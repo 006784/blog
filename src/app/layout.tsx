@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FontProvider } from "@/components/FontProvider";
+import { AdminProvider } from "@/components/AdminProvider";
 import { Sidebar } from "@/components/Sidebar";
 import { ParticleBackground } from "@/components/ParticleBackground";
 
@@ -69,6 +70,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <FontProvider>
+          <AdminProvider>
           {/* 全局背景 */}
           <div className="fixed inset-0 -z-10 bg-background" />
           
@@ -88,6 +90,7 @@ export default function RootLayout({
           <main className="md:ml-[var(--sidebar-width,288px)] min-h-screen transition-all duration-300 pb-24 md:pb-0">
             {children}
           </main>
+          </AdminProvider>
           </FontProvider>
         </ThemeProvider>
       </body>

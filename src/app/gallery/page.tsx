@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Camera, Image as ImageIcon, Plus, X, Heart, MapPin, 
   Calendar, Folder, Trash2, ZoomIn, ChevronLeft, ChevronRight,
-  Grid3X3, LayoutGrid, Sparkles, Upload, Loader2
+  Grid3X3, LayoutGrid, Sparkles, Upload, Loader2, Shield
 } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { 
@@ -14,6 +14,7 @@ import {
   createPhoto, createAlbum, deletePhoto,
   formatDate
 } from '@/lib/supabase';
+import { useAdmin } from '@/components/AdminProvider';
 
 export default function GalleryPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -23,6 +24,7 @@ export default function GalleryPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('masonry');
+  const { isAdmin, showLoginModal } = useAdmin();
 
   useEffect(() => {
     loadData();
@@ -153,11 +155,17 @@ export default function GalleryPage() {
           </div>
 
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              if (!isAdmin) {
+                showLoginModal();
+                return;
+              }
+              setShowAddModal(true);
+            }}
             className="btn-primary"
           >
-            <Plus className="w-5 h-5" />
-            添加照片
+            {isAdmin ? <Plus className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+            {isAdmin ? '添加照片' : '管理员登录'}
           </button>
         </motion.div>
 
@@ -175,10 +183,16 @@ export default function GalleryPage() {
             <ImageIcon className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground">还没有添加照片</p>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                if (!isAdmin) {
+                  showLoginModal();
+                  return;
+                }
+                setShowAddModal(true);
+              }}
               className="mt-4 text-primary hover:underline"
             >
-              上传第一张照片
+              {isAdmin ? '上传第一张照片' : '管理员登录后可上传'}
             </button>
           </motion.div>
         ) : viewMode === 'masonry' ? (
@@ -190,6 +204,7 @@ export default function GalleryPage() {
                 index={index}
                 onClick={() => setLightboxPhoto(photo)}
                 onDelete={handleDeletePhoto}
+                isAdmin={isAdmin}
               />
             ))}
           </div>
@@ -202,6 +217,7 @@ export default function GalleryPage() {
                 index={index}
                 onClick={() => setLightboxPhoto(photo)}
                 onDelete={handleDeletePhoto}
+                isAdmin={isAdmin}
                 square
               />
             ))}
@@ -245,12 +261,14 @@ function PhotoCard({
   index, 
   onClick,
   onDelete,
+  isAdmin = false,
   square = false
 }: { 
   photo: Photo; 
   index: number;
   onClick: () => void;
   onDelete: (id: string) => void;
+  isAdmin?: boolean;
   square?: boolean;
 }) {
   return (
@@ -295,7 +313,7 @@ function PhotoCard({
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Actions - 只有管理员可见 */}
       <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => { e.stopPropagation(); }}
@@ -303,12 +321,14 @@ function PhotoCard({
         >
           <Heart className="w-4 h-4 text-white" />
         </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }}
-          className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/80 transition-colors"
-        >
-          <Trash2 className="w-4 h-4 text-white" />
-        </button>
+        {isAdmin && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }}
+            className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/80 transition-colors"
+          >
+            <Trash2 className="w-4 h-4 text-white" />
+          </button>
+        )}
       </div>
 
       {/* Zoom Icon */}

@@ -7,11 +7,13 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Save, Send, Settings, X, Plus, 
   Tag, Folder, Check, AlertCircle, Loader2, 
-  Clock, Eye, BookOpen, Sparkles, ImageIcon
+  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield
 } from 'lucide-react';
 import { RichEditor } from '@/components/RichEditor';
 import { ImageUploader } from '@/components/ImageUploader';
 import { Post, createPost, updatePost, getPostById } from '@/lib/supabase';
+import { useAdmin } from '@/components/AdminProvider';
+import MobileWritePage from './mobile/page';
 
 const categories = [
   { value: 'tech', label: '技术', icon: '💻', color: 'bg-blue-500' },
@@ -20,10 +22,26 @@ const categories = [
   { value: 'thoughts', label: '思考', icon: '💭', color: 'bg-amber-500' },
 ];
 
+// 移动端检测 Hook
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  
+  return isMobile;
+}
+
 function WritePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
+  const isMobile = useIsMobile();
+  const { isAdmin, showLoginModal } = useAdmin();
 
   // 文章数据
   const [title, setTitle] = useState('');
@@ -203,6 +221,40 @@ function WritePageContent() {
 
   // 获取当前分类
   const currentCategory = categories.find(c => c.value === category);
+
+  // 非管理员显示登录提示
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center max-w-md"
+        >
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+            <Shield className="w-10 h-10 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">需要管理员权限</h1>
+          <p className="text-muted-foreground mb-6">只有管理员可以发布文章，请先登录</p>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={showLoginModal}
+            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25"
+          >
+            管理员登录
+          </motion.button>
+          <Link href="/blog" className="block mt-4 text-sm text-muted-foreground hover:text-primary transition-colors">
+            返回博客
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // 移动端使用专用编辑器
+  if (isMobile) {
+    return <MobileWritePage />;
+  }
 
   if (loading) {
     return (

@@ -5,13 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, Plus, X, Calendar, MapPin, Clock, 
   Edit2, Trash2, Lock, Unlock, ChevronLeft, ChevronRight,
-  Sparkles, Save, Eye
+  Sparkles, Save, Eye, Shield
 } from 'lucide-react';
 import { 
   Diary, 
   getDiaries, createDiary, updateDiary, deleteDiary,
   formatDate, moodIcons, weatherIcons
 } from '@/lib/supabase';
+import { useAdmin } from '@/components/AdminProvider';
 
 const moods = Object.entries(moodIcons).map(([value, info]) => ({
   value,
@@ -30,6 +31,7 @@ export default function DiaryPage() {
   const [editingDiary, setEditingDiary] = useState<Diary | null>(null);
   const [selectedDiary, setSelectedDiary] = useState<Diary | null>(null);
   const [moodFilter, setMoodFilter] = useState<string | null>(null);
+  const { isAdmin, showLoginModal } = useAdmin();
 
   useEffect(() => {
     loadData();
@@ -135,11 +137,18 @@ export default function DiaryPage() {
           className="flex justify-center mb-8"
         >
           <button
-            onClick={() => { setEditingDiary(null); setShowEditor(true); }}
+            onClick={() => {
+              if (!isAdmin) {
+                showLoginModal();
+                return;
+              }
+              setEditingDiary(null);
+              setShowEditor(true);
+            }}
             className="btn-primary"
           >
-            <Plus className="w-5 h-5" />
-            写日记
+            {isAdmin ? <Plus className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+            {isAdmin ? '写日记' : '管理员登录'}
           </button>
         </motion.div>
 
@@ -157,20 +166,27 @@ export default function DiaryPage() {
             <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground">还没有写过日记</p>
             <button
-              onClick={() => setShowEditor(true)}
+              onClick={() => {
+                if (!isAdmin) {
+                  showLoginModal();
+                  return;
+                }
+                setShowEditor(true);
+              }}
               className="mt-4 text-primary hover:underline"
             >
-              写下今天的心情
+              {isAdmin ? '写下今天的心情' : '管理员登录后可写日记'}
             </button>
           </motion.div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence>
               {filteredDiaries.map((diary, index) => (
-                <DiaryCard
+              <DiaryCard
                   key={diary.id}
                   diary={diary}
                   index={index}
+                  isAdmin={isAdmin}
                   onClick={() => setSelectedDiary(diary)}
                   onEdit={() => handleEdit(diary)}
                   onDelete={() => handleDelete(diary.id)}
@@ -221,12 +237,14 @@ export default function DiaryPage() {
 function DiaryCard({
   diary,
   index,
+  isAdmin,
   onClick,
   onEdit,
   onDelete
 }: {
   diary: Diary;
   index: number;
+  isAdmin: boolean;
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -310,21 +328,23 @@ function DiaryCard({
             </span>
           </div>
           
-          {/* Actions */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onDelete(); }}
-              className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Actions - 只有管理员可见 */}
+          {isAdmin && (
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

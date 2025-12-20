@@ -7,9 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, FileText, User, Mail, PenLine, 
   Sun, Moon, Sparkles, ChevronLeft,
-  Heart, Music, Camera, BookOpen, Github, Twitter
+  Heart, Music, Camera, BookOpen, Github, Twitter,
+  Menu, X, Shield, LogOut
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useAdmin } from './AdminProvider';
 import clsx from 'clsx';
 
 const navItems = [
@@ -26,8 +28,10 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
+  const { isAdmin, showLoginModal, logout } = useAdmin();
 
   useEffect(() => {
     setMounted(true);
@@ -260,10 +264,47 @@ export function Sidebar() {
 
             {/* 写文章按钮 */}
             <div className="mt-6 px-1">
-              <Link href="/write">
+              {isAdmin ? (
+                <Link href="/write">
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={clsx(
+                      'relative w-full flex items-center justify-center gap-2',
+                      'px-4 py-3.5 rounded-xl',
+                      'text-white font-semibold',
+                      'overflow-hidden',
+                      'shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30',
+                      'transition-shadow duration-300'
+                    )}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]" />
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      initial={{ x: '-100%' }}
+                      animate={{ x: '200%' }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    />
+                    <PenLine className="w-5 h-5 relative z-10" />
+                    <AnimatePresence>
+                      {!isCollapsed && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: 'auto' }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="relative z-10 whitespace-nowrap"
+                        >
+                          写文章
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                </Link>
+              ) : (
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={showLoginModal}
                   className={clsx(
                     'relative w-full flex items-center justify-center gap-2',
                     'px-4 py-3.5 rounded-xl',
@@ -273,18 +314,8 @@ export function Sidebar() {
                     'transition-shadow duration-300'
                   )}
                 >
-                  {/* 渐变背景 */}
                   <div className="absolute inset-0 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]" />
-                  
-                  {/* 光效动画 */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                    initial={{ x: '-100%' }}
-                    animate={{ x: '200%' }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  />
-                  
-                  <PenLine className="w-5 h-5 relative z-10" />
+                  <Shield className="w-5 h-5 relative z-10" />
                   <AnimatePresence>
                     {!isCollapsed && (
                       <motion.span
@@ -293,12 +324,12 @@ export function Sidebar() {
                         exit={{ opacity: 0, width: 0 }}
                         className="relative z-10 whitespace-nowrap"
                       >
-                        写文章
+                        管理员登录
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </motion.button>
-              </Link>
+              )}
             </div>
           </nav>
 
@@ -384,6 +415,38 @@ export function Sidebar() {
                 )}
               </AnimatePresence>
             </motion.button>
+
+            {/* 管理员登出按钮 */}
+            {isAdmin && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={logout}
+                className={clsx(
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-xl',
+                  'bg-red-500/10 hover:bg-red-500/20',
+                  'border border-red-500/20',
+                  'transition-all duration-300',
+                  isCollapsed && 'justify-center'
+                )}
+              >
+                <div className="w-9 h-9 rounded-lg bg-red-500/20 flex items-center justify-center">
+                  <LogOut className="w-[18px] h-[18px] text-red-500" />
+                </div>
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm font-medium text-red-500"
+                    >
+                      退出管理
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            )}
           </div>
 
           {/* 版权信息 */}
@@ -476,19 +539,31 @@ export function Sidebar() {
             </Link>
 
             {/* 写文章按钮 - 中间突出 */}
-            <Link href="/write">
-              <motion.div
+            {isAdmin ? (
+              <Link href="/write">
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className="relative -mt-6"
+                >
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center shadow-lg shadow-primary/30">
+                    <PenLine className="w-6 h-6 text-white" />
+                  </div>
+                </motion.div>
+              </Link>
+            ) : (
+              <motion.button
                 whileTap={{ scale: 0.9 }}
+                onClick={showLoginModal}
                 className="relative -mt-6"
               >
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center shadow-lg shadow-primary/30">
-                  <PenLine className="w-6 h-6 text-white" />
+                  <Shield className="w-6 h-6 text-white" />
                 </div>
-              </motion.div>
-            </Link>
+              </motion.button>
+            )}
 
-            {/* 歌单 */}
-            <Link href="/music">
+            {/* 相册 */}
+            <Link href="/gallery">
               <motion.div
                 whileTap={{ scale: 0.9 }}
                 className={clsx(
@@ -496,53 +571,196 @@ export function Sidebar() {
                   'transition-all duration-300'
                 )}
               >
-                {pathname === '/music' && (
+                {pathname === '/gallery' && (
                   <motion.div
                     layoutId="mobile-nav-bg"
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 opacity-20"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 opacity-20"
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
-                <Music className={clsx(
+                <Camera className={clsx(
                   'w-5 h-5 relative z-10 transition-colors',
-                  pathname === '/music' ? 'text-primary' : 'text-muted-foreground'
+                  pathname === '/gallery' ? 'text-primary' : 'text-muted-foreground'
                 )} />
                 <span className={clsx(
                   'text-[10px] font-medium relative z-10 transition-colors',
-                  pathname === '/music' ? 'text-primary' : 'text-muted-foreground'
+                  pathname === '/gallery' ? 'text-primary' : 'text-muted-foreground'
                 )}>
-                  歌单
+                  相册
                 </span>
               </motion.div>
             </Link>
 
-            {/* 主题切换按钮 */}
+            {/* 更多按钮 */}
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={toggleTheme}
+              onClick={() => setShowMobileMenu(true)}
               className="relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-300"
             >
-              {mounted && (
-                <motion.div
-                  key={resolvedTheme}
-                  initial={{ rotate: -90, scale: 0 }}
-                  animate={{ rotate: 0, scale: 1 }}
-                  transition={{ duration: 0.3, type: 'spring' }}
-                >
-                  {resolvedTheme === 'dark' ? (
-                    <Sun className="w-5 h-5 text-amber-400" />
-                  ) : (
-                    <Moon className="w-5 h-5 text-indigo-500" />
-                  )}
-                </motion.div>
-              )}
+              <Menu className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] font-medium text-muted-foreground">
-                {resolvedTheme === 'dark' ? '浅色' : '深色'}
+                更多
               </span>
             </motion.button>
           </div>
         </div>
       </motion.nav>
+
+      {/* 移动端抽屉菜单 */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <>
+            {/* 背景遮罩 */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileMenu(false)}
+              className="fixed inset-0 bg-black/50 z-[60] md:hidden"
+            />
+            
+            {/* 抽屉内容 */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-card rounded-t-3xl z-[60] md:hidden max-h-[80vh] overflow-hidden"
+            >
+              {/* 拖动条 */}
+              <div className="flex justify-center py-3">
+                <div className="w-10 h-1 bg-muted rounded-full" />
+              </div>
+
+              {/* 关闭按钮 */}
+              <button
+                onClick={() => setShowMobileMenu(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-secondary/50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* 菜单内容 */}
+              <div className="px-4 pb-8 pt-2">
+                {/* 用户信息 */}
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center text-white font-bold text-lg">
+                    S
+                  </div>
+                  <div>
+                    <p className="font-semibold">拾光博主</p>
+                    <p className="text-xs text-muted-foreground">探索 · 记录 · 分享</p>
+                  </div>
+                </div>
+
+                {/* 导航网格 */}
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                  {navItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link 
+                        key={item.name} 
+                        href={item.href}
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        <motion.div
+                          whileTap={{ scale: 0.95 }}
+                          className={clsx(
+                            'flex flex-col items-center gap-2 p-3 rounded-2xl transition-all',
+                            isActive 
+                              ? 'bg-primary/15 text-primary' 
+                              : 'bg-secondary/30 text-muted-foreground'
+                          )}
+                        >
+                          <item.icon className="w-6 h-6" />
+                          <span className="text-xs font-medium">{item.name}</span>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* 主题切换 */}
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={toggleTheme}
+                  className="w-full flex items-center justify-between p-4 rounded-2xl bg-secondary/30 mb-3"
+                >
+                  <div className="flex items-center gap-3">
+                    {mounted && (
+                      resolvedTheme === 'dark' ? (
+                        <Sun className="w-5 h-5 text-amber-400" />
+                      ) : (
+                        <Moon className="w-5 h-5 text-indigo-500" />
+                      )
+                    )}
+                    <span className="font-medium">
+                      {resolvedTheme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+                    </span>
+                  </div>
+                  <div className={clsx(
+                    'w-12 h-7 rounded-full relative transition-colors',
+                    resolvedTheme === 'dark' ? 'bg-primary' : 'bg-muted'
+                  )}>
+                    <motion.div 
+                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm"
+                      animate={{ left: resolvedTheme === 'dark' ? '26px' : '4px' }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    />
+                  </div>
+                </motion.button>
+
+                {/* 管理员登录/登出 */}
+                {isAdmin ? (
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      logout();
+                      setShowMobileMenu(false);
+                    }}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-red-500/10 mb-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LogOut className="w-5 h-5 text-red-500" />
+                      <span className="font-medium text-red-500">退出管理员</span>
+                    </div>
+                    <Shield className="w-5 h-5 text-red-500" />
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setShowMobileMenu(false);
+                      showLoginModal();
+                    }}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-primary/10 mb-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-5 h-5 text-primary" />
+                      <span className="font-medium text-primary">管理员登录</span>
+                    </div>
+                  </motion.button>
+                )}
+
+                {/* 社交链接 */}
+                <div className="flex items-center justify-center gap-4 pt-2">
+                  <a href="#" className="p-3 rounded-full bg-secondary/30 text-muted-foreground hover:text-foreground transition-colors">
+                    <Github className="w-5 h-5" />
+                  </a>
+                  <a href="#" className="p-3 rounded-full bg-secondary/30 text-muted-foreground hover:text-foreground transition-colors">
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                </div>
+
+                {/* 版权 */}
+                <p className="text-center text-xs text-muted-foreground/50 mt-4 flex items-center justify-center gap-1">
+                  Made with <Heart className="w-3 h-3 text-red-400 fill-red-400" /> by 拾光
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
