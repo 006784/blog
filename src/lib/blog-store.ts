@@ -3,9 +3,9 @@
 import { Post } from './types';
 
 // 检查是否配置了 Supabase
-const hasSupabase = typeof window !== 'undefined' && 
+const hasSupabase = !!(typeof window !== 'undefined' && 
   process.env.NEXT_PUBLIC_SUPABASE_URL && 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export interface BlogPost extends Post {
   id: string;

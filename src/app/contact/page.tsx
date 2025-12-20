@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Mail, MapPin, Phone, Github, Twitter, Linkedin, MessageCircle, Check, Loader2 } from 'lucide-react';
+import { Send, Mail, MapPin, Phone, Github, Twitter, Linkedin, MessageCircle, Check, Loader2, AlertCircle } from 'lucide-react';
 import { AnimatedSection, Floating } from '@/components/Animations';
+import { createContactMessage } from '@/lib/supabase';
 import clsx from 'clsx';
 
 const contactInfo = [
   {
     icon: Mail,
     label: '邮箱',
-    value: 'hello@example.com',
-    href: 'mailto:hello@example.com',
+    value: 'zyi408480@gmail.com',
+    href: 'mailto:zyi408480@gmail.com',
     color: 'bg-blue-500',
   },
   {
@@ -46,23 +47,35 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      await createContactMessage({
+        name: formState.name,
+        email: formState.email,
+        subject: formState.subject,
+        message: formState.message,
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      setIsSubmitted(true);
 
-    // Reset after showing success
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormState({ name: '', email: '', subject: '', message: '' });
-    }, 3000);
+      // Reset after showing success
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormState({ name: '', email: '', subject: '', message: '' });
+      }, 3000);
+    } catch (err: any) {
+      console.error('发送失败:', err);
+      setError(err.message || '发送失败，请稍后重试');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -336,6 +349,18 @@ export default function ContactPage() {
                             className="w-full px-5 py-4 bg-secondary/50 backdrop-blur-sm border-2 border-border/50 rounded-2xl focus:outline-none focus:border-primary transition-all duration-300 resize-none"
                           />
                         </div>
+
+                        {/* Error Message */}
+                        {error && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2 p-4 bg-red-500/10 text-red-500 rounded-xl"
+                          >
+                            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                            <p className="text-sm">{error}</p>
+                          </motion.div>
+                        )}
 
                         {/* Submit Button */}
                         <motion.button

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { FontProvider } from "@/components/FontProvider";
 import { Sidebar } from "@/components/Sidebar";
 import { ParticleBackground } from "@/components/ParticleBackground";
 
@@ -42,8 +43,24 @@ export default function RootLayout({
         {/* 加载优质中文字体 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* 思源黑体 */}
         <link 
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" 
+          rel="stylesheet" 
+        />
+        {/* 思源宋体 */}
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" 
+          rel="stylesheet" 
+        />
+        {/* 霞鹜文楷 */}
+        <link 
+          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" 
+          rel="stylesheet" 
+        />
+        {/* 站酷快乐体 */}
+        <link 
+          href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" 
           rel="stylesheet" 
         />
       </head>
@@ -51,6 +68,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased min-h-screen`}
       >
         <ThemeProvider>
+          <FontProvider>
           {/* 全局背景 */}
           <div className="fixed inset-0 -z-10 bg-background" />
           
@@ -70,6 +88,7 @@ export default function RootLayout({
           <main className="md:ml-[var(--sidebar-width,288px)] min-h-screen transition-all duration-300 pb-24 md:pb-0">
             {children}
           </main>
+          </FontProvider>
         </ThemeProvider>
       </body>
     </html>

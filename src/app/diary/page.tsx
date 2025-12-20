@@ -119,8 +119,8 @@ export default function DiaryPage() {
               style={moodFilter === mood.value ? { 
                 backgroundColor: `${mood.color}20`,
                 color: mood.color,
-                ringColor: mood.color
-              } : {}}
+                '--tw-ring-color': mood.color
+              } as React.CSSProperties : {}}
             >
               {mood.emoji} {mood.label}
             </button>
@@ -534,8 +534,8 @@ function DiaryEditor({
                     style={formData.mood === mood.value ? {
                       backgroundColor: `${mood.color}20`,
                       color: mood.color,
-                      ringColor: mood.color
-                    } : {}}
+                      '--tw-ring-color': mood.color
+                    } as React.CSSProperties : {}}
                   >
                     {mood.emoji} {mood.label}
                   </button>

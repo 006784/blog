@@ -823,12 +823,25 @@ textarea:focus {
   overflow-x: auto;
   margin: 1.5em 0;
   border: 1px solid var(--border);
+  position: relative;
 }
 
 .prose pre code {
   background: transparent;
   padding: 0;
   border: none;
+  font-size: 0.9em;
+  line-height: 1.7;
+}
+
+/* 代码块容器样式 */
+.prose div:has(> pre) {
+  position: relative;
+  margin: 1.5em 0;
+}
+
+.prose div:has(> pre) pre {
+  margin: 0;
 }
 
 .prose blockquote {

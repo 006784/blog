@@ -179,6 +179,169 @@ export async function incrementPostViews(id: string) {
   await supabase.rpc('increment_post_views', { post_id: id });
 }
 
+export async function likePost(id: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .update({ likes: supabase.rpc('increment', { x: 1 }) })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    // 如果 rpc 不存在，使用普通方式
+    const post = await getPostById(id);
+    if (post) {
+      await supabase.from('posts').update({ likes: (post.likes || 0) + 1 }).eq('id', id);
+    }
+  }
+  return data as Post;
+}
+
+export async function searchPosts(query: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('status', 'published')
+    .or(`title.ilike.%${query}%,description.ilike.%${query}%,content.ilike.%${query}%`)
+    .order('published_at', { ascending: false });
+  if (error) throw error;
+  return data as Post[];
+}
+
+export async function getPostsByCategory(category: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('status', 'published')
+    .eq('category', category)
+    .order('published_at', { ascending: false });
+  if (error) throw error;
+  return data as Post[];
+}
+
+export async function getPostsByTag(tag: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('status', 'published')
+    .contains('tags', [tag])
+    .order('published_at', { ascending: false });
+  if (error) throw error;
+  return data as Post[];
+}
+
+export function subscribeRealtime(table: string, callback: (payload: any) => void) {
+  return supabase
+    .channel(`public:${table}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table }, callback)
+    .subscribe();
+}
+
+// 邮箱订阅
+export async function subscribe(email: string) {
+  // 这里可以实现邮箱订阅功能，保存到数据库或发送到邮件服务
+  // 目前先记录到控制台
+  console.log('Email subscription:', email);
+  // 如果有 subscribers 表，可以保存
+  // const { error } = await supabase.from('subscribers').insert([{ email }]);
+  // if (error) throw error;
+}
+
+// ============ 联系消息 ============
+
+export interface ContactMessage {
+  id?: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status?: 'unread' | 'read' | 'replied';
+  created_at?: string;
+}
+
+export async function createContactMessage(data: Omit<ContactMessage, 'id' | 'created_at' | 'status'>) {
+  const { data: result, error } = await supabase
+    .from('contact_messages')
+    .insert([data])
+    .select()
+    .single();
+  if (error) throw error;
+  return result as ContactMessage;
+}
+
+export async function getContactMessages() {
+  const { data, error } = await supabase
+    .from('contact_messages')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data as ContactMessage[];
+}
+
+export async function updateMessageStatus(id: string, status: 'unread' | 'read' | 'replied') {
+  const { error } = await supabase
+    .from('contact_messages')
+    .update({ status })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteContactMessage(id: string) {
+  const { error } = await supabase
+    .from('contact_messages')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
+// ============ 订阅者 ============
+
+export interface Subscriber {
+  id: string;
+  email: string;
+  name?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export async function addSubscriber(email: string, name?: string) {
+  const { data, error } = await supabase
+    .from('subscribers')
+    .insert([{ email, name, is_active: true }])
+    .select()
+    .single();
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('该邮箱已经订阅');
+    }
+    throw error;
+  }
+  return data as Subscriber;
+}
+
+export async function getActiveSubscribers() {
+  const { data, error } = await supabase
+    .from('subscribers')
+    .select('*')
+    .eq('is_active', true);
+  if (error) throw error;
+  return data as Subscriber[];
+}
+
+export async function unsubscribe(email: string) {
+  const { error } = await supabase
+    .from('subscribers')
+    .update({ is_active: false })
+    .eq('email', email);
+  if (error) throw error;
+}
+
+export function calculateReadingTime(content: string): string {
+  const wordsPerMinute = 300;
+  const words = content.length;
+  const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
+  return `${minutes} min read`;
+}
+
 // ============ 歌单操作 ============
 
 export async function getPlaylists() {

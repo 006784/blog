@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, Sparkles, Code2, Palette, Coffee, ChevronDown, Zap, Heart, Star } from 'lucide-react';
+import { ArrowRight, Sparkles, Code2, Palette, Coffee, ChevronDown, Zap, Heart, Star, Loader2 } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
 import { AnimatedSection, Floating } from '@/components/Animations';
 import { FloatingParticles, GlowOrb } from '@/components/BackgroundEffects';
-import { defaultPosts } from '@/lib/types';
+import { getPublishedPosts, Post } from '@/lib/supabase';
 
 const features = [
   {
@@ -37,10 +37,41 @@ const stats = [
 ];
 
 export default function HomePage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 0.95]);
   const heroY = useTransform(scrollY, [0, 400], [0, 100]);
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  async function loadPosts() {
+    try {
+      const data = await getPublishedPosts();
+      setPosts(data.slice(0, 4));
+    } catch (error) {
+      console.error('加载文章失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 转换为 BlogCard 需要的格式
+  const formattedPosts = posts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    description: post.description,
+    date: post.published_at || post.created_at,
+    category: post.category,
+    tags: post.tags,
+    image: post.cover_image || post.image,
+    author: post.author,
+    readingTime: post.reading_time,
+  }));
 
   return (
     <div className="min-h-screen">
@@ -355,16 +386,35 @@ export default function HomePage() {
             </Link>
           </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {defaultPosts.slice(0, 4).map((post, index) => (
-              <BlogCard 
-                key={post.slug} 
-                post={post} 
-                index={index}
-                featured={index === 0}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            </div>
+          ) : formattedPosts.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-8">
+              {formattedPosts.map((post, index) => (
+                <BlogCard 
+                  key={post.slug} 
+                  post={post} 
+                  index={index}
+                  featured={index === 0}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground mb-4">还没有发布文章</p>
+              <Link href="/write">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-primary"
+                >
+                  写第一篇文章
+                </motion.button>
+              </Link>
+            </div>
+          )}
 
           <div className="mt-12 text-center sm:hidden">
             <Link href="/blog">
