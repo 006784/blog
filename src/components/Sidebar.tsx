@@ -417,38 +417,129 @@ export function Sidebar() {
             {/* 背景装饰 */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
             
-            {navItems.slice(0, 5).map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link key={item.name} href={item.href}>
+            {/* 首页 */}
+            <Link href="/">
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className={clsx(
+                  'relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl',
+                  'transition-all duration-300'
+                )}
+              >
+                {pathname === '/' && (
                   <motion.div
-                    whileTap={{ scale: 0.9 }}
-                    className={clsx(
-                      'relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl',
-                      'transition-all duration-300'
-                    )}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="mobile-nav-bg"
-                        className={`absolute inset-0 rounded-xl bg-gradient-to-r ${item.gradient} opacity-20`}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                    <item.icon className={clsx(
-                      'w-5 h-5 relative z-10 transition-colors',
-                      isActive ? 'text-primary' : 'text-muted-foreground'
-                    )} />
-                    <span className={clsx(
-                      'text-[10px] font-medium relative z-10 transition-colors',
-                      isActive ? 'text-primary' : 'text-muted-foreground'
-                    )}>
-                      {item.name}
-                    </span>
-                  </motion.div>
-                </Link>
-              );
-            })}
+                    layoutId="mobile-nav-bg"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 opacity-20"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <Home className={clsx(
+                  'w-5 h-5 relative z-10 transition-colors',
+                  pathname === '/' ? 'text-primary' : 'text-muted-foreground'
+                )} />
+                <span className={clsx(
+                  'text-[10px] font-medium relative z-10 transition-colors',
+                  pathname === '/' ? 'text-primary' : 'text-muted-foreground'
+                )}>
+                  首页
+                </span>
+              </motion.div>
+            </Link>
+
+            {/* 博客 */}
+            <Link href="/blog">
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className={clsx(
+                  'relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl',
+                  'transition-all duration-300'
+                )}
+              >
+                {pathname === '/blog' && (
+                  <motion.div
+                    layoutId="mobile-nav-bg"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-500 to-purple-500 opacity-20"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <FileText className={clsx(
+                  'w-5 h-5 relative z-10 transition-colors',
+                  pathname === '/blog' ? 'text-primary' : 'text-muted-foreground'
+                )} />
+                <span className={clsx(
+                  'text-[10px] font-medium relative z-10 transition-colors',
+                  pathname === '/blog' ? 'text-primary' : 'text-muted-foreground'
+                )}>
+                  博客
+                </span>
+              </motion.div>
+            </Link>
+
+            {/* 写文章按钮 - 中间突出 */}
+            <Link href="/write">
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className="relative -mt-6"
+              >
+                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center shadow-lg shadow-primary/30">
+                  <PenLine className="w-6 h-6 text-white" />
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* 歌单 */}
+            <Link href="/music">
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className={clsx(
+                  'relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl',
+                  'transition-all duration-300'
+                )}
+              >
+                {pathname === '/music' && (
+                  <motion.div
+                    layoutId="mobile-nav-bg"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 opacity-20"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <Music className={clsx(
+                  'w-5 h-5 relative z-10 transition-colors',
+                  pathname === '/music' ? 'text-primary' : 'text-muted-foreground'
+                )} />
+                <span className={clsx(
+                  'text-[10px] font-medium relative z-10 transition-colors',
+                  pathname === '/music' ? 'text-primary' : 'text-muted-foreground'
+                )}>
+                  歌单
+                </span>
+              </motion.div>
+            </Link>
+
+            {/* 主题切换按钮 */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={toggleTheme}
+              className="relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-300"
+            >
+              {mounted && (
+                <motion.div
+                  key={resolvedTheme}
+                  initial={{ rotate: -90, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ duration: 0.3, type: 'spring' }}
+                >
+                  {resolvedTheme === 'dark' ? (
+                    <Sun className="w-5 h-5 text-amber-400" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-indigo-500" />
+                  )}
+                </motion.div>
+              )}
+              <span className="text-[10px] font-medium text-muted-foreground">
+                {resolvedTheme === 'dark' ? '浅色' : '深色'}
+              </span>
+            </motion.button>
           </div>
         </div>
       </motion.nav>
