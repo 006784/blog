@@ -62,8 +62,11 @@ export interface Song {
   album?: string;
   cover_image?: string;
   duration?: string;
+  duration_seconds?: number; // 歌曲时长(秒)
   music_url?: string;
-  platform: 'netease' | 'qq' | 'spotify' | 'apple' | 'other';
+  audio_url?: string; // 上传的音频文件URL
+  lyrics?: string; // 歌词内容 (LRC格式)
+  platform: 'netease' | 'qq' | 'spotify' | 'apple' | 'local' | 'other';
   platform_id?: string;
   note?: string;
   mood?: string;
@@ -798,5 +801,6 @@ export const platformIcons: Record<string, { name: string; color: string }> = {
   qq: { name: 'QQ音乐', color: '#31c27c' },
   spotify: { name: 'Spotify', color: '#1db954' },
   apple: { name: 'Apple Music', color: '#fa243c' },
+  local: { name: '本地上传', color: '#10b981' },
   other: { name: '其他', color: '#6b7280' },
 };

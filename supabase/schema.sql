@@ -57,8 +57,11 @@ CREATE TABLE IF NOT EXISTS songs (
     album TEXT,
     cover_image TEXT,
     duration TEXT,
-    music_url TEXT,
-    platform TEXT DEFAULT 'other', -- netease, qq, spotify, apple, other
+    duration_seconds INTEGER, -- 歌曲时长(秒)
+    music_url TEXT, -- 外部链接
+    audio_url TEXT, -- 上传的音频文件URL
+    lyrics TEXT, -- 歌词内容 (LRC格式)
+    platform TEXT DEFAULT 'other', -- netease, qq, spotify, apple, local, other
     platform_id TEXT, -- 平台歌曲ID，用于外链
     note TEXT, -- 推荐理由/心情
     mood TEXT, -- 心情标签：happy, sad, chill, energetic 等

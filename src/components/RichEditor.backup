@@ -11,7 +11,6 @@ import {
   Wand2, Brain, Zap, FileText, MessageSquare, BookOpen, AlertCircle
 } from 'lucide-react';
 import { uploadFile, compressImage } from '@/lib/storage';
-import { autoFormatContent } from '@/lib/auto-format';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -33,6 +32,7 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTableModal, setShowTableModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
   // 历史记录
   const [history, setHistory] = useState<string[]>([]);
@@ -158,15 +158,50 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave
 
   // 一键排版功能
   const autoFormat = () => {
-    const formatted = autoFormatContent(value);
-    onChange(formatted);
-    saveToHistory(formatted);
-  };
+    let formatted = value;
+    
+    // 1. 统一换行符
+    formatted = formatted.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    
+    // 2. 清理多余的空行
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+    
+    // 3. 标题前后添加空行
+    formatted = formatted.replace(/
+*(#{1,6}.*?)(?=
+|$)/g, '
 
-  // 高级排版功能
-  const advancedFormat = () => {
-    // 调用现有的基础排版功能
-    const formatted = autoFormatContent(value);
+$1
+
+');
+    
+    // 4. 段落格式化
+    formatted = formatted.replace(/
+
+([^
+#-`>].*?)(?=
+
+|$)/g, '
+
+$1
+
+');
+    
+    // 5. 清理开头和结尾的多余空行
+    formatted = formatted.trim();
+    
+    // 6. 修复列表格式
+    formatted = formatted.replace(/^(\s*)(-|\d+\.)\s+/gm, '$1$2 ');
+    
+    // 7. 修复代码块格式
+    formatted = formatted.replace(/(```.*?```)/gs, '\n\n$1\n\n');
+    
+    // 8. 修复引用格式
+    formatted = formatted.replace(/(^>.*$)/gm, '\n$1\n');
+    
+    // 9. 最终清理多余空行
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+    
     onChange(formatted);
     saveToHistory(formatted);
   };
@@ -358,8 +393,8 @@ console.log('Hello World');
     { icon: Brain, title: 'AI生成摘要', action: generateSummary },
     { type: 'divider' },
     { icon: Zap, title: '一键排版', action: autoFormat },
-    { icon: FileText, title: '高级排版', action: advancedFormat },
-  ];  
+  ];
+  
   const tools: ToolItem[] = [
     ...formatTools,
     { type: 'divider' },

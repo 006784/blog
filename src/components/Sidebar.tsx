@@ -502,12 +502,18 @@ export function Sidebar() {
                     exit={{ opacity: 0 }}
                     className="text-sm font-medium text-muted-foreground"
                   >
-                    {resolvedTheme === 'dark' ? '浅色模式' : '深色模式'}
+                    {/* 使用固定文本避免hydration错误，实际文本通过useEffect设置 */}
+                    <span ref={(el) => {
+                      if (el && resolvedTheme) {
+                        el.textContent = resolvedTheme === 'dark' ? '浅色模式' : '深色模式';
+                      }
+                    }}>
+                      {resolvedTheme === 'dark' ? '浅色模式' : '深色模式'}
+                    </span>
                   </motion.span>
                 )}
               </AnimatePresence>
             </motion.button>
-
             {/* 折叠按钮 */}
             <motion.button
               whileHover={{ scale: 1.02 }}
