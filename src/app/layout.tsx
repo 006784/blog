@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FontProvider } from "@/components/FontProvider";
@@ -7,20 +6,6 @@ import { AdminProvider } from "@/components/AdminProvider";
 import { ProfileProvider } from "@/components/ProfileProvider";
 import { Sidebar } from "@/components/Sidebar";
 import { ParticleBackground } from "@/components/ParticleBackground";
-
-// 优雅的无衬线英文字体
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// 精美的等宽字体用于代码
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "拾光 - 记录生活，收藏时光",
@@ -77,9 +62,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased min-h-screen`}
-      >
+      <body className="antialiased min-h-screen">
         <ThemeProvider>
           <FontProvider>
           <AdminProvider>

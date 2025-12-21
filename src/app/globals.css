@@ -15,6 +15,8 @@
   --accent-foreground: #1d1d1f;
   --border: #d2d2d7;
   --ring: #0071e3;
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
   --gradient-start: #667eea;
   --gradient-end: #764ba2;
   /* 背景渐变 */

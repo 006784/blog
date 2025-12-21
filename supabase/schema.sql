@@ -375,6 +375,53 @@ INSERT INTO diaries (title, content, mood, weather, is_public, diary_date) VALUE
 ON CONFLICT DO NOTHING;
 
 -- =============================================
+-- 资源存储表 - 安全文件存储
+-- =============================================
+CREATE TABLE IF NOT EXISTS resources (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    description TEXT,
+    file_url TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    file_type TEXT NOT NULL,
+    category TEXT DEFAULT 'other',
+    extension TEXT,
+    is_public BOOLEAN DEFAULT false,
+    download_count INTEGER DEFAULT 0,
+    tags TEXT[] DEFAULT '{}',
+    upload_ip TEXT,
+    checksum TEXT,
+    is_verified BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_resources_category ON resources(category);
+CREATE INDEX IF NOT EXISTS idx_resources_public ON resources(is_public);
+CREATE INDEX IF NOT EXISTS idx_resources_created ON resources(created_at DESC);
+
+ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "resources_select" ON resources FOR SELECT USING (true);
+CREATE POLICY "resources_insert" ON resources FOR INSERT WITH CHECK (true);
+CREATE POLICY "resources_update" ON resources FOR UPDATE USING (true);
+CREATE POLICY "resources_delete" ON resources FOR DELETE USING (true);
+
+-- 资源下载记录表
+CREATE TABLE IF NOT EXISTS resource_downloads (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
+    download_ip TEXT,
+    user_agent TEXT,
+    downloaded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_downloads_resource ON resource_downloads(resource_id);
+ALTER TABLE resource_downloads ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "downloads_insert" ON resource_downloads FOR INSERT WITH CHECK (true);
+CREATE POLICY "downloads_select" ON resource_downloads FOR SELECT USING (true);
+
+-- =============================================
 -- 完成
 -- =============================================
 -- 请在 Supabase SQL Editor 中运行此脚本
