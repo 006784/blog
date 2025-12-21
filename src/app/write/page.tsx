@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Save, Send, Settings, X, Plus, 
   Tag, Folder, Check, AlertCircle, Loader2, 
-  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield
+  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield, FolderOpen
 } from 'lucide-react';
 import { RichEditor } from '@/components/RichEditor';
 import { ImageUploader } from '@/components/ImageUploader';
-import { Post, createPost, updatePost, getPostById } from '@/lib/supabase';
+import { Post, Collection, createPost, updatePost, getPostById, getCollections, createCollection } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import MobileWritePage from './mobile/page';
 
@@ -53,6 +53,13 @@ function WritePageContent() {
   const [coverImage, setCoverImage] = useState('');
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
+  const [collectionId, setCollectionId] = useState<string | null>(null);
+  
+  // 集合数据
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [showNewCollection, setShowNewCollection] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [creatingCollection, setCreatingCollection] = useState(false);
   
   // UI 状态
   const [showSettings, setShowSettings] = useState(false);
@@ -70,6 +77,20 @@ function WritePageContent() {
     }
   }, [editId]);
 
+  // 加载集合列表
+  useEffect(() => {
+    loadCollections();
+  }, []);
+
+  async function loadCollections() {
+    try {
+      const data = await getCollections();
+      setCollections(data);
+    } catch (error) {
+      console.error('加载集合失败:', error);
+    }
+  }
+
   async function loadPost(id: string) {
     try {
       setLoading(true);
@@ -83,6 +104,7 @@ function WritePageContent() {
         setCoverImage(post.cover_image || post.image || '');
         setMetaTitle(post.meta_title || '');
         setMetaDescription(post.meta_description || '');
+        setCollectionId(post.collection_id || null);
         setCurrentPostId(post.id);
       }
     } catch (error) {
@@ -98,6 +120,29 @@ function WritePageContent() {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 3000);
   };
+
+  // 创建新集合
+  async function handleCreateCollection() {
+    if (!newCollectionName.trim()) return;
+    
+    setCreatingCollection(true);
+    try {
+      const newCollection = await createCollection({
+        name: newCollectionName.trim(),
+        color: `#${Math.floor(Math.random()*16777215).toString(16)}`, // 随机颜色
+      });
+      setCollections([...collections, newCollection]);
+      setCollectionId(newCollection.id);
+      setShowNewCollection(false);
+      setNewCollectionName('');
+      showNotification('success', `集合「${newCollection.name}」创建成功`);
+    } catch (error) {
+      console.error('创建集合失败:', error);
+      showNotification('error', '创建集合失败');
+    } finally {
+      setCreatingCollection(false);
+    }
+  }
 
   // 生成 slug
   function generateSlug(title: string): string {
@@ -140,6 +185,7 @@ function WritePageContent() {
         status: 'draft' as const,
         meta_title: metaTitle,
         meta_description: metaDescription,
+        collection_id: collectionId || undefined,
       };
 
       if (currentPostId) {
@@ -187,6 +233,7 @@ function WritePageContent() {
         meta_title: metaTitle,
         meta_description: metaDescription,
         published_at: new Date().toISOString(),
+        collection_id: collectionId || undefined,
       };
 
       if (currentPostId) {
@@ -568,6 +615,109 @@ Markdown 语法支持：
                   <p className="text-xs text-muted-foreground mt-2">
                     建议尺寸：1200 x 630 像素，比例 1.91:1
                   </p>
+                </div>
+
+                {/* 文章集合 */}
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+                    <FolderOpen className="w-4 h-4" />
+                    文章集合
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    将相关文章归类到同一个集合（系列/专题）
+                  </p>
+                  
+                  <div className="space-y-2">
+                    {/* 无集合选项 */}
+                    <button
+                      onClick={() => setCollectionId(null)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
+                        !collectionId 
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <Folder className="w-4 h-4" />
+                      <span className="text-sm">不归入集合</span>
+                      {!collectionId && <Check className="w-4 h-4 ml-auto" />}
+                    </button>
+                    
+                    {/* 已有集合 */}
+                    {collections.map(col => (
+                      <button
+                        key={col.id}
+                        onClick={() => setCollectionId(col.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
+                          collectionId === col.id 
+                            ? 'border-primary bg-primary/10 text-primary' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div 
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: col.color || '#6366f1' }}
+                        />
+                        <div className="flex-1 text-left">
+                          <span className="text-sm font-medium">{col.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {col.post_count} 篇文章
+                          </span>
+                        </div>
+                        {collectionId === col.id && <Check className="w-4 h-4" />}
+                      </button>
+                    ))}
+                    
+                    {/* 新建集合 */}
+                    {showNewCollection ? (
+                      <div className="flex items-center gap-2 p-2 rounded-xl border border-border bg-secondary/30">
+                        <input
+                          type="text"
+                          value={newCollectionName}
+                          onChange={(e) => setNewCollectionName(e.target.value)}
+                          placeholder="集合名称..."
+                          className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-primary"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && newCollectionName.trim()) {
+                              handleCreateCollection();
+                            }
+                            if (e.key === 'Escape') {
+                              setShowNewCollection(false);
+                              setNewCollectionName('');
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={handleCreateCollection}
+                          disabled={!newCollectionName.trim() || creatingCollection}
+                          className="p-2 rounded-lg bg-primary text-white disabled:opacity-50"
+                        >
+                          {creatingCollection ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowNewCollection(false);
+                            setNewCollectionName('');
+                          }}
+                          className="p-2 rounded-lg hover:bg-secondary"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowNewCollection(true)}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border hover:border-primary/50 text-muted-foreground hover:text-foreground transition-all"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span className="text-sm">新建集合</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* SEO 设置 */}

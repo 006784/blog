@@ -24,9 +24,24 @@ export interface Post {
   meta_description?: string;
   views: number;
   likes: number;
+  collection_id?: string; // 文章集合ID
   created_at: string;
   updated_at: string;
   published_at?: string;
+}
+
+// 文章集合（系列/专题）
+export interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+  cover_image?: string;
+  color?: string; // 主题色
+  is_public: boolean;
+  post_count: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Playlist {
@@ -227,6 +242,86 @@ export async function getPostsByTag(tag: string) {
     .order('published_at', { ascending: false });
   if (error) throw error;
   return data as Post[];
+}
+
+// ============ 文章集合操作 ============
+
+export async function getCollections() {
+  const { data, error } = await supabase
+    .from('collections')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) {
+    console.error('获取集合失败:', error);
+    return [];
+  }
+  return data as Collection[];
+}
+
+export async function getCollectionById(id: string) {
+  const { data, error } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) return null;
+  return data as Collection;
+}
+
+export async function createCollection(collection: Partial<Collection>) {
+  const { data, error } = await supabase
+    .from('collections')
+    .insert([{
+      ...collection,
+      post_count: 0,
+      sort_order: 0,
+      is_public: true,
+    }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Collection;
+}
+
+export async function updateCollection(id: string, updates: Partial<Collection>) {
+  const { data, error } = await supabase
+    .from('collections')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Collection;
+}
+
+export async function deleteCollection(id: string) {
+  // 先将该集合下的文章解绑
+  await supabase.from('posts').update({ collection_id: null }).eq('collection_id', id);
+  const { error } = await supabase.from('collections').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function getPostsByCollection(collectionId: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('collection_id', collectionId)
+    .eq('status', 'published')
+    .order('published_at', { ascending: false });
+  if (error) throw error;
+  return data as Post[];
+}
+
+export async function updateCollectionPostCount(collectionId: string) {
+  const { count } = await supabase
+    .from('posts')
+    .select('*', { count: 'exact', head: true })
+    .eq('collection_id', collectionId);
+  
+  await supabase
+    .from('collections')
+    .update({ post_count: count || 0 })
+    .eq('id', collectionId);
 }
 
 export function subscribeRealtime(table: string, callback: (payload: any) => void) {

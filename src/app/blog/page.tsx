@@ -3,10 +3,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2, FolderOpen } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
 import { AnimatedSection } from '@/components/Animations';
-import { getPublishedPosts, Post, deletePost } from '@/lib/supabase';
+import { getPublishedPosts, Post, deletePost, getCollections, Collection } from '@/lib/supabase';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { useAdmin } from '@/components/AdminProvider';
 import clsx from 'clsx';
@@ -21,24 +21,30 @@ const categoryList = [
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { isAdmin } = useAdmin();
 
   useEffect(() => {
-    loadPosts();
+    loadData();
   }, []);
 
-  async function loadPosts() {
+  async function loadData() {
     try {
       setLoading(true);
-      const data = await getPublishedPosts();
-      setPosts(data);
+      const [postsData, collectionsData] = await Promise.all([
+        getPublishedPosts(),
+        getCollections()
+      ]);
+      setPosts(postsData);
+      setCollections(collectionsData);
     } catch (error) {
-      console.error('加载文章失败:', error);
+      console.error('加载失败:', error);
     } finally {
       setLoading(false);
     }
@@ -71,9 +77,11 @@ export default function BlogPage() {
       
       const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
       
-      return matchesSearch && matchesCategory;
+      const matchesCollection = !selectedCollection || post.collection_id === selectedCollection;
+      
+      return matchesSearch && matchesCategory && matchesCollection;
     });
-  }, [posts, searchQuery, selectedCategory]);
+  }, [posts, searchQuery, selectedCategory, selectedCollection]);
 
   // 转换为 BlogCard 需要的格式
   const formattedPosts = filteredPosts.map(post => ({
@@ -256,6 +264,57 @@ export default function BlogPage() {
           </AnimatePresence>
         </div>
       </section>
+
+      {/* 集合筛选 */}
+      {collections.length > 0 && (
+        <section className="px-6 pb-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <FolderOpen className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">文章集合</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedCollection(null)}
+                className={clsx(
+                  'px-4 py-2 rounded-xl text-sm font-medium transition-all border',
+                  !selectedCollection
+                    ? 'bg-primary/10 border-primary text-primary'
+                    : 'bg-card border-border hover:border-primary/50'
+                )}
+              >
+                全部
+              </motion.button>
+              {collections.map((col) => {
+                const count = posts.filter(p => p.collection_id === col.id).length;
+                return (
+                  <motion.button
+                    key={col.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCollection(col.id)}
+                    className={clsx(
+                      'px-4 py-2 rounded-xl text-sm font-medium transition-all border flex items-center gap-2',
+                      selectedCollection === col.id
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'bg-card border-border hover:border-primary/50'
+                    )}
+                  >
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: col.color || '#6366f1' }}
+                    />
+                    {col.name}
+                    <span className="text-xs opacity-70">{count}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Posts Grid */}
       <section className="py-12 px-6">
