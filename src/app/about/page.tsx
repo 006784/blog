@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Github, Twitter, Mail, Linkedin, MapPin, Briefcase, GraduationCap, Heart, Code2, Palette, Coffee, Music } from 'lucide-react';
 import { AnimatedSection, Floating } from '@/components/Animations';
+import { useProfile } from '@/components/ProfileProvider';
 
 const skills = [
   { name: 'React', level: 95 },
@@ -51,6 +52,14 @@ const socialLinks = [
 ];
 
 export default function AboutPage() {
+  const { profile } = useProfile();
+  
+  const socialLinks = [
+    { name: 'GitHub', href: profile.github || 'https://github.com', icon: Github },
+    { name: 'Twitter', href: profile.twitter || 'https://twitter.com', icon: Twitter },
+    { name: 'Email', href: `mailto:${profile.email || 'hello@example.com'}`, icon: Mail },
+  ];
+  
   return (
     <div className="min-h-screen">
       {/* Background decorations */}
@@ -81,12 +90,17 @@ export default function AboutPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] rounded-3xl rotate-6 opacity-20" />
                 <div className="relative aspect-square rounded-3xl overflow-hidden border-4 border-card">
-                  <Image
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=faces"
-                    alt="Profile"
-                    fill
-                    className="object-cover"
-                  />
+                  {profile.avatar ? (
+                    <img 
+                      src={profile.avatar}
+                      alt="个人头像"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center">
+                      <span className="text-6xl font-bold text-white">{profile.nickname.charAt(0)}</span>
+                    </div>
+                  )}
                 </div>
                 {/* Floating badges */}
                 <motion.div
@@ -119,23 +133,26 @@ export default function AboutPage() {
                 </motion.div>
 
                 <h1 className="text-4xl sm:text-5xl font-bold mb-6">
-                  你好，我是 <span className="aurora-text">拾光</span>
+                  你好，我是 <span className="aurora-text">{profile.nickname}</span>
                 </h1>
 
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                  一名热爱技术和设计的全栈开发者，专注于创建美观、高性能的 Web 应用。
-                  我相信优秀的产品来源于对细节的追求和对用户体验的深刻理解。
+                  {profile.bio || '一名热爱技术和设计的全栈开发者，专注于创建美观、高性能的 Web 应用。我相信优秀的产品来源于对细节的追求和对用户体验的深刻理解。'}
                 </p>
 
                 <div className="flex flex-wrap gap-4 mb-8">
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    上海，中国
-                  </span>
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <Briefcase className="w-4 h-4" />
-                    高级前端工程师
-                  </span>
+                  {profile.location && (
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="w-4 h-4" />
+                      {profile.location}
+                    </span>
+                  )}
+                  {profile.occupation && (
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Briefcase className="w-4 h-4" />
+                      {profile.occupation}
+                    </span>
+                  )}
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <GraduationCap className="w-4 h-4" />
                     计算机科学学士

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAdmin } from './AdminProvider';
+import { useProfile } from './ProfileProvider';
 import clsx from 'clsx';
 
 const navItems = [
@@ -32,6 +33,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const { isAdmin, showLoginModal, logout } = useAdmin();
+  const { profile } = useProfile();
 
   useEffect(() => {
     setMounted(true);
@@ -138,14 +140,22 @@ export function Sidebar() {
                   
                   <div className="relative flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center text-white font-bold text-lg">
-                        S
-                      </div>
+                      {profile.avatar ? (
+                        <img 
+                          src={profile.avatar} 
+                          alt="头像" 
+                          className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center text-white font-bold text-lg">
+                          {profile.nickname.charAt(0)}
+                        </div>
+                      )}
                       <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-card" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate">拾光博主</p>
-                      <p className="text-xs text-muted-foreground truncate">探索 · 记录 · 分享</p>
+                      <p className="font-semibold truncate">{profile.nickname}</p>
+                      <p className="text-xs text-muted-foreground truncate">{profile.signature}</p>
                     </div>
                   </div>
                   
@@ -169,7 +179,7 @@ export function Sidebar() {
               {navItems.map((item, index) => {
                 const isActive = pathname === item.href;
                 const isHovered = hoveredItem === item.name;
-                
+                            
                 return (
                   <motion.div
                     key={item.name}
@@ -205,7 +215,7 @@ export function Sidebar() {
                           }}
                           transition={{ duration: 0.2 }}
                         />
-                        
+                                    
                         {/* 活跃指示条 */}
                         {isActive && (
                           <motion.div
@@ -214,7 +224,7 @@ export function Sidebar() {
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                           />
                         )}
-
+          
                         {/* 图标 */}
                         <div className={clsx(
                           'relative z-10 flex items-center justify-center',
@@ -228,7 +238,7 @@ export function Sidebar() {
                             isActive ? 'text-white' : 'text-muted-foreground group-hover:text-primary'
                           )} />
                         </div>
-                        
+                                    
                         {/* 文字 */}
                         <AnimatePresence>
                           {!isCollapsed && (
@@ -245,7 +255,7 @@ export function Sidebar() {
                             </motion.span>
                           )}
                         </AnimatePresence>
-
+          
                         {/* 悬浮光效 */}
                         {!isActive && (
                           <motion.div 
@@ -260,6 +270,93 @@ export function Sidebar() {
                   </motion.div>
                 );
               })}
+                          
+              {/* 个人资料设置 */}
+              {isAdmin && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navItems.length * 0.05 }}
+                  onHoverStart={() => setHoveredItem('profile')}
+                  onHoverEnd={() => setHoveredItem(null)}
+                >
+                  <Link href="/profile">
+                    <motion.div
+                      whileTap={{ scale: 0.98 }}
+                      className={clsx(
+                        'relative flex items-center gap-3 px-4 py-3 rounded-xl',
+                        'transition-all duration-300',
+                        'group cursor-pointer overflow-hidden',
+                        isCollapsed && 'justify-center',
+                        pathname === '/profile' 
+                          ? 'text-white' 
+                          : 'text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {/* 活跃/悬浮背景 */}
+                      <motion.div
+                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500"
+                        initial={false}
+                        animate={{
+                          opacity: pathname === '/profile' ? 1 : hoveredItem === 'profile' ? 0.15 : 0,
+                          scale: pathname === '/profile' || hoveredItem === 'profile' ? 1 : 0.95,
+                        }}
+                        transition={{ duration: 0.2 }}
+                      />
+                                  
+                      {/* 活跃指示条 */}
+                      {pathname === '/profile' && (
+                        <motion.div
+                          layoutId="sidebar-indicator"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-full shadow-lg shadow-white/50"
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        />
+                      )}
+          
+                      {/* 图标 */}
+                      <div className={clsx(
+                        'relative z-10 flex items-center justify-center',
+                        'w-9 h-9 rounded-lg transition-all duration-300',
+                        pathname === '/profile' 
+                          ? 'bg-white/20' 
+                          : 'bg-secondary/50 group-hover:bg-secondary'
+                      )}>
+                        <User className={clsx(
+                          'w-[18px] h-[18px] transition-colors',
+                          pathname === '/profile' ? 'text-white' : 'text-muted-foreground group-hover:text-primary'
+                        )} />
+                      </div>
+                                  
+                      {/* 文字 */}
+                      <AnimatePresence>
+                        {!isCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className={clsx(
+                              'relative z-10 font-medium whitespace-nowrap',
+                              pathname === '/profile' ? 'text-white' : ''
+                            )}
+                          >
+                            个人资料
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+          
+                      {/* 悬浮光效 */}
+                      {pathname !== '/profile' && (
+                        <motion.div 
+                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-primary/5 to-transparent"
+                          initial={{ x: '-100%' }}
+                          animate={{ x: hoveredItem === 'profile' ? '100%' : '-100%' }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      )}
+                    </motion.div>
+                  </Link>
+                </motion.div>
+              )}
             </div>
 
             {/* 写文章按钮 */}
@@ -673,12 +770,20 @@ export function Sidebar() {
               <div className="px-4 pb-8 pt-2">
                 {/* 用户信息 */}
                 <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center text-white font-bold text-lg">
-                    S
-                  </div>
+                  {profile.avatar ? (
+                    <img 
+                      src={profile.avatar} 
+                      alt="头像" 
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center text-white font-bold text-lg">
+                      {profile.nickname.charAt(0)}
+                    </div>
+                  )}
                   <div>
-                    <p className="font-semibold">拾光博主</p>
-                    <p className="text-xs text-muted-foreground">探索 · 记录 · 分享</p>
+                    <p className="font-semibold">{profile.nickname}</p>
+                    <p className="text-xs text-muted-foreground">{profile.signature}</p>
                   </div>
                 </div>
 
@@ -707,6 +812,27 @@ export function Sidebar() {
                       </Link>
                     );
                   })}
+                  
+                  {/* 个人资料设置 */}
+                  {isAdmin && (
+                    <Link 
+                      href="/profile"
+                      onClick={() => setShowMobileMenu(false)}
+                    >
+                      <motion.div
+                        whileTap={{ scale: 0.95 }}
+                        className={clsx(
+                          'flex flex-col items-center gap-2 p-3 rounded-2xl transition-all',
+                          pathname === '/profile' 
+                            ? 'bg-primary/15 text-primary' 
+                            : 'bg-secondary/30 text-muted-foreground'
+                        )}
+                      >
+                        <User className="w-6 h-6" />
+                        <span className="text-xs font-medium">资料</span>
+                      </motion.div>
+                    </Link>
+                  )}
                 </div>
 
                 {/* 主题切换 */}
