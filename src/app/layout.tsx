@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FontProvider } from "@/components/FontProvider";
@@ -103,6 +104,9 @@ export default function RootLayout({
           <main className="md:ml-[var(--sidebar-width,288px)] min-h-screen transition-all duration-300 pb-24 md:pb-0">
             {children}
           </main>
+          
+          {/* Vercel Analytics */}
+          <Analytics />
           
           {/* Service Worker 注册 */}
           <script
