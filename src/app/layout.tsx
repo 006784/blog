@@ -42,6 +42,17 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
+        {/* PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#8b5cf6" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="拾光" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        
+        {/* RSS */}
+        <link rel="alternate" type="application/rss+xml" title="拾光博客 RSS" href="/api/rss" />
+        
         {/* 加载优质中文字体 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -92,6 +103,23 @@ export default function RootLayout({
           <main className="md:ml-[var(--sidebar-width,288px)] min-h-screen transition-all duration-300 pb-24 md:pb-0">
             {children}
           </main>
+          
+          {/* Service Worker 注册 */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                      console.log('SW registered: ', registration);
+                    }).catch(function(registrationError) {
+                      console.log('SW registration failed: ', registrationError);
+                    });
+                  });
+                }
+              `,
+            }}
+          />
           </ProfileProvider>
           </AdminProvider>
           </FontProvider>

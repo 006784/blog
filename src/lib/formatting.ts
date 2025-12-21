@@ -18,10 +18,7 @@ export function autoFormatContent(content: string): string {
   formatted = formatted.replace(/(#{1,6}[^\n]*)/g, '$1\n');
   
   // 4. 段落后加空行
-  
-  return formatted;
-}  // 4. 段落后加空行
   formatted = formatted.replace(/([^\n])(\n)([^\n#-`>])/g, '$1\n\n$3');
   
   return formatted;
-};
+}

@@ -5,13 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, Clock, Tag, Share2, Twitter, Facebook, Linkedin, Copy, Check, ChevronUp, Loader2, Eye, Type, Edit2, Trash2, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Tag, Share2, Twitter, Facebook, Linkedin, Copy, Check, ChevronUp, Loader2, Eye, Type, Edit2, Trash2, MoreHorizontal, BookOpen } from 'lucide-react';
 import { AnimatedSection } from '@/components/Animations';
 import { getPostBySlug, incrementPostViews, formatDate, Post, deletePost } from '@/lib/supabase';
 import { useFont } from '@/components/FontProvider';
 import { FontSettings } from '@/components/FontSettings';
 import { markdownComponents } from '@/components/CodeBlock';
 import { useAdmin } from '@/components/AdminProvider';
+import { ReadingProgress } from '@/components/ReadingProgress';
+import { TableOfContents } from '@/components/TableOfContents';
+import { ShareButton } from '@/components/ShareButton';
+import { Comments } from '@/components/GiscusComments';
 import clsx from 'clsx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -30,6 +34,7 @@ export default function BlogPostPage({ params }: PageProps) {
   const [showFontSettings, setShowFontSettings] = useState(false);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isReadingMode, setIsReadingMode] = useState(false);
   const { currentFont, fontSize, lineHeight } = useFont();
   const { isAdmin } = useAdmin();
 
@@ -132,6 +137,9 @@ export default function BlogPostPage({ params }: PageProps) {
 
   return (
     <article className="min-h-screen">
+      {/* 阅读进度条 */}
+      <ReadingProgress showPercentage />
+      
       {/* Hero */}
       <section className="relative h-[50vh] min-h-[400px] overflow-hidden">
         {post.cover_image || post.image ? (
@@ -254,20 +262,31 @@ export default function BlogPostPage({ params }: PageProps) {
 
         {/* Content */}
         <AnimatedSection delay={0.1}>
-          <div 
-            className="prose prose-neutral dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-pre:bg-secondary prose-pre:border prose-pre:border-border"
-            style={{
-              fontFamily: currentFont.family,
-              fontSize: `${fontSize}px`,
-              lineHeight: lineHeight,
-            }}
-          >
-            <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
-              components={markdownComponents}
-            >
-              {post.content}
-            </ReactMarkdown>
+          <div className="flex gap-8">
+            {/* 主内容 */}
+            <div className="flex-1 min-w-0">
+              <div 
+                className={clsx(
+                  "prose prose-neutral dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-pre:bg-secondary prose-pre:border prose-pre:border-border",
+                  isReadingMode && "bg-card/50 p-8 rounded-2xl"
+                )}
+                style={{
+                  fontFamily: currentFont.family,
+                  fontSize: `${fontSize}px`,
+                  lineHeight: lineHeight,
+                }}
+              >
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={markdownComponents}
+                >
+                  {post.content}
+                </ReactMarkdown>
+              </div>
+            </div>
+            
+            {/* 侧边目录 */}
+            <TableOfContents content={post.content} className="w-64 flex-shrink-0" />
           </div>
         </AnimatedSection>
 
@@ -291,9 +310,12 @@ export default function BlogPostPage({ params }: PageProps) {
         {/* Share */}
         <AnimatedSection delay={0.3}>
           <div className="mt-8 p-6 bg-secondary/50 rounded-2xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Share2 className="w-5 h-5" />
-              <span className="font-medium">分享这篇文章</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Share2 className="w-5 h-5" />
+                <span className="font-medium">分享这篇文章</span>
+              </div>
+              <ShareButton title={post.title} description={post.description} />
             </div>
             <div className="flex flex-wrap gap-3">
               <motion.a
@@ -337,6 +359,11 @@ export default function BlogPostPage({ params }: PageProps) {
             </div>
           </div>
         </AnimatedSection>
+        
+        {/* 评论系统 */}
+        <AnimatedSection delay={0.4}>
+          <Comments />
+        </AnimatedSection>
       </section>
 
       {/* Scroll to top */}
@@ -349,6 +376,24 @@ export default function BlogPostPage({ params }: PageProps) {
         className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center z-50"
       >
         <ChevronUp className="w-5 h-5" />
+      </motion.button>
+
+      {/* 阅读模式切换 */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsReadingMode(!isReadingMode)}
+        className={clsx(
+          "fixed bottom-8 right-40 w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-50 transition-colors",
+          isReadingMode 
+            ? "bg-primary text-white" 
+            : "bg-card border border-border hover:border-primary"
+        )}
+        title={isReadingMode ? "退出阅读模式" : "阅读模式"}
+      >
+        <BookOpen className="w-5 h-5" />
       </motion.button>
 
       {/* Font settings button */}

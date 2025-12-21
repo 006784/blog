@@ -310,6 +310,30 @@ CREATE POLICY "contact_insert" ON contact_messages FOR INSERT WITH CHECK (true);
 -- 插入示例数据
 -- =============================================
 
+-- =============================================
+-- 友情链接表
+-- =============================================
+CREATE TABLE IF NOT EXISTS friend_links (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    description TEXT,
+    avatar TEXT,
+    category TEXT DEFAULT '其他',
+    is_featured BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_friend_links_category ON friend_links(category);
+CREATE INDEX IF NOT EXISTS idx_friend_links_featured ON friend_links(is_featured);
+
+-- 友情链接策略
+ALTER TABLE friend_links ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "friend_links_select" ON friend_links FOR SELECT USING (true);
+CREATE POLICY "friend_links_insert" ON friend_links FOR INSERT WITH CHECK (true);
+CREATE POLICY "friend_links_update" ON friend_links FOR UPDATE USING (true);
+CREATE POLICY "friend_links_delete" ON friend_links FOR DELETE USING (true);
+
 -- 示例歌单
 INSERT INTO playlists (name, description, cover_image) VALUES
 (

@@ -8,7 +8,7 @@ import {
   Home, FileText, User, Mail, PenLine, 
   Sun, Moon, Sparkles, ChevronLeft,
   Heart, Music, Camera, BookOpen, Github, Twitter,
-  Menu, X, Shield, LogOut, Settings
+  Menu, X, Shield, LogOut, Settings, Calendar, Link as LinkIcon, Rss
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAdmin } from './AdminProvider';
@@ -18,9 +18,11 @@ import clsx from 'clsx';
 const navItems = [
   { name: '首页', href: '/', icon: Home, gradient: 'from-blue-500 to-cyan-500' },
   { name: '博客', href: '/blog', icon: FileText, gradient: 'from-violet-500 to-purple-500' },
+  { name: '归档', href: '/archive', icon: Calendar, gradient: 'from-purple-500 to-indigo-500' },
   { name: '歌单', href: '/music', icon: Music, gradient: 'from-pink-500 to-rose-500' },
   { name: '相册', href: '/gallery', icon: Camera, gradient: 'from-amber-500 to-orange-500' },
   { name: '日记', href: '/diary', icon: BookOpen, gradient: 'from-emerald-500 to-teal-500' },
+  { name: '友链', href: '/links', icon: LinkIcon, gradient: 'from-cyan-500 to-teal-500' },
   { name: '关于', href: '/about', icon: User, gradient: 'from-indigo-500 to-blue-500' },
   { name: '联系', href: '/contact', icon: Mail, gradient: 'from-fuchsia-500 to-pink-500' },
 ];
