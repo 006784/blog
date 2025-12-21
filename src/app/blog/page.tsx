@@ -2,11 +2,13 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, X, Grid, List as ListIcon, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2 } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
 import { AnimatedSection } from '@/components/Animations';
-import { getPublishedPosts, Post } from '@/lib/supabase';
+import { getPublishedPosts, Post, deletePost } from '@/lib/supabase';
 import { SubscribeForm } from '@/components/SubscribeForm';
+import { useAdmin } from '@/components/AdminProvider';
 import clsx from 'clsx';
 
 const categoryList = [
@@ -24,6 +26,7 @@ export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     loadPosts();
@@ -38,6 +41,16 @@ export default function BlogPage() {
       console.error('加载文章失败:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeletePost(id: string) {
+    if (!confirm('确定要删除这篇文章吗？')) return;
+    try {
+      await deletePost(id);
+      setPosts(posts.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('删除失败:', error);
     }
   }
 
@@ -88,19 +101,35 @@ export default function BlogPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/50 via-secondary/20 to-transparent" />
         <div className="max-w-6xl mx-auto relative z-10">
           <AnimatedSection>
-            <motion.span 
-              className="inline-block text-sm font-medium text-primary mb-4 px-4 py-1.5 bg-primary/10 rounded-full"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              全部文章
-            </motion.span>
-            <h1 className="text-4xl sm:text-6xl font-bold mb-6">
-              <span className="aurora-text">博客文章</span>
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              探索技术、设计和生活的无限可能。每一篇文章都是一次深度思考的结晶。
-            </p>
+            <div className="flex items-start justify-between">
+              <div>
+                <motion.span 
+                  className="inline-block text-sm font-medium text-primary mb-4 px-4 py-1.5 bg-primary/10 rounded-full"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  全部文章
+                </motion.span>
+                <h1 className="text-4xl sm:text-6xl font-bold mb-6">
+                  <span className="aurora-text">博客文章</span>
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-2xl">
+                  探索技术、设计和生活的无限可能。每一篇文章都是一次深度思考的结晶。
+                </p>
+              </div>
+              {isAdmin && (
+                <Link href="/write">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="btn-primary hidden sm:flex"
+                  >
+                    <Plus className="w-5 h-5" />
+                    写文章
+                  </motion.button>
+                </Link>
+              )}
+            </div>
           </AnimatedSection>
         </div>
       </section>
@@ -264,7 +293,12 @@ export default function BlogPage() {
                     )}
                   >
                     {formattedPosts.map((post, index) => (
-                      <BlogCard key={post.slug} post={post} index={index} />
+                      <BlogCard 
+                        key={post.slug} 
+                        post={post} 
+                        index={index}
+                        onDelete={handleDeletePost}
+                      />
                     ))}
                   </motion.div>
                 ) : (

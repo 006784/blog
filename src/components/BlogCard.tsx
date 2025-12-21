@@ -3,8 +3,9 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, Clock, ArrowRight, Tag, Eye, Sparkles } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Tag, Eye, Sparkles, Edit2, Trash2 } from 'lucide-react';
 import { Post, formatDate } from '@/lib/types';
+import { useAdmin } from './AdminProvider';
 import clsx from 'clsx';
 import { useRef, useState } from 'react';
 
@@ -12,11 +13,13 @@ interface BlogCardProps {
   post: Post;
   index?: number;
   featured?: boolean;
+  onDelete?: (slug: string) => void;
 }
 
-export function BlogCard({ post, index = 0, featured = false }: BlogCardProps) {
+export function BlogCard({ post, index = 0, featured = false, onDelete }: BlogCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const { isAdmin } = useAdmin();
   
   // 3D tilt effect
   const x = useMotionValue(0);
@@ -201,18 +204,45 @@ export function BlogCard({ post, index = 0, featured = false }: BlogCardProps) {
 
           {/* Read indicator - enhanced */}
           <motion.div
-            className="absolute top-5 right-5"
+            className="absolute top-5 right-5 flex items-center gap-2"
             initial={{ opacity: 0, scale: 0 }}
-            whileHover={{ scale: 1.1 }}
             animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 0.8 }}
             transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
           >
-            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-lg">
+            {/* 管理员操作按钮 */}
+            {isAdmin && (
+              <>
+                <Link href={`/write?edit=${post.slug}`} onClick={(e) => e.stopPropagation()}>
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-lg hover:bg-primary/80 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4 text-white" />
+                  </motion.div>
+                </Link>
+                {onDelete && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDelete(post.slug);
+                    }}
+                    className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-lg hover:bg-red-500/80 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4 text-white" />
+                  </motion.button>
+                )}
+              </>
+            )}
+            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-lg">
               <motion.div
                 animate={{ rotate: isHovered ? 360 : 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <Eye className="w-5 h-5 text-white" />
+                <Eye className="w-4 h-4 text-white" />
               </motion.div>
             </div>
           </motion.div>

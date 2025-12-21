@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Camera, Image as ImageIcon, Plus, X, Heart, MapPin, 
   Calendar, Folder, Trash2, ZoomIn, ChevronLeft, ChevronRight,
-  Grid3X3, LayoutGrid, Sparkles, Upload, Loader2, Shield
+  Grid3X3, LayoutGrid, Sparkles, Upload, Loader2, Shield, Edit2, Save
 } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { 
   Photo, Album,
   getAllPhotos, getAlbums, getPhotos,
-  createPhoto, createAlbum, deletePhoto,
+  createPhoto, createAlbum, deletePhoto, updatePhoto,
   formatDate
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
@@ -22,6 +22,7 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('masonry');
   const { isAdmin, showLoginModal } = useAdmin();
@@ -53,6 +54,16 @@ export default function GalleryPage() {
       setPhotos(photos.filter(p => p.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
+    }
+  }
+
+  async function handleUpdatePhoto(id: string, updates: Partial<Photo>) {
+    try {
+      const updated = await updatePhoto(id, updates);
+      setPhotos(photos.map(p => p.id === id ? updated : p));
+      setEditingPhoto(null);
+    } catch (error) {
+      console.error('更新失败:', error);
     }
   }
 
@@ -204,6 +215,7 @@ export default function GalleryPage() {
                 index={index}
                 onClick={() => setLightboxPhoto(photo)}
                 onDelete={handleDeletePhoto}
+                onEdit={setEditingPhoto}
                 isAdmin={isAdmin}
               />
             ))}
@@ -217,6 +229,7 @@ export default function GalleryPage() {
                 index={index}
                 onClick={() => setLightboxPhoto(photo)}
                 onDelete={handleDeletePhoto}
+                onEdit={setEditingPhoto}
                 isAdmin={isAdmin}
                 square
               />
@@ -239,6 +252,18 @@ export default function GalleryPage() {
           )}
         </AnimatePresence>
 
+        {/* Edit Photo Modal */}
+        <AnimatePresence>
+          {editingPhoto && (
+            <EditPhotoModal
+              photo={editingPhoto}
+              albums={albums}
+              onClose={() => setEditingPhoto(null)}
+              onSave={handleUpdatePhoto}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Lightbox */}
         <AnimatePresence>
           {lightboxPhoto && (
@@ -247,6 +272,9 @@ export default function GalleryPage() {
               onClose={() => setLightboxPhoto(null)}
               onPrev={handlePrevPhoto}
               onNext={handleNextPhoto}
+              isAdmin={isAdmin}
+              onEdit={() => { setEditingPhoto(lightboxPhoto); setLightboxPhoto(null); }}
+              onDelete={() => { handleDeletePhoto(lightboxPhoto.id); setLightboxPhoto(null); }}
             />
           )}
         </AnimatePresence>
@@ -261,6 +289,7 @@ function PhotoCard({
   index, 
   onClick,
   onDelete,
+  onEdit,
   isAdmin = false,
   square = false
 }: { 
@@ -268,6 +297,7 @@ function PhotoCard({
   index: number;
   onClick: () => void;
   onDelete: (id: string) => void;
+  onEdit?: (photo: Photo) => void;
   isAdmin?: boolean;
   square?: boolean;
 }) {
@@ -322,12 +352,22 @@ function PhotoCard({
           <Heart className="w-4 h-4 text-white" />
         </button>
         {isAdmin && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }}
-            className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/80 transition-colors"
-          >
-            <Trash2 className="w-4 h-4 text-white" />
-          </button>
+          <>
+            {onEdit && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onEdit(photo); }}
+                className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-primary/80 transition-colors"
+              >
+                <Edit2 className="w-4 h-4 text-white" />
+              </button>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }}
+              className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/80 transition-colors"
+            >
+              <Trash2 className="w-4 h-4 text-white" />
+            </button>
+          </>
         )}
       </div>
 
@@ -341,17 +381,178 @@ function PhotoCard({
   );
 }
 
+// Edit Photo Modal
+function EditPhotoModal({
+  photo,
+  albums,
+  onClose,
+  onSave
+}: {
+  photo: Photo;
+  albums: Album[];
+  onClose: () => void;
+  onSave: (id: string, updates: Partial<Photo>) => Promise<void>;
+}) {
+  const [formData, setFormData] = useState({
+    title: photo.title || '',
+    description: photo.description || '',
+    location: photo.location || '',
+    album_id: photo.album_id || '',
+    taken_at: photo.taken_at || '',
+  });
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onSave(photo.id, {
+        ...formData,
+        album_id: formData.album_id || undefined,
+        taken_at: formData.taken_at || undefined,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Edit2 className="w-5 h-5 text-primary" />
+              编辑照片
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {/* Preview */}
+          <div className="aspect-video rounded-xl overflow-hidden bg-muted">
+            <img src={photo.url} alt="" className="w-full h-full object-cover" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">标题</label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={e => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              placeholder="给照片起个名字"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">描述</label>
+            <textarea
+              value={formData.description}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+              rows={2}
+              placeholder="这张照片的故事..."
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium mb-2">地点</label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="拍摄地点"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">拍摄日期</label>
+              <input
+                type="date"
+                value={formData.taken_at}
+                onChange={e => setFormData({ ...formData, taken_at: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">相册</label>
+            <select
+              value={formData.album_id}
+              onChange={e => setFormData({ ...formData, album_id: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            >
+              <option value="">不归类到相册</option>
+              {albums.map(album => (
+                <option key={album.id} value={album.id}>{album.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-border flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
+          >
+            取消
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="btn-primary disabled:opacity-50"
+          >
+            {loading ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> 保存中...</>
+            ) : (
+              <><Save className="w-4 h-4" /> 保存修改</>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // Lightbox Component
 function Lightbox({
   photo,
   onClose,
   onPrev,
-  onNext
+  onNext,
+  isAdmin = false,
+  onEdit,
+  onDelete
 }: {
   photo: Photo;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
+  isAdmin?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -371,13 +572,31 @@ function Lightbox({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
       onClick={onClose}
     >
-      {/* Close Button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
-      >
-        <X className="w-6 h-6 text-white" />
-      </button>
+      {/* Top Actions */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        {isAdmin && onEdit && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="p-3 rounded-full bg-white/10 hover:bg-primary/60 transition-colors"
+          >
+            <Edit2 className="w-5 h-5 text-white" />
+          </button>
+        )}
+        {isAdmin && onDelete && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="p-3 rounded-full bg-white/10 hover:bg-red-500/60 transition-colors"
+          >
+            <Trash2 className="w-5 h-5 text-white" />
+          </button>
+        )}
+        <button
+          onClick={onClose}
+          className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        >
+          <X className="w-6 h-6 text-white" />
+        </button>
+      </div>
 
       {/* Navigation */}
       <button

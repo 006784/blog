@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Clock, Tag, Share2, Twitter, Facebook, Linkedin, Copy, Check, ChevronUp, Loader2, Eye, Type } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Calendar, Clock, Tag, Share2, Twitter, Facebook, Linkedin, Copy, Check, ChevronUp, Loader2, Eye, Type, Edit2, Trash2, MoreHorizontal } from 'lucide-react';
 import { AnimatedSection } from '@/components/Animations';
-import { getPostBySlug, incrementPostViews, formatDate, Post } from '@/lib/supabase';
+import { getPostBySlug, incrementPostViews, formatDate, Post, deletePost } from '@/lib/supabase';
 import { useFont } from '@/components/FontProvider';
 import { FontSettings } from '@/components/FontSettings';
 import { markdownComponents } from '@/components/CodeBlock';
+import { useAdmin } from '@/components/AdminProvider';
 import clsx from 'clsx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -20,12 +22,16 @@ interface PageProps {
 
 export default function BlogPostPage({ params }: PageProps) {
   const resolvedParams = use(params);
+  const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showFontSettings, setShowFontSettings] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { currentFont, fontSize, lineHeight } = useFont();
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     loadPost();
@@ -64,6 +70,22 @@ export default function BlogPostPage({ params }: PageProps) {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async () => {
+    if (!post) return;
+    if (!confirm('确定要删除这篇文章吗？此操作不可恢复！')) return;
+    
+    setDeleting(true);
+    try {
+      await deletePost(post.id);
+      router.push('/blog');
+    } catch (error) {
+      console.error('删除失败:', error);
+      alert('删除失败');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -143,6 +165,41 @@ export default function BlogPostPage({ params }: PageProps) {
             </motion.button>
           </Link>
         </motion.div>
+
+        {/* 管理员操作按钮 */}
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="absolute top-8 right-6 flex items-center gap-2"
+          >
+            <Link href={`/write?edit=${post.id}`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 px-4 py-2 bg-background/80 backdrop-blur-md rounded-full text-sm font-medium"
+              >
+                <Edit2 className="w-4 h-4" />
+                编辑
+              </motion.button>
+            </Link>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/80 backdrop-blur-md rounded-full text-sm font-medium text-white"
+            >
+              {deleting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              删除
+            </motion.button>
+          </motion.div>
+        )}
 
         {/* Title overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-12">

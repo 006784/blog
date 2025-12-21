@@ -225,6 +225,7 @@ export default function DiaryPage() {
               onClose={() => setSelectedDiary(null)}
               onEdit={() => { handleEdit(selectedDiary); setSelectedDiary(null); }}
               onDelete={() => { handleDelete(selectedDiary.id); setSelectedDiary(null); }}
+              isAdmin={isAdmin}
             />
           )}
         </AnimatePresence>
@@ -356,12 +357,14 @@ function DiaryDetail({
   diary,
   onClose,
   onEdit,
-  onDelete
+  onDelete,
+  isAdmin = false
 }: {
   diary: Diary;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  isAdmin?: boolean;
 }) {
   const mood = diary.mood ? moodIcons[diary.mood] : null;
   const weather = diary.weather ? weatherIcons[diary.weather] : null;
@@ -426,22 +429,24 @@ function DiaryDetail({
           <span className="text-sm text-muted-foreground">
             {diary.word_count} 字
           </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              className="px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
-            >
-              <Edit2 className="w-4 h-4" />
-              编辑
-            </button>
-            <button
-              onClick={onDelete}
-              className="px-4 py-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors flex items-center gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              删除
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onEdit}
+                className="px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
+              >
+                <Edit2 className="w-4 h-4" />
+                编辑
+              </button>
+              <button
+                onClick={onDelete}
+                className="px-4 py-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                删除
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>

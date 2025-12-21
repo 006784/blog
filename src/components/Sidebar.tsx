@@ -8,7 +8,7 @@ import {
   Home, FileText, User, Mail, PenLine, 
   Sun, Moon, Sparkles, ChevronLeft,
   Heart, Music, Camera, BookOpen, Github, Twitter,
-  Menu, X, Shield, LogOut
+  Menu, X, Shield, LogOut, Settings
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAdmin } from './AdminProvider';
@@ -263,43 +263,72 @@ export function Sidebar() {
             </div>
 
             {/* 写文章按钮 */}
-            <div className="mt-6 px-1">
+            <div className="mt-6 px-1 space-y-2">
               {isAdmin ? (
-                <Link href="/write">
-                  <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={clsx(
-                      'relative w-full flex items-center justify-center gap-2',
-                      'px-4 py-3.5 rounded-xl',
-                      'text-white font-semibold',
-                      'overflow-hidden',
-                      'shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30',
-                      'transition-shadow duration-300'
-                    )}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]" />
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                      initial={{ x: '-100%' }}
-                      animate={{ x: '200%' }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    />
-                    <PenLine className="w-5 h-5 relative z-10" />
-                    <AnimatePresence>
-                      {!isCollapsed && (
-                        <motion.span
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: 'auto' }}
-                          exit={{ opacity: 0, width: 0 }}
-                          className="relative z-10 whitespace-nowrap"
-                        >
-                          写文章
-                        </motion.span>
+                <>
+                  <Link href="/write">
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={clsx(
+                        'relative w-full flex items-center justify-center gap-2',
+                        'px-4 py-3.5 rounded-xl',
+                        'text-white font-semibold',
+                        'overflow-hidden',
+                        'shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30',
+                        'transition-shadow duration-300'
                       )}
-                    </AnimatePresence>
-                  </motion.button>
-                </Link>
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]" />
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                        initial={{ x: '-100%' }}
+                        animate={{ x: '200%' }}
+                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                      />
+                      <PenLine className="w-5 h-5 relative z-10" />
+                      <AnimatePresence>
+                        {!isCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className="relative z-10 whitespace-nowrap"
+                          >
+                            写文章
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </Link>
+                  <Link href="/admin">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={clsx(
+                        'relative w-full flex items-center justify-center gap-2',
+                        'px-4 py-2.5 rounded-xl',
+                        'bg-secondary/50 hover:bg-secondary/80',
+                        'border border-border/50',
+                        'transition-all duration-300'
+                      )}
+                    >
+                      <Settings className="w-4 h-4 text-primary" />
+                      <AnimatePresence>
+                        {!isCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className="text-sm font-medium whitespace-nowrap"
+                          >
+                            管理后台
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </Link>
+                </>
               ) : (
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
@@ -712,20 +741,33 @@ export function Sidebar() {
 
                 {/* 管理员登录/登出 */}
                 {isAdmin ? (
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      logout();
-                      setShowMobileMenu(false);
-                    }}
-                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-red-500/10 mb-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <LogOut className="w-5 h-5 text-red-500" />
-                      <span className="font-medium text-red-500">退出管理员</span>
-                    </div>
-                    <Shield className="w-5 h-5 text-red-500" />
-                  </motion.button>
+                  <>
+                    <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                      <motion.div
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-primary/10 mb-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Settings className="w-5 h-5 text-primary" />
+                          <span className="font-medium text-primary">管理后台</span>
+                        </div>
+                        <Shield className="w-5 h-5 text-primary" />
+                      </motion.div>
+                    </Link>
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        logout();
+                        setShowMobileMenu(false);
+                      }}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-red-500/10 mb-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <LogOut className="w-5 h-5 text-red-500" />
+                        <span className="font-medium text-red-500">退出管理员</span>
+                      </div>
+                    </motion.button>
+                  </>
                 ) : (
                   <motion.button
                     whileTap={{ scale: 0.98 }}
