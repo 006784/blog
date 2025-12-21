@@ -107,7 +107,7 @@ export default function AdminPage() {
         <div className="text-center">
           <Shield className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <p className="text-muted-foreground mb-4">需要管理员权限</p>
-          <button onClick={showLoginModal} className="btn-primary">
+          <button onClick={() => showLoginModal()} className="btn-primary">
             <Shield className="w-5 h-5" />
             管理员登录
           </button>

@@ -6,7 +6,9 @@ import {
   Bold, Italic, Strikethrough, Code, Link2, Image, 
   List, ListOrdered, Quote, Heading1, Heading2, Heading3,
   Table, Minus, Eye, EyeOff, Maximize2, Minimize2,
-  Undo, Redo, CheckSquare, FileCode, Upload, X, Loader2, Sparkles
+  Undo, Redo, CheckSquare, FileCode, Upload, X, Loader2, Sparkles,
+  AlignLeft, AlignCenter, AlignRight, Palette, Type, Copy, Scissors, RotateCcw,
+  Wand2, Brain, Zap, FileText, MessageSquare, BookOpen, AlertCircle
 } from 'lucide-react';
 import { uploadFile, compressImage } from '@/lib/storage';
 import ReactMarkdown from 'react-markdown';
@@ -17,9 +19,10 @@ interface RichEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   onImageUpload?: (url: string) => void;
+  onSave?: () => void;
 }
 
-export function RichEditor({ value, onChange, placeholder, onImageUpload }: RichEditorProps) {
+export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave }: RichEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreview, setShowPreview] = useState(true); // 默认开启预览
@@ -29,6 +32,7 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTableModal, setShowTableModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
   // 历史记录
   const [history, setHistory] = useState<string[]>([]);
@@ -76,6 +80,158 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
       onChange(history[newIndex]);
       lastValueRef.current = history[newIndex];
     }
+  };
+
+  // 复制选中文本
+  const copySelection = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = value.substring(start, end);
+    
+    if (selectedText) {
+      navigator.clipboard.writeText(selectedText);
+    }
+  };
+
+  // 剪切选中文本
+  const cutSelection = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = value.substring(start, end);
+    
+    if (selectedText) {
+      navigator.clipboard.writeText(selectedText);
+      const newText = value.substring(0, start) + value.substring(end);
+      onChange(newText);
+      saveToHistory(newText);
+      
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start, start);
+      }, 0);
+    }
+  };
+
+  // 清空格式
+  const clearFormatting = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    let selectedText = value.substring(start, end);
+    
+    if (selectedText) {
+      // 移除常见的Markdown格式符号
+      selectedText = selectedText
+        .replace(/\*\*(.*?)\*\*/g, '$1')  // 粗体
+        .replace(/\*(.*?)\*/g, '$1')      // 斜体
+        .replace(/~~(.*?)~~/g, '$1')       // 删除线
+        .replace(/`(.*?)`/g, '$1')         // 行内代码
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1'); // 链接
+      
+      const newText = value.substring(0, start) + selectedText + value.substring(end);
+      onChange(newText);
+      saveToHistory(newText);
+      
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start, start + selectedText.length);
+      }, 0);
+    }
+  };
+
+  // AI辅助功能
+  const showAIAssistant = () => {
+    alert('AI写作助手功能正在开发中...');
+  };
+
+  const generateSummary = () => {
+    alert('AI自动生成摘要功能正在开发中...');
+  };
+
+  // 插入文章模板
+  const insertArticleTemplate = () => {
+    const template = `
+# 文章标题
+
+## 简介
+
+在这里简要介绍文章的主要内容...
+
+## 正文
+
+详细内容...
+
+## 总结
+
+总结要点...
+
+## 相关链接
+
+- [链接1](链接地址)
+- [链接2](链接地址)
+`;
+    insertText(template);
+  };
+
+  // 插入教程模板
+  const insertTutorialTemplate = () => {
+    const template = `
+# 教程标题
+
+## 简介
+
+本教程将教你如何...
+
+## 准备工作
+
+- 需要的工具/软件
+- 环境要求
+
+## 步骤一：第一步
+
+详细说明第一步的操作...
+
+### 示例代码
+
+\`\`\`javascript
+// 示例代码
+console.log('Hello World');
+\`\`\`
+
+## 步骤二：第二步
+
+详细说明第二步的操作...
+
+## 常见问题
+
+### 问题1
+
+**问题描述**
+
+解决方案...
+
+## 总结
+
+通过本教程你学会了...
+`;
+    insertText(template);
+  };
+
+  // 插入提示框
+  const insertAlertBox = () => {
+    const template = `
+> 📝 **提示**
+> 这里是一些有用的提示信息
+`;
+    insertText(template);
   };
 
   // 插入文本到光标位置
@@ -143,10 +299,7 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
     | { type: 'divider' }
     | { icon: React.ComponentType<{ className?: string }>; title: string; action: () => void; disabled?: boolean };
   
-  const tools: ToolItem[] = [
-    { icon: Undo, title: '撤销 (Ctrl+Z)', action: undo, disabled: historyIndex <= 0 },
-    { icon: Redo, title: '重做 (Ctrl+Shift+Z)', action: redo, disabled: historyIndex >= history.length - 1 },
-    { type: 'divider' },
+  const formatTools: ToolItem[] = [
     { icon: Heading1, title: '一级标题', action: () => insertAtLineStart('# ') },
     { icon: Heading2, title: '二级标题', action: () => insertAtLineStart('## ') },
     { icon: Heading3, title: '三级标题', action: () => insertAtLineStart('### ') },
@@ -155,17 +308,51 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
     { icon: Italic, title: '斜体 (Ctrl+I)', action: () => insertAtCursor('*', '*', '斜体文字') },
     { icon: Strikethrough, title: '删除线', action: () => insertAtCursor('~~', '~~', '删除线') },
     { icon: Code, title: '行内代码', action: () => insertAtCursor('`', '`', 'code') },
-    { type: 'divider' },
+  ];
+  
+  const listTools: ToolItem[] = [
     { icon: List, title: '无序列表', action: () => insertAtLineStart('- ') },
     { icon: ListOrdered, title: '有序列表', action: () => insertAtLineStart('1. ') },
     { icon: CheckSquare, title: '任务列表', action: () => insertAtLineStart('- [ ] ') },
-    { type: 'divider' },
+  ];
+  
+  const mediaTools: ToolItem[] = [
     { icon: Quote, title: '引用', action: () => insertAtLineStart('> ') },
     { icon: Minus, title: '分割线', action: () => insertText('\n\n---\n\n') },
     { icon: Link2, title: '链接', action: () => setShowLinkModal(true) },
     { icon: Image, title: '图片', action: () => setShowImageModal(true) },
     { icon: Table, title: '表格', action: () => setShowTableModal(true) },
     { icon: FileCode, title: '代码块', action: () => setShowCodeModal(true) },
+  ];
+  
+  const editTools: ToolItem[] = [
+    { icon: Undo, title: '撤销 (Ctrl+Z)', action: undo, disabled: historyIndex <= 0 },
+    { icon: Redo, title: '重做 (Ctrl+Shift+Z)', action: redo, disabled: historyIndex >= history.length - 1 },
+    { type: 'divider' },
+    { icon: Copy, title: '复制选中', action: copySelection },
+    { icon: Scissors, title: '剪切选中', action: cutSelection },
+    { icon: RotateCcw, title: '清空格式', action: clearFormatting },
+  ];
+  
+  const templateTools: ToolItem[] = [
+    { icon: Sparkles, title: '文章模板', action: insertArticleTemplate },
+    { icon: BookOpen, title: '教程模板', action: insertTutorialTemplate },
+    { icon: AlertCircle, title: '提示框', action: insertAlertBox },
+    { type: 'divider' },
+    { icon: Wand2, title: 'AI优化建议', action: showAIAssistant },
+    { icon: Brain, title: 'AI生成摘要', action: generateSummary },
+  ];
+  
+  const tools: ToolItem[] = [
+    ...formatTools,
+    { type: 'divider' },
+    ...listTools,
+    { type: 'divider' },
+    ...mediaTools,
+    { type: 'divider' },
+    ...editTools,
+    { type: 'divider' },
+    ...templateTools,
   ];
 
   // 处理图片上传
@@ -237,8 +424,31 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
             undo();
           }
           break;
+        case 's':
+          e.preventDefault();
+          // 触发保存事件
+          onSave?.();
+          break;
       }
     }
+  };
+
+  // 统计字数
+  const getWordCount = () => {
+    const text = value.replace(/[#*~`\[\]()]/g, '').trim();
+    return text.length > 0 ? text.length : 0;
+  };
+
+  // 统计行数
+  const getLineCount = () => {
+    return value.split('\n').length;
+  };
+
+  // 估计阅读时间（分钟）
+  const estimateReadingTime = () => {
+    const wordsPerMinute = 300;
+    const wordCount = getWordCount();
+    return Math.ceil(wordCount / wordsPerMinute) || 1;
   };
 
   // 处理内容变化
@@ -339,7 +549,7 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
             style={{ minHeight: isFullscreen ? '100%' : '500px' }}
           />
           <div className="absolute bottom-3 right-4 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
-            {value.length} 字
+            {getWordCount()} 字 • {getLineCount()} 行 • {estimateReadingTime()}分钟
           </div>
         </div>
 
@@ -635,7 +845,7 @@ function TableForm({ onInsert }: { onInsert: (rows: number, cols: number) => voi
 function CodeBlockForm({ onInsert }: { onInsert: (lang: string) => void }) {
   const languages = [
     'javascript', 'typescript', 'python', 'java', 'go', 'rust',
-    'html', 'css', 'json', 'bash', 'sql', 'markdown'
+    'html', 'css', 'json', 'bash', 'sql', '``'
   ];
   const [selected, setSelected] = useState('javascript');
 

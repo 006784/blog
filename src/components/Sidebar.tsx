@@ -430,7 +430,7 @@ export function Sidebar() {
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={showLoginModal}
+                  onClick={() => showLoginModal()}
                   className={clsx(
                     'relative w-full flex items-center justify-center gap-2',
                     'px-4 py-3.5 rounded-xl',
@@ -679,7 +679,7 @@ export function Sidebar() {
             ) : (
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                onClick={showLoginModal}
+                onClick={() => showLoginModal()}
                 className="relative -mt-6"
               >
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center shadow-lg shadow-primary/30">

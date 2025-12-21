@@ -121,6 +121,55 @@ function WritePageContent() {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // 自动保存草稿
+  useEffect(() => {
+    if (!title && !content) return;
+    
+    const timer = setTimeout(() => {
+      if (title.trim() || content.trim()) {
+        autoSaveDraft();
+      }
+    }, 30000); // 30秒自动保存
+    
+    return () => clearTimeout(timer);
+  }, [title, content]);
+
+  // 自动保存草稿函数
+  async function autoSaveDraft() {
+    if (!title.trim() && !content.trim()) return;
+    
+    try {
+      const postData = {
+        title: title || '未命名草稿',
+        slug: currentPostId ? undefined : generateSlug(title || '未命名草稿'),
+        description,
+        content,
+        category,
+        tags,
+        image: coverImage,
+        cover_image: coverImage,
+        author: '拾光',
+        reading_time: estimateReadingTime(content),
+        status: 'draft' as const,
+        meta_title: metaTitle,
+        meta_description: metaDescription,
+        collection_id: collectionId || undefined,
+      };
+
+      if (currentPostId) {
+        await updatePost(currentPostId, postData);
+      } else {
+        const newPost = await createPost(postData);
+        setCurrentPostId(newPost.id);
+      }
+      
+      setLastSaved(new Date());
+      console.log('草稿已自动保存');
+    } catch (error) {
+      console.error('自动保存失败:', error);
+    }
+  }
+
   // 创建新集合
   async function handleCreateCollection() {
     if (!newCollectionName.trim()) return;
@@ -285,12 +334,16 @@ function WritePageContent() {
           <p className="text-muted-foreground mb-6">只有管理员可以发布文章，请先登录</p>
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={showLoginModal}
-            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25"
+            onClick={() => showLoginModal(() => {
+              // 登录成功后刷新页面以显示写作界面
+              window.location.reload();
+            })}
+            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 mb-4"
           >
             管理员登录
           </motion.button>
-          <Link href="/blog" className="block mt-4 text-sm text-muted-foreground hover:text-primary transition-colors">
+          <p className="text-sm text-muted-foreground mb-4">登录后将自动跳转到写作页面</p>
+          <Link href="/blog" className="block text-sm text-muted-foreground hover:text-primary transition-colors">
             返回博客
           </Link>
         </motion.div>
@@ -546,6 +599,7 @@ function WritePageContent() {
           <RichEditor
             value={content}
             onChange={setContent}
+            onSave={handleSaveDraft}
             placeholder="开始写作...
 
 Markdown 语法支持：
@@ -562,6 +616,7 @@ Markdown 语法支持：
 - Ctrl/Cmd + B：粗体
 - Ctrl/Cmd + I：斜体
 - Ctrl/Cmd + K：链接
+- Ctrl/Cmd + S：保存
 - 可以直接粘贴或拖拽图片"
           />
         </motion.div>

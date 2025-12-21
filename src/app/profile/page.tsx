@@ -47,7 +47,7 @@ export default function ProfilePage() {
           <User className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <p className="text-muted-foreground mb-4">需要管理员权限才能编辑个人资料</p>
           <button 
-            onClick={showLoginModal}
+            onClick={() => showLoginModal()}
             className="btn-primary"
           >
             管理员登录

@@ -168,7 +168,7 @@ function MobileWriteContent() {
           <p className="text-muted-foreground mb-6">只有管理员可以发布文章</p>
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={showLoginModal}
+            onClick={() => showLoginModal()}
             className="px-8 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25"
           >
             管理员登录

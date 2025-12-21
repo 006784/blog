@@ -9,7 +9,7 @@ const ADMIN_PASSWORD = 'shiguang2024';
 
 interface AdminContextType {
   isAdmin: boolean;
-  showLoginModal: () => void;
+  showLoginModal: (callback?: () => void) => void;
   logout: () => void;
 }
 
@@ -18,7 +18,7 @@ const AdminContext = createContext<AdminContextType | null>(null);
 export function useAdmin() {
   const context = useContext(AdminContext);
   if (!context) {
-    return { isAdmin: false, showLoginModal: () => {}, logout: () => {} };
+    return { isAdmin: false, showLoginModal: (callback?: () => void) => {}, logout: () => {} };
   }
   return context;
 }
@@ -26,6 +26,8 @@ export function useAdmin() {
 interface AdminProviderProps {
   children: ReactNode;
 }
+
+let loginCallback: (() => void) | null = null;
 
 export function AdminProvider({ children }: AdminProviderProps) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -51,6 +53,12 @@ export function AdminProvider({ children }: AdminProviderProps) {
       setShowModal(false);
       setPassword('');
       setError('');
+      
+      // 执行登录回调
+      if (loginCallback) {
+        loginCallback();
+        loginCallback = null;
+      }
     } else {
       setError('密码错误');
       setPassword('');
@@ -62,7 +70,8 @@ export function AdminProvider({ children }: AdminProviderProps) {
     localStorage.removeItem('admin-token');
   };
 
-  const showLoginModal = () => {
+  const showLoginModal = (callback?: () => void) => {
+    loginCallback = callback || null;
     setShowModal(true);
     setError('');
     setPassword('');
