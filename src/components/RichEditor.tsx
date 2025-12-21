@@ -22,7 +22,7 @@ interface RichEditorProps {
 export function RichEditor({ value, onChange, placeholder, onImageUpload }: RichEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true); // 默认开启预览
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -303,12 +303,13 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload }: Rich
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowPreview(!showPreview)}
-          className={`p-2 rounded-lg transition-colors ${
+          className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${
             showPreview ? 'bg-primary/10 text-primary' : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
           }`}
-          title={showPreview ? '关闭预览' : '预览'}
+          title={showPreview ? '关闭预览' : '开启预览（可查看图片）'}
         >
           {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          <span className="text-xs hidden sm:inline">{showPreview ? '编辑' : '预览'}</span>
         </motion.button>
 
         <motion.button

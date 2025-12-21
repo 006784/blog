@@ -8,6 +8,8 @@ import {
   Eye, EyeOff, Check, X, Loader2, ChevronDown
 } from 'lucide-react';
 import { uploadFile, compressImage } from '@/lib/storage';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MobileEditorProps {
   value: string;
@@ -107,25 +109,12 @@ export function MobileEditor({ value, onChange, placeholder }: MobileEditorProps
       {/* 编辑区域 */}
       <div className="flex-1 relative">
         {showPreview ? (
-          <div className="h-full p-4 overflow-auto prose prose-sm dark:prose-invert max-w-none">
-            {value ? (
-              <div dangerouslySetInnerHTML={{ 
-                __html: value
-                  .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                  .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                  .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                  .replace(/`(.*?)`/g, '<code>$1</code>')
-                  .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
-                  .replace(/^- (.*$)/gm, '<li>$1</li>')
-                  .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" />')
-                  .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-                  .replace(/\n/g, '<br />')
-              }} />
-            ) : (
-              <p className="text-muted-foreground">预览区域</p>
-            )}
+          <div className="h-full p-4 overflow-auto">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {value || '*开始写作后这里会显示预览...*'}
+              </ReactMarkdown>
+            </div>
           </div>
         ) : (
           <textarea
@@ -176,11 +165,12 @@ export function MobileEditor({ value, onChange, placeholder }: MobileEditorProps
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowPreview(!showPreview)}
-            className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-              showPreview ? 'bg-primary/20 text-primary' : 'bg-secondary/50 text-muted-foreground'
+            className={`flex-shrink-0 px-3 h-10 rounded-xl flex items-center justify-center gap-1 transition-colors ${
+              showPreview ? 'bg-primary text-white' : 'bg-secondary/50 text-muted-foreground'
             }`}
           >
-            {showPreview ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <span className="text-xs font-medium">{showPreview ? '编辑' : '预览图片'}</span>
           </motion.button>
         </div>
       </motion.div>
