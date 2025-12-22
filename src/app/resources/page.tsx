@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
@@ -9,6 +9,7 @@ import {
   Folder, Archive, Code, Database, Book, Link, Star
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
+import { Turnstile } from '@/components/Turnstile';
 
 interface Resource {
   id: string;
@@ -107,6 +108,11 @@ export default function ResourcesPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // 下载验证
+  const [downloadModal, setDownloadModal] = useState<Resource | null>(null);
+  const [downloadToken, setDownloadToken] = useState<string | null>(null);
+  const [downloadVerified, setDownloadVerified] = useState(false);
+  
   // 上传表单
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadName, setUploadName] = useState('');
@@ -123,6 +129,41 @@ export default function ResourcesPage() {
   const [newCatIcon, setNewCatIcon] = useState('folder');
   const [newCatColor, setNewCatColor] = useState('gray');
   const [savingCategory, setSavingCategory] = useState(false);
+
+  // Turnstile 回调
+  const handleDownloadVerify = useCallback((token: string) => {
+    setDownloadToken(token);
+    setDownloadVerified(true);
+  }, []);
+
+  const handleDownloadError = useCallback(() => {
+    setDownloadToken(null);
+    setDownloadVerified(false);
+  }, []);
+
+  // 点击下载按钮
+  const handleDownloadClick = (resource: Resource) => {
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    // 如果没配置 Turnstile，直接下载
+    if (!siteKey) {
+      window.open(resource.file_url, '_blank');
+      return;
+    }
+    // 显示验证模态框
+    setDownloadModal(resource);
+    setDownloadToken(null);
+    setDownloadVerified(false);
+  };
+
+  // 确认下载
+  const confirmDownload = () => {
+    if (downloadModal && downloadVerified) {
+      window.open(downloadModal.file_url, '_blank');
+      setDownloadModal(null);
+      setDownloadToken(null);
+      setDownloadVerified(false);
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -572,14 +613,13 @@ export default function ResourcesPage() {
                   </div>
                   
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a
-                      href={resource.file_url}
-                      download={resource.original_name}
+                    <button
+                      onClick={() => handleDownloadClick(resource)}
                       className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
                       下载
-                    </a>
+                    </button>
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
                       className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
@@ -639,13 +679,12 @@ export default function ResourcesPage() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <a
-                      href={resource.file_url}
-                      download={resource.original_name}
+                    <button
+                      onClick={() => handleDownloadClick(resource)}
                       className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                     >
                       <Download className="w-4 h-4" />
-                    </a>
+                    </button>
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
                       className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
@@ -670,6 +709,86 @@ export default function ResourcesPage() {
             })}
           </div>
         )}
+
+        {/* 下载验证弹窗 */}
+        <AnimatePresence>
+          {downloadModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              onClick={() => setDownloadModal(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full max-w-md bg-card rounded-2xl shadow-2xl p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10">
+                      <Download className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">下载资源</h3>
+                      <p className="text-xs text-muted-foreground">请完成安全验证</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setDownloadModal(null)} className="p-2 rounded-lg hover:bg-muted">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-xl bg-secondary/30 mb-4">
+                  <p className="font-medium truncate">{downloadModal.name}</p>
+                  <p className="text-sm text-muted-foreground">{formatFileSize(downloadModal.file_size)}</p>
+                </div>
+
+                {/* Turnstile 验证 */}
+                <div className="py-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                    <Shield className="w-4 h-4" />
+                    <span>请完成安全验证后下载</span>
+                  </div>
+                  <Turnstile
+                    onVerify={handleDownloadVerify}
+                    onError={handleDownloadError}
+                    onExpire={handleDownloadError}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDownloadModal(null)}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-border hover:bg-muted transition-colors"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={confirmDownload}
+                    disabled={!downloadVerified}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {downloadVerified ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        确认下载
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="w-4 h-4" />
+                        等待验证
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* 上传弹窗 */}
         <AnimatePresence>
