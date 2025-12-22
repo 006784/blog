@@ -396,16 +396,15 @@ export async function deleteContactMessage(id: string) {
 export interface Subscriber {
   id: string;
   email: string;
-  name?: string;
   is_active: boolean;
-  created_at: string;
+  subscribed_at: string;
 }
 
-export async function addSubscriber(email: string, name?: string) {
+export async function addSubscriber(email: string) {
   const { data, error } = await supabase
     .from('subscribers')
-    .insert([{ email, name, is_active: true }])
-    .select()
+    .insert([{ email, is_active: true }])
+    .select('id, email, is_active, subscribed_at')
     .single();
   if (error) {
     if (error.code === '23505') {

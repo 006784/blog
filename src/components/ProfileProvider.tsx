@@ -44,8 +44,10 @@ const ProfileContext = createContext<ProfileContextType | null>(null);
 export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     loadProfile();
   }, []);
 
@@ -54,13 +56,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       // 首先尝试从Supabase加载
       const { data, error } = await supabase
         .from('site_settings')
-        .select('*')
+        .select('value')
         .eq('key', 'profile')
         .single();
       
       if (data && !error) {
         setProfile({ ...defaultProfile, ...data.value });
-      } else {
+      } else if (typeof window !== 'undefined') {
         // 如果Supabase没有数据，尝试从localStorage加载
         const saved = localStorage.getItem('site_profile');
         if (saved) {
@@ -69,9 +71,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       // 降级到localStorage
-      const saved = localStorage.getItem('site_profile');
-      if (saved) {
-        setProfile({ ...defaultProfile, ...JSON.parse(saved) });
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('site_profile');
+        if (saved) {
+          setProfile({ ...defaultProfile, ...JSON.parse(saved) });
+        }
       }
     } finally {
       setLoading(false);

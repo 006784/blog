@@ -27,20 +27,27 @@ export function ReadingModeProvider({ children }: { children: ReactNode }) {
   const [isReadingMode, setIsReadingMode] = useState(false);
   const [fontSize, setFontSize] = useState(18);
   const [lineHeight, setLineHeight] = useState(1.8);
+  const [mounted, setMounted] = useState(false);
 
-  // 保存设置到localStorage
+  // 加载设置从localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('readingModeSettings');
-    if (saved) {
-      const settings = JSON.parse(saved);
-      setFontSize(settings.fontSize || 18);
-      setLineHeight(settings.lineHeight || 1.8);
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('readingModeSettings');
+      if (saved) {
+        const settings = JSON.parse(saved);
+        setFontSize(settings.fontSize || 18);
+        setLineHeight(settings.lineHeight || 1.8);
+      }
     }
   }, []);
 
+  // 保存设置到localStorage
   useEffect(() => {
-    localStorage.setItem('readingModeSettings', JSON.stringify({ fontSize, lineHeight }));
-  }, [fontSize, lineHeight]);
+    if (mounted && typeof window !== 'undefined') {
+      localStorage.setItem('readingModeSettings', JSON.stringify({ fontSize, lineHeight }));
+    }
+  }, [fontSize, lineHeight, mounted]);
 
   const toggleReadingMode = () => setIsReadingMode(!isReadingMode);
 
