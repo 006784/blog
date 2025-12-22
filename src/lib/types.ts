@@ -23,6 +23,30 @@ export function formatDate(dateString: string): string {
   });
 }
 
+// 计算阅读时间（中文平均 300 字/分钟）
+export function calculateReadingTime(content: string): { minutes: number; text: string } {
+  if (!content) return { minutes: 0, text: '0 分钟' };
+  
+  // 移除 HTML 标签和 Markdown 标记
+  const text = content
+    .replace(/<[^>]+>/g, '')
+    .replace(/[#*`~>\-\[\]()]/g, '')
+    .replace(/\s+/g, '');
+  
+  // 中文字符数
+  const chineseCount = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+  // 英文单词数（粗略估计）
+  const englishWords = (text.match(/[a-zA-Z]+/g) || []).length;
+  
+  // 中文 300 字/分钟，英文 200 词/分钟
+  const minutes = Math.ceil((chineseCount / 300) + (englishWords / 200));
+  
+  return {
+    minutes: Math.max(1, minutes),
+    text: `${Math.max(1, minutes)} 分钟`,
+  };
+}
+
 // Default posts for demo - can be used on client side
 export const defaultPosts: Post[] = [
   {

@@ -80,7 +80,50 @@ function WritePageContent() {
   // 加载集合列表
   useEffect(() => {
     loadCollections();
-  }, []);
+    // 加载本地草稿
+    if (!editId) {
+      loadLocalDraft();
+    }
+  }, [editId]);
+
+  // 保存本地草稿
+  useEffect(() => {
+    if (editId) return; // 编辑模式不保存本地草稿
+    const timer = setTimeout(() => {
+      saveLocalDraft();
+    }, 5000); // 5秒保存一次
+    return () => clearTimeout(timer);
+  }, [title, description, content, category, tags, coverImage, editId]);
+
+  function saveLocalDraft() {
+    if (!title.trim() && !content.trim()) return;
+    const draft = { title, description, content, category, tags, coverImage, savedAt: new Date().toISOString() };
+    localStorage.setItem('blog-draft', JSON.stringify(draft));
+  }
+
+  function loadLocalDraft() {
+    try {
+      const saved = localStorage.getItem('blog-draft');
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.title || draft.content) {
+          setTitle(draft.title || '');
+          setDescription(draft.description || '');
+          setContent(draft.content || '');
+          setCategory(draft.category || 'tech');
+          setTags(draft.tags || []);
+          setCoverImage(draft.coverImage || '');
+          showNotification('success', '已恢复本地草稿');
+        }
+      }
+    } catch (e) {
+      console.error('加载本地草稿失败:', e);
+    }
+  }
+
+  function clearLocalDraft() {
+    localStorage.removeItem('blog-draft');
+  }
 
   async function loadCollections() {
     try {
@@ -292,6 +335,7 @@ function WritePageContent() {
       }
       
       showNotification('success', '文章已发布');
+      clearLocalDraft();
       setTimeout(() => router.push('/blog'), 1000);
     } catch (error) {
       console.error('发布失败:', error);
