@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Save, Send, Settings, X, Plus, 
   Tag, Folder, Check, AlertCircle, Loader2, 
-  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield, FolderOpen
+  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield, FolderOpen, Bell
 } from 'lucide-react';
 import { RichEditor } from '@/components/RichEditor';
 import { ImageUploader } from '@/components/ImageUploader';
@@ -60,6 +60,7 @@ function WritePageContent() {
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [creatingCollection, setCreatingCollection] = useState(false);
+  const [notifySubscribers, setNotifySubscribers] = useState(true); // 发布时通知订阅者
   
   // UI 状态
   const [showSettings, setShowSettings] = useState(false);
@@ -310,9 +311,10 @@ function WritePageContent() {
 
     setIsPublishing(true);
     try {
+      const slug = currentPostId ? undefined : generateSlug(title);
       const postData = {
         title,
-        slug: currentPostId ? undefined : generateSlug(title),
+        slug,
         description,
         content,
         category,
@@ -328,15 +330,45 @@ function WritePageContent() {
         collection_id: collectionId || undefined,
       };
 
+      let savedPost;
       if (currentPostId) {
-        await updatePost(currentPostId, postData);
+        savedPost = await updatePost(currentPostId, postData);
       } else {
-        await createPost(postData);
+        savedPost = await createPost(postData);
       }
       
       showNotification('success', '文章已发布');
       clearLocalDraft();
-      setTimeout(() => router.push('/blog'), 1000);
+
+      // 发送订阅者通知
+      if (notifySubscribers && savedPost) {
+        try {
+          const adminToken = localStorage.getItem('admin-token');
+          const password = adminToken ? atob(adminToken) : '';
+          const res = await fetch('/api/notify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${password}`,
+            },
+            body: JSON.stringify({
+              postId: savedPost.id,
+              postSlug: savedPost.slug,
+              title: savedPost.title,
+              description: savedPost.description,
+              author: savedPost.author,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.successful > 0) {
+            showNotification('success', `已通知 ${data.successful} 位订阅者`);
+          }
+        } catch (notifyError) {
+          console.error('发送通知失败:', notifyError);
+        }
+      }
+
+      setTimeout(() => router.push('/blog'), 1500);
     } catch (error) {
       console.error('发布失败:', error);
       showNotification('error', '发布失败');
@@ -875,6 +907,39 @@ Markdown 语法支持：
                       {metaDescription || description || '文章描述将显示在搜索结果中，帮助读者了解文章内容...'}
                     </p>
                   </div>
+                </div>
+
+                {/* 发布设置 */}
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+                    <Bell className="w-4 h-4" />
+                    发布设置
+                  </h3>
+                  
+                  <label className="flex items-center justify-between p-4 rounded-xl bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Bell className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">通知订阅者</p>
+                        <p className="text-xs text-muted-foreground">发布后自动发送邮件通知</p>
+                      </div>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-colors relative ${
+                      notifySubscribers ? 'bg-primary' : 'bg-muted'
+                    }`}>
+                      <input
+                        type="checkbox"
+                        checked={notifySubscribers}
+                        onChange={(e) => setNotifySubscribers(e.target.checked)}
+                        className="sr-only"
+                      />
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        notifySubscribers ? 'translate-x-7' : 'translate-x-1'
+                      }`} />
+                    </div>
+                  </label>
                 </div>
 
                 {/* 操作按钮 */}

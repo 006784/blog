@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendSubscriptionConfirmation } from '@/lib/email';
 
 // 创建 Supabase 客户端
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let isNewSubscriber = false;
+    let isReactivated = false;
+
     // 如果配置了 Supabase，保存到数据库
     if (supabaseUrl && supabaseKey) {
       const supabase = createClient(supabaseUrl, supabaseKey);
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
       // 检查是否已订阅
       const { data: existing } = await supabase
         .from('subscribers')
-        .select('*')
+        .select('id, email, is_active')
         .eq('email', email)
         .single();
 
@@ -59,36 +63,47 @@ export async function POST(request: NextRequest) {
             { status: 500 }
           );
         }
+        isReactivated = true;
+      } else {
+        // 新订阅
+        const { error } = await supabase
+          .from('subscribers')
+          .insert([{
+            email,
+            is_active: true,
+            subscribed_at: new Date().toISOString(),
+          }]);
 
-        return NextResponse.json(
-          { message: '订阅已重新激活！' },
-          { status: 200 }
-        );
-      }
-
-      // 新订阅
-      const { error } = await supabase
-        .from('subscribers')
-        .insert([{
-          email,
-          is_active: true,
-          subscribed_at: new Date().toISOString(),
-        }]);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        return NextResponse.json(
-          { error: '订阅失败，请稍后重试' },
-          { status: 500 }
-        );
+        if (error) {
+          console.error('Supabase error:', error);
+          return NextResponse.json(
+            { error: '订阅失败，请稍后重试' },
+            { status: 500 }
+          );
+        }
+        isNewSubscriber = true;
       }
     } else {
-      // 没有 Supabase 时，只记录日志
       console.log('New subscription:', email);
+      isNewSubscriber = true;
+    }
+
+    // 发送欢迎邮件
+    if ((isNewSubscriber || isReactivated) && process.env.RESEND_API_KEY) {
+      try {
+        await sendSubscriptionConfirmation(email);
+        console.log('订阅确认邮件已发送:', email);
+      } catch (emailError) {
+        console.error('发送订阅确认邮件失败:', emailError);
+        // 邮件发送失败不影响订阅成功
+      }
     }
 
     return NextResponse.json(
-      { message: '订阅成功！感谢您的关注。' },
+      { 
+        message: isReactivated ? '订阅已重新激活！' : '订阅成功！感谢您的关注。',
+        emailSent: !!process.env.RESEND_API_KEY 
+      },
       { status: 200 }
     );
   } catch (error) {
