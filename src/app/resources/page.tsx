@@ -71,6 +71,7 @@ export default function ResourcesPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // 上传表单
@@ -105,34 +106,81 @@ export default function ResourcesPage() {
     if (!uploadFile || !isAdmin) return;
     
     setUploading(true);
+    setUploadProgress(0);
+    
     try {
-      const formData = new FormData();
-      formData.append('file', uploadFile);
-      formData.append('name', uploadName || uploadFile.name);
-      formData.append('description', uploadDesc);
-      formData.append('tags', uploadTags);
-      formData.append('isPublic', String(uploadPublic));
-      formData.append('adminPassword', getAdminPassword());
+      const adminPassword = getAdminPassword();
       
-      const res = await fetch('/api/resources', {
+      // 步骤1: 获取预签名URL
+      const presignRes = await fetch('/api/resources/presign', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: uploadFile.name,
+          fileType: uploadFile.type || 'application/octet-stream',
+          fileSize: uploadFile.size,
+          adminPassword,
+        }),
       });
       
-      const data = await res.json();
+      const presignData = await presignRes.json();
       
-      if (data.success) {
+      if (!presignData.success) {
+        alert(presignData.error || '获取上传链接失败');
+        return;
+      }
+      
+      // 步骤2: 直接上传到R2
+      setUploadProgress(10);
+      
+      const uploadRes = await fetch(presignData.uploadUrl, {
+        method: 'PUT',
+        body: uploadFile,
+        headers: {
+          'Content-Type': uploadFile.type || 'application/octet-stream',
+        },
+      });
+      
+      if (!uploadRes.ok) {
+        throw new Error('文件上传失败');
+      }
+      
+      setUploadProgress(80);
+      
+      // 步骤3: 保存资源信息到数据库
+      const saveRes = await fetch('/api/resources/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminPassword,
+          name: uploadName || uploadFile.name.replace(/\.[^/.]+$/, ''),
+          originalName: uploadFile.name,
+          description: uploadDesc,
+          fileUrl: presignData.publicUrl,
+          fileSize: uploadFile.size,
+          fileType: uploadFile.type || 'application/octet-stream',
+          category: presignData.category,
+          isPublic: uploadPublic,
+          tags: uploadTags,
+        }),
+      });
+      
+      const saveData = await saveRes.json();
+      
+      if (saveData.success) {
+        setUploadProgress(100);
         setShowUploadModal(false);
         resetUploadForm();
         fetchResources();
       } else {
-        alert(data.error || '上传失败');
+        alert(saveData.error || '保存失败');
       }
     } catch (error) {
       console.error('Upload error:', error);
       alert('上传失败');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -514,7 +562,7 @@ export default function ResourcesPage() {
                       <>
                         <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
                         <p className="text-muted-foreground">点击选择文件</p>
-                        <p className="text-xs text-muted-foreground mt-1">支持图片、视频、文档、压缩包等 (最大100MB)</p>
+                        <p className="text-xs text-muted-foreground mt-1">支持图片、视频、文档、安装包等 (最大500MB)</p>
                       </>
                     )}
                   </div>
@@ -601,7 +649,7 @@ export default function ResourcesPage() {
                     {uploading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        上传中...
+                        {uploadProgress > 0 ? `${uploadProgress}%` : '上传中...'}
                       </>
                     ) : (
                       <>
