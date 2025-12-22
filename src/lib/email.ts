@@ -18,7 +18,7 @@ export async function sendNewPostNotification(
   const results = await Promise.allSettled(
     subscribers.map(async (subscriber) => {
       return resend.emails.send({
-        from: '拾光博客 <noreply@cloud.lishiya.com>',
+        from: '拾光博客 <noreply@artchain.icu>',
         to: subscriber.email,
         subject: `📝 新文章: ${post.title}`,
         html: `
@@ -69,7 +69,7 @@ export async function sendSubscriptionConfirmation(email: string, name?: string)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   await resend.emails.send({
-    from: '拾光博客 <noreply@cloud.lishiya.com>',
+    from: '拾光博客 <noreply@artchain.icu>',
     to: email,
     subject: '🎉 欢迎订阅拾光博客！',
     html: `
