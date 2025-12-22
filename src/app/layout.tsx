@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FontProvider } from "@/components/FontProvider";
 import { AdminProvider } from "@/components/AdminProvider";
@@ -103,6 +104,9 @@ export default function RootLayout({
               `,
             }}
           />
+          
+          {/* Vercel Speed Insights */}
+          <SpeedInsights />
           </ProfileProvider>
           </AdminProvider>
           </FontProvider>
