@@ -84,23 +84,55 @@ ${post.description}
   return { successful, failed, total: subscribers.length };
 }
 
-// 发送订阅确认邮件
-export async function sendSubscriptionConfirmation(email: string, name?: string) {
+// 发送订阅确认邮件（包含最近文章）
+export async function sendSubscriptionConfirmation(
+  email: string, 
+  name?: string,
+  recentPosts?: { title: string; slug: string; description: string }[]
+) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const unsubscribeUrl = `${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
+
+  // 生成文章列表 HTML
+  const postsHtml = recentPosts && recentPosts.length > 0 
+    ? `
+      <tr>
+        <td style="padding: 20px 0;">
+          <h3 style="color: #333333; font-size: 16px; margin: 0 0 15px 0;">精选文章推荐</h3>
+          ${recentPosts.map(post => `
+            <div style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 6px;">
+              <a href="${siteUrl}/blog/${post.slug}" style="color: #667eea; text-decoration: none; font-weight: 500; font-size: 15px;">${post.title}</a>
+              <p style="color: #666666; font-size: 13px; margin: 8px 0 0 0; line-height: 1.5;">${post.description}</p>
+            </div>
+          `).join('')}
+        </td>
+      </tr>
+    `
+    : '';
+
+  // 生成纯文本文章列表
+  const postsText = recentPosts && recentPosts.length > 0
+    ? '\n\n精选文章推荐:\n' + recentPosts.map(post => `- ${post.title}: ${siteUrl}/blog/${post.slug}`).join('\n')
+    : '';
 
   await resend.emails.send({
     from: '拾光博客 <noreply@artchain.icu>',
     to: email,
-    subject: '欢迎订阅拾光博客',
+    subject: '感谢订阅拾光博客',
     headers: {
       'List-Unsubscribe': `<${unsubscribeUrl}>`,
     },
-    text: `订阅成功
+    text: `感谢订阅
 
-感谢你订阅拾光博客！从现在开始，每当有新文章发布，你都会第一时间收到通知。
+Hi${name ? ` ${name}` : ''},
 
-浏览文章: ${siteUrl}/blog
+真诚地感谢你订阅拾光博客！
+
+从现在开始，每当有新文章发布，你都会第一时间收到通知。
+
+期待与你在文字中相遇。${postsText}
+
+浏览更多文章: ${siteUrl}/blog
 
 ---
 取消订阅: ${unsubscribeUrl}`,
@@ -110,25 +142,28 @@ export async function sendSubscriptionConfirmation(email: string, name?: string)
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>订阅成功</title>
+        <title>感谢订阅</title>
       </head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;">
           <tr>
             <td style="text-align: center; padding-bottom: 20px;">
-              <h1 style="color: #333333; font-size: 24px; margin: 0;">订阅成功</h1>
+              <h1 style="color: #667eea; font-size: 28px; margin: 0;">感谢订阅</h1>
+              <p style="color: #666666; font-size: 14px; margin: 10px 0 0 0;">欢迎加入拾光博客的读者大家庭</p>
             </td>
           </tr>
           <tr>
-            <td style="padding: 20px;">
-              <p style="margin: 0 0 15px 0;">Hi${name ? ` ${name}` : ''},</p>
-              <p style="margin: 0 0 15px 0;">感谢你订阅拾光博客！从现在开始，每当有新文章发布，你都会第一时间收到通知。</p>
-              <p style="margin: 0;”>期待与你在文字中相遇。</p>
+            <td style="padding: 25px; background-color: #f8f9fa; border-radius: 8px;">
+              <p style="margin: 0 0 15px 0; font-size: 16px;">Hi${name ? ` ${name}` : ''},</p>
+              <p style="margin: 0 0 15px 0;">真诚地感谢你订阅拾光博客！</p>
+              <p style="margin: 0 0 15px 0;">从现在开始，每当有新文章发布，你都会第一时间收到通知。我会用心创作每一篇内容，希望能给你带来一些启发和思考。</p>
+              <p style="margin: 0;">期待与你在文字中相遇。</p>
             </td>
           </tr>
+          ${postsHtml}
           <tr>
-            <td style="text-align: center; padding: 20px 0;">
-              <a href="${siteUrl}/blog" style="display: inline-block; background-color: #667eea; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500;">浏览文章</a>
+            <td style="text-align: center; padding: 25px 0;">
+              <a href="${siteUrl}/blog" style="display: inline-block; background-color: #667eea; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-size: 15px; font-weight: 500;">浏览更多文章</a>
             </td>
           </tr>
           <tr>

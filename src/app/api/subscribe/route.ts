@@ -88,10 +88,27 @@ export async function POST(request: NextRequest) {
       isNewSubscriber = true;
     }
 
-    // 发送欢迎邮件
+    // 发送欢迎邮件（包含最近文章）
     if ((isNewSubscriber || isReactivated) && process.env.RESEND_API_KEY) {
       try {
-        await sendSubscriptionConfirmation(email);
+        // 获取最近的文章
+        let recentPosts: { title: string; slug: string; description: string }[] = [];
+        
+        if (supabaseUrl && supabaseKey) {
+          const supabase = createClient(supabaseUrl, supabaseKey);
+          const { data: posts } = await supabase
+            .from('posts')
+            .select('title, slug, description')
+            .eq('is_published', true)
+            .order('published_at', { ascending: false })
+            .limit(3);
+          
+          if (posts) {
+            recentPosts = posts;
+          }
+        }
+        
+        await sendSubscriptionConfirmation(email, undefined, recentPosts);
         console.log('订阅确认邮件已发送:', email);
       } catch (emailError) {
         console.error('发送订阅确认邮件失败:', emailError);
