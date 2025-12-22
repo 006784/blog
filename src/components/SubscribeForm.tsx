@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Loader2, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { Mail, Loader2, Check, AlertCircle, Sparkles, Shield } from 'lucide-react';
 import { Turnstile } from './Turnstile';
 
 interface SubscribeFormProps {
@@ -15,35 +15,35 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileError, setTurnstileError] = useState(false);
+  const [showTurnstile, setShowTurnstile] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const handleTurnstileVerify = useCallback((token: string) => {
     setTurnstileToken(token);
-    setTurnstileError(false);
+    setError(null);
   }, []);
 
   const handleTurnstileError = useCallback(() => {
-    setTurnstileError(true);
+    setError('验证加载失败，请刷新页面');
     setTurnstileToken(null);
   }, []);
 
   const handleTurnstileExpire = useCallback(() => {
     setTurnstileToken(null);
+    setError('验证已过期，请重新验证');
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-
-    // 检查 Turnstile 验证（如果配置了的话）
-    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-    if (siteKey && !turnstileToken) {
-      setError('请完成人机验证');
-      return;
+  // 当获取到 token 且有待提交时，自动提交
+  useEffect(() => {
+    if (pendingSubmit && turnstileToken) {
+      doSubmit();
     }
+  }, [turnstileToken, pendingSubmit]);
 
+  const doSubmit = async () => {
     setLoading(true);
     setError(null);
+    setPendingSubmit(false);
 
     try {
       const res = await fetch('/api/subscribe', {
@@ -64,8 +64,8 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
       setSuccess(true);
       setEmail('');
       setTurnstileToken(null);
+      setShowTurnstile(false);
       
-      // 5秒后重置
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
       console.error('订阅失败:', err);
@@ -73,6 +73,23 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    
+    // 如果配置了 Turnstile 且没有 token
+    if (siteKey && !turnstileToken) {
+      setShowTurnstile(true);
+      setPendingSubmit(true);
+      return;
+    }
+
+    // 已有 token 或未配置 Turnstile，直接提交
+    await doSubmit();
   };
 
   if (variant === 'inline') {
@@ -156,25 +173,33 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
               </motion.div>
             )}
 
-            {/* Turnstile 人机验证 */}
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-              <div className="py-2">
-                <Turnstile
-                  onVerify={handleTurnstileVerify}
-                  onError={handleTurnstileError}
-                  onExpire={handleTurnstileExpire}
-                />
-                {turnstileError && (
-                  <p className="text-xs text-red-500 text-center mt-1">
-                    验证加载失败，请刷新页面
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Turnstile 人机验证 - 点击订阅后才显示 */}
+            <AnimatePresence>
+              {showTurnstile && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="py-3 px-4 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <Shield className="w-4 h-4" />
+                      <span>请完成安全验证</span>
+                    </div>
+                    <Turnstile
+                      onVerify={handleTurnstileVerify}
+                      onError={handleTurnstileError}
+                      onExpire={handleTurnstileExpire}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <motion.button
               type="submit"
-              disabled={loading}
+              disabled={loading || (showTurnstile && !turnstileToken)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50"
