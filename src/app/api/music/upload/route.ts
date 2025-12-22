@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import crypto from 'crypto';
+
+// Cloudflare R2 配置
+const R2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+  },
+});
+
+const R2_BUCKET = process.env.R2_BUCKET_NAME || 'resources';
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,36 +40,28 @@ export async function POST(request: NextRequest) {
 
     // 生成唯一文件名
     const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 8);
+    const randomStr = crypto.randomBytes(6).toString('hex');
     const ext = file.name.split('.').pop();
-    const fileName = `${type}/${timestamp}-${randomStr}.${ext}`;
+    const fileName = `music/${type}/${timestamp}-${randomStr}.${ext}`;
 
     // 读取文件内容
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = new Uint8Array(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
 
-    // 上传到 Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('music-uploads')
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        cacheControl: '3600',
-        upsert: false,
-      });
-
-    if (error) {
-      console.error('上传失败:', error);
-      return NextResponse.json({ error: '上传失败: ' + error.message }, { status: 500 });
-    }
+    // 上传到 Cloudflare R2
+    await R2.send(new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: fileName,
+      Body: buffer,
+      ContentType: file.type,
+    }));
 
     // 获取公共URL
-    const { data: urlData } = supabase.storage
-      .from('music-uploads')
-      .getPublicUrl(fileName);
+    const publicUrl = `${R2_PUBLIC_URL}/${fileName}`;
 
     return NextResponse.json({ 
       success: true,
-      url: urlData.publicUrl,
+      url: publicUrl,
       fileName: fileName,
       size: file.size,
     });

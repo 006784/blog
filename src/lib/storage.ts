@@ -1,38 +1,29 @@
-import { supabase } from './supabase';
-
-// 上传文件到 Supabase Storage
+// 上传文件到 Cloudflare R2
 export async function uploadFile(
   file: File,
-  bucket: string = 'blog-uploads',
+  bucket: string = 'uploads',
   folder: string = ''
 ): Promise<{ url: string; path: string } | null> {
   try {
-    // 生成唯一文件名
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-    const filePath = folder ? `${folder}/${fileName}` : fileName;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder || bucket);
 
-    // 上传文件
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
 
-    if (error) {
-      console.error('Upload error:', error);
-      throw error;
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error('Upload error:', result.error);
+      return null;
     }
 
-    // 获取公开URL
-    const { data: urlData } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path);
-
     return {
-      url: urlData.publicUrl,
-      path: data.path
+      url: result.url,
+      path: result.path
     };
   } catch (error) {
     console.error('Upload failed:', error);
@@ -40,10 +31,10 @@ export async function uploadFile(
   }
 }
 
-// 上传多个文件
+// 上传多个文件到 R2
 export async function uploadFiles(
   files: File[],
-  bucket: string = 'blog-uploads',
+  bucket: string = 'uploads',
   folder: string = ''
 ): Promise<{ url: string; path: string }[]> {
   const results = await Promise.all(
@@ -52,21 +43,20 @@ export async function uploadFiles(
   return results.filter((r): r is { url: string; path: string } => r !== null);
 }
 
-// 删除文件
+// 删除 R2 文件
 export async function deleteFile(
   path: string,
-  bucket: string = 'blog-uploads'
+  bucket: string = 'uploads'
 ): Promise<boolean> {
   try {
-    const { error } = await supabase.storage
-      .from(bucket)
-      .remove([path]);
+    const response = await fetch('/api/upload', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path }),
+    });
 
-    if (error) {
-      console.error('Delete error:', error);
-      return false;
-    }
-    return true;
+    const result = await response.json();
+    return result.success;
   } catch (error) {
     console.error('Delete failed:', error);
     return false;
@@ -74,9 +64,9 @@ export async function deleteFile(
 }
 
 // 获取文件公开URL
-export function getPublicUrl(path: string, bucket: string = 'blog-uploads'): string {
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+export function getPublicUrl(path: string, bucket: string = 'uploads'): string {
+  // R2 URL 由 API 返回，这里直接返回 path
+  return path;
 }
 
 // 压缩图片 (可选，用于优化上传)
