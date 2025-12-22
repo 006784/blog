@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
   Download, Trash2, Eye, EyeOff, Search, Grid, List, X,
-  Copy, Check, Shield, HardDrive, Loader2
+  Copy, Check, Shield, HardDrive, Loader2, Settings, Plus, Edit2,
+  Folder, Archive, Code, Database, Book, Link, Star
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
 
@@ -25,14 +26,44 @@ interface Resource {
   created_at: string;
 }
 
-const categoryConfig: Record<string, { icon: typeof File; color: string; bg: string; name: string }> = {
-  image: { icon: Image, name: '图片', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  video: { icon: Video, name: '视频', color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  document: { icon: FileText, name: '文档', color: 'text-green-500', bg: 'bg-green-500/10' },
-  software: { icon: Package, name: '软件', color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  audio: { icon: Music, name: '音频', color: 'text-pink-500', bg: 'bg-pink-500/10' },
-  other: { icon: File, name: '其他', color: 'text-gray-500', bg: 'bg-gray-500/10' },
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon: string;
+  color: string;
+  sort_order: number;
+  is_system: boolean;
+}
+
+// 图标映射
+const iconMap: Record<string, typeof File> = {
+  image: Image, video: Video, 'file-text': FileText, package: Package,
+  music: Music, file: File, folder: Folder, archive: Archive,
+  code: Code, database: Database, book: Book, link: Link, star: Star,
 };
+
+// 颜色映射
+const colorMap: Record<string, { color: string; bg: string }> = {
+  blue: { color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  purple: { color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  green: { color: 'text-green-500', bg: 'bg-green-500/10' },
+  orange: { color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  pink: { color: 'text-pink-500', bg: 'bg-pink-500/10' },
+  red: { color: 'text-red-500', bg: 'bg-red-500/10' },
+  yellow: { color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+  cyan: { color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+  gray: { color: 'text-gray-500', bg: 'bg-gray-500/10' },
+};
+
+// 获取分类配置
+function getCategoryConfig(category: Category | undefined) {
+  if (!category) return { icon: File, color: 'text-gray-500', bg: 'bg-gray-500/10', name: '未分类' };
+  const icon = iconMap[category.icon] || File;
+  const colors = colorMap[category.color] || colorMap.gray;
+  return { icon, ...colors, name: category.name };
+}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
@@ -64,9 +95,11 @@ function getAdminPassword(): string {
 export default function ResourcesPage() {
   const { isAdmin } = useAdmin();
   const [resources, setResources] = useState<Resource[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -80,10 +113,34 @@ export default function ResourcesPage() {
   const [uploadDesc, setUploadDesc] = useState('');
   const [uploadTags, setUploadTags] = useState('');
   const [uploadPublic, setUploadPublic] = useState(false);
+  const [uploadCategory, setUploadCategory] = useState('');
+  
+  // 分类管理表单
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatSlug, setNewCatSlug] = useState('');
+  const [newCatDesc, setNewCatDesc] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('folder');
+  const [newCatColor, setNewCatColor] = useState('gray');
+  const [savingCategory, setSavingCategory] = useState(false);
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+  
   useEffect(() => {
     fetchResources();
   }, [selectedCategory, searchQuery]);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      setCategories(data.categories || []);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
   const fetchResources = async () => {
     try {
@@ -159,7 +216,7 @@ export default function ResourcesPage() {
           fileUrl: presignData.publicUrl,
           fileSize: uploadFile.size,
           fileType: uploadFile.type || 'application/octet-stream',
-          category: presignData.category,
+          category: uploadCategory || presignData.category,
           isPublic: uploadPublic,
           tags: uploadTags,
         }),
@@ -219,7 +276,98 @@ export default function ResourcesPage() {
     setUploadDesc('');
     setUploadTags('');
     setUploadPublic(false);
+    setUploadCategory('');
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // 分类管理函数
+  const resetCategoryForm = () => {
+    setEditingCategory(null);
+    setNewCatName('');
+    setNewCatSlug('');
+    setNewCatDesc('');
+    setNewCatIcon('folder');
+    setNewCatColor('gray');
+  };
+
+  const handleEditCategory = (cat: Category) => {
+    setEditingCategory(cat);
+    setNewCatName(cat.name);
+    setNewCatSlug(cat.slug);
+    setNewCatDesc(cat.description || '');
+    setNewCatIcon(cat.icon);
+    setNewCatColor(cat.color);
+  };
+
+  const handleSaveCategory = async () => {
+    if (!newCatName || !newCatSlug) {
+      alert('请填写分类名称和标识符');
+      return;
+    }
+    
+    setSavingCategory(true);
+    try {
+      const url = '/api/categories';
+      const method = editingCategory ? 'PUT' : 'POST';
+      const body = {
+        adminPassword: getAdminPassword(),
+        ...(editingCategory && { id: editingCategory.id }),
+        name: newCatName,
+        slug: newCatSlug,
+        description: newCatDesc,
+        icon: newCatIcon,
+        color: newCatColor,
+      };
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        fetchCategories();
+        resetCategoryForm();
+      } else {
+        alert(data.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('Save category error:', error);
+      alert('保存失败');
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm('确定要删除这个分类吗？')) return;
+    
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, adminPassword: getAdminPassword() }),
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        fetchCategories();
+      } else {
+        alert(data.error || '删除失败');
+      }
+    } catch (error) {
+      console.error('Delete category error:', error);
+      alert('删除失败');
+    }
+  };
+
+  // 获取资源的分类配置
+  const getResourceCategoryConfig = (slug: string) => {
+    const category = categories.find(c => c.slug === slug);
+    return getCategoryConfig(category);
   };
 
   const stats = {
@@ -316,10 +464,21 @@ export default function ResourcesPage() {
               className="px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
             >
               <option value="all">全部分类</option>
-              {Object.entries(categoryConfig).map(([key, { name }]) => (
-                <option key={key} value={key}>{name}</option>
+              {categories.map((cat) => (
+                <option key={cat.slug} value={cat.slug}>{cat.name}</option>
               ))}
             </select>
+            
+            {/* 分类管理按钮 */}
+            {isAdmin && (
+              <button
+                onClick={() => setShowCategoryModal(true)}
+                className="p-2.5 rounded-xl bg-secondary/50 border border-border hover:border-primary transition-colors"
+                title="管理分类"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -375,7 +534,7 @@ export default function ResourcesPage() {
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {resources.map((resource, index) => {
-              const config = categoryConfig[resource.category] || categoryConfig.other;
+              const config = getResourceCategoryConfig(resource.category);
               const Icon = config.icon;
               
               return (
@@ -447,7 +606,7 @@ export default function ResourcesPage() {
         ) : (
           <div className="space-y-2">
             {resources.map((resource, index) => {
-              const config = categoryConfig[resource.category] || categoryConfig.other;
+              const config = getResourceCategoryConfig(resource.category);
               const Icon = config.icon;
               
               return (
@@ -591,6 +750,21 @@ export default function ResourcesPage() {
                     />
                   </div>
 
+                  {/* 分类选择 */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">资源分类</label>
+                    <select
+                      value={uploadCategory}
+                      onChange={(e) => setUploadCategory(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                    >
+                      <option value="">自动检测</option>
+                      {categories.map((cat) => (
+                        <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* 描述 */}
                   <div>
                     <label className="block text-sm font-medium mb-2">描述</label>
@@ -658,6 +832,163 @@ export default function ResourcesPage() {
                       </>
                     )}
                   </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 分类管理弹窗 */}
+        <AnimatePresence>
+          {showCategoryModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-2xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[80vh] flex flex-col"
+              >
+                {/* 头部 */}
+                <div className="flex items-center justify-between p-6 border-b border-border">
+                  <h3 className="text-xl font-bold">分类管理</h3>
+                  <button
+                    onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
+                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* 内容 */}
+                <div className="p-6 overflow-y-auto flex-1">
+                  {/* 添加/编辑表单 */}
+                  <div className="p-4 rounded-xl bg-secondary/30 mb-6">
+                    <h4 className="font-medium mb-4">
+                      {editingCategory ? '编辑分类' : '添加新分类'}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm mb-1">分类名称</label>
+                        <input
+                          type="text"
+                          value={newCatName}
+                          onChange={(e) => setNewCatName(e.target.value)}
+                          placeholder="例如：设计资源"
+                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1">标识符</label>
+                        <input
+                          type="text"
+                          value={newCatSlug}
+                          onChange={(e) => setNewCatSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                          placeholder="例如：design"
+                          disabled={editingCategory?.is_system}
+                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none disabled:opacity-50"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-sm mb-1">描述</label>
+                        <input
+                          type="text"
+                          value={newCatDesc}
+                          onChange={(e) => setNewCatDesc(e.target.value)}
+                          placeholder="分类说明"
+                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1">图标</label>
+                        <select
+                          value={newCatIcon}
+                          onChange={(e) => setNewCatIcon(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                        >
+                          {Object.keys(iconMap).map(icon => (
+                            <option key={icon} value={icon}>{icon}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1">颜色</label>
+                        <select
+                          value={newCatColor}
+                          onChange={(e) => setNewCatColor(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                        >
+                          {Object.keys(colorMap).map(color => (
+                            <option key={color} value={color}>{color}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      {editingCategory && (
+                        <button
+                          onClick={resetCategoryForm}
+                          className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                        >
+                          取消
+                        </button>
+                      )}
+                      <button
+                        onClick={handleSaveCategory}
+                        disabled={savingCategory || !newCatName || !newCatSlug}
+                        className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {savingCategory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                        {editingCategory ? '保存' : '添加'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 分类列表 */}
+                  <div className="space-y-2">
+                    {categories.map((cat) => {
+                      const config = getCategoryConfig(cat);
+                      const Icon = config.icon;
+                      return (
+                        <div
+                          key={cat.id}
+                          className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${config.bg}`}>
+                              <Icon className={`w-5 h-5 ${config.color}`} />
+                            </div>
+                            <div>
+                              <p className="font-medium">{cat.name}</p>
+                              <p className="text-xs text-muted-foreground">{cat.slug} {cat.is_system && '(系统)'}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleEditCategory(cat)}
+                              className="p-2 hover:bg-muted rounded-lg transition-colors"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            {!cat.is_system && (
+                              <button
+                                onClick={() => handleDeleteCategory(cat.id)}
+                                className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
