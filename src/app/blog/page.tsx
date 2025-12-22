@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2, FolderOpen } from 'lucide-react';
+import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2, FolderOpen, Bell, CheckCircle } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
 import { AnimatedSection } from '@/components/Animations';
 import { getPublishedPosts, Post, deletePost, getCollections, Collection } from '@/lib/supabase';
@@ -28,6 +28,8 @@ export default function BlogPage() {
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [notifying, setNotifying] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const { isAdmin } = useAdmin();
 
   useEffect(() => {
@@ -57,6 +59,50 @@ export default function BlogPage() {
       setPosts(posts.filter(p => p.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
+    }
+  }
+
+  // 推送文章通知
+  async function handleNotifyPost(post: any) {
+    if (!confirm(`确定要向所有订阅者推送《${post.title}》吗？`)) return;
+    
+    setNotifying(post.slug);
+    try {
+      const adminToken = localStorage.getItem('admin-token');
+      const password = adminToken ? atob(adminToken) : '';
+      
+      const res = await fetch('/api/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${password}`,
+        },
+        body: JSON.stringify({
+          postSlug: post.slug,
+          title: post.title,
+          description: post.description,
+          author: post.author || '拾光',
+        }),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        setNotification({ 
+          type: 'success', 
+          message: data.successful > 0 
+            ? `已成功通知 ${data.successful} 位订阅者` 
+            : '暂无订阅者'
+        });
+      } else {
+        setNotification({ type: 'error', message: data.error || '推送失败' });
+      }
+    } catch (error) {
+      console.error('推送失败:', error);
+      setNotification({ type: 'error', message: '推送失败' });
+    } finally {
+      setNotifying(null);
+      setTimeout(() => setNotification(null), 3000);
     }
   }
 
@@ -98,6 +144,29 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen">
+      {/* 通知提示 */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 ${
+              notification.type === 'success' 
+                ? 'bg-green-500 text-white' 
+                : 'bg-red-500 text-white'
+            }`}
+          >
+            {notification.type === 'success' ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <X className="w-5 h-5" />
+            )}
+            {notification.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Background decorations */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-[var(--bg-gradient-1)] to-[var(--bg-gradient-2)] rounded-full blur-3xl opacity-20" />
@@ -357,6 +426,7 @@ export default function BlogPage() {
                         post={post} 
                         index={index}
                         onDelete={handleDeletePost}
+                        onNotify={handleNotifyPost}
                       />
                     ))}
                   </motion.div>

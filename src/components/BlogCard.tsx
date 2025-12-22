@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, Clock, ArrowRight, Tag, Eye, Sparkles, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Tag, Eye, Sparkles, Edit2, Trash2, Bell } from 'lucide-react';
 import { Post, formatDate } from '@/lib/types';
 import { useAdmin } from './AdminProvider';
 import clsx from 'clsx';
@@ -14,9 +14,10 @@ interface BlogCardProps {
   index?: number;
   featured?: boolean;
   onDelete?: (slug: string) => void;
+  onNotify?: (post: Post) => void;
 }
 
-export function BlogCard({ post, index = 0, featured = false, onDelete }: BlogCardProps) {
+export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify }: BlogCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const { isAdmin } = useAdmin();
@@ -212,6 +213,22 @@ export function BlogCard({ post, index = 0, featured = false, onDelete }: BlogCa
             {/* 管理员操作按钮 */}
             {isAdmin && (
               <>
+                {/* 推送通知按钮 */}
+                {onNotify && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onNotify(post);
+                    }}
+                    className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-lg hover:bg-green-500/80 transition-colors"
+                    title="推送通知"
+                  >
+                    <Bell className="w-4 h-4 text-white" />
+                  </motion.button>
+                )}
                 <Link href={`/write?edit=${post.slug}`} onClick={(e) => e.stopPropagation()}>
                   <motion.div
                     whileHover={{ scale: 1.1 }}
