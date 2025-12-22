@@ -6,10 +6,36 @@ import { sendSubscriptionConfirmation } from '@/lib/email';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// 验证 Turnstile token
+async function verifyTurnstile(token: string): Promise<boolean> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  if (!secretKey) {
+    console.warn('Turnstile secret key not configured, skipping verification');
+    return true; // 未配置则跳过验证
+  }
+
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: secretKey,
+        response: token,
+      }),
+    });
+
+    const data = await res.json();
+    return data.success === true;
+  } catch (error) {
+    console.error('Turnstile verification failed:', error);
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email } = body;
+    const { email, turnstileToken } = body;
 
     // 验证邮箱
     if (!email) {
@@ -26,6 +52,24 @@ export async function POST(request: NextRequest) {
         { error: '请输入有效的邮箱地址' },
         { status: 400 }
       );
+    }
+
+    // 验证 Turnstile（如果配置了）
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { error: '请完成人机验证' },
+          { status: 400 }
+        );
+      }
+
+      const isValid = await verifyTurnstile(turnstileToken);
+      if (!isValid) {
+        return NextResponse.json(
+          { error: '人机验证失败，请重试' },
+          { status: 400 }
+        );
+      }
     }
 
     let isNewSubscriber = false;

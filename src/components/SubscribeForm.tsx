@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Loader2, Check, AlertCircle, Sparkles } from 'lucide-react';
-import { addSubscriber } from '@/lib/supabase';
+import { Turnstile } from './Turnstile';
 
 interface SubscribeFormProps {
   variant?: 'inline' | 'card';
@@ -14,33 +14,62 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState(false);
+
+  const handleTurnstileVerify = useCallback((token: string) => {
+    setTurnstileToken(token);
+    setTurnstileError(false);
+  }, []);
+
+  const handleTurnstileError = useCallback(() => {
+    setTurnstileError(true);
+    setTurnstileToken(null);
+  }, []);
+
+  const handleTurnstileExpire = useCallback(() => {
+    setTurnstileToken(null);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
 
+    // 检查 Turnstile 验证（如果配置了的话）
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (siteKey && !turnstileToken) {
+      setError('请完成人机验证');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      console.log('开始订阅:', email);
-      await addSubscriber(email.trim());
-      console.log('订阅成功!');
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: email.trim(),
+          turnstileToken 
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || '订阅失败');
+      }
+
       setSuccess(true);
       setEmail('');
+      setTurnstileToken(null);
       
       // 5秒后重置
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
       console.error('订阅失败:', err);
-      // 显示更详细的错误信息
-      if (err.message?.includes('subscribers')) {
-        setError('订阅功能暂未开放，请联系管理员');
-      } else if (err.message?.includes('已经订阅')) {
-        setError('该邮箱已经订阅过了');
-      } else {
-        setError(err.message || '订阅失败，请稍后重试');
-      }
+      setError(err.message || '订阅失败，请稍后重试');
     } finally {
       setLoading(false);
     }
@@ -125,6 +154,22 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
                 <AlertCircle className="w-4 h-4" />
                 {error}
               </motion.div>
+            )}
+
+            {/* Turnstile 人机验证 */}
+            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+              <div className="py-2">
+                <Turnstile
+                  onVerify={handleTurnstileVerify}
+                  onError={handleTurnstileError}
+                  onExpire={handleTurnstileExpire}
+                />
+                {turnstileError && (
+                  <p className="text-xs text-red-500 text-center mt-1">
+                    验证加载失败，请刷新页面
+                  </p>
+                )}
+              </div>
             )}
 
             <motion.button
