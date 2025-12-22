@@ -130,6 +130,9 @@ export default function ResourcesPage() {
   const [newCatColor, setNewCatColor] = useState('gray');
   const [savingCategory, setSavingCategory] = useState(false);
 
+  // 下载进度
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+  
   // Turnstile 回调
   const handleDownloadVerify = useCallback((token: string) => {
     setDownloadToken(token);
@@ -156,12 +159,30 @@ export default function ResourcesPage() {
   };
 
   // 确认下载
-  const confirmDownload = () => {
+  const confirmDownload = async () => {
     if (downloadModal && downloadVerified) {
-      window.open(downloadModal.file_url, '_blank');
-      setDownloadModal(null);
-      setDownloadToken(null);
-      setDownloadVerified(false);
+      // 显示下载进度
+      setDownloadProgress(0);
+      
+      try {
+        // 创建下载链接
+        const link = document.createElement('a');
+        link.href = downloadModal.file_url;
+        link.download = downloadModal.original_name;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 关闭模态框
+        setDownloadModal(null);
+        setDownloadToken(null);
+        setDownloadVerified(false);
+        setDownloadProgress(null);
+      } catch (error) {
+        console.error('Download failed:', error);
+        setDownloadProgress(null);
+      }
     }
   };
 
@@ -620,6 +641,12 @@ export default function ResourcesPage() {
                       <Download className="w-3.5 h-3.5" />
                       下载
                     </button>
+                    {/* 高频资源预加载提示 */}
+                    {resource.download_count > 10 && (
+                      <div className="text-xs text-green-500 flex items-center gap-1" title="高频资源，已优化加载">
+                        <Star className="w-3 h-3" />
+                      </div>
+                    )}
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
                       className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
@@ -685,6 +712,12 @@ export default function ResourcesPage() {
                     >
                       <Download className="w-4 h-4" />
                     </button>
+                    {/* 高频资源预加载提示 */}
+                    {resource.download_count > 10 && (
+                      <div className="text-xs text-green-500 flex items-center gap-1" title="高频资源，已优化加载">
+                        <Star className="w-3 h-3" />
+                      </div>
+                    )}
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
                       className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
@@ -769,10 +802,15 @@ export default function ResourcesPage() {
                   </button>
                   <button
                     onClick={confirmDownload}
-                    disabled={!downloadVerified}
+                    disabled={!downloadVerified || downloadProgress !== null}
                     className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
-                    {downloadVerified ? (
+                    {downloadProgress !== null ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        下载中...
+                      </>
+                    ) : downloadVerified ? (
                       <>
                         <Check className="w-4 h-4" />
                         确认下载
