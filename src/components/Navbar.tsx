@@ -91,15 +91,15 @@ export function Navbar() {
             : 'bg-transparent'
         )}
       >
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-2 group">
               <motion.div
                 whileHover={{ rotate: 180, scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center overflow-hidden"
+                className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center overflow-hidden"
               >
                 <motion.div
                   className="absolute inset-0 bg-white/20"
@@ -107,11 +107,11 @@ export function Navbar() {
                   whileHover={{ x: '100%', opacity: 1 }}
                   transition={{ duration: 0.6 }}
                 />
-                <Sparkles className="w-5 h-5 text-white relative z-10" />
+                <Sparkles className="w-4 h-4 text-white relative z-10" />
               </motion.div>
               <motion.span 
-                className="font-semibold text-lg hidden sm:block shimmer-text"
-                whileHover={{ x: 3 }}
+                className="font-semibold text-base hidden sm:block text-foreground"
+                whileHover={{ x: 2 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
                 拾光

@@ -119,6 +119,23 @@ export interface Diary {
   created_at: string;
   updated_at: string;
   diary_date: string;
+  environment_data?: {
+    location?: {
+      latitude: number;
+      longitude: number;
+      city: string;
+      country: string;
+      address: string;
+    };
+    weather?: {
+      temperature: number;
+      condition: string;
+      humidity: number;
+      windSpeed: number;
+      location: string;
+      timestamp: number;
+    };
+  } | null;
 }
 
 // ============ 文章操作 ============

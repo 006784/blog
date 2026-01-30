@@ -126,12 +126,14 @@ CREATE TABLE IF NOT EXISTS diaries (
     word_count INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    diary_date DATE DEFAULT CURRENT_DATE -- 日记日期
+    diary_date DATE DEFAULT CURRENT_DATE, -- 日记日期
+    environment_data JSONB -- 环境信息：位置、天气等
 );
 
 CREATE INDEX IF NOT EXISTS idx_diaries_date ON diaries(diary_date);
 CREATE INDEX IF NOT EXISTS idx_diaries_mood ON diaries(mood);
 CREATE INDEX IF NOT EXISTS idx_diaries_public ON diaries(is_public);
+CREATE INDEX IF NOT EXISTS idx_diaries_environment ON diaries USING GIN (environment_data);
 
 -- =============================================
 -- 分类表

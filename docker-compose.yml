@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # 主应用服务
+  blog-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+      # 从.env文件读取其他环境变量
+    env_file:
+      - .env.local
+    volumes:
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - blog-network
+
+  # Redis缓存服务
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - blog-network
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - blog-app
+    restart: unless-stopped
+    networks:
+      - blog-network
+
+  # 数据库备份服务
+  backup:
+    image: postgres:15-alpine
+    volumes:
+      - ./backups:/backups
+      - ./scripts:/scripts
+    environment:
+      - PGHOST=your-postgres-host
+      - PGUSER=your-db-user
+      - PGPASSWORD=your-db-password
+      - PGDATABASE=your-db-name
+    entrypoint: ["/scripts/backup.sh"]
+    restart: "no"
+    networks:
+      - blog-network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  blog-network:
+    driver: bridge
+
+# 开发环境配置
+profiles:
+  development:
+    services:
+      blog-app:
+        build:
+          target: development
+        ports:
+          - "3000:3000"
+        volumes:
+          - .:/app
+          - /app/node_modules
+        environment:
+          - NODE_ENV=development
+          - WATCHPACK_POLLING=true

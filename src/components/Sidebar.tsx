@@ -46,7 +46,7 @@ export function Sidebar() {
   }, []);
   
   useEffect(() => {
-    document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '88px' : '280px');
+    document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '80px' : '240px');
   }, [isCollapsed]);
 
   const toggleCollapse = () => {
@@ -71,7 +71,7 @@ export function Sidebar() {
           'flex flex-col',
           'transition-all duration-300 ease-out',
           'hidden md:flex',
-          isCollapsed ? 'w-[88px]' : 'w-[280px]'
+          isCollapsed ? 'w-[80px]' : 'w-[240px]'
         )}
       >
         {/* 背景层 */}
@@ -96,7 +96,7 @@ export function Sidebar() {
           {/* Logo区域 */}
           <div className={clsx(
             'flex items-center border-b border-border/30',
-            isCollapsed ? 'h-20 justify-center px-4' : 'h-24 px-6'
+            isCollapsed ? 'h-16 justify-center px-3' : 'h-20 px-5'
           )}>
             <Link href="/" className="flex items-center gap-3 group">
               <motion.div
