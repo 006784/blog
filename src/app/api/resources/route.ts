@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { verifyAdminPassword } from '@/lib/env';
 import crypto from 'crypto';
+
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
 
 // Cloudflare R2 配置
 const R2 = new S3Client({
@@ -62,12 +67,6 @@ const SECURITY_CONFIG = {
     'htaccess', 'htpasswd',
   ],
 };
-
-// 验证管理员密码
-function verifyAdminPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || 'shiguang2024';
-  return password === adminPassword;
-}
 
 // 清理文件名（防止路径遍历攻击）
 function sanitizeFileName(filename: string): string {

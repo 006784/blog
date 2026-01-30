@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Diary } from '@/lib/supabase';
+import { getAdminPassword } from '@/lib/env';
 
 // 配置静态导出
 export const dynamic = 'force-static';
@@ -67,9 +68,8 @@ export async function PUT(
     const token = authHeader.substring(7);
     
     // 验证token是否与预期的admin token匹配
-    // 使用与AdminProvider中相同的密码
-    const ADMIN_PASSWORD = 'shiguang2024';
-    const expectedHash = btoa(ADMIN_PASSWORD);
+    const adminPassword = getAdminPassword();
+    const expectedHash = btoa(adminPassword);
     
     if (token !== expectedHash) {
       return Response.json(
@@ -151,9 +151,8 @@ export async function DELETE(
     const token = authHeader.substring(7);
     
     // 验证token是否与预期的admin token匹配
-    // 使用与AdminProvider中相同的密码
-    const ADMIN_PASSWORD = 'shiguang2024';
-    const expectedHash = btoa(ADMIN_PASSWORD);
+    const adminPassword = getAdminPassword();
+    const expectedHash = btoa(adminPassword);
     
     if (token !== expectedHash) {
       return Response.json(

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
 
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
+
 // Cloudflare R2 配置
 const R2 = new S3Client({
   region: 'auto',

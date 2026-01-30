@@ -1,5 +1,11 @@
 import * as Sentry from "@sentry/nextjs";
-export const dynamic = "force-dynamic";
+
+// 配置静态导出
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
+// 注意：这个示例API在静态导出模式下不会真正抛出错误
+// 因为它会被预渲染为静态文件
 
 class SentryExampleAPIError extends Error {
   constructor(message: string | undefined) {

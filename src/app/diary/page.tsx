@@ -6,7 +6,9 @@ import {
   BookOpen, Plus, X, Calendar, MapPin, Clock, 
   Edit2, Trash2, Lock, Unlock, ChevronLeft, ChevronRight,
   Sparkles, Save, Eye, Shield, Filter, Grid, List, Search,
-  Thermometer, Droplets, Wind, Navigation, Sun, Cloud, CloudRain
+  Thermometer, Droplets, Wind, Navigation, Sun, Cloud, CloudRain,
+  PenLine, NotebookPen, StickyNote, Archive, Bookmark,
+  ChevronDown
 } from 'lucide-react';
 import { 
   Diary, 
@@ -15,6 +17,116 @@ import {
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import { EnvironmentService } from '@/services/environmentService';
+
+// 笔记本背景组件
+const NotebookBackground = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative min-h-screen bg-amber-50 dark:bg-amber-950/20 overflow-hidden">
+    {/* 纸张纹理 */}
+    <div className="absolute inset-0 opacity-20" 
+         style={{
+           backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='%23f5f5dc'/%3E%3Cpath d='M0 0h100v1h-100zM0 2h100v1h-100zM0 4h100v1h-100z' fill='%23e8e8d0'/%3E%3C/svg%3E")`
+         }}>
+    </div>
+    
+    {/* 网格线 */}
+    <div className="absolute inset-0 opacity-10 pointer-events-none"
+         style={{
+           backgroundImage: `linear-gradient(to right, #d4d4d4 1px, transparent 1px),
+                            linear-gradient(to bottom, #d4d4d4 1px, transparent 1px)` ,
+           backgroundSize: '24px 24px',
+           transform: 'translate(12px, 12px)'
+         }}>
+    </div>
+    
+    {/* 装订线 */}
+    <div className="absolute left-8 top-0 bottom-0 w-1 h-full bg-red-400/30 shadow-lg"></div>
+    <div className="absolute left-7 top-0 bottom-0 w-0.5 h-full bg-red-600/50"></div>
+    
+    {/* 孔洞装饰 */}
+    <div className="absolute left-6 top-16 w-2 h-2 rounded-full bg-red-300/50 shadow-inner"></div>
+    <div className="absolute left-6 top-32 w-2 h-2 rounded-full bg-red-300/50 shadow-inner"></div>
+    <div className="absolute left-6 top-48 w-2 h-2 rounded-full bg-red-300/50 shadow-inner"></div>
+    
+    {children}
+  </div>
+);
+
+// 笔记本封面组件
+const NotebookCover = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) => (
+  <motion.div 
+    className="relative w-full max-w-4xl mx-auto mb-8 cursor-pointer"
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onToggle}
+  >
+    <div className="relative h-64 rounded-xl overflow-hidden shadow-2xl">
+      {/* 封面背景 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-700 via-amber-800 to-amber-900"></div>
+      
+      {/* 封面纹理 */}
+      <div className="absolute inset-0 opacity-30" 
+           style={{
+             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+           }}>
+      </div>
+      
+      {/* 封面文字 */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-amber-100 p-8">
+        <motion.div 
+          animate={{ rotate: isOpen ? -5 : 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <BookOpen className="w-16 h-16 mb-4 text-amber-200" />
+        </motion.div>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2 text-center">我的日记本</h1>
+        <p className="text-lg text-amber-200/80 text-center max-w-md">
+          记录生活的点点滴滴 ✨
+        </p>
+        <div className="mt-6 flex items-center gap-2 text-amber-200/70">
+          <span>点击{isOpen ? '合上' : '打开'}笔记本</span>
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </motion.div>
+        </div>
+      </div>
+      
+      {/* 封面边角磨损效果 */}
+      <div className="absolute top-0 left-0 w-8 h-8 bg-amber-900/50 rounded-br-full"></div>
+      <div className="absolute bottom-0 right-0 w-8 h-8 bg-amber-900/50 rounded-tl-full"></div>
+    </div>
+  </motion.div>
+);
+
+// 笔记本内页组件
+const NotebookPage = ({ children, pageNumber }: { children: React.ReactNode; pageNumber?: number }) => (
+  <motion.div 
+    className="relative w-full max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl mb-8 overflow-hidden"
+    initial={{ opacity: 0, y: 50, rotateY: -10 }}
+    animate={{ opacity: 1, y: 0, rotateY: 0 }}
+    transition={{ duration: 0.6 }}
+  >
+    {/* 页面阴影 */}
+    <div className="absolute inset-0 shadow-inner"></div>
+    
+    {/* 页码 */}
+    {pageNumber && (
+      <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-mono">
+        第 {pageNumber} 页
+      </div>
+    )}
+    
+    {/* 页面内容 */}
+    <div className="p-8 md:p-12 relative z-10 text-gray-800 dark:text-gray-200">
+      {children}
+    </div>
+    
+    {/* 页面折痕 */}
+    <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-gray-200/30 to-transparent"></div>
+  </motion.div>
+);
 
 const moods = Object.entries(moodIcons).map(([value, info]) => ({
   value,
@@ -44,6 +156,7 @@ export default function DiaryPage() {
     weather: any;
     error?: string;
   } | null>(null);
+  const [notebookOpen, setNotebookOpen] = useState(false);
   const { isAdmin, showLoginModal } = useAdmin();
 
   // 直接使用搜索查询，不使用防抖
@@ -190,362 +303,189 @@ export default function DiaryPage() {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-orange-500/25">
-              <BookOpen className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text">
-              日记本
-            </h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            记录每一天的心情，让时光留下痕迹 ✨
-          </p>
-        </motion.div>
-
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 p-6 rounded-2xl bg-card border border-border/50"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="搜索标题或内容..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all w-64"
-                />
-              </div>
-              
-              {/* Mood Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">心情:</span>
-                <button
-                  onClick={() => setMoodFilter(null)}
-                  className={`px-3 py-1.5 rounded-full text-sm ${
-                    !moodFilter
-                      ? 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white'
-                      : 'bg-card hover:bg-card/80 text-foreground'
-                  }`}
-                >
-                  全部
-                </button>
-                {moods.slice(0, 6).map(mood => (
-                  <button
-                    key={mood.value}
-                    onClick={() => setMoodFilter(moodFilter === mood.value ? null : mood.value)}
-                    className={`px-3 py-1.5 rounded-full text-sm ${
-                      moodFilter === mood.value
-                        ? 'ring-2 ring-offset-2'
-                        : 'bg-card/50 hover:bg-card'
-                    }`}
-                    style={moodFilter === mood.value ? { 
-                      backgroundColor: `${mood.color}20`,
-                      color: mood.color,
-                      '--tw-ring-color': mood.color
-                    } as React.CSSProperties : {}}
-                    title={mood.label}
-                  >
-                    {mood.emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              {/* Privacy Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">隐私:</span>
-                <div className="flex gap-1">
-                  {[
-                    { key: 'all', label: '全部', icon: Eye },
-                    { key: 'public', label: '公开', icon: Unlock },
-                    { key: 'private', label: '私密', icon: Lock },
-                  ].map(({ key, label, icon: Icon }) => (
-                    <button
-                      key={key}
-                      onClick={() => setPrivacyFilter(key as any)}
-                      className={`px-3 py-1.5 rounded-full text-sm flex items-center gap-1 ${
-                        privacyFilter === key
-                          ? 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white'
-                          : 'bg-card hover:bg-card/80 text-foreground'
-                      }`}
-                    >
-                      <Icon className="w-3 h-3" />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              {/* View Mode */}
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-card hover:bg-card/80'}`}
-                  title="网格视图"
-                >
-                  <Grid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card hover:bg-card/80'}`}
-                  title="列表视图"
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
+    <NotebookBackground>
+      <div className="py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* 笔记本封面 */}
+          <NotebookCover 
+            isOpen={notebookOpen} 
+            onToggle={() => setNotebookOpen(!notebookOpen)} 
+          />
           
-          {/* Date Range Filter */}
-          <div className="flex items-center gap-4 pt-4 border-t border-border/30">
-            <span className="text-sm text-muted-foreground">日期范围:</span>
-            <input
-              type="date"
-              value={dateFilter?.start || ''}
-              onChange={(e) => handleDateFilterChange(e.target.value, dateFilter?.end || '')}
-              className="px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-            />
-            <span className="text-muted-foreground">至</span>
-            <input
-              type="date"
-              value={dateFilter?.end || ''}
-              onChange={(e) => handleDateFilterChange(dateFilter?.start || '', e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-            />
-            {dateFilter && (
-              <button
-                onClick={() => setDateFilter(null)}
-                className="px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground text-sm"
+          <AnimatePresence>
+            {notebookOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
               >
-                清除
-              </button>
+                <NotebookPage pageNumber={1}>
+                  <div className="text-center mb-12">
+                    <div className="inline-flex items-center gap-3 mb-4">
+                      <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-orange-500/25">
+                        <PenLine className="w-8 h-8 text-white" />
+                      </div>
+                      <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200">
+                        我的日记收藏
+                      </h2>
+                    </div>
+                    <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                      翻开记忆的每一页，重温那些美好的时光 ✨
+                    </p>
+                  </div>
+                  
+                  {/* 简化的日记列表 */}
+                  <div className="mb-8">
+                    {loading ? (
+                      <div className="flex items-center justify-center py-20">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                          <p className="text-gray-600 dark:text-gray-400">正在加载日记...</p>
+                        </div>
+                      </div>
+                    ) : filteredDiaries.length === 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center py-20"
+                      >
+                        <NotebookPen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400 mb-4">还没有日记呢</p>
+                        <button
+                          onClick={() => {
+                            if (!isAdmin) {
+                              showLoginModal();
+                              return;
+                            }
+                            setShowEditor(true);
+                          }}
+                          className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                        >
+                          {isAdmin ? '写下第一篇日记' : '管理员登录后可写日记'}
+                        </button>
+                      </motion.div>
+                    ) : (
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <AnimatePresence>
+                          {filteredDiaries.map((diary, index) => (
+                            <DiaryCard
+                              key={diary.id}
+                              diary={diary}
+                              index={index}
+                              isAdmin={isAdmin}
+                              onClick={() => setSelectedDiary(diary)}
+                              onEdit={() => handleEdit(diary)}
+                              onDelete={() => handleDelete(diary.id)}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 写日记按钮 */}
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => {
+                        if (!isAdmin) {
+                          showLoginModal();
+                          return;
+                        }
+                        setEditingDiary(null);
+                        setShowEditor(true);
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 font-medium"
+                    >
+                      {isAdmin ? <Plus className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+                      {isAdmin ? '写新日记' : '管理员登录'}
+                    </button>
+                  </div>
+                </NotebookPage>
+              </motion.div>
             )}
-          </div>
-        </motion.div>
-
-        {/* Add Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mb-8"
-        >
-          <button
-            onClick={() => {
-              if (!isAdmin) {
-                showLoginModal();
-                return;
-              }
-              setEditingDiary(null);
-              setShowEditor(true);
-            }}
-            className="btn-primary flex items-center gap-2"
-          >
-            {isAdmin ? <Plus className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
-            {isAdmin ? '写日记' : '管理员登录'}
-          </button>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-8 p-4 rounded-xl bg-card border border-border/50"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-            <div className="flex items-center gap-6">
-              <span className="text-muted-foreground">
-                共 <span className="font-semibold text-foreground">{filteredDiaries.length}</span> 篇日记
-              </span>
-              <span className="text-muted-foreground">
-                公开 <span className="font-semibold text-foreground">{filteredDiaries.filter(d => d.is_public).length}</span> 篇
-              </span>
-              <span className="text-muted-foreground">
-                私密 <span className="font-semibold text-foreground">{filteredDiaries.filter(d => !d.is_public).length}</span> 篇
-              </span>
-            </div>
-            <div className="flex items-center gap-6">
-              <span className="text-muted-foreground">
-                总字数: <span className="font-semibold text-foreground">{filteredDiaries.reduce((sum, diary) => sum + diary.word_count, 0)}</span>
-              </span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <BookOpen className="w-12 h-12 text-primary animate-pulse" />
-          </div>
-        ) : filteredDiaries.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <BookOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">没有找到匹配的日记</p>
-            {searchQuery || moodFilter || privacyFilter !== 'all' || dateFilter ? (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setMoodFilter(null);
-                  setPrivacyFilter('all');
-                  setDateFilter(null);
+          </AnimatePresence>
+          
+          {/* 编辑器和详情模态框保持原有逻辑 */}
+          <AnimatePresence>
+            {showEditor && (
+              <DiaryEditor
+                diary={editingDiary}
+                onClose={() => { 
+                  setShowEditor(false); 
+                  setEditingDiary(null);
+                  setEnvironmentInfo(null);
                 }}
-                className="mt-4 text-primary hover:underline"
-              >
-                清除筛选条件
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  if (!isAdmin) {
-                    showLoginModal();
+                onSave={async (diaryData) => {
+                  // 获取管理员token
+                  const adminToken = localStorage.getItem('admin-token');
+                  if (!adminToken) {
+                    alert('请先登录');
                     return;
                   }
-                  setShowEditor(true);
+                
+                  if (editingDiary) {
+                    // 更新现有日记
+                    const response = await fetch(`/api/diaries/${editingDiary.id}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                      },
+                      body: JSON.stringify(diaryData)
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                      throw new Error(result.error || '更新日记失败');
+                    }
+                    
+                    setDiaries(diaries.map(d => d.id === editingDiary.id ? result.data : d));
+                  } else {
+                    // 创建新日记
+                    const response = await fetch('/api/diaries', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                      },
+                      body: JSON.stringify(diaryData)
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                      throw new Error(result.error || '创建日记失败');
+                    }
+                    
+                    setDiaries([result.data, ...diaries]);
+                  }
+                  setShowEditor(false);
+                  setEditingDiary(null);
+                  setEnvironmentInfo(null);
                 }}
-                className="mt-4 text-primary hover:underline"
-              >
-                {isAdmin ? '写下今天的心情' : '管理员登录后可写日记'}
-              </button>
+                autoCaptureEnvironment={autoCaptureEnvironment}
+                setAutoCaptureEnvironment={setAutoCaptureEnvironment}
+                capturingEnvironment={capturingEnvironment}
+                environmentInfo={environmentInfo}
+                captureEnvironmentInfo={captureEnvironmentInfo}
+              />
             )}
-          </motion.div>
-        ) : (
-          viewMode === 'grid' ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <AnimatePresence>
-                {filteredDiaries.map((diary, index) => (
-                  <DiaryCard
-                    key={diary.id}
-                    diary={diary}
-                    index={index}
-                    isAdmin={isAdmin}
-                    onClick={() => setSelectedDiary(diary)}
-                    onEdit={() => handleEdit(diary)}
-                    onDelete={() => handleDelete(diary.id)}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <AnimatePresence>
-                {filteredDiaries.map((diary, index) => (
-                  <DiaryListItem
-                    key={diary.id}
-                    diary={diary}
-                    index={index}
-                    isAdmin={isAdmin}
-                    onClick={() => setSelectedDiary(diary)}
-                    onEdit={() => handleEdit(diary)}
-                    onDelete={() => handleDelete(diary.id)}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-          )
-        )}
-
-        {/* Editor Modal */}
-        <AnimatePresence>
-          {showEditor && (
-            <DiaryEditor
-              diary={editingDiary}
-              onClose={() => { 
-                setShowEditor(false); 
-                setEditingDiary(null);
-                setEnvironmentInfo(null);
-              }}
-              onSave={async (diaryData) => {
-                // 获取管理员token
-                const adminToken = localStorage.getItem('admin-token');
-                if (!adminToken) {
-                  alert('请先登录');
-                  return;
-                }
-                            
-                if (editingDiary) {
-                  // 更新现有日记
-                  const response = await fetch(`/api/diaries/${editingDiary.id}`, {
-                    method: 'PUT',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${adminToken}`
-                    },
-                    body: JSON.stringify(diaryData)
-                  });
-                              
-                  const result = await response.json();
-                  if (!result.success) {
-                    throw new Error(result.error || '更新日记失败');
-                  }
-                              
-                  setDiaries(diaries.map(d => d.id === editingDiary.id ? result.data : d));
-                } else {
-                  // 创建新日记
-                  const response = await fetch('/api/diaries', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${adminToken}`
-                    },
-                    body: JSON.stringify(diaryData)
-                  });
-                              
-                  const result = await response.json();
-                  if (!result.success) {
-                    throw new Error(result.error || '创建日记失败');
-                  }
-                              
-                  setDiaries([result.data, ...diaries]);
-                }
-                setShowEditor(false);
-                setEditingDiary(null);
-                setEnvironmentInfo(null);
-              }}
-              autoCaptureEnvironment={autoCaptureEnvironment}
-              setAutoCaptureEnvironment={setAutoCaptureEnvironment}
-              capturingEnvironment={capturingEnvironment}
-              environmentInfo={environmentInfo}
-              captureEnvironmentInfo={captureEnvironmentInfo}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Diary Detail Modal */}
-        <AnimatePresence>
-          {selectedDiary && (
-            <DiaryDetail
-              diary={selectedDiary}
-              onClose={() => setSelectedDiary(null)}
-              onEdit={() => { handleEdit(selectedDiary); setSelectedDiary(null); }}
-              onDelete={() => { handleDelete(selectedDiary.id); setSelectedDiary(null); }}
-              isAdmin={isAdmin}
-            />
-          )}
-        </AnimatePresence>
+          </AnimatePresence>
+          
+          <AnimatePresence>
+            {selectedDiary && (
+              <DiaryDetail
+                diary={selectedDiary}
+                onClose={() => setSelectedDiary(null)}
+                onEdit={() => { handleEdit(selectedDiary); setSelectedDiary(null); }}
+                onDelete={() => { handleDelete(selectedDiary.id); setSelectedDiary(null); }}
+                isAdmin={isAdmin}
+              />
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </NotebookBackground>
   );
 }
 
@@ -579,14 +519,14 @@ function DiaryCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ delay: index * 0.05 }}
-      className="group relative overflow-hidden rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all hover:shadow-xl cursor-pointer"
+      className="group relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 hover:border-amber-400/50 transition-all hover:shadow-xl cursor-pointer backdrop-blur-sm"
       onClick={onClick}
     >
       {/* Date Badge */}
       <div className="absolute top-4 left-4 text-center">
-        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-primary">{day}</span>
-          <span className="text-xs text-muted-foreground">{month}</span>
+        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold text-amber-700 dark:text-amber-300">{day}</span>
+          <span className="text-xs text-amber-600 dark:text-amber-400">{month}</span>
         </div>
       </div>
 
@@ -595,7 +535,7 @@ function DiaryCard({
         {diary.is_public ? (
           <Unlock className="w-4 h-4 text-green-500" />
         ) : (
-          <Lock className="w-4 h-4 text-muted-foreground" />
+          <Lock className="w-4 h-4 text-gray-400" />
         )}
       </div>
 
@@ -604,10 +544,10 @@ function DiaryCard({
         {/* Title & Mood */}
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="font-semibold text-lg line-clamp-1">
+            <h3 className="font-semibold text-lg line-clamp-1 text-gray-800 dark:text-gray-200">
               {diary.title || formatDate(diary.diary_date)}
             </h3>
-            <span className="text-sm text-muted-foreground">{weekday}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{weekday}</span>
           </div>
           <div className="flex items-center gap-2">
             {mood && (
@@ -625,12 +565,12 @@ function DiaryCard({
         </div>
 
         {/* Preview */}
-        <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
+        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">
           {diary.content.substring(0, 150)}...
         </p>
 
         {/* Meta */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-3">
             {diary.location && (
               <span className="flex items-center gap-1">
@@ -649,125 +589,14 @@ function DiaryCard({
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                className="p-1.5 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-gray-500 hover:text-amber-600 transition-colors"
                 title="编辑"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
-                title="删除"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Diary List Item Component
-function DiaryListItem({
-  diary,
-  index,
-  isAdmin,
-  onClick,
-  onEdit,
-  onDelete
-}: {
-  diary: Diary;
-  index: number;
-  isAdmin: boolean;
-  onClick: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const mood = diary.mood ? moodIcons[diary.mood] : null;
-  const weather = diary.weather ? weatherIcons[diary.weather] : null;
-  const date = new Date(diary.diary_date);
-  const day = date.getDate();
-  const month = date.toLocaleDateString('zh-CN', { month: 'short' });
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ delay: index * 0.05 }}
-      className="group flex items-center gap-4 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg cursor-pointer"
-      onClick={onClick}
-    >
-      {/* Date Badge */}
-      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex flex-col items-center justify-center flex-shrink-0">
-        <span className="text-lg font-bold text-primary">{day}</span>
-        <span className="text-xs text-muted-foreground">{month}</span>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="font-semibold text-base line-clamp-1 mr-4">
-            {diary.title || formatDate(diary.diary_date)}
-          </h3>
-          <div className="flex items-center gap-2">
-            {mood && (
-              <span 
-                className="text-lg"
-                title={mood.label}
-              >
-                {mood.emoji}
-              </span>
-            )}
-            {weather && (
-              <span title={weather.label}>{weather.emoji}</span>
-            )}
-            {diary.is_public ? (
-              <Unlock className="w-4 h-4 text-green-500" />
-            ) : (
-              <Lock className="w-4 h-4 text-muted-foreground" />
-            )}
-          </div>
-        </div>
-        
-        <p className="text-muted-foreground text-sm line-clamp-2 mb-2">
-          {diary.content.substring(0, 100)}...
-        </p>
-        
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {formatDate(diary.diary_date)}
-            </span>
-            {diary.location && (
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                {diary.location}
-              </span>
-            )}
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {diary.word_count} 字
-            </span>
-          </div>
-          
-          {/* Actions - 只有管理员可见 */}
-          {isAdmin && (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-                title="编辑"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-500 hover:text-red-500 transition-colors"
                 title="删除"
               >
                 <Trash2 className="w-4 h-4" />
@@ -809,19 +638,18 @@ function DiaryDetail({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-3xl bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-6 border-b border-border flex items-start justify-between">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
               {mood && <span className="text-3xl">{mood.emoji}</span>}
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold truncate">
+                <h2 className="text-xl font-bold truncate text-gray-900 dark:text-gray-100">
                   {diary.title || formatDate(diary.diary_date)}
                 </h2>
-                <div className="flex items-center flex-wrap gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     {formatDateTime(diary.diary_date)}
@@ -836,23 +664,16 @@ function DiaryDetail({
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>{diary.word_count} 字</span>
-              <span>•</span>
-              <span>{Math.ceil(diary.word_count / 300)} 分钟阅读</span>
-            </div>
           </div>
           
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-muted transition-colors flex-shrink-0"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             {diary.content.split('\n').map((paragraph, i) => (
@@ -865,8 +686,7 @@ function DiaryDetail({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-border flex items-center justify-between">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {diary.is_public ? (
               <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
@@ -874,7 +694,7 @@ function DiaryDetail({
                 公开日记
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Lock className="w-4 h-4" />
                 私密日记
               </div>
@@ -885,14 +705,14 @@ function DiaryDetail({
             <div className="flex items-center gap-2">
               <button
                 onClick={onEdit}
-                className="px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-colors flex items-center gap-2"
               >
                 <Edit2 className="w-4 h-4" />
                 编辑
               </button>
               <button
                 onClick={onDelete}
-                className="px-4 py-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 删除
@@ -935,13 +755,13 @@ function DiaryEditor({
     diary_date: diary?.diary_date || new Date().toISOString().split('T')[0],
   });
   const [loading, setLoading] = useState(false);
+  const { isAdmin } = useAdmin();
 
   async function handleSubmit() {
     if (!formData.content.trim()) return;
     
     setLoading(true);
     try {
-      // 准备日记数据，包含环境信息
       const diaryData = {
         ...formData,
         environment: autoCaptureEnvironment && environmentInfo && !environmentInfo.error 
@@ -970,253 +790,140 @@ function DiaryEditor({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-4xl bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Sparkles className="w-5 h-5 text-amber-500" />
               {diary ? '编辑日记' : '写日记'}
             </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Form */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Date & Title */}
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium mb-2">日期</label>
+              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">日期</label>
               <input
                 type="date"
                 value={formData.diary_date}
                 onChange={e => setFormData({ ...formData, diary_date: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-900 dark:text-gray-100"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">标题（可选）</label>
+              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">标题（可选）</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-900 dark:text-gray-100"
                 placeholder="给这篇日记起个标题"
               />
             </div>
           </div>
 
-          {/* Mood & Weather */}
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium mb-2">今天的心情</label>
+              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">今天的心情</label>
               <div className="flex flex-wrap gap-2">
-                {moods.map(mood => (
+                {Object.entries(moodIcons).map(([value, info]) => (
                   <button
-                    key={mood.value}
+                    key={value}
                     type="button"
-                    onClick={() => setFormData({ ...formData, mood: formData.mood === mood.value ? '' : mood.value })}
+                    onClick={() => setFormData({ ...formData, mood: formData.mood === value ? '' : value })}
                     className={`px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
-                      formData.mood === mood.value
-                        ? 'ring-2 ring-offset-2'
-                        : 'bg-muted hover:bg-muted/80'
+                      formData.mood === value
+                        ? 'ring-2 ring-offset-2 ring-amber-500 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                     }`}
-                    style={formData.mood === mood.value ? {
-                      backgroundColor: `${mood.color}20`,
-                      color: mood.color,
-                      '--tw-ring-color': mood.color
-                    } as React.CSSProperties : {}}
-                    title={mood.label}
+                    title={info.label}
                   >
-                    {mood.emoji} {mood.label}
+                    {info.emoji} {info.label}
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">天气</label>
+              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">天气</label>
               <div className="flex flex-wrap gap-2">
-                {weathers.map(w => (
+                {Object.entries(weatherIcons).map(([value, info]) => (
                   <button
-                    key={w.value}
+                    key={value}
                     type="button"
-                    onClick={() => setFormData({ ...formData, weather: formData.weather === w.value ? '' : w.value })}
+                    onClick={() => setFormData({ ...formData, weather: formData.weather === value ? '' : value })}
                     className={`px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
-                      formData.weather === w.value
-                        ? 'bg-primary/20 text-primary ring-2 ring-primary/30'
-                        : 'bg-muted hover:bg-muted/80'
+                      formData.weather === value
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                     }`}
-                    title={w.label}
+                    title={info.label}
                   >
-                    {w.emoji} {w.label}
+                    {info.emoji} {info.label}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Location */}
           <div>
-            <label className="block text-sm font-medium mb-2">地点</label>
+            <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">地点</label>
             <input
               type="text"
               value={formData.location}
               onChange={e => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-900 dark:text-gray-100"
               placeholder="你在哪里写的这篇日记"
             />
           </div>
 
-          {/* Environment Info Toggle */}
-          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Navigation className="w-4 h-4 text-blue-500" />
-                <span className="font-medium">自动获取环境信息</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                自动记录位置、天气等环境信息到日记中
-              </p>
-            </div>
-            <button
-              onClick={() => setAutoCaptureEnvironment(!autoCaptureEnvironment)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                autoCaptureEnvironment 
-                  ? 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]' 
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  autoCaptureEnvironment ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Environment Status */}
-          {autoCaptureEnvironment && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center gap-1">
-                  <Navigation className="w-4 h-4 text-blue-500" />
-                  <Thermometer className="w-4 h-4 text-red-500" />
-                  <Cloud className="w-4 h-4 text-gray-500" />
-                </div>
-                <span className="font-medium text-blue-700 dark:text-blue-300">
-                  环境信息
-                </span>
-              </div>
-              
-              {capturingEnvironment ? (
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                  <span className="text-sm">正在获取位置和天气信息...</span>
-                </div>
-              ) : environmentInfo ? (
-                <div className="space-y-2">
-                  {environmentInfo.error ? (
-                    <div className="text-amber-600 dark:text-amber-400 text-sm">
-                      ⚠️ {environmentInfo.error}
-                    </div>
-                  ) : (
-                    <>
-                      {environmentInfo.location && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="w-4 h-4 text-green-500" />
-                          <span className="text-green-700 dark:text-green-300">
-                            {environmentInfo.location.city || environmentInfo.location.address}
-                          </span>
-                        </div>
-                      )}
-                      {environmentInfo.weather && (
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Thermometer className="w-4 h-4 text-red-500" />
-                            <span>{environmentInfo.weather.temperature}°C</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Droplets className="w-4 h-4 text-blue-500" />
-                            <span>{environmentInfo.weather.humidity}%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Wind className="w-4 h-4 text-gray-500" />
-                            <span>{environmentInfo.weather.windSpeed}km/h</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Sun className="w-4 h-4 text-yellow-500" />
-                            <span>{environmentInfo.weather.condition}</span>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                  <button
-                    onClick={captureEnvironmentInfo}
-                    disabled={capturingEnvironment}
-                    className="mt-2 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
-                  >
-                    重新获取环境信息
-                  </button>
-                </div>
-              ) : (
-                <div className="text-gray-500 text-sm">
-                  等待获取环境信息...
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Content */}
           <div>
-            <label className="block text-sm font-medium mb-2">内容</label>
+            <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">内容</label>
             <textarea
               value={formData.content}
               onChange={e => setFormData({ ...formData, content: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all resize-none text-gray-900 dark:text-gray-100"
               rows={12}
               placeholder="写下今天的故事...\n\n今天的感受是...\n\n今天发生的事情..."
             />
-            <div className="text-right text-sm text-muted-foreground mt-2">
+            <div className="text-right text-sm text-gray-700 dark:text-gray-300 mt-2">
               {formData.content.length} 字
             </div>
           </div>
 
-          {/* Privacy */}
-          <div className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border">
+          <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
                 id="privacy-toggle"
                 checked={formData.is_public}
                 onChange={e => setFormData({ ...formData, is_public: e.target.checked })}
-                className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
+                className="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
               />
-              <label htmlFor="privacy-toggle" className="flex items-center gap-2 cursor-pointer">
+              <label htmlFor="privacy-toggle" className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
                 {formData.is_public ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                 {formData.is_public ? '公开日记' : '私密日记'}
               </label>
             </div>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-gray-700 dark:text-gray-300">
               {formData.is_public ? '所有人可见' : '仅自己可见'}
             </span>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-border flex justify-end gap-3">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
+            className="px-6 py-2.5 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             disabled={loading}
           >
             取消
@@ -1224,7 +931,7 @@ function DiaryEditor({
           <button
             onClick={handleSubmit}
             disabled={loading || !formData.content.trim()}
-            className="btn-primary disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50 font-medium"
           >
             {loading ? (
               <>

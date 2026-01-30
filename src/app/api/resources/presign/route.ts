@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { verifyAdminPassword } from '@/lib/env';
 import crypto from 'crypto';
+
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
 
 // Cloudflare R2 配置
 const R2 = new S3Client({
@@ -18,12 +23,6 @@ const R2 = new S3Client({
 
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'resources';
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
-
-// 验证管理员密码
-function verifyAdminPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || 'shiguang2024';
-  return password === adminPassword;
-}
 
 // 允许的文件类型
 const ALLOWED_TYPES: Record<string, { ext: string; category: string }> = {

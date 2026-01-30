@@ -123,15 +123,58 @@ export default function HomePageClient() {
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                 </motion.div>
 
-                {/* Title with shimmer effect */}
+                {/* Title with enhanced shimmer effect */}
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.3 }}
-                  className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tight mb-6"
+                  className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tight mb-6 relative"
                 >
-                  <span className="block metallic-shimmer">拾起时光</span>
-                  <span className="block mt-3 aurora-text">留住美好</span>
+                  <motion.span 
+                    className="block metallic-shimmer relative"
+                    animate={{ 
+                      backgroundPosition: ['0%', '100%'],
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity, 
+                      repeatType: 'reverse',
+                      ease: 'linear'
+                    }}
+                  >
+                    拾起时光
+                    {/* 光晕效果 */}
+                    <motion.div
+                      className="absolute inset-0 blur-3xl opacity-30"
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.3, 0.5, 0.3],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: 'easeInOut'
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
+                      }}
+                    />
+                  </motion.span>
+                  <motion.span 
+                    className="block mt-3 aurora-text relative"
+                    animate={{ 
+                      backgroundPosition: ['0%', '100%'],
+                    }}
+                    transition={{ 
+                      duration: 4, 
+                      repeat: Infinity, 
+                      repeatType: 'reverse',
+                      ease: 'linear',
+                      delay: 0.5
+                    }}
+                  >
+                    留住美好
+                  </motion.span>
                 </motion.h1>
 
                 {/* Subtitle */}

@@ -8,11 +8,12 @@ import {
   Home, FileText, User, Mail, PenLine, 
   Sun, Moon, Sparkles, ChevronLeft,
   Heart, Music, Camera, BookOpen, Github, Twitter,
-  Menu, X, Shield, LogOut, Settings, Calendar, Link as LinkIcon, Rss, FolderOpen, MessageCircle
+  Menu, X, Shield, LogOut, Settings, Calendar, Link as LinkIcon, Rss, FolderOpen, MessageCircle, Search
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAdmin } from './AdminProvider';
 import { useProfile } from './ProfileProvider';
+import { EnhancedSearch } from './EnhancedSearch';
 import clsx from 'clsx';
 
 const navItems = [
@@ -363,8 +364,18 @@ export function Sidebar() {
               )}
             </div>
 
+            {/* 搜索功能 */}
+            <div className="mt-6 px-1 mb-4">
+              <div className={clsx(
+                'transition-all duration-300',
+                isCollapsed && 'flex justify-center'
+              )}>
+                <EnhancedSearch />
+              </div>
+            </div>
+
             {/* 写文章按钮 */}
-            <div className="mt-6 px-1 space-y-2">
+            <div className="mt-2 px-1 space-y-2">
               {isAdmin ? (
                 <>
                   <Link href="/write">

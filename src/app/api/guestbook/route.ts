@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { verifyAdminPassword } from '@/lib/env';
 import crypto from 'crypto';
+
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
 
 // 哈希IP
 function hashIP(ip: string): string {
   return crypto.createHash('sha256').update(ip).digest('hex').substring(0, 32);
-}
-
-// 验证管理员密码
-function verifyAdminPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || 'shiguang2024';
-  return password === adminPassword;
 }
 
 // GET - 获取留言列表

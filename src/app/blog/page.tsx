@@ -3,12 +3,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2, FolderOpen, Bell, CheckCircle } from 'lucide-react';
+import { Search, Filter, X, Grid, List as ListIcon, Loader2, Plus, Edit2, Trash2, FolderOpen, Bell, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
 import { AnimatedSection } from '@/components/Animations';
 import { getPublishedPosts, Post, deletePost, getCollections, Collection } from '@/lib/supabase';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { useAdmin } from '@/components/AdminProvider';
+import { EnhancedSearch } from '@/components/EnhancedSearch';
 import clsx from 'clsx';
 
 const categoryList = [
@@ -211,12 +212,17 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* Filters & Search */}
-      <section className="sticky top-16 md:top-20 z-30 py-4 px-6 glass border-b border-border/50">
+      {/* Filters & Search - 增强版 */}
+      <section className="sticky top-16 md:top-20 z-30 py-4 px-6 glass border-b border-border/50 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-            {/* Search */}
-            <div className="relative flex-1">
+            {/* Enhanced Search */}
+            <div className="flex-1">
+              <EnhancedSearch />
+            </div>
+            
+            {/* 传统搜索框（备用） */}
+            <div className="relative flex-1 sm:hidden">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"

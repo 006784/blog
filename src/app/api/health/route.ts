@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
+
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
 // 健康检查状态
 let healthStatus = {
   status: 'healthy',

@@ -6,6 +6,8 @@ import { AdminProvider } from "@/components/AdminProvider";
 import { ProfileProvider } from "@/components/ProfileProvider";
 import { Sidebar } from "@/components/Sidebar";
 import { ParticleBackground } from "@/components/ParticleBackground";
+import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
+import { ReadingProgress } from "@/components/ReadingProgress";
 
 export const metadata: Metadata = {
   title: "拾光 - 记录生活，收藏时光",
@@ -79,6 +81,12 @@ export default function RootLayout({
             <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-background via-background/80 to-transparent" />
           </div>
 
+          {/* 性能优化 */}
+          <PerformanceOptimizer />
+          
+          {/* 阅读进度条 */}
+          <ReadingProgress />
+          
           {/* 侧边栏 */}
           <Sidebar />
           

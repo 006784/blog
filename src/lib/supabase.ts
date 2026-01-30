@@ -1,9 +1,33 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// 获取环境变量（不验证服务端专用变量，因为可能在客户端使用）
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  // 在开发环境给出更详细的错误信息
+  if (process.env.NODE_ENV === 'development') {
+    console.error(
+      '❌ Supabase 配置缺失。\n' +
+      '请设置以下环境变量：\n' +
+      '  - NEXT_PUBLIC_SUPABASE_URL\n' +
+      '  - NEXT_PUBLIC_SUPABASE_ANON_KEY\n' +
+      '参考 .env.example 文件了解所需配置。'
+    );
+  }
+  // 在客户端，使用空字符串避免错误
+  // 在服务端，抛出错误
+  if (typeof window === 'undefined') {
+    throw new Error(
+      'Supabase 配置缺失。请设置 NEXT_PUBLIC_SUPABASE_URL 和 NEXT_PUBLIC_SUPABASE_ANON_KEY 环境变量。'
+    );
+  }
+}
+
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+);
 
 // ============ 类型定义 ============
 

@@ -4,9 +4,6 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, X, Eye, EyeOff, Shield } from 'lucide-react';
 
-// 管理员密码 - 你可以修改这个密码
-const ADMIN_PASSWORD = 'shiguang2024';
-
 interface AdminContextType {
   isAdmin: boolean;
   showLoginModal: (callback?: () => void) => void;
@@ -41,26 +38,50 @@ export function AdminProvider({ children }: AdminProviderProps) {
     setMounted(true);
     // 检查本地存储的登录状态
     const adminToken = localStorage.getItem('admin-token');
-    if (adminToken === btoa(ADMIN_PASSWORD)) {
+    if (adminToken) {
+      // 验证 token 是否有效（通过检查格式）
+      // 实际验证在服务端 API 进行
       setIsAdmin(true);
     }
   }, []);
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      localStorage.setItem('admin-token', btoa(ADMIN_PASSWORD));
-      setShowModal(false);
-      setPassword('');
-      setError('');
-      
-      // 执行登录回调
-      if (loginCallback) {
-        loginCallback();
-        loginCallback = null;
+  const handleLogin = async () => {
+    if (!password) {
+      setError('请输入密码');
+      return;
+    }
+
+    try {
+      // 通过 API 验证密码
+      const response = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.token) {
+        setIsAdmin(true);
+        localStorage.setItem('admin-token', data.token);
+        setShowModal(false);
+        setPassword('');
+        setError('');
+        
+        // 执行登录回调
+        if (loginCallback) {
+          loginCallback();
+          loginCallback = null;
+        }
+      } else {
+        setError(data.error || '密码错误');
+        setPassword('');
       }
-    } else {
-      setError('密码错误');
+    } catch (error) {
+      console.error('登录失败:', error);
+      setError('登录失败，请稍后重试');
       setPassword('');
     }
   };

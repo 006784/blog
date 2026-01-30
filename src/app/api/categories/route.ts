@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { verifyAdminPassword } from '@/lib/env';
 
-// 验证管理员密码
-function verifyAdminPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || 'shiguang2024';
-  return password === adminPassword;
-}
+
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
 
 // 颜色选项
 const VALID_COLORS = ['blue', 'purple', 'green', 'orange', 'pink', 'red', 'yellow', 'cyan', 'gray'];

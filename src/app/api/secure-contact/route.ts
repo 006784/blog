@@ -8,6 +8,10 @@ import {
 } from '@/lib/security';
 import { logger } from '@/lib/logger';
 
+// 配置静态导出
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
 // 模拟的联系表单数据接口
 interface ContactFormData {
   name: string;

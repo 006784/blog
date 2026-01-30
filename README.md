@@ -9,13 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/your-username/blog-1/actions/workflows/ci-cd.yml">
-    <img src="https://github.com/your-username/blog-1/workflows/CI/CD%20Pipeline/badge.svg" alt="CI/CD Status">
-  </a>
-  <a href="https://codecov.io/gh/your-username/blog-1">
-    <img src="https://codecov.io/gh/your-username/blog-1/branch/main/graph/badge.svg" alt="Coverage Status">
-  </a>
-  <a href="https://github.com/your-username/blog-1/blob/main/LICENSE">
+  <a href="https://github.com/your-username/blog-1">
     <img src="https://img.shields.io/github/license/your-username/blog-1" alt="License">
   </a>
 </p>
@@ -75,7 +69,7 @@ src/
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/blog-1.git
+git clone <your-repository-url>
 cd blog-1
 
 # 安装依赖
@@ -187,9 +181,9 @@ npm run test:coverage
 
 ## 📞 联系方式
 
-- 项目地址: [https://github.com/your-username/blog-1](https://github.com/your-username/blog-1)
-- 问题反馈: [Issues](https://github.com/your-username/blog-1/issues)
-- 邮箱: your-email@example.com
+- 项目地址: 请替换为实际的项目地址
+- 问题反馈: 请替换为实际的 Issues 链接
+- 邮箱: 请替换为实际的联系邮箱
 
 ---
 

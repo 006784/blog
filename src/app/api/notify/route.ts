@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendNewPostNotification } from '@/lib/email';
+import { getAdminPassword } from '@/lib/env';
+
+// 配置静态导出
+export const dynamic = "force-static";
+export const revalidate = 0;
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -10,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     // 验证管理员密码
     const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = getAdminPassword();
     
     if (authHeader !== `Bearer ${adminPassword}`) {
       return NextResponse.json(
@@ -114,7 +119,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = getAdminPassword();
     
     if (authHeader !== `Bearer ${adminPassword}`) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });

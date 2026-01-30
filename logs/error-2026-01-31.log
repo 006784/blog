@@ -1,0 +1,32 @@
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-01-31 03:51:28:5128"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-01-31 03:51:29:5129"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-01-31 03:51:38:5138"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-01-31 03:51:38:5138"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-01-31 03:51:46:5146"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-01-31 03:51:46:5146"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"手动新闻收集失败","timestamp":"2026-01-31 03:51:46:5146"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-01-31 03:51:56:5156"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-01-31 03:51:57:5157"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-01-31 03:51:59:5159"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-01-31 03:52:02:522"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-01-31 03:52:02:522"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-01-31 03:52:07:527"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-01-31 03:52:07:527"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"手动新闻收集失败","timestamp":"2026-01-31 03:52:07:527"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-01-31 03:56:25:5625"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-01-31 03:56:26:5626"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-01-31 03:56:28:5628"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-01-31 03:56:30:5630"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-01-31 03:56:31:5631"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-01-31 03:56:37:5637"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-01-31 03:56:37:5637"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-01-31 03:56:37:5637"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-01-31 03:56:44:5644"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-01-31 03:56:45:5645"}
+{"error":"read ECONNRESET","level":"error","message":"RSS收集失败: TechCrunch","sourceId":"techcrunch","timestamp":"2026-01-31 03:56:50:5650"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-01-31 03:56:51:5651"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-01-31 03:56:54:5654"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-01-31 03:56:54:5654"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-01-31 03:56:58:5658"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-01-31 03:56:58:5658"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-01-31 03:56:58:5658"}
