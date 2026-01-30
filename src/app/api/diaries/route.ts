@@ -2,6 +2,10 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Diary } from '@/lib/supabase';
 
+// 配置静态导出
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
 // 环境信息接口
 interface EnvironmentInfo {
   location?: {

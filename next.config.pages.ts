@@ -7,12 +7,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // 禁用不兼容静态导出的功能
-  experimental: {
-    serverActions: {
-      allowedOrigins: []
-    }
-  }
+  // 移除Sentry配置以适应静态部署
 };
 
 export default nextConfig;
