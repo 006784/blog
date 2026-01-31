@@ -1,13 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
   distDir: 'out',
   trailingSlash: true,
   images: {
     unoptimized: true,
   },
-  // 禁用不兼容静态导出的功能
+  /* 禁用不兼容静态导出的功能 */
   experimental: {
     serverActions: {
       allowedOrigins: []

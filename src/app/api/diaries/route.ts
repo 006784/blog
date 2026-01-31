@@ -3,10 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { Diary } from '@/lib/supabase';
 import { getAdminPassword } from '@/lib/env';
 
-// 配置动态路由
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 // 环境信息接口
 interface EnvironmentInfo {
   location?: {
