@@ -1033,9 +1033,18 @@ function DiaryEditor({
       // 先上传媒体文件
       const mediaUrls = await uploadMediaFiles();
       
+      const allTags = [
+        ...generatedTags.emotions.map(tag => tag.name),
+        ...generatedTags.activities.map(tag => tag.name),
+        ...generatedTags.weather.map(tag => tag.name),
+        ...generatedTags.locations.map(tag => tag.name),
+        ...generatedTags.custom.map(tag => tag.name)
+      ];
+      
       const diaryData = {
         ...formData,
         images: mediaUrls.map(media => media.url), // 将媒体URL添加到images数组
+        tags: allTags, // 添加生成的标签
         environment: autoCaptureEnvironment && environmentInfo && !environmentInfo.error 
           ? {
               location: environmentInfo.location,
