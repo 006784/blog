@@ -368,7 +368,7 @@ export class AudioVisualizer {
 
     requestAnimationFrame(() => this.draw());
 
-    this.analyser.getByteFrequencyData(this.dataArray);
+    this.analyser.getByteFrequencyData(this.dataArray as any);
 
     this.ctx.fillStyle = 'rgb(0, 0, 0)';
     this.ctx.fillRect(0, 0, width, height);

@@ -976,7 +976,7 @@ function DiaryEditor({
   };
 
   // 执行搜索
-  const performSearch = () => {
+  const performSearch = (allDiaries: Diary[]) => {
     if (!searchQuery.trim() && Object.keys(searchOptions).length <= 2) {
       setSearchResults([]);
       setSearchStats(null);
@@ -988,8 +988,8 @@ function DiaryEditor({
       query: searchQuery.trim()
     };
     
-    const results = DiarySearchService.searchDiaries(diaries, options);
-    const stats = DiarySearchService.getSearchStats(diaries, options);
+    const results = DiarySearchService.searchDiaries(allDiaries, options);
+    const stats = DiarySearchService.getSearchStats(allDiaries, options);
     
     setSearchResults(results);
     setSearchStats(stats);
@@ -1045,6 +1045,20 @@ function DiaryEditor({
       };
       
       await onSave(diaryData);
+      
+      // 重置表单
+      setGeneratedTags({
+        emotions: [],
+        activities: [],
+        weather: [],
+        locations: [],
+        custom: []
+      });
+      setShowTags(false);
+      setMediaFiles([]);
+      setUploadedMedia([]);
+      
+      // 注意：不需要在这里执行搜索，父组件会处理状态更新
     } finally {
       setLoading(false);
     }
