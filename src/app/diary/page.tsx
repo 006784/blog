@@ -38,18 +38,25 @@ import { DiaryTemplateSelector } from '@/components/DiaryTemplateSelector';
 // 笔记本背景组件
 const NotebookBackground = ({ children }: { children: React.ReactNode }) => (
   <div className="relative min-h-screen bg-gradient-to-br from-amber-50 via-amber-100 to-yellow-50 dark:from-amber-950/30 dark:via-amber-900/20 dark:to-yellow-900/10 overflow-hidden">
-    {/* 纸张纹理 - 更精致的效果 */}
-    <div className="absolute inset-0 opacity-15" 
+    {/* 纸张纹理 - 更细致的纸张质感 */}
+    <div className="absolute inset-0 opacity-20" 
          style={{
-           backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='paper' x='0' y='0' width='200' height='200' patternUnits='userSpaceOnUse'%3E%3Crect width='200' height='200' fill='%23fdf6e3'/%3E%3Cpath d='M0 0h200v1h-200zM0 2h200v1h-200zM0 4h200v1h-200zM0 6h200v1h-200zM0 8h200v1h-200z' fill='%23f0e6d2'/%3E%3Cpath d='M0 0v200h1V0zM2 0v200h1V0zM4 0v200h1V0zM6 0v200h1V0zM8 0v200h1V0z' fill='%23f0e6d2'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23paper)'/%3E%3C/svg%3E")`
+           backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E")`
          }}>
     </div>
     
-    {/* 增强网格线 - 更清晰的视觉效果 */}
-    <div className="absolute inset-0 opacity-15 pointer-events-none"
+    {/* 纸张纤维纹理 */}
+    <div className="absolute inset-0 opacity-10" 
          style={{
-           backgroundImage: `linear-gradient(to right, #d97706 1px, transparent 1px),
-                            linear-gradient(to bottom, #d97706 1px, transparent 1px)` ,
+           backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='fibers' x='0' y='0' width='200' height='200' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 0h200v1h-200zM0 2h200v1h-200zM0 4h200v1h-200zM0 6h200v1h-200zM0 8h200v1h-200z' fill='%23d4af37'/%3E%3Cpath d='M0 0v200h1V0zM2 0v200h1V0zM4 0v200h1V0zM6 0v200h1V0zM8 0v200h1V0z' fill='%23d4af37'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23fibers)'/%3E%3C/svg%3E")`
+         }}>
+    </div>
+    
+    {/* 增强网格线 - 更清晰的书写格线 */}
+    <div className="absolute inset-0 opacity-20 pointer-events-none"
+         style={{
+           backgroundImage: `linear-gradient(to right, #d97706 0.5px, transparent 0.5px),
+                            linear-gradient(to bottom, #d97706 0.5px, transparent 0.5px)` ,
            backgroundSize: '28px 28px',
            transform: 'translate(14px, 14px)'
          }}>
@@ -67,7 +74,10 @@ const NotebookBackground = ({ children }: { children: React.ReactNode }) => (
     <div className="absolute left-5 top-68 w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-inner border border-red-800/30"></div>
     
     {/* 添加纸张边缘阴影效果 */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-900/5 to-transparent opacity-20 pointer-events-none"></div>
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-900/5 to-transparent opacity-30 pointer-events-none"></div>
+    
+    {/* 纸张阴影 - 增加层次感 */}
+    <div className="absolute inset-4 bg-black/5 rounded-lg -z-10 shadow-inner"></div>
     
     {children}
   </div>
@@ -321,8 +331,7 @@ export default function DiaryPage() {
     });
   }, [diaries, searchQuery, searchFilteredIds, moodFilter, privacyFilter, dateFilter]);
 
-  // 获取环境信息
-  const captureEnvironmentInfo = async () => {
+  async function handleAutoCapture() {
     if (!autoCaptureEnvironment) return;
     
     // 检查浏览器环境
@@ -335,6 +344,36 @@ export default function DiaryPage() {
     try {
       const envInfo = await EnvironmentService.getEnvironmentInfo();
       setEnvironmentInfo(envInfo);
+      
+      // 如果获取成功且没有错误，自动填充到日记表单
+      if (envInfo && !envInfo.error) {
+        if (envInfo.location && envInfo.location.city) {
+          setFormData(prev => ({
+            ...prev,
+            location: `${envInfo.location.city}${envInfo.location.country ? ', ' + envInfo.location.country : ''}`
+          }));
+        }
+        
+        if (envInfo.weather && envInfo.weather.condition) {
+          // 将天气信息映射到对应图标
+          const weatherMapping: Record<string, string> = {
+            '晴': 'sunny', '晴天': 'sunny', 'sunny': 'sunny',
+            '阴': 'cloudy', '阴天': 'cloudy', 'cloudy': 'cloudy',
+            '雨': 'rainy', '下雨': 'rainy', 'rainy': 'rainy',
+            '雪': 'snowy', '下雪': 'snowy', 'snowy': 'snowy',
+            '多云': 'partly-cloudy', 'partly-cloudy': 'partly-cloudy'
+          };
+          
+          const weatherKey = Object.keys(weatherMapping).find(key => 
+            envInfo.weather.condition.includes(key)
+          );
+          
+          if (weatherKey) {
+            const mappedWeather = weatherMapping[weatherKey];
+            setFormData(prev => ({ ...prev, weather: mappedWeather }));
+          }
+        }
+      }
       
       if (envInfo.error) {
         console.warn('环境信息获取失败:', envInfo.error);
@@ -356,7 +395,7 @@ export default function DiaryPage() {
   // 当编辑器打开时自动获取环境信息
   useEffect(() => {
     if (showEditor && autoCaptureEnvironment) {
-      captureEnvironmentInfo();
+      handleAutoCapture();
     }
   }, [showEditor, autoCaptureEnvironment]);
 
@@ -788,30 +827,30 @@ function DiaryDetail({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
+          <div className="prose prose-neutral dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-relaxed font-serif">
             {diary.content.split('\n').map((paragraph, i) => (
               paragraph.trim() ? (
-                <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
+                <p key={i} className="mb-4 last:mb-0 indent-8">{paragraph}</p>
               ) : (
                 <br key={i} />
               )
             ))}
           </div>
           
-          {/* 媒体内容展示 */}
+          {/* 显示日记中的图片 */}
           {(diary as any).images && (diary as any).images.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-amber-200 dark:border-amber-800/50">
+            <div className="mt-6 pt-6 border-t border-amber-200 dark:border-amber-800/50">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                 <FileImage className="w-5 h-5 text-amber-600" />
-                相关媒体
+                相关照片
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(diary as any).images.map((imageUrl: string, index: number) => (
                   <div key={index} className="group relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-                    <div className="aspect-square flex items-center justify-center overflow-hidden">
+                    <div className="aspect-video flex items-center justify-center overflow-hidden">
                       <img 
                         src={imageUrl} 
-                        alt={`媒体内容 ${index + 1}`}
+                        alt={`日记照片 ${index + 1}`}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                       />
