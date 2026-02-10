@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 
 
 // 配置静态导出
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';

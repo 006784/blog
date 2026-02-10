@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Diary } from '@/lib/supabase';
 import { getAdminPassword } from '@/lib/env';
 
+export const dynamic = 'force-dynamic';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -15,12 +17,31 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const { data, error } = await supabase
+    // 检查是否为管理员请求
+    const authHeader = request.headers.get('authorization');
+    let isAdminRequest = false;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.substring(7);
+        const adminPassword = getAdminPassword();
+        const expectedHash = btoa(adminPassword);
+        isAdminRequest = token === expectedHash;
+      } catch {
+        // 忽略
+      }
+    }
+
+    let query = supabase
       .from('diaries')
       .select('*')
-      .eq('id', id)
-      .eq('is_public', true)
-      .single();
+      .eq('id', id);
+    
+    // 非管理员只能看公开日记
+    if (!isAdminRequest) {
+      query = query.eq('is_public', true);
+    }
+    
+    const { data, error } = await query.single();
 
     if (error) {
       if (error.code === 'PGRST116') {

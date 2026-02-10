@@ -78,7 +78,7 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="搜索日记内容、标题..."
-          className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+          className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
         />
         {query && (
           <button
@@ -114,11 +114,11 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
 
       {/* 高级筛选面板 */}
       {showFilters && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 日期范围 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 日期范围
               </label>
@@ -127,25 +127,25 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
                   type="date"
                   value={searchOptions.dateFrom || ''}
                   onChange={(e) => updateSearchOptions({ dateFrom: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
                 <input
                   type="date"
                   value={searchOptions.dateTo || ''}
                   onChange={(e) => updateSearchOptions({ dateTo: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>
             </div>
 
             {/* 排序选项 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">排序方式</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">排序方式</label>
               <div className="space-y-2">
                 <select
                   value={searchOptions.sortBy || 'date'}
                   onChange={(e) => updateSearchOptions({ sortBy: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   <option value="date">按日期</option>
                   <option value="relevance">按相关性</option>

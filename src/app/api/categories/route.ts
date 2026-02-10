@@ -4,7 +4,7 @@ import { verifyAdminPassword } from '@/lib/env';
 
 
 // 配置静态导出
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // 颜色选项

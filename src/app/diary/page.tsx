@@ -31,6 +31,9 @@ import { EnvironmentService } from '@/services/environmentService';
 import { SmartTagService, type GeneratedTags } from '@/lib/diary/smart-tag-service';
 import { DiarySearchService, type SearchOptions, type SearchResult } from '@/lib/diary/search-service';
 import { DiarySearch } from '@/components/DiarySearch';
+import { DiaryFeaturePanel } from '@/components/DiaryFeaturePanel';
+import { SocialShare } from '@/components/SocialShare';
+import { DiaryTemplateSelector } from '@/components/DiaryTemplateSelector';
 
 // 笔记本背景组件
 const NotebookBackground = ({ children }: { children: React.ReactNode }) => (
@@ -246,26 +249,30 @@ export default function DiaryPage() {
   const [notebookOpen, setNotebookOpen] = useState(false);
   const { isAdmin, showLoginModal } = useAdmin();
 
-  // 直接使用搜索查询，不使用防抖
-  const effectiveSearch = searchQuery;
+  const [searchFilteredIds, setSearchFilteredIds] = useState<Set<string> | null>(null);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     // 当搜索查询改变时重新过滤
-    if (effectiveSearch) {
+    if (searchQuery) {
       setMoodFilter(null);
       setPrivacyFilter('all');
     }
-  }, [effectiveSearch]);
+  }, [searchQuery]);
 
   async function loadData() {
     try {
       setLoading(true);
       // 使用API端点获取日记
-      const response = await fetch('/api/diaries?limit=100');
+      const adminToken = localStorage.getItem('admin-token');
+      const headers: Record<string, string> = {};
+      if (adminToken) {
+        headers['Authorization'] = `Bearer ${adminToken}`;
+      }
+      const response = await fetch('/api/diaries?limit=100', { headers });
       const result = await response.json();
       
       if (!result.success) {
@@ -283,10 +290,15 @@ export default function DiaryPage() {
   // 过滤日记
   const filteredDiaries = useMemo(() => {
     return diaries.filter(diary => {
+      // 如果有搜索结果过滤，优先使用
+      if (searchFilteredIds !== null) {
+        return searchFilteredIds.has(diary.id);
+      }
+      
       // 搜索查询过滤
-      if (effectiveSearch && 
-          !diary.title?.toLowerCase().includes(effectiveSearch.toLowerCase()) && 
-          !diary.content.toLowerCase().includes(effectiveSearch.toLowerCase())) {
+      if (searchQuery && 
+          !diary.title?.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !diary.content.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
       
@@ -307,7 +319,7 @@ export default function DiaryPage() {
       
       return true;
     });
-  }, [diaries, effectiveSearch, moodFilter, privacyFilter, dateFilter]);
+  }, [diaries, searchQuery, searchFilteredIds, moodFilter, privacyFilter, dateFilter]);
 
   // 获取环境信息
   const captureEnvironmentInfo = async () => {
@@ -409,6 +421,18 @@ export default function DiaryPage() {
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.5 }}
               >
+                {/* 功能工具面板 */}
+                <DiaryFeaturePanel
+                  diaries={diaries}
+                  isAdmin={isAdmin}
+                  onSearchResults={(results) => {
+                    setSearchFilteredIds(new Set(results.map(r => r.id)));
+                  }}
+                  onClearSearch={() => {
+                    setSearchFilteredIds(null);
+                  }}
+                />
+
                 <NotebookPage pageNumber={1}>
                   <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-3 mb-4">
@@ -419,7 +443,7 @@ export default function DiaryPage() {
                         我的日记收藏
                       </h2>
                     </div>
-                    <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-800 dark:text-gray-200 max-w-2xl mx-auto">
                       翻开记忆的每一页，重温那些美好的时光 ✨
                     </p>
                   </div>
@@ -430,7 +454,7 @@ export default function DiaryPage() {
                       <div className="flex items-center justify-center py-20">
                         <div className="text-center">
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
-                          <p className="text-gray-600 dark:text-gray-400">正在加载日记...</p>
+                          <p className="text-gray-800 dark:text-gray-200">正在加载日记...</p>
                         </div>
                       </div>
                     ) : filteredDiaries.length === 0 ? (
@@ -440,7 +464,7 @@ export default function DiaryPage() {
                         className="text-center py-20"
                       >
                         <NotebookPen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400 mb-4">还没有日记呢</p>
+                        <p className="text-gray-700 dark:text-gray-300 mb-4">还没有日记呢</p>
                         <button
                           onClick={() => {
                             if (!isAdmin) {
@@ -636,7 +660,7 @@ function DiaryCard({
             <h3 className="font-semibold text-lg line-clamp-1 text-gray-800 dark:text-gray-200">
               {diary.title || formatDate(diary.diary_date)}
             </h3>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{weekday}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">{weekday}</span>
           </div>
           <div className="flex items-center gap-2">
             {mood && (
@@ -654,12 +678,12 @@ function DiaryCard({
         </div>
 
         {/* Preview */}
-        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">
+        <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3 mb-4">
           {diary.content.substring(0, 150)}...
         </p>
 
         {/* Meta */}
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300">
           <div className="flex items-center gap-3">
             {diary.location && (
               <span className="flex items-center gap-1">
@@ -678,14 +702,14 @@ function DiaryCard({
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="p-1.5 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-gray-500 hover:text-amber-600 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-gray-700 hover:text-amber-600 transition-colors"
                 title="编辑"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-500 hover:text-red-500 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 hover:text-red-500 transition-colors"
                 title="删除"
               >
                 <Trash2 className="w-4 h-4" />
@@ -815,10 +839,14 @@ function DiaryDetail({
                 公开日记
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                 <Lock className="w-4 h-4" />
                 私密日记
               </div>
+            )}
+            {/* 社交分享 */}
+            {diary.is_public && (
+              <SocialShare diary={diary} />
             )}
           </div>
           
@@ -897,6 +925,7 @@ function DiaryEditor({
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchStats, setSearchStats] = useState<any>(null);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const { isAdmin } = useAdmin();
 
   // 处理媒体文件选择
@@ -1101,6 +1130,16 @@ function DiaryEditor({
               </h2>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowTemplateSelector(!showTemplateSelector)}
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  showTemplateSelector 
+                    ? 'bg-indigo-100/80 text-indigo-700 border-indigo-300' 
+                    : 'bg-gray-100/80 text-gray-600 border-gray-300 hover:bg-indigo-50 hover:text-indigo-600'
+                }`}
+              >
+                📝 模板
+              </button>
               <div className="px-3 py-1 bg-amber-100/80 rounded-full text-xs text-amber-700 font-medium border border-amber-300">
                 <Brush className="w-3 h-3 inline mr-1" />
                 手写模式
@@ -1175,7 +1214,7 @@ function DiaryEditor({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Wind className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-700 dark:text-gray-300">空气质量</span>
+                      <span className="font-medium text-gray-800 dark:text-gray-200">空气质量</span>
                     </div>
                     <div className="ml-6 space-y-1 text-gray-600 dark:text-gray-400">
                       <div>📊 AQI: {environmentInfo.airQuality.aqi} ({getAQILevel(environmentInfo.airQuality.aqi)})</div>
@@ -1191,7 +1230,7 @@ function DiaryEditor({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Sun className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-700 dark:text-gray-300">天文信息</span>
+                      <span className="font-medium text-gray-800 dark:text-gray-200">天文信息</span>
                     </div>
                     <div className="ml-6 space-y-1 text-gray-600 dark:text-gray-400">
                       <div>🌅 日出: {environmentInfo.astronomy.sunrise}</div>
@@ -1243,6 +1282,23 @@ function DiaryEditor({
               )}
             </button>
           </div>
+          {/* 模板选择器 */}
+          {showTemplateSelector && (
+            <div className="border-2 border-dashed border-indigo-300/50 rounded-2xl p-4 bg-gradient-to-br from-indigo-50/50 to-violet-50/50 dark:from-indigo-900/20 dark:to-violet-900/20">
+              <DiaryTemplateSelector
+                onSelect={(template, variables) => {
+                  let content = template.content;
+                  Object.entries(variables).forEach(([key, value]) => {
+                    content = content.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+                  });
+                  setFormData(prev => ({ ...prev, content: prev.content ? prev.content + '\n\n' + content : content }));
+                  setShowTemplateSelector(false);
+                }}
+                currentContent={formData.content}
+              />
+            </div>
+          )}
+
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">日期</label>
@@ -1352,7 +1408,7 @@ function DiaryEditor({
               </button>
             </div>
             
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+            <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">
               基于日记内容自动生成情绪、活动、天气等标签
             </p>
             
@@ -1492,7 +1548,7 @@ function DiaryEditor({
             )}
             
             {!showTags && formData.content.trim().length >= 10 && (
-              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-4 text-gray-700 dark:text-gray-300">
                 点击"生成标签"按钮，基于您的日记内容自动生成智能标签
               </div>
             )}
@@ -1650,12 +1706,12 @@ function DiaryEditor({
                 onChange={e => setFormData({ ...formData, is_public: e.target.checked })}
                 className="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
               />
-              <label htmlFor="privacy-toggle" className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
+              <label htmlFor="privacy-toggle" className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200">
                 {formData.is_public ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                 {formData.is_public ? '公开日记' : '私密日记'}
               </label>
             </div>
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-800 dark:text-gray-200">
               {formData.is_public ? '所有人可见' : '仅自己可见'}
             </span>
           </div>
@@ -1665,7 +1721,7 @@ function DiaryEditor({
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="px-6 py-2.5 rounded-xl text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             disabled={loading}
           >
             取消

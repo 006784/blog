@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 
 // 配置静态导出
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 // 创建 Supabase 客户端
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

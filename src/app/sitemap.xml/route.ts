@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
 // 配置静态导出
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // 1小时重新验证
 
 export async function GET() {

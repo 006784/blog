@@ -3,7 +3,7 @@ import { logger } from '@/lib/logger';
 
 
 // 配置静态导出
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 // 健康检查状态
 let healthStatus = {

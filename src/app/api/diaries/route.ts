@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Diary } from '@/lib/supabase';
 import { getAdminPassword } from '@/lib/env';
 
+export const dynamic = 'force-dynamic';
+
 // 环境信息接口
 interface EnvironmentInfo {
   location?: {
@@ -37,11 +39,29 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     
+    // 检查是否为管理员请求
+    const authHeader = request.headers.get('authorization');
+    let isAdminRequest = false;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.substring(7);
+        const adminPassword = getAdminPassword();
+        const expectedHash = btoa(adminPassword);
+        isAdminRequest = token === expectedHash;
+      } catch {
+        // 忽略验证错误，当作普通请求处理
+      }
+    }
+
     let query = supabase
       .from('diaries')
       .select('*', { count: 'exact' })
-      .eq('is_public', true)
       .order('diary_date', { ascending: false });
+
+    // 非管理员只能看公开日记
+    if (!isAdminRequest) {
+      query = query.eq('is_public', true);
+    }
 
     if (mood) {
       query = query.eq('mood', mood);
@@ -157,8 +177,7 @@ export async function POST(request: NextRequest) {
       tags: [],
       word_count: content.length,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      environment_data: environment || null
+      updated_at: new Date().toISOString()
     };
 
     const { data, error } = await supabase

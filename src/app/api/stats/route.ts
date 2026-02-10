@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 
 // 配置静态导出
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // 生成访客ID（基于IP和User-Agent的哈希）

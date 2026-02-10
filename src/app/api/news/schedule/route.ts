@@ -4,7 +4,7 @@ import { ScheduleManager, DEFAULT_SCHEDULED_CONFIG } from '@/lib/news/schedule-c
 import { logger } from '@/lib/logger';
 
 // 配置静态导出
-export const dynamic = 'force-static';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**

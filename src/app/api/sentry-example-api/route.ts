@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 // 配置静态导出
-export const dynamic = 'force-static';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // 注意：这个示例API在静态导出模式下不会真正抛出错误
