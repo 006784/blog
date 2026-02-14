@@ -5,7 +5,7 @@
   --foreground: #1a1a1a;
   --card: #ffffff;
   --card-foreground: #1a1a1a;
-  --primary: #6366f1;
+  --primary: #0f766e;
   --primary-foreground: #ffffff;
   --secondary: #f5f5f7;
   --secondary-foreground: #1d1d1f;
@@ -14,7 +14,7 @@
   --accent: #f5f5f7;
   --accent-foreground: #1d1d1f;
   --border: #d2d2d7;
-  --ring: #6366f1;
+  --ring: #0f766e;
   
   /* 统一的间距系统 */
   --spacing-xs: 0.5rem;    /* 8px */
@@ -25,24 +25,24 @@
   --spacing-2xl: 4rem;     /* 64px */
   
   /* 简化的配色系统 */
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
+  --color-primary: #0f766e;
+  --color-primary-dark: #115e59;
   --color-secondary: #f3f4f6;
-  --color-accent: #ec4899;
+  --color-accent: #f97316;
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   
   --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
-  --gradient-start: #6366f1;
-  --gradient-end: #8b5cf6;
+  --gradient-start: #0891b2;
+  --gradient-end: #f97316;
   
   /* 背景渐变 */
-  --bg-gradient-1: #e0e7ff;
-  --bg-gradient-2: #dbeafe;
-  --bg-gradient-3: #f0f9ff;
-  --bg-gradient-4: #fdf4ff;
+  --bg-gradient-1: #cffafe;
+  --bg-gradient-2: #e0f2fe;
+  --bg-gradient-3: #ffedd5;
+  --bg-gradient-4: #fef3c7;
 }
 
 .dark {
@@ -50,7 +50,7 @@
   --foreground: #fafafa;
   --card: #18181b;
   --card-foreground: #fafafa;
-  --primary: #818cf8;
+  --primary: #5eead4;
   --primary-foreground: #09090b;
   --secondary: #27272a;
   --secondary-foreground: #fafafa;
@@ -59,19 +59,19 @@
   --accent: #27272a;
   --accent-foreground: #fafafa;
   --border: #27272a;
-  --ring: #818cf8;
+  --ring: #5eead4;
   
   /* 暗色模式配色 */
-  --color-primary: #818cf8;
-  --color-primary-dark: #6366f1;
+  --color-primary: #5eead4;
+  --color-primary-dark: #14b8a6;
   --color-secondary: #27272a;
-  --color-accent: #f472b6;
+  --color-accent: #fdba74;
   --color-success: #34d399;
   --color-warning: #fbbf24;
   --color-error: #f87171;
   
-  --gradient-start: #818cf8;
-  --gradient-end: #a78bfa;
+  --gradient-start: #22d3ee;
+  --gradient-end: #fb923c;
 }
 
 @theme inline {
@@ -120,7 +120,10 @@ html {
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1000px circle at 5% -10%, color-mix(in srgb, var(--gradient-start) 20%, transparent), transparent 45%),
+    radial-gradient(900px circle at 95% 110%, color-mix(in srgb, var(--gradient-end) 18%, transparent), transparent 42%),
+    var(--background);
   color: var(--foreground);
   font-family: 
     'Noto Sans SC',
@@ -140,6 +143,14 @@ body {
   overflow-x: hidden;
   letter-spacing: -0.01em;
   line-height: 1.6;
+}
+
+.studio-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border) 35%, transparent) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
 }
 
 /* 统一的字体层级系统 */
