@@ -1,0 +1,78 @@
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:53:12:5312"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:53:13:5313"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:53:27:5327"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:53:33:5333"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:53:33:5333"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 02:53:36:5336"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:53:38:5338"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:53:39:5339"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:53:45:5345"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:53:47:5347"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:53:49:5349"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:53:52:5352"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-02-15 02:53:54:5354"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-02-15 02:53:54:5354"}
+{"error":"read ECONNRESET","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:55:12:5512"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:55:14:5514"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:55:27:5527"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:55:29:5529"}
+{"error":"Status code 502","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:55:29:5529"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 02:55:32:5532"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:55:34:5534"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:55:34:5534"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:55:39:5539"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:55:41:5541"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:55:43:5543"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:55:46:5546"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-02-15 02:55:48:5548"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-02-15 02:55:48:5548"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:59:17:5917"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:59:18:5918"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:59:33:5933"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:59:35:5935"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:59:35:5935"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 02:59:38:5938"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:59:40:5940"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:59:40:5940"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:59:47:5947"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:59:51:5951"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:59:53:5953"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:59:55:5955"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-02-15 02:59:57:5957"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-02-15 02:59:57:5957"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:01:38:138"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:01:39:139"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:01:53:153"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:01:55:155"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:01:55:155"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 03:01:57:157"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:01:59:159"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:02:00:20"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:02:07:27"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:02:09:29"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:02:11:211"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:02:13:213"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:08:55:855"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:08:56:856"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:09:09:99"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:09:10:910"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:09:11:911"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 03:09:13:913"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:09:15:915"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:09:16:916"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:09:25:925"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:09:29:929"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:09:31:931"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:09:33:933"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:15:17:1517"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:15:18:1518"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:15:31:1531"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:15:33:1533"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:15:33:1533"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 03:15:36:1536"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:15:38:1538"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:15:39:1539"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:15:45:1545"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:15:47:1547"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:15:49:1549"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:15:52:1552"}

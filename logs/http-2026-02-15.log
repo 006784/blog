@@ -1,0 +1,468 @@
+{"checks":{"cache":true,"database":true,"server":true,"storage":true},"level":"info","message":"健康检查完成","status":"healthy","timestamp":"2026-02-15 02:53:07:537"}
+{"level":"info","message":"定时任务删除成功","scheduleId":"smoke","timestamp":"2026-02-15 02:53:10:5310"}
+{"level":"info","message":"开始测试新闻收集功能","timestamp":"2026-02-15 02:53:10:5310"}
+{"level":"info","message":"开始每日新闻收集","timestamp":"2026-02-15 02:53:10:5310"}
+{"level":"info","message":"开始收集RSS源: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:53:10:5310"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:53:12:5312"}
+{"level":"info","message":"开始收集RSS源: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 02:53:12:5312"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 02:53:12:5312"}
+{"level":"info","message":"开始收集RSS源: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:53:12:5312"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:53:13:5313"}
+{"level":"info","message":"开始收集RSS源: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 02:53:13:5313"}
+{"itemCount":16,"level":"info","message":"RSS源收集完成: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 02:53:15:5315"}
+{"level":"info","message":"开始收集RSS源: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 02:53:15:5315"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 02:53:15:5315"}
+{"level":"info","message":"开始收集RSS源: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 02:53:15:5315"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 02:53:17:5317"}
+{"level":"info","message":"开始收集RSS源: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 02:53:17:5317"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 02:53:17:5317"}
+{"level":"info","message":"开始收集RSS源: 36氪","sourceId":"36kr","timestamp":"2026-02-15 02:53:17:5317"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 36氪","sourceId":"36kr","timestamp":"2026-02-15 02:53:20:5320"}
+{"level":"info","message":"开始收集RSS源: Wired","sourceId":"wired","timestamp":"2026-02-15 02:53:20:5320"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Wired","sourceId":"wired","timestamp":"2026-02-15 02:53:21:5321"}
+{"level":"info","message":"开始收集RSS源: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 02:53:21:5321"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 02:53:21:5321"}
+{"level":"info","message":"开始收集RSS源: Engadget","sourceId":"engadget","timestamp":"2026-02-15 02:53:21:5321"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Engadget","sourceId":"engadget","timestamp":"2026-02-15 02:53:24:5324"}
+{"level":"info","message":"开始收集RSS源: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 02:53:24:5324"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 02:53:25:5325"}
+{"level":"info","message":"开始收集RSS源: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:53:25:5325"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:53:27:5327"}
+{"level":"info","message":"开始收集RSS源: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 02:53:27:5327"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 02:53:28:5328"}
+{"level":"info","message":"开始收集RSS源: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:53:28:5328"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:53:33:5333"}
+{"level":"info","message":"开始收集RSS源: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:53:33:5333"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:53:33:5333"}
+{"level":"info","message":"开始收集RSS源: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 02:53:33:5333"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 02:53:35:5335"}
+{"level":"info","message":"开始收集RSS源: 经济学人","sourceId":"economist","timestamp":"2026-02-15 02:53:35:5335"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 经济学人","sourceId":"economist","timestamp":"2026-02-15 02:53:36:5336"}
+{"level":"info","message":"开始收集RSS源: Politico","sourceId":"politico","timestamp":"2026-02-15 02:53:36:5336"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 02:53:36:5336"}
+{"level":"info","message":"开始收集RSS源: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 02:53:36:5336"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 02:53:37:5337"}
+{"level":"info","message":"开始收集RSS源: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:53:37:5337"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:53:38:5338"}
+{"level":"info","message":"开始收集RSS源: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:53:38:5338"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:53:39:5339"}
+{"level":"info","message":"开始收集RSS源: Variety","sourceId":"variety","timestamp":"2026-02-15 02:53:39:5339"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Variety","sourceId":"variety","timestamp":"2026-02-15 02:53:39:5339"}
+{"level":"info","message":"开始收集RSS源: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 02:53:39:5339"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 02:53:40:5340"}
+{"level":"info","message":"开始收集RSS源: Billboard","sourceId":"billboard","timestamp":"2026-02-15 02:53:40:5340"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Billboard","sourceId":"billboard","timestamp":"2026-02-15 02:53:43:5343"}
+{"level":"info","message":"开始收集RSS源: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 02:53:43:5343"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 02:53:44:5344"}
+{"level":"info","message":"开始收集RSS源: ESPN","sourceId":"espn","timestamp":"2026-02-15 02:53:44:5344"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: ESPN","sourceId":"espn","timestamp":"2026-02-15 02:53:45:5345"}
+{"level":"info","message":"开始收集RSS源: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:53:45:5345"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:53:45:5345"}
+{"level":"info","message":"开始收集RSS源: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:53:45:5345"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:53:47:5347"}
+{"level":"info","message":"开始收集RSS源: 马卡报","sourceId":"marca","timestamp":"2026-02-15 02:53:47:5347"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 马卡报","sourceId":"marca","timestamp":"2026-02-15 02:53:48:5348"}
+{"level":"info","message":"开始收集RSS源: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:53:48:5348"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:53:49:5349"}
+{"level":"info","message":"开始收集RSS源: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:53:49:5349"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:53:52:5352"}
+{"level":"info","message":"开始收集RSS源: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 02:53:52:5352"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 02:53:52:5352"}
+{"level":"info","message":"开始收集RSS源: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 02:53:52:5352"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 02:53:54:5354"}
+{"level":"info","message":"收集到原始新闻: 386 条","timestamp":"2026-02-15 02:53:54:5354"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-02-15 02:53:54:5354"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-02-15 02:53:54:5354"}
+{"email":"smoke@example.com","level":"info","message":"处理联系表单","name":"Smoke","subject":"Smoke subject","timestamp":"2026-02-15 02:53:56:5356"}
+{"ip":"::1","level":"info","message":"收到测试日志API请求","method":"GET","timestamp":"2026-02-15 02:53:58:5358","url":"http://localhost:3000/api/test-logs/","userAgent":"curl/8.7.1"}
+{"level":"info","message":"测试请求处理完成","testData":{"message":"日志系统测试成功","requestId":"udxm6c","timestamp":"2026-02-14T18:53:58.108Z"},"timestamp":"2026-02-15 02:53:58:5358"}
+{"body":"smoke","level":"info","message":"收到POST测试请求","timestamp":"2026-02-15 02:53:58:5358"}
+{"checks":{"cache":true,"database":true,"server":true,"storage":true},"level":"info","message":"健康检查完成","status":"healthy","timestamp":"2026-02-15 02:55:07:557"}
+{"level":"info","message":"定时任务删除成功","scheduleId":"smoke","timestamp":"2026-02-15 02:55:09:559"}
+{"level":"info","message":"开始测试新闻收集功能","timestamp":"2026-02-15 02:55:09:559"}
+{"level":"info","message":"开始每日新闻收集","timestamp":"2026-02-15 02:55:09:559"}
+{"level":"info","message":"开始收集RSS源: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:55:09:559"}
+{"error":"read ECONNRESET","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:55:12:5512"}
+{"level":"info","message":"开始收集RSS源: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 02:55:12:5512"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 02:55:14:5514"}
+{"level":"info","message":"开始收集RSS源: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:55:14:5514"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:55:14:5514"}
+{"level":"info","message":"开始收集RSS源: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 02:55:14:5514"}
+{"itemCount":16,"level":"info","message":"RSS源收集完成: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 02:55:16:5516"}
+{"level":"info","message":"开始收集RSS源: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 02:55:16:5516"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 02:55:16:5516"}
+{"level":"info","message":"开始收集RSS源: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 02:55:16:5516"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 02:55:18:5518"}
+{"level":"info","message":"开始收集RSS源: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 02:55:18:5518"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 02:55:19:5519"}
+{"level":"info","message":"开始收集RSS源: 36氪","sourceId":"36kr","timestamp":"2026-02-15 02:55:19:5519"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 36氪","sourceId":"36kr","timestamp":"2026-02-15 02:55:21:5521"}
+{"level":"info","message":"开始收集RSS源: Wired","sourceId":"wired","timestamp":"2026-02-15 02:55:21:5521"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Wired","sourceId":"wired","timestamp":"2026-02-15 02:55:22:5522"}
+{"level":"info","message":"开始收集RSS源: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 02:55:22:5522"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 02:55:22:5522"}
+{"level":"info","message":"开始收集RSS源: Engadget","sourceId":"engadget","timestamp":"2026-02-15 02:55:22:5522"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Engadget","sourceId":"engadget","timestamp":"2026-02-15 02:55:24:5524"}
+{"level":"info","message":"开始收集RSS源: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 02:55:24:5524"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 02:55:25:5525"}
+{"level":"info","message":"开始收集RSS源: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:55:25:5525"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:55:27:5527"}
+{"level":"info","message":"开始收集RSS源: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 02:55:27:5527"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 02:55:28:5528"}
+{"level":"info","message":"开始收集RSS源: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:55:28:5528"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:55:29:5529"}
+{"level":"info","message":"开始收集RSS源: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:55:29:5529"}
+{"error":"Status code 502","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:55:29:5529"}
+{"level":"info","message":"开始收集RSS源: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 02:55:29:5529"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 02:55:31:5531"}
+{"level":"info","message":"开始收集RSS源: 经济学人","sourceId":"economist","timestamp":"2026-02-15 02:55:31:5531"}
+{"email":"smoke@example.com","level":"info","message":"处理联系表单","name":"Smoke","subject":"Smoke subject","timestamp":"2026-02-15 02:55:31:5531"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 经济学人","sourceId":"economist","timestamp":"2026-02-15 02:55:31:5531"}
+{"level":"info","message":"开始收集RSS源: Politico","sourceId":"politico","timestamp":"2026-02-15 02:55:31:5531"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 02:55:32:5532"}
+{"level":"info","message":"开始收集RSS源: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 02:55:32:5532"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 02:55:32:5532"}
+{"level":"info","message":"开始收集RSS源: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:55:32:5532"}
+{"ip":"::1","level":"info","message":"收到测试日志API请求","method":"GET","timestamp":"2026-02-15 02:55:32:5532","url":"http://localhost:3000/api/test-logs/","userAgent":"curl/8.7.1"}
+{"level":"info","message":"测试请求处理完成","testData":{"message":"日志系统测试成功","requestId":"q3tk5","timestamp":"2026-02-14T18:55:32.906Z"},"timestamp":"2026-02-15 02:55:32:5532"}
+{"body":"smoke","level":"info","message":"收到POST测试请求","timestamp":"2026-02-15 02:55:32:5532"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:55:34:5534"}
+{"level":"info","message":"开始收集RSS源: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:55:34:5534"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:55:34:5534"}
+{"level":"info","message":"开始收集RSS源: Variety","sourceId":"variety","timestamp":"2026-02-15 02:55:34:5534"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Variety","sourceId":"variety","timestamp":"2026-02-15 02:55:35:5535"}
+{"level":"info","message":"开始收集RSS源: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 02:55:35:5535"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 02:55:35:5535"}
+{"level":"info","message":"开始收集RSS源: Billboard","sourceId":"billboard","timestamp":"2026-02-15 02:55:35:5535"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Billboard","sourceId":"billboard","timestamp":"2026-02-15 02:55:36:5536"}
+{"level":"info","message":"开始收集RSS源: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 02:55:36:5536"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 02:55:38:5538"}
+{"level":"info","message":"开始收集RSS源: ESPN","sourceId":"espn","timestamp":"2026-02-15 02:55:38:5538"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: ESPN","sourceId":"espn","timestamp":"2026-02-15 02:55:39:5539"}
+{"level":"info","message":"开始收集RSS源: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:55:39:5539"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:55:39:5539"}
+{"level":"info","message":"开始收集RSS源: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:55:39:5539"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:55:41:5541"}
+{"level":"info","message":"开始收集RSS源: 马卡报","sourceId":"marca","timestamp":"2026-02-15 02:55:41:5541"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 马卡报","sourceId":"marca","timestamp":"2026-02-15 02:55:43:5543"}
+{"level":"info","message":"开始收集RSS源: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:55:43:5543"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:55:43:5543"}
+{"level":"info","message":"开始收集RSS源: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:55:43:5543"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:55:46:5546"}
+{"level":"info","message":"开始收集RSS源: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 02:55:46:5546"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 02:55:47:5547"}
+{"level":"info","message":"开始收集RSS源: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 02:55:47:5547"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 02:55:48:5548"}
+{"level":"info","message":"收集到原始新闻: 386 条","timestamp":"2026-02-15 02:55:48:5548"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-02-15 02:55:48:5548"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-02-15 02:55:48:5548"}
+{"level":"info","message":"开始测试新闻收集功能","timestamp":"2026-02-15 02:59:16:5916"}
+{"level":"info","message":"开始每日新闻收集","timestamp":"2026-02-15 02:59:16:5916"}
+{"level":"info","message":"开始收集RSS源: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:59:16:5916"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 02:59:17:5917"}
+{"level":"info","message":"开始收集RSS源: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 02:59:17:5917"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 02:59:17:5917"}
+{"level":"info","message":"开始收集RSS源: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:59:17:5917"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 02:59:18:5918"}
+{"level":"info","message":"开始收集RSS源: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 02:59:18:5918"}
+{"itemCount":16,"level":"info","message":"RSS源收集完成: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 02:59:20:5920"}
+{"level":"info","message":"开始收集RSS源: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 02:59:20:5920"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 02:59:20:5920"}
+{"level":"info","message":"开始收集RSS源: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 02:59:20:5920"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 02:59:22:5922"}
+{"level":"info","message":"开始收集RSS源: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 02:59:22:5922"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 02:59:22:5922"}
+{"level":"info","message":"开始收集RSS源: 36氪","sourceId":"36kr","timestamp":"2026-02-15 02:59:22:5922"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 36氪","sourceId":"36kr","timestamp":"2026-02-15 02:59:25:5925"}
+{"level":"info","message":"开始收集RSS源: Wired","sourceId":"wired","timestamp":"2026-02-15 02:59:25:5925"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Wired","sourceId":"wired","timestamp":"2026-02-15 02:59:25:5925"}
+{"level":"info","message":"开始收集RSS源: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 02:59:25:5925"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 02:59:27:5927"}
+{"level":"info","message":"开始收集RSS源: Engadget","sourceId":"engadget","timestamp":"2026-02-15 02:59:27:5927"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Engadget","sourceId":"engadget","timestamp":"2026-02-15 02:59:29:5929"}
+{"level":"info","message":"开始收集RSS源: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 02:59:29:5929"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 02:59:30:5930"}
+{"level":"info","message":"开始收集RSS源: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:59:30:5930"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 02:59:33:5933"}
+{"level":"info","message":"开始收集RSS源: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 02:59:33:5933"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 02:59:33:5933"}
+{"level":"info","message":"开始收集RSS源: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:59:33:5933"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 02:59:35:5935"}
+{"level":"info","message":"开始收集RSS源: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:59:35:5935"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 02:59:35:5935"}
+{"level":"info","message":"开始收集RSS源: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 02:59:35:5935"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 02:59:37:5937"}
+{"level":"info","message":"开始收集RSS源: 经济学人","sourceId":"economist","timestamp":"2026-02-15 02:59:37:5937"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 经济学人","sourceId":"economist","timestamp":"2026-02-15 02:59:37:5937"}
+{"level":"info","message":"开始收集RSS源: Politico","sourceId":"politico","timestamp":"2026-02-15 02:59:37:5937"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 02:59:38:5938"}
+{"level":"info","message":"开始收集RSS源: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 02:59:38:5938"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 02:59:38:5938"}
+{"level":"info","message":"开始收集RSS源: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:59:38:5938"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 02:59:40:5940"}
+{"level":"info","message":"开始收集RSS源: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:59:40:5940"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 02:59:40:5940"}
+{"level":"info","message":"开始收集RSS源: Variety","sourceId":"variety","timestamp":"2026-02-15 02:59:40:5940"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Variety","sourceId":"variety","timestamp":"2026-02-15 02:59:43:5943"}
+{"level":"info","message":"开始收集RSS源: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 02:59:43:5943"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 02:59:43:5943"}
+{"level":"info","message":"开始收集RSS源: Billboard","sourceId":"billboard","timestamp":"2026-02-15 02:59:43:5943"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Billboard","sourceId":"billboard","timestamp":"2026-02-15 02:59:44:5944"}
+{"level":"info","message":"开始收集RSS源: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 02:59:44:5944"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 02:59:46:5946"}
+{"level":"info","message":"开始收集RSS源: ESPN","sourceId":"espn","timestamp":"2026-02-15 02:59:46:5946"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: ESPN","sourceId":"espn","timestamp":"2026-02-15 02:59:47:5947"}
+{"level":"info","message":"开始收集RSS源: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:59:47:5947"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 02:59:47:5947"}
+{"level":"info","message":"开始收集RSS源: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:59:47:5947"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 02:59:51:5951"}
+{"level":"info","message":"开始收集RSS源: 马卡报","sourceId":"marca","timestamp":"2026-02-15 02:59:51:5951"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 马卡报","sourceId":"marca","timestamp":"2026-02-15 02:59:52:5952"}
+{"level":"info","message":"开始收集RSS源: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:59:52:5952"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 02:59:53:5953"}
+{"level":"info","message":"开始收集RSS源: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:59:53:5953"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 02:59:55:5955"}
+{"level":"info","message":"开始收集RSS源: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 02:59:55:5955"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 02:59:56:5956"}
+{"level":"info","message":"开始收集RSS源: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 02:59:56:5956"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 02:59:57:5957"}
+{"level":"info","message":"收集到原始新闻: 386 条","timestamp":"2026-02-15 02:59:57:5957"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集失败","timestamp":"2026-02-15 02:59:57:5957"}
+{"error":"Cannot convert object to primitive value","level":"error","message":"新闻收集测试失败","timestamp":"2026-02-15 02:59:57:5957"}
+{"level":"info","message":"开始测试新闻收集功能","timestamp":"2026-02-15 03:01:37:137"}
+{"level":"info","message":"开始每日新闻收集","timestamp":"2026-02-15 03:01:37:137"}
+{"level":"info","message":"开始收集RSS源: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:01:37:137"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:01:38:138"}
+{"level":"info","message":"开始收集RSS源: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 03:01:38:138"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 03:01:39:139"}
+{"level":"info","message":"开始收集RSS源: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:01:39:139"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:01:39:139"}
+{"level":"info","message":"开始收集RSS源: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 03:01:39:139"}
+{"itemCount":16,"level":"info","message":"RSS源收集完成: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 03:01:41:141"}
+{"level":"info","message":"开始收集RSS源: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 03:01:41:141"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 03:01:41:141"}
+{"level":"info","message":"开始收集RSS源: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 03:01:41:141"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 03:01:43:143"}
+{"level":"info","message":"开始收集RSS源: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 03:01:43:143"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 03:01:44:144"}
+{"level":"info","message":"开始收集RSS源: 36氪","sourceId":"36kr","timestamp":"2026-02-15 03:01:44:144"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 36氪","sourceId":"36kr","timestamp":"2026-02-15 03:01:47:147"}
+{"level":"info","message":"开始收集RSS源: Wired","sourceId":"wired","timestamp":"2026-02-15 03:01:47:147"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Wired","sourceId":"wired","timestamp":"2026-02-15 03:01:47:147"}
+{"level":"info","message":"开始收集RSS源: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 03:01:47:147"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 03:01:47:147"}
+{"level":"info","message":"开始收集RSS源: Engadget","sourceId":"engadget","timestamp":"2026-02-15 03:01:47:147"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Engadget","sourceId":"engadget","timestamp":"2026-02-15 03:01:50:150"}
+{"level":"info","message":"开始收集RSS源: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 03:01:50:150"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 03:01:51:151"}
+{"level":"info","message":"开始收集RSS源: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:01:51:151"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:01:53:153"}
+{"level":"info","message":"开始收集RSS源: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 03:01:53:153"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 03:01:54:154"}
+{"level":"info","message":"开始收集RSS源: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:01:54:154"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:01:55:155"}
+{"level":"info","message":"开始收集RSS源: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:01:55:155"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:01:55:155"}
+{"level":"info","message":"开始收集RSS源: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 03:01:55:155"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 03:01:57:157"}
+{"level":"info","message":"开始收集RSS源: 经济学人","sourceId":"economist","timestamp":"2026-02-15 03:01:57:157"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 经济学人","sourceId":"economist","timestamp":"2026-02-15 03:01:57:157"}
+{"level":"info","message":"开始收集RSS源: Politico","sourceId":"politico","timestamp":"2026-02-15 03:01:57:157"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 03:01:57:157"}
+{"level":"info","message":"开始收集RSS源: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 03:01:57:157"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 03:01:58:158"}
+{"level":"info","message":"开始收集RSS源: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:01:58:158"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:01:59:159"}
+{"level":"info","message":"开始收集RSS源: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:01:59:159"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:02:00:20"}
+{"level":"info","message":"开始收集RSS源: Variety","sourceId":"variety","timestamp":"2026-02-15 03:02:00:20"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Variety","sourceId":"variety","timestamp":"2026-02-15 03:02:03:23"}
+{"level":"info","message":"开始收集RSS源: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 03:02:03:23"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 03:02:03:23"}
+{"level":"info","message":"开始收集RSS源: Billboard","sourceId":"billboard","timestamp":"2026-02-15 03:02:03:23"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Billboard","sourceId":"billboard","timestamp":"2026-02-15 03:02:04:24"}
+{"level":"info","message":"开始收集RSS源: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 03:02:04:24"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 03:02:06:26"}
+{"level":"info","message":"开始收集RSS源: ESPN","sourceId":"espn","timestamp":"2026-02-15 03:02:06:26"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: ESPN","sourceId":"espn","timestamp":"2026-02-15 03:02:07:27"}
+{"level":"info","message":"开始收集RSS源: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:02:07:27"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:02:07:27"}
+{"level":"info","message":"开始收集RSS源: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:02:07:27"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:02:09:29"}
+{"level":"info","message":"开始收集RSS源: 马卡报","sourceId":"marca","timestamp":"2026-02-15 03:02:09:29"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 马卡报","sourceId":"marca","timestamp":"2026-02-15 03:02:10:210"}
+{"level":"info","message":"开始收集RSS源: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:02:10:210"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:02:11:211"}
+{"level":"info","message":"开始收集RSS源: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:02:11:211"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:02:13:213"}
+{"level":"info","message":"开始收集RSS源: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 03:02:13:213"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 03:02:14:214"}
+{"level":"info","message":"开始收集RSS源: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 03:02:14:214"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 03:02:15:215"}
+{"level":"info","message":"收集到原始新闻: 386 条","timestamp":"2026-02-15 03:02:15:215"}
+{"categoriesDistribution":{"AI":3,"Analytical Chemistry":2,"Apple":1,"Archaeology":1,"Arts & Entertainment":2,"Audio Technology":1,"Biotechnology":1,"Business":7,"Business / Regulation":1,"Camera Lenses":1,"Cars":1,"ChatGPT":1,"Copa del Rey":1,"Culture":5,"Earth Sciences":2,"Ecology":2,"Education":1,"Entertainment":1,"Environment":2,"FC Barcelona":1,"Features":1,"Festivals":2,"Fútbol Femenino":1,"Gaming":3,"Gear":11,"Girona FC":1,"Global":5,"Google":1,"Health":2,"Health &amp; Fitness":1,"How to Watch Football":2,"How to Watch Rugby":1,"Internet & Networking Technology":2,"Latin":1,"Lifestyle":2,"Media":5,"Molecular & Computational biology":1,"Movie Features":2,"Movie News":4,"Movie Reviews":1,"Movies":1,"Music":5,"Nanophysics":1,"News":10,"Other":1,"Paleontology & Fossils":1,"Plants & Animals":2,"Policy":3,"Politics":2,"Politics & Government":1,"Primera División":8,"Pro":2,"RFEF":1,"RS Recommends":3,"Real Madrid":1,"Reviews":1,"Science":5,"Seasonal Sales":1,"Security":2,"Segunda División":1,"Shopping":1,"Show Types":3,"Smartwatches":1,"Social Sciences":1,"Software":1,"Space":3,"Space Exploration":2,"Sport":9,"TV":1,"TV & Movies":2,"Tech":2,"Technology & Electronics":6,"Televisions":1,"Video Games":1,"Villarreal CF":1,"Websites &amp; Apps":2,"business":48,"fútbol":3,"iPhone":1,"international":36,"politics":20,"science":20,"sports":21,"technology":45},"duplicatesRemoved":17,"level":"info","message":"新闻处理完成","processingTime":21,"sourcesDistribution":{"36氪":15,"Ars Technica":20,"BBC World":20,"Billboard":10,"CNBC":20,"CNN International":16,"ESPN":20,"Engadget":20,"Phys.org":20,"TechCrunch":20,"TechRadar":20,"The Verge":10,"Variety":10,"Wired":20,"半岛电视台":20,"华尔街日报":20,"卫报政治":20,"好莱坞报道":10,"滚石杂志":10,"科学杂志":20,"经济学人":8,"马卡报":20},"timestamp":"2026-02-15 03:02:16:216","totalCollected":386,"totalProcessed":369,"translationsCompleted":369}
+{"categoriesDistribution":{"AI":3,"Analytical Chemistry":2,"Apple":1,"Archaeology":1,"Arts & Entertainment":2,"Audio Technology":1,"Biotechnology":1,"Business":7,"Business / Regulation":1,"Camera Lenses":1,"Cars":1,"ChatGPT":1,"Copa del Rey":1,"Culture":5,"Earth Sciences":2,"Ecology":2,"Education":1,"Entertainment":1,"Environment":2,"FC Barcelona":1,"Features":1,"Festivals":2,"Fútbol Femenino":1,"Gaming":3,"Gear":11,"Girona FC":1,"Global":5,"Google":1,"Health":2,"Health &amp; Fitness":1,"How to Watch Football":2,"How to Watch Rugby":1,"Internet & Networking Technology":2,"Latin":1,"Lifestyle":2,"Media":5,"Molecular & Computational biology":1,"Movie Features":2,"Movie News":4,"Movie Reviews":1,"Movies":1,"Music":5,"Nanophysics":1,"News":10,"Other":1,"Paleontology & Fossils":1,"Plants & Animals":2,"Policy":3,"Politics":2,"Politics & Government":1,"Primera División":8,"Pro":2,"RFEF":1,"RS Recommends":3,"Real Madrid":1,"Reviews":1,"Science":5,"Seasonal Sales":1,"Security":2,"Segunda División":1,"Shopping":1,"Show Types":3,"Smartwatches":1,"Social Sciences":1,"Software":1,"Space":3,"Space Exploration":2,"Sport":9,"TV":1,"TV & Movies":2,"Tech":2,"Technology & Electronics":6,"Televisions":1,"Video Games":1,"Villarreal CF":1,"Websites &amp; Apps":2,"business":48,"fútbol":3,"iPhone":1,"international":36,"politics":20,"science":20,"sports":21,"technology":45},"duplicatesRemoved":17,"level":"info","message":"新闻处理完成","processingTime":21,"sourcesDistribution":{"36氪":15,"Ars Technica":20,"BBC World":20,"Billboard":10,"CNBC":20,"CNN International":16,"ESPN":20,"Engadget":20,"Phys.org":20,"TechCrunch":20,"TechRadar":20,"The Verge":10,"Variety":10,"Wired":20,"半岛电视台":20,"华尔街日报":20,"卫报政治":20,"好莱坞报道":10,"滚石杂志":10,"科学杂志":20,"经济学人":8,"马卡报":20},"timestamp":"2026-02-15 03:02:16:216","totalCollected":386,"totalProcessed":369,"translationsCompleted":369}
+{"level":"info","message":"新闻简报邮件发送成功: test@example.com","timestamp":"2026-02-15 03:02:16:216"}
+{"level":"info","message":"新闻收集完成，耗时: 39401ms","timestamp":"2026-02-15 03:02:16:216"}
+{"checks":{"cache":true,"database":true,"server":true,"storage":true},"level":"info","message":"健康检查完成","status":"healthy","timestamp":"2026-02-15 03:08:52:852"}
+{"level":"info","message":"定时任务删除成功","scheduleId":"smoke","timestamp":"2026-02-15 03:08:54:854"}
+{"level":"info","message":"开始测试新闻收集功能","timestamp":"2026-02-15 03:08:54:854"}
+{"level":"info","message":"开始每日新闻收集","timestamp":"2026-02-15 03:08:54:854"}
+{"level":"info","message":"开始收集RSS源: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:08:54:854"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:08:55:855"}
+{"level":"info","message":"开始收集RSS源: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 03:08:55:855"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 03:08:56:856"}
+{"level":"info","message":"开始收集RSS源: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:08:56:856"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:08:56:856"}
+{"level":"info","message":"开始收集RSS源: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 03:08:56:856"}
+{"itemCount":16,"level":"info","message":"RSS源收集完成: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 03:08:58:858"}
+{"level":"info","message":"开始收集RSS源: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 03:08:58:858"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 03:08:59:859"}
+{"level":"info","message":"开始收集RSS源: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 03:08:59:859"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 03:09:01:91"}
+{"level":"info","message":"开始收集RSS源: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 03:09:01:91"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 03:09:01:91"}
+{"level":"info","message":"开始收集RSS源: 36氪","sourceId":"36kr","timestamp":"2026-02-15 03:09:01:91"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 36氪","sourceId":"36kr","timestamp":"2026-02-15 03:09:04:94"}
+{"level":"info","message":"开始收集RSS源: Wired","sourceId":"wired","timestamp":"2026-02-15 03:09:04:94"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Wired","sourceId":"wired","timestamp":"2026-02-15 03:09:04:94"}
+{"level":"info","message":"开始收集RSS源: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 03:09:04:94"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 03:09:04:94"}
+{"level":"info","message":"开始收集RSS源: Engadget","sourceId":"engadget","timestamp":"2026-02-15 03:09:04:94"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Engadget","sourceId":"engadget","timestamp":"2026-02-15 03:09:05:95"}
+{"level":"info","message":"开始收集RSS源: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 03:09:05:95"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 03:09:06:96"}
+{"level":"info","message":"开始收集RSS源: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:09:06:96"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:09:09:99"}
+{"level":"info","message":"开始收集RSS源: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 03:09:09:99"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 03:09:09:99"}
+{"level":"info","message":"开始收集RSS源: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:09:09:99"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:09:10:910"}
+{"level":"info","message":"开始收集RSS源: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:09:10:910"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:09:11:911"}
+{"level":"info","message":"开始收集RSS源: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 03:09:11:911"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 03:09:12:912"}
+{"level":"info","message":"开始收集RSS源: 经济学人","sourceId":"economist","timestamp":"2026-02-15 03:09:12:912"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 经济学人","sourceId":"economist","timestamp":"2026-02-15 03:09:13:913"}
+{"level":"info","message":"开始收集RSS源: Politico","sourceId":"politico","timestamp":"2026-02-15 03:09:13:913"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 03:09:13:913"}
+{"level":"info","message":"开始收集RSS源: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 03:09:13:913"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 03:09:14:914"}
+{"level":"info","message":"开始收集RSS源: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:09:14:914"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:09:15:915"}
+{"level":"info","message":"开始收集RSS源: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:09:15:915"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:09:16:916"}
+{"level":"info","message":"开始收集RSS源: Variety","sourceId":"variety","timestamp":"2026-02-15 03:09:16:916"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Variety","sourceId":"variety","timestamp":"2026-02-15 03:09:19:919"}
+{"level":"info","message":"开始收集RSS源: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 03:09:19:919"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 03:09:20:920"}
+{"level":"info","message":"开始收集RSS源: Billboard","sourceId":"billboard","timestamp":"2026-02-15 03:09:20:920"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Billboard","sourceId":"billboard","timestamp":"2026-02-15 03:09:23:923"}
+{"level":"info","message":"开始收集RSS源: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 03:09:23:923"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 03:09:23:923"}
+{"level":"info","message":"开始收集RSS源: ESPN","sourceId":"espn","timestamp":"2026-02-15 03:09:23:923"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: ESPN","sourceId":"espn","timestamp":"2026-02-15 03:09:24:924"}
+{"level":"info","message":"开始收集RSS源: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:09:24:924"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:09:25:925"}
+{"level":"info","message":"开始收集RSS源: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:09:25:925"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:09:29:929"}
+{"level":"info","message":"开始收集RSS源: 马卡报","sourceId":"marca","timestamp":"2026-02-15 03:09:29:929"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 马卡报","sourceId":"marca","timestamp":"2026-02-15 03:09:30:930"}
+{"level":"info","message":"开始收集RSS源: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:09:30:930"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:09:31:931"}
+{"level":"info","message":"开始收集RSS源: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:09:31:931"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:09:33:933"}
+{"level":"info","message":"开始收集RSS源: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 03:09:33:933"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 03:09:34:934"}
+{"level":"info","message":"开始收集RSS源: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 03:09:34:934"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 03:09:35:935"}
+{"level":"info","message":"收集到原始新闻: 386 条","timestamp":"2026-02-15 03:09:35:935"}
+{"categoriesDistribution":{"AI":3,"Analytical Chemistry":2,"Apple":1,"Archaeology":1,"Arts & Entertainment":2,"Audio Technology":1,"Biotechnology":1,"Business":7,"Business / Regulation":1,"Camera Lenses":1,"Cars":1,"ChatGPT":1,"Copa del Rey":1,"Culture":5,"Earth Sciences":2,"Ecology":2,"Education":1,"Entertainment":1,"Environment":2,"FC Barcelona":1,"Features":1,"Festivals":2,"Fútbol Femenino":1,"Gaming":3,"Gear":11,"Girona FC":1,"Global":5,"Google":1,"Health":2,"Health &amp; Fitness":1,"How to Watch Football":2,"How to Watch Rugby":1,"Internet & Networking Technology":2,"Latin":1,"Lifestyle":2,"Media":5,"Molecular & Computational biology":1,"Movie Features":2,"Movie News":4,"Movie Reviews":1,"Movies":1,"Music":5,"Nanophysics":1,"News":10,"Other":1,"Paleontology & Fossils":1,"Plants & Animals":2,"Policy":3,"Politics":2,"Politics & Government":1,"Primera División":8,"Pro":2,"RFEF":1,"RS Recommends":3,"Real Madrid":1,"Reviews":1,"Science":5,"Seasonal Sales":1,"Security":2,"Segunda División":1,"Shopping":1,"Show Types":3,"Smartwatches":1,"Social Sciences":1,"Software":1,"Space":3,"Space Exploration":2,"Sport":9,"TV":1,"TV & Movies":2,"Tech":2,"Technology & Electronics":6,"Televisions":1,"Video Games":1,"Villarreal CF":1,"Websites &amp; Apps":2,"business":48,"fútbol":3,"iPhone":1,"international":36,"politics":20,"science":20,"sports":21,"technology":45},"duplicatesRemoved":17,"level":"info","message":"新闻处理完成","processingTime":21,"sourcesDistribution":{"36氪":15,"Ars Technica":20,"BBC World":20,"Billboard":10,"CNBC":20,"CNN International":16,"ESPN":20,"Engadget":20,"Phys.org":20,"TechCrunch":20,"TechRadar":20,"The Verge":10,"Variety":10,"Wired":20,"半岛电视台":20,"华尔街日报":20,"卫报政治":20,"好莱坞报道":10,"滚石杂志":10,"科学杂志":20,"经济学人":8,"马卡报":20},"timestamp":"2026-02-15 03:09:35:935","totalCollected":386,"totalProcessed":369,"translationsCompleted":369}
+{"categoriesDistribution":{"AI":3,"Analytical Chemistry":2,"Apple":1,"Archaeology":1,"Arts & Entertainment":2,"Audio Technology":1,"Biotechnology":1,"Business":7,"Business / Regulation":1,"Camera Lenses":1,"Cars":1,"ChatGPT":1,"Copa del Rey":1,"Culture":5,"Earth Sciences":2,"Ecology":2,"Education":1,"Entertainment":1,"Environment":2,"FC Barcelona":1,"Features":1,"Festivals":2,"Fútbol Femenino":1,"Gaming":3,"Gear":11,"Girona FC":1,"Global":5,"Google":1,"Health":2,"Health &amp; Fitness":1,"How to Watch Football":2,"How to Watch Rugby":1,"Internet & Networking Technology":2,"Latin":1,"Lifestyle":2,"Media":5,"Molecular & Computational biology":1,"Movie Features":2,"Movie News":4,"Movie Reviews":1,"Movies":1,"Music":5,"Nanophysics":1,"News":10,"Other":1,"Paleontology & Fossils":1,"Plants & Animals":2,"Policy":3,"Politics":2,"Politics & Government":1,"Primera División":8,"Pro":2,"RFEF":1,"RS Recommends":3,"Real Madrid":1,"Reviews":1,"Science":5,"Seasonal Sales":1,"Security":2,"Segunda División":1,"Shopping":1,"Show Types":3,"Smartwatches":1,"Social Sciences":1,"Software":1,"Space":3,"Space Exploration":2,"Sport":9,"TV":1,"TV & Movies":2,"Tech":2,"Technology & Electronics":6,"Televisions":1,"Video Games":1,"Villarreal CF":1,"Websites &amp; Apps":2,"business":48,"fútbol":3,"iPhone":1,"international":36,"politics":20,"science":20,"sports":21,"technology":45},"duplicatesRemoved":17,"level":"info","message":"新闻处理完成","processingTime":21,"sourcesDistribution":{"36氪":15,"Ars Technica":20,"BBC World":20,"Billboard":10,"CNBC":20,"CNN International":16,"ESPN":20,"Engadget":20,"Phys.org":20,"TechCrunch":20,"TechRadar":20,"The Verge":10,"Variety":10,"Wired":20,"半岛电视台":20,"华尔街日报":20,"卫报政治":20,"好莱坞报道":10,"滚石杂志":10,"科学杂志":20,"经济学人":8,"马卡报":20},"timestamp":"2026-02-15 03:09:35:935","totalCollected":386,"totalProcessed":369,"translationsCompleted":369}
+{"level":"info","message":"新闻简报邮件发送成功: test@example.com","timestamp":"2026-02-15 03:09:36:936"}
+{"level":"info","message":"新闻收集完成，耗时: 42106ms","timestamp":"2026-02-15 03:09:36:936"}
+{"email":"smoke@example.com","level":"info","message":"处理联系表单","name":"Smoke","subject":"Smoke subject","timestamp":"2026-02-15 03:09:38:938"}
+{"ip":"::1","level":"info","message":"收到测试日志API请求","method":"GET","timestamp":"2026-02-15 03:09:39:939","url":"http://localhost:3000/api/test-logs/","userAgent":"curl/8.7.1"}
+{"level":"info","message":"测试请求处理完成","testData":{"message":"日志系统测试成功","requestId":"wvdc7l","timestamp":"2026-02-14T19:09:39.589Z"},"timestamp":"2026-02-15 03:09:39:939"}
+{"body":"smoke","level":"info","message":"收到POST测试请求","timestamp":"2026-02-15 03:09:39:939"}
+{"checks":{"cache":true,"database":true,"server":true,"storage":true},"level":"info","message":"健康检查完成","status":"healthy","timestamp":"2026-02-15 03:15:14:1514"}
+{"level":"info","message":"定时任务删除成功","scheduleId":"smoke","timestamp":"2026-02-15 03:15:16:1516"}
+{"level":"info","message":"开始测试新闻收集功能","timestamp":"2026-02-15 03:15:16:1516"}
+{"level":"info","message":"开始每日新闻收集","timestamp":"2026-02-15 03:15:16:1516"}
+{"level":"info","message":"开始收集RSS源: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:15:16:1516"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社","sourceId":"reuters","timestamp":"2026-02-15 03:15:17:1517"}
+{"level":"info","message":"开始收集RSS源: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 03:15:17:1517"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: BBC World","sourceId":"bbc-world","timestamp":"2026-02-15 03:15:18:1518"}
+{"level":"info","message":"开始收集RSS源: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:15:18:1518"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: 美联社","sourceId":"ap-news","timestamp":"2026-02-15 03:15:18:1518"}
+{"level":"info","message":"开始收集RSS源: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 03:15:18:1518"}
+{"itemCount":16,"level":"info","message":"RSS源收集完成: CNN International","sourceId":"cnn-world","timestamp":"2026-02-15 03:15:20:1520"}
+{"level":"info","message":"开始收集RSS源: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 03:15:20:1520"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 半岛电视台","sourceId":"al-jazeera","timestamp":"2026-02-15 03:15:20:1520"}
+{"level":"info","message":"开始收集RSS源: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 03:15:20:1520"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechCrunch","sourceId":"techcrunch","timestamp":"2026-02-15 03:15:22:1522"}
+{"level":"info","message":"开始收集RSS源: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 03:15:22:1522"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: The Verge","sourceId":"the-verge","timestamp":"2026-02-15 03:15:22:1522"}
+{"level":"info","message":"开始收集RSS源: 36氪","sourceId":"36kr","timestamp":"2026-02-15 03:15:22:1522"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 36氪","sourceId":"36kr","timestamp":"2026-02-15 03:15:25:1525"}
+{"level":"info","message":"开始收集RSS源: Wired","sourceId":"wired","timestamp":"2026-02-15 03:15:25:1525"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Wired","sourceId":"wired","timestamp":"2026-02-15 03:15:26:1526"}
+{"level":"info","message":"开始收集RSS源: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 03:15:26:1526"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Ars Technica","sourceId":"ars-technica","timestamp":"2026-02-15 03:15:26:1526"}
+{"level":"info","message":"开始收集RSS源: Engadget","sourceId":"engadget","timestamp":"2026-02-15 03:15:26:1526"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Engadget","sourceId":"engadget","timestamp":"2026-02-15 03:15:28:1528"}
+{"level":"info","message":"开始收集RSS源: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 03:15:28:1528"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: TechRadar","sourceId":"techradar","timestamp":"2026-02-15 03:15:29:1529"}
+{"level":"info","message":"开始收集RSS源: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:15:29:1529"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"error","message":"RSS收集失败: 彭博社","sourceId":"bloomberg","timestamp":"2026-02-15 03:15:31:1531"}
+{"level":"info","message":"开始收集RSS源: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 03:15:31:1531"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: CNBC","sourceId":"cnbc","timestamp":"2026-02-15 03:15:32:1532"}
+{"level":"info","message":"开始收集RSS源: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:15:32:1532"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 财新网","sourceId":"caixin","timestamp":"2026-02-15 03:15:33:1533"}
+{"level":"info","message":"开始收集RSS源: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:15:33:1533"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 金融时报","sourceId":"ft-china","timestamp":"2026-02-15 03:15:33:1533"}
+{"level":"info","message":"开始收集RSS源: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 03:15:33:1533"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 华尔街日报","sourceId":"wall-street-journal","timestamp":"2026-02-15 03:15:35:1535"}
+{"level":"info","message":"开始收集RSS源: 经济学人","sourceId":"economist","timestamp":"2026-02-15 03:15:35:1535"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 经济学人","sourceId":"economist","timestamp":"2026-02-15 03:15:35:1535"}
+{"level":"info","message":"开始收集RSS源: Politico","sourceId":"politico","timestamp":"2026-02-15 03:15:35:1535"}
+{"error":"Status code 403","level":"error","message":"RSS收集失败: Politico","sourceId":"politico","timestamp":"2026-02-15 03:15:36:1536"}
+{"level":"info","message":"开始收集RSS源: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 03:15:36:1536"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 卫报政治","sourceId":"guardian-politics","timestamp":"2026-02-15 03:15:36:1536"}
+{"level":"info","message":"开始收集RSS源: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:15:36:1536"}
+{"error":"socket hang up","level":"error","message":"RSS收集失败: 路透社政治","sourceId":"reuters-politics","timestamp":"2026-02-15 03:15:38:1538"}
+{"level":"info","message":"开始收集RSS源: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:15:38:1538"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: Axios Politics","sourceId":"axios-politics","timestamp":"2026-02-15 03:15:39:1539"}
+{"level":"info","message":"开始收集RSS源: Variety","sourceId":"variety","timestamp":"2026-02-15 03:15:39:1539"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Variety","sourceId":"variety","timestamp":"2026-02-15 03:15:39:1539"}
+{"level":"info","message":"开始收集RSS源: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 03:15:39:1539"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 滚石杂志","sourceId":"rolling-stone","timestamp":"2026-02-15 03:15:40:1540"}
+{"level":"info","message":"开始收集RSS源: Billboard","sourceId":"billboard","timestamp":"2026-02-15 03:15:40:1540"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: Billboard","sourceId":"billboard","timestamp":"2026-02-15 03:15:43:1543"}
+{"level":"info","message":"开始收集RSS源: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 03:15:43:1543"}
+{"itemCount":10,"level":"info","message":"RSS源收集完成: 好莱坞报道","sourceId":"hollywood-reporter","timestamp":"2026-02-15 03:15:44:1544"}
+{"level":"info","message":"开始收集RSS源: ESPN","sourceId":"espn","timestamp":"2026-02-15 03:15:44:1544"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: ESPN","sourceId":"espn","timestamp":"2026-02-15 03:15:44:1544"}
+{"level":"info","message":"开始收集RSS源: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:15:44:1544"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 体育画报","sourceId":"sports-illustrated","timestamp":"2026-02-15 03:15:45:1545"}
+{"level":"info","message":"开始收集RSS源: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:15:45:1545"}
+{"error":"Unencoded <\nLine: 2\nColumn: 139\nChar: 1","level":"error","message":"RSS收集失败: The Athletic","sourceId":"the-athletic","timestamp":"2026-02-15 03:15:47:1547"}
+{"level":"info","message":"开始收集RSS源: 马卡报","sourceId":"marca","timestamp":"2026-02-15 03:15:47:1547"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 马卡报","sourceId":"marca","timestamp":"2026-02-15 03:15:49:1549"}
+{"level":"info","message":"开始收集RSS源: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:15:49:1549"}
+{"error":"Status code 404","level":"error","message":"RSS收集失败: 科学美国人","sourceId":"scientific-american","timestamp":"2026-02-15 03:15:49:1549"}
+{"level":"info","message":"开始收集RSS源: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:15:49:1549"}
+{"error":"Status code 406","level":"error","message":"RSS收集失败: 自然杂志","sourceId":"nature","timestamp":"2026-02-15 03:15:52:1552"}
+{"level":"info","message":"开始收集RSS源: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 03:15:52:1552"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: 科学杂志","sourceId":"science-magazine","timestamp":"2026-02-15 03:15:53:1553"}
+{"level":"info","message":"开始收集RSS源: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 03:15:53:1553"}
+{"itemCount":20,"level":"info","message":"RSS源收集完成: Phys.org","sourceId":"phys-org","timestamp":"2026-02-15 03:15:54:1554"}
+{"level":"info","message":"收集到原始新闻: 386 条","timestamp":"2026-02-15 03:15:54:1554"}
+{"categoriesDistribution":{"AI":3,"Analytical Chemistry":2,"Apple":1,"Archaeology":1,"Arts & Entertainment":2,"Audio Technology":1,"Biotechnology":1,"Business":6,"Business / Regulation":1,"Camera Lenses":1,"Cars":1,"ChatGPT":1,"Copa del Rey":1,"Culture":5,"Earth Sciences":2,"Ecology":2,"Education":1,"Entertainment":1,"Environment":2,"FC Barcelona":1,"Features":1,"Festivals":2,"Fútbol Femenino":1,"Gaming":3,"Gear":11,"Girona FC":1,"Global":5,"Google":1,"Health":2,"Health &amp; Fitness":1,"How to Watch Football":2,"How to Watch Rugby":1,"Internet & Networking Technology":2,"Latin":1,"Lifestyle":2,"Media":6,"Molecular & Computational biology":1,"Movie Features":2,"Movie News":4,"Movie Reviews":1,"Movies":1,"Music":6,"Nanophysics":1,"News":8,"Other":1,"Paleontology & Fossils":1,"Plants & Animals":2,"Policy":3,"Politics":2,"Politics & Government":1,"Primera División":8,"Pro":2,"RFEF":1,"RS Recommends":3,"Real Madrid":1,"Reviews":1,"Science":5,"Seasonal Sales":1,"Security":2,"Segunda División":1,"Shopping":1,"Show Types":4,"Smartwatches":1,"Social Sciences":1,"Software":1,"Space":3,"Space Exploration":2,"Sport":10,"TV":1,"TV & Movies":2,"Tech":2,"Technology & Electronics":5,"Televisions":1,"Video Games":1,"Villarreal CF":1,"Websites &amp; Apps":2,"business":48,"fútbol":3,"iPhone":1,"international":36,"politics":20,"science":20,"sports":21,"technology":45},"duplicatesRemoved":17,"level":"info","message":"新闻处理完成","processingTime":17,"sourcesDistribution":{"36氪":15,"Ars Technica":20,"BBC World":20,"Billboard":10,"CNBC":20,"CNN International":16,"ESPN":20,"Engadget":20,"Phys.org":20,"TechCrunch":20,"TechRadar":20,"The Verge":10,"Variety":10,"Wired":20,"半岛电视台":20,"华尔街日报":20,"卫报政治":20,"好莱坞报道":10,"滚石杂志":10,"科学杂志":20,"经济学人":8,"马卡报":20},"timestamp":"2026-02-15 03:15:54:1554","totalCollected":386,"totalProcessed":369,"translationsCompleted":369}
+{"categoriesDistribution":{"AI":3,"Analytical Chemistry":2,"Apple":1,"Archaeology":1,"Arts & Entertainment":2,"Audio Technology":1,"Biotechnology":1,"Business":6,"Business / Regulation":1,"Camera Lenses":1,"Cars":1,"ChatGPT":1,"Copa del Rey":1,"Culture":5,"Earth Sciences":2,"Ecology":2,"Education":1,"Entertainment":1,"Environment":2,"FC Barcelona":1,"Features":1,"Festivals":2,"Fútbol Femenino":1,"Gaming":3,"Gear":11,"Girona FC":1,"Global":5,"Google":1,"Health":2,"Health &amp; Fitness":1,"How to Watch Football":2,"How to Watch Rugby":1,"Internet & Networking Technology":2,"Latin":1,"Lifestyle":2,"Media":6,"Molecular & Computational biology":1,"Movie Features":2,"Movie News":4,"Movie Reviews":1,"Movies":1,"Music":6,"Nanophysics":1,"News":8,"Other":1,"Paleontology & Fossils":1,"Plants & Animals":2,"Policy":3,"Politics":2,"Politics & Government":1,"Primera División":8,"Pro":2,"RFEF":1,"RS Recommends":3,"Real Madrid":1,"Reviews":1,"Science":5,"Seasonal Sales":1,"Security":2,"Segunda División":1,"Shopping":1,"Show Types":4,"Smartwatches":1,"Social Sciences":1,"Software":1,"Space":3,"Space Exploration":2,"Sport":10,"TV":1,"TV & Movies":2,"Tech":2,"Technology & Electronics":5,"Televisions":1,"Video Games":1,"Villarreal CF":1,"Websites &amp; Apps":2,"business":48,"fútbol":3,"iPhone":1,"international":36,"politics":20,"science":20,"sports":21,"technology":45},"duplicatesRemoved":17,"level":"info","message":"新闻处理完成","processingTime":17,"sourcesDistribution":{"36氪":15,"Ars Technica":20,"BBC World":20,"Billboard":10,"CNBC":20,"CNN International":16,"ESPN":20,"Engadget":20,"Phys.org":20,"TechCrunch":20,"TechRadar":20,"The Verge":10,"Variety":10,"Wired":20,"半岛电视台":20,"华尔街日报":20,"卫报政治":20,"好莱坞报道":10,"滚石杂志":10,"科学杂志":20,"经济学人":8,"马卡报":20},"timestamp":"2026-02-15 03:15:54:1554","totalCollected":386,"totalProcessed":369,"translationsCompleted":369}
+{"level":"info","message":"新闻简报邮件发送成功: test@example.com","timestamp":"2026-02-15 03:15:56:1556"}
+{"level":"info","message":"新闻收集完成，耗时: 39865ms","timestamp":"2026-02-15 03:15:56:1556"}
+{"email":"smoke@example.com","level":"info","message":"处理联系表单","name":"Smoke","subject":"Smoke subject","timestamp":"2026-02-15 03:15:57:1557"}
+{"ip":"::1","level":"info","message":"收到测试日志API请求","method":"GET","timestamp":"2026-02-15 03:15:58:1558","url":"http://localhost:3000/api/test-logs/","userAgent":"curl/8.7.1"}
+{"level":"info","message":"测试请求处理完成","testData":{"message":"日志系统测试成功","requestId":"kqsebd","timestamp":"2026-02-14T19:15:58.871Z"},"timestamp":"2026-02-15 03:15:58:1558"}
+{"body":"smoke","level":"info","message":"收到POST测试请求","timestamp":"2026-02-15 03:15:58:1558"}

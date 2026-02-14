@@ -1,6 +1,0 @@
-{"ip":"::1","level":"info","message":"收到测试日志API请求","method":"GET","timestamp":"2026-01-29 06:12:50:1250","url":"http://localhost:3000/api/test-logs","userAgent":"curl/8.7.1"}
-{"level":"info","message":"测试请求处理完成","testData":{"message":"日志系统测试成功","requestId":"0h5jr","timestamp":"2026-01-28T22:12:50.212Z"},"timestamp":"2026-01-29 06:12:50:1250"}
-{"error":"test error","level":"error","message":"Test error message","timestamp":"2026-01-29 06:15:49:1549"}
-{"level":"warn","message":"CSRF验证失败","method":"POST","origin":"http://localhost:3001","timestamp":"2026-01-29 12:05:00:50","url":"http://localhost:3001/api/secure-contact"}
-{"checks":{"cache":true,"database":true,"server":true,"storage":true},"level":"info","message":"健康检查完成","status":"healthy","timestamp":"2026-01-29 12:31:08:318"}
-{"checks":{"cache":true,"database":true,"server":true,"storage":true},"level":"info","message":"健康检查完成","status":"healthy","timestamp":"2026-01-29 14:26:03:263"}
