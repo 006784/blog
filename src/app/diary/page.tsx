@@ -1,1786 +1,1275 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-// AQI等级判断函数
-function getAQILevel(aqi: number): string {
-  if (aqi <= 50) return '优';
-  if (aqi <= 100) return '良';
-  if (aqi <= 150) return '轻度污染';
-  if (aqi <= 200) return '中度污染';
-  if (aqi <= 300) return '重度污染';
-  return '严重污染';
-}
-
-import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BookOpen, Plus, X, Calendar, MapPin, Clock, 
-  Edit2, Trash2, Lock, Unlock, ChevronLeft, ChevronRight,
-  Sparkles, Save, Eye, Shield, Filter, Grid, List, Search,
-  Thermometer, Droplets, Wind, Navigation, Sun, Cloud, CloudRain,
-  PenLine, NotebookPen, StickyNote, Archive, Bookmark,
-  ChevronDown, Globe, Feather, Palette, Brush,
-  Image, Video, Upload, Camera, FileImage, PlayCircle
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import ReactMarkdown, { type Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import {
+  BookOpen,
+  Calendar,
+  Camera,
+  Cloud,
+  Clock,
+  Edit3,
+  Globe,
+  ImageIcon,
+  Loader2,
+  Lock,
+  MapPin,
+  NotebookPen,
+  Plus,
+  Search,
+  Shield,
+  Sun,
+  Thermometer,
+  Trash2,
+  Unlock,
+  Video,
+  X,
 } from 'lucide-react';
-import { 
-  Diary, 
-  getDiaries, createDiary, updateDiary, deleteDiary,
-  formatDate, formatDateTime, moodIcons, weatherIcons
-} from '@/lib/supabase';
+import { Diary, formatDate, formatDateTime, moodIcons, weatherIcons } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import { EnvironmentService } from '@/services/environmentService';
-import { SmartTagService, type GeneratedTags } from '@/lib/diary/smart-tag-service';
-import { DiarySearchService, type SearchOptions, type SearchResult } from '@/lib/diary/search-service';
-import { DiarySearch } from '@/components/DiarySearch';
-import { DiaryFeaturePanel } from '@/components/DiaryFeaturePanel';
-import { SocialShare } from '@/components/SocialShare';
-import { DiaryTemplateSelector } from '@/components/DiaryTemplateSelector';
 
-// 笔记本背景组件
-const NotebookBackground = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative min-h-screen bg-gradient-to-br from-amber-50 via-amber-100 to-yellow-50 dark:from-amber-950/30 dark:via-amber-900/20 dark:to-yellow-900/10 overflow-hidden">
-    {/* 纸张纹理 - 更细致的纸张质感 */}
-    <div className="absolute inset-0 opacity-20" 
-         style={{
-           backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E")`
-         }}>
-    </div>
-    
-    {/* 纸张纤维纹理 */}
-    <div className="absolute inset-0 opacity-10" 
-         style={{
-           backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='fibers' x='0' y='0' width='200' height='200' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 0h200v1h-200zM0 2h200v1h-200zM0 4h200v1h-200zM0 6h200v1h-200zM0 8h200v1h-200z' fill='%23d4af37'/%3E%3Cpath d='M0 0v200h1V0zM2 0v200h1V0zM4 0v200h1V0zM6 0v200h1V0zM8 0v200h1V0z' fill='%23d4af37'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23fibers)'/%3E%3C/svg%3E")`
-         }}>
-    </div>
-    
-    {/* 增强网格线 - 更清晰的书写格线 */}
-    <div className="absolute inset-0 opacity-20 pointer-events-none"
-         style={{
-           backgroundImage: `linear-gradient(to right, #d97706 0.5px, transparent 0.5px),
-                            linear-gradient(to bottom, #d97706 0.5px, transparent 0.5px)` ,
-           backgroundSize: '28px 28px',
-           transform: 'translate(14px, 14px)'
-         }}>
-    </div>
-    
-    {/* 增强装订线 - 更立体的效果 */}
-    <div className="absolute left-8 top-0 bottom-0 w-1.5 h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400 shadow-2xl"></div>
-    <div className="absolute left-7 top-0 bottom-0 w-1 h-full bg-gradient-to-r from-red-800 to-red-600 shadow-lg"></div>
-    <div className="absolute left-9 top-0 bottom-0 w-0.5 h-full bg-red-300/40"></div>
-    
-    {/* 增强孔洞装饰 - 更逼真的效果 */}
-    <div className="absolute left-5 top-20 w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-inner border border-red-800/30"></div>
-    <div className="absolute left-5 top-36 w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-inner border border-red-800/30"></div>
-    <div className="absolute left-5 top-52 w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-inner border border-red-800/30"></div>
-    <div className="absolute left-5 top-68 w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-inner border border-red-800/30"></div>
-    
-    {/* 添加纸张边缘阴影效果 */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-900/5 to-transparent opacity-30 pointer-events-none"></div>
-    
-    {/* 纸张阴影 - 增加层次感 */}
-    <div className="absolute inset-4 bg-black/5 rounded-lg -z-10 shadow-inner"></div>
-    
-    {children}
-  </div>
-);
+interface EnvironmentSnapshot {
+  location?: {
+    latitude: number;
+    longitude: number;
+    city: string;
+    country: string;
+    address: string;
+    accuracy?: number;
+    timezone?: string;
+  };
+  weather?: {
+    temperature: number;
+    condition: string;
+    humidity: number;
+    windSpeed: number;
+    feelsLike?: number;
+    pressure?: number;
+    timestamp?: number;
+  };
+  airQuality?: {
+    aqi: number;
+    pm25: number;
+    pm10: number;
+  };
+  astronomy?: {
+    sunrise: string;
+    sunset: string;
+    moonPhase: string;
+  };
+  error?: string;
+}
 
-// 笔记本封面组件
-const NotebookCover = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) => (
-  <motion.div 
-    className="relative w-full max-w-4xl mx-auto mb-8 cursor-pointer"
-    whileHover={{ scale: 1.03, y: -5 }}
-    whileTap={{ scale: 0.98 }}
-    onClick={onToggle}
-  >
-    <div className="relative h-72 rounded-2xl overflow-hidden shadow-2xl border-4 border-amber-800/30">
-      {/* 增强封面背景 - 更丰富的渐变 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-800 via-amber-900 to-red-900"></div>
-      
-      {/* 金属光泽效果 */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-30"></div>
-      
-      {/* 封面纹理 - 更复杂的图案 */}
-      <div className="absolute inset-0 opacity-25" 
-           style={{
-             backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.5' stroke-opacity='0.2'%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3Ccircle cx='60' cy='60' r='2'/%3E%3Ccircle cx='20' cy='60' r='2'/%3E%3Ccircle cx='60' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E")`
-           }}>
-      </div>
-      
-      {/* 封面皮革质感 */}
-      <div className="absolute inset-0 opacity-10" 
-           style={{
-             backgroundImage: `radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 50%),
-                              radial-gradient(circle at 80% 70%, rgba(0,0,0,0.2) 0%, transparent 50%)`
-           }}>
-      </div>
-      
-      {/* 封面文字区域 */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-amber-50 p-10">
-        <motion.div 
-          animate={{ rotate: isOpen ? -8 : 0, y: isOpen ? -10 : 0 }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-          className="mb-6"
-        >
-          <div className="relative">
-            <BookOpen className="w-20 h-20 mb-4 text-amber-100 drop-shadow-lg" />
-            {/* 光泽效果 */}
-            <div className="absolute inset-0 w-20 h-20 bg-gradient-to-br from-white/30 to-transparent rounded-full blur-sm"></div>
-          </div>
-        </motion.div>
-        
-        <motion.h1 
-          className="text-5xl md:text-6xl font-bold mb-4 text-center drop-shadow-lg"
-          animate={{ scale: isOpen ? 0.95 : 1 }}
-          transition={{ duration: 0.6 }}
-        >
-          我的日记本
-        </motion.h1>
-        
-        <motion.p 
-          className="text-xl text-amber-100/90 text-center max-w-lg mb-8 drop-shadow-md leading-relaxed"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          记录生活的点点滴滴 ✨
-        </motion.p>
-        
-        <motion.div
-          className="flex items-center gap-3 text-amber-100/80 bg-amber-900/30 px-6 py-3 rounded-full backdrop-blur-sm border border-amber-700/50"
-          animate={{ y: isOpen ? 15 : 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <span className="font-medium">点击{isOpen ? '合上' : '打开'}笔记本</span>
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0, x: isOpen ? 5 : 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <ChevronRight className="w-6 h-6" />
-          </motion.div>
-        </motion.div>
-      </div>
-      
-      {/* 封面装饰元素 */}
-      <div className="absolute top-6 left-6 w-3 h-3 rounded-full bg-amber-200/40 shadow-lg"></div>
-      <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-amber-200/40 shadow-lg"></div>
-      <div className="absolute bottom-6 left-6 w-3 h-3 rounded-full bg-amber-200/40 shadow-lg"></div>
-      <div className="absolute bottom-6 right-6 w-3 h-3 rounded-full bg-amber-200/40 shadow-lg"></div>
-      
-      {/* 封面边角磨损效果 - 更自然 */}
-      <div className="absolute top-0 left-0 w-12 h-12 bg-gradient-to-br from-amber-950/80 to-transparent rounded-br-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-12 h-12 bg-gradient-to-tl from-amber-950/80 to-transparent rounded-tl-3xl"></div>
-      
-      {/* 侧面阴影增强立体感 */}
-      <div className="absolute -right-2 top-4 bottom-4 w-2 bg-gradient-to-r from-transparent to-black/20 rounded-r-lg"></div>
-    </div>
-  </motion.div>
-);
+interface DiaryFormState {
+  title: string;
+  content: string;
+  mood: string;
+  weather: string;
+  location: string;
+  is_public: boolean;
+  diary_date: string;
+}
 
-// 笔记本内页组件
-const NotebookPage = ({ children, pageNumber }: { children: React.ReactNode; pageNumber?: number }) => (
-  <motion.div 
-    className="relative w-full max-w-4xl mx-auto bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/20 rounded-2xl shadow-2xl mb-8 overflow-hidden border border-amber-200/50"
-    initial={{ opacity: 0, y: 50, rotateY: -15 }}
-    animate={{ opacity: 1, y: 0, rotateY: 0 }}
-    transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-  >
-    {/* 页面材质质感 */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-900/5 to-transparent opacity-20"></div>
-    
-    {/* 纸张纤维纹理 */}
-    <div className="absolute inset-0 opacity-10" 
-         style={{
-           backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='%23ffffff'/%3E%3Cpath d='M0 0h100v0.5h-100zM0 2h100v0.5h-100zM0 4h100v0.5h-100z' fill='%23f5f5dc'/%3E%3C/svg%3E")`
-         }}>
-    </div>
-    
-    {/* 页码 - 更精美的设计 */}
-    {pageNumber && (
-      <div className="absolute bottom-6 right-6 flex items-center gap-2">
-        <div className="w-8 h-8 rounded-full bg-amber-100/80 border border-amber-300 flex items-center justify-center shadow-sm">
-          <span className="text-xs font-bold text-amber-800">{pageNumber}</span>
-        </div>
-        <span className="text-xs text-amber-600/70 font-medium">页</span>
-      </div>
-    )}
-    
-    {/* 页面内容区域 */}
-    <div className="p-10 md:p-14 relative z-10">
+interface UploadedMedia {
+  url: string;
+  type: 'image' | 'video';
+  name: string;
+}
+
+function getAdminToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem('admin-token');
+}
+
+function buildAuthHeaders(): HeadersInit {
+  const token = getAdminToken();
+  if (!token) return {};
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+function stripVideoMarker(url: string): string {
+  return url.replace(/#video$/i, '');
+}
+
+function isVideoMedia(url: string): boolean {
+  return /#video$/i.test(url) || /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
+}
+
+function extractMediaUrlsFromContent(content: string): string[] {
+  const regex = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+  const urls: string[] = [];
+  let match: RegExpExecArray | null = regex.exec(content);
+
+  while (match) {
+    urls.push(stripVideoMarker(match[1]));
+    match = regex.exec(content);
+  }
+
+  return Array.from(new Set(urls));
+}
+
+const ENV_BLOCK_START = '<!--DIARY_ENV_AUTO_START-->';
+const ENV_BLOCK_END = '<!--DIARY_ENV_AUTO_END-->';
+
+function buildEnvironmentMarkdown(snapshot: EnvironmentSnapshot): string {
+  if (snapshot.error) return '';
+
+  const lines: string[] = [];
+  const capturedAt = new Date().toLocaleString('zh-CN', { hour12: false });
+
+  if (snapshot.location?.city) {
+    const place = `${snapshot.location.city}${snapshot.location.country ? `, ${snapshot.location.country}` : ''}`;
+    lines.push(`- 位置：${place}`);
+  } else if (snapshot.location?.address) {
+    lines.push(`- 位置：${snapshot.location.address}`);
+  }
+
+  if (snapshot.weather?.condition) {
+    lines.push(`- 天气：${snapshot.weather.condition}`);
+  }
+  if (snapshot.weather?.temperature !== undefined) {
+    lines.push(`- 温度：${snapshot.weather.temperature}°C`);
+  }
+  if (snapshot.weather?.humidity !== undefined) {
+    lines.push(`- 湿度：${snapshot.weather.humidity}%`);
+  }
+  lines.push(`- 记录时间：${capturedAt}`);
+
+  if (lines.length <= 1) return '';
+
+  return ['### 今日环境记录', ...lines].join('\n');
+}
+
+function upsertEnvironmentBlock(content: string, snapshot: EnvironmentSnapshot): string {
+  const envMarkdown = buildEnvironmentMarkdown(snapshot);
+  if (!envMarkdown) return content;
+
+  const block = `${ENV_BLOCK_START}\n${envMarkdown}\n${ENV_BLOCK_END}`;
+  const blockRegex = new RegExp(`${ENV_BLOCK_START}[\\s\\S]*?${ENV_BLOCK_END}\\n*`, 'g');
+  const cleanedContent = content.replace(blockRegex, '').trim();
+
+  return cleanedContent ? `${block}\n\n${cleanedContent}` : `${block}\n`;
+}
+
+function buildUploadedMediaList(content: string, images?: string[] | null): UploadedMedia[] {
+  const merged = new Set<string>();
+
+  extractMediaUrlsFromContent(content).forEach((url) => {
+    merged.add(stripVideoMarker(url));
+  });
+
+  (images || []).forEach((url) => {
+    if (typeof url === 'string' && url.trim()) {
+      merged.add(stripVideoMarker(url));
+    }
+  });
+
+  return Array.from(merged).map((url) => ({
+    url,
+    type: isVideoMedia(url) ? 'video' : 'image',
+    name: decodeURIComponent(url.split('/').pop() || '媒体'),
+  }));
+}
+
+function weatherKeyFromCondition(condition: string): string {
+  const text = condition.toLowerCase();
+  if (text.includes('晴') || text.includes('clear')) return 'sunny';
+  if (text.includes('雪') || text.includes('snow')) return 'snowy';
+  if (text.includes('雨') || text.includes('drizzle') || text.includes('shower') || text.includes('rain')) return 'rainy';
+  if (text.includes('雾') || text.includes('mist') || text.includes('fog')) return 'foggy';
+  if (text.includes('风') || text.includes('wind')) return 'windy';
+  if (text.includes('雷') || text.includes('storm') || text.includes('thunder')) return 'stormy';
+  return 'cloudy';
+}
+
+function diaryPreview(content: string): string {
+  const compact = content.replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\s+/g, ' ').trim();
+  return compact.length > 110 ? `${compact.slice(0, 110)}...` : compact;
+}
+
+function DiaryNotebookBackground({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="diary-readable relative min-h-screen overflow-hidden bg-[#f7f3e8] text-zinc-900 [font-family:var(--font-ui)] [text-rendering:optimizeLegibility] [letter-spacing:0] dark:bg-[#151512] dark:text-zinc-100">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, rgba(120,94,42,0.09) 1px, transparent 1px), linear-gradient(to bottom, rgba(120,94,42,0.09) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+      <div className="pointer-events-none absolute left-8 top-0 h-full w-0.5 bg-red-500/25 shadow-[0_0_0_1px_rgba(239,68,68,0.08)]" />
+      <div className="pointer-events-none absolute left-4 top-20 h-2.5 w-2.5 rounded-full bg-red-500/35" />
+      <div className="pointer-events-none absolute left-4 top-48 h-2.5 w-2.5 rounded-full bg-red-500/35" />
+      <div className="pointer-events-none absolute left-4 top-76 h-2.5 w-2.5 rounded-full bg-red-500/35" />
       {children}
     </div>
-    
-    {/* 页面装订边效果 */}
-    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-amber-100/40 via-amber-50/20 to-transparent border-r border-amber-200/30">
-      {/* 装订孔阴影 */}
-      <div className="absolute left-8 top-24 w-1.5 h-1.5 rounded-full bg-amber-300/50 shadow-inner"></div>
-      <div className="absolute left-8 top-40 w-1.5 h-1.5 rounded-full bg-amber-300/50 shadow-inner"></div>
-      <div className="absolute left-8 top-56 w-1.5 h-1.5 rounded-full bg-amber-300/50 shadow-inner"></div>
-    </div>
-    
-    {/* 页面折痕和阴影 */}
-    <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-l from-transparent via-gray-300/20 to-transparent shadow-sm"></div>
-    <div className="absolute top-4 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent"></div>
-    
-    {/* 页面角落轻微卷曲效果 */}
-    <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-amber-900/10 to-transparent rounded-tl-3xl"></div>
-    <div className="absolute top-0 left-0 w-12 h-12 bg-gradient-to-br from-amber-900/10 to-transparent rounded-br-2xl"></div>
-  </motion.div>
-);
-
-const moods = Object.entries(moodIcons).map(([value, info]) => ({
-  value,
-  ...info
-}));
-
-const weathers = Object.entries(weatherIcons).map(([value, info]) => ({
-  value,
-  ...info
-}));
+  );
+}
 
 export default function DiaryPage() {
   const [diaries, setDiaries] = useState<Diary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coverOpen, setCoverOpen] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [editingDiary, setEditingDiary] = useState<Diary | null>(null);
-  const [selectedDiary, setSelectedDiary] = useState<Diary | null>(null);
-  const [moodFilter, setMoodFilter] = useState<string | null>(null);
-  const [privacyFilter, setPrivacyFilter] = useState<'all' | 'public' | 'private'>('all');
-  const [dateFilter, setDateFilter] = useState<{ start: string; end: string } | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [autoCaptureEnvironment, setAutoCaptureEnvironment] = useState(true);
-  const [capturingEnvironment, setCapturingEnvironment] = useState(false);
-  const [environmentInfo, setEnvironmentInfo] = useState<{
-    location: any;
-    weather: any;
-    airQuality: any;
-    astronomy: any;
-    error?: string;
-  } | null>(null);
-  const [notebookOpen, setNotebookOpen] = useState(false);
+  const [activeDiary, setActiveDiary] = useState<Diary | null>(null);
+  const [keyword, setKeyword] = useState('');
+  const [moodFilter, setMoodFilter] = useState<string>('all');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [showPublicOnly, setShowPublicOnly] = useState(false);
+
   const { isAdmin, showLoginModal } = useAdmin();
 
-  const [searchFilteredIds, setSearchFilteredIds] = useState<Set<string> | null>(null);
-
-  useEffect(() => {
-    loadData();
-  }, [isAdmin]);
-
-  useEffect(() => {
-    // 当搜索查询改变时重新过滤
-    if (searchQuery) {
-      setMoodFilter(null);
-      setPrivacyFilter('all');
-    }
-  }, [searchQuery]);
-
-  async function loadData() {
+  const loadDiaries = useCallback(async () => {
     try {
       setLoading(true);
-      // 使用API端点获取日记
-      const adminToken = localStorage.getItem('admin-token');
-      const headers: Record<string, string> = {};
-      if (adminToken) {
-        headers['Authorization'] = `Bearer ${adminToken}`;
-      }
-      const response = await fetch('/api/diaries?limit=100', { headers });
+      const response = await fetch('/api/diaries?limit=120', {
+        headers: buildAuthHeaders(),
+      });
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || '加载日记失败');
       }
-      
-      setDiaries(result.data);
+
+      setDiaries(Array.isArray(result.data) ? result.data : []);
     } catch (error) {
       console.error('加载日记失败:', error);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  // 过滤日记
+  useEffect(() => {
+    void loadDiaries();
+  }, [isAdmin, loadDiaries]);
+
   const filteredDiaries = useMemo(() => {
-    return diaries.filter(diary => {
-      // 如果有搜索结果过滤，优先使用
-      if (searchFilteredIds !== null) {
-        return searchFilteredIds.has(diary.id);
-      }
-      
-      // 搜索查询过滤
-      if (searchQuery && 
-          !diary.title?.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !diary.content.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      
-      // 心情过滤
-      if (moodFilter && diary.mood !== moodFilter) return false;
-      
-      // 隐私过滤
-      if (privacyFilter === 'public' && !diary.is_public) return false;
-      if (privacyFilter === 'private' && diary.is_public) return false;
-      
-      // 日期过滤
-      if (dateFilter) {
-        const diaryDate = new Date(diary.diary_date);
-        const startDate = new Date(dateFilter.start);
-        const endDate = new Date(dateFilter.end);
-        if (diaryDate < startDate || diaryDate > endDate) return false;
-      }
-      
-      return true;
-    });
-  }, [diaries, searchQuery, searchFilteredIds, moodFilter, privacyFilter, dateFilter]);
+    const q = keyword.trim().toLowerCase();
 
-  async function handleAutoCapture() {
-    if (!autoCaptureEnvironment) return;
-    
-    // 检查浏览器环境
-    if (typeof window === 'undefined') {
-      console.warn('服务端渲染环境中无法获取环境信息');
+    return diaries
+      .filter((diary) => {
+        if (showPublicOnly && !diary.is_public) return false;
+        if (monthFilter && !diary.diary_date.startsWith(monthFilter)) return false;
+        if (moodFilter !== 'all' && diary.mood !== moodFilter) return false;
+
+        if (!q) return true;
+
+        const title = (diary.title || '').toLowerCase();
+        const content = diary.content.toLowerCase();
+        const location = (diary.location || '').toLowerCase();
+        return title.includes(q) || content.includes(q) || location.includes(q);
+      })
+      .sort((a, b) => new Date(b.diary_date).getTime() - new Date(a.diary_date).getTime());
+  }, [diaries, keyword, monthFilter, moodFilter, showPublicOnly]);
+
+  const stats = useMemo(() => {
+    const publicCount = diaries.filter((item) => item.is_public).length;
+    const privateCount = diaries.length - publicCount;
+    const wordCount = diaries.reduce((acc, item) => acc + (item.word_count || 0), 0);
+
+    return {
+      total: diaries.length,
+      publicCount,
+      privateCount,
+      wordCount,
+    };
+  }, [diaries]);
+
+  const openCreateEditor = () => {
+    if (!isAdmin) {
+      showLoginModal(() => {
+        setEditingDiary(null);
+        setShowEditor(true);
+      });
       return;
     }
-    
-    setCapturingEnvironment(true);
+
+    setEditingDiary(null);
+    setShowEditor(true);
+  };
+
+  const handleDelete = async (diary: Diary) => {
+    if (!isAdmin) {
+      showLoginModal();
+      return;
+    }
+
+    const confirmed = window.confirm(`确定删除《${diary.title || formatDate(diary.diary_date)}》吗？`);
+    if (!confirmed) return;
+
     try {
-      const envInfo = await EnvironmentService.getEnvironmentInfo();
-      setEnvironmentInfo(envInfo);
-      
-      // 如果获取成功且没有错误，自动填充到日记表单
-      if (envInfo && !envInfo.error) {
-        if (envInfo.location && envInfo.location.city) {
-          setFormData(prev => ({
-            ...prev,
-            location: `${envInfo.location.city}${envInfo.location.country ? ', ' + envInfo.location.country : ''}`
-          }));
-        }
-        
-        if (envInfo.weather && envInfo.weather.condition) {
-          // 将天气信息映射到对应图标
-          const weatherMapping: Record<string, string> = {
-            '晴': 'sunny', '晴天': 'sunny', 'sunny': 'sunny',
-            '阴': 'cloudy', '阴天': 'cloudy', 'cloudy': 'cloudy',
-            '雨': 'rainy', '下雨': 'rainy', 'rainy': 'rainy',
-            '雪': 'snowy', '下雪': 'snowy', 'snowy': 'snowy',
-            '多云': 'partly-cloudy', 'partly-cloudy': 'partly-cloudy'
-          };
-          
-          const weatherKey = Object.keys(weatherMapping).find(key => 
-            envInfo.weather.condition.includes(key)
-          );
-          
-          if (weatherKey) {
-            const mappedWeather = weatherMapping[weatherKey];
-            setFormData(prev => ({ ...prev, weather: mappedWeather }));
-          }
-        }
+      const token = getAdminToken();
+      if (!token) {
+        showLoginModal();
+        return;
       }
-      
-      if (envInfo.error) {
-        console.warn('环境信息获取失败:', envInfo.error);
+
+      const response = await fetch(`/api/diaries/${diary.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || '删除失败');
+      }
+
+      setDiaries((prev) => prev.filter((item) => item.id !== diary.id));
+      if (activeDiary?.id === diary.id) {
+        setActiveDiary(null);
       }
     } catch (error) {
-      console.error('获取环境信息时出错:', error);
-      setEnvironmentInfo({
-        location: null,
-        weather: null,
-        airQuality: null,
-        astronomy: null,
-        error: error instanceof Error ? error.message : '获取环境信息失败'
-      });
-    } finally {
-      setCapturingEnvironment(false);
+      console.error('删除日记失败:', error);
+      window.alert('删除失败，请稍后重试。');
     }
   };
 
-  // 当编辑器打开时自动获取环境信息
-  useEffect(() => {
-    if (showEditor && autoCaptureEnvironment) {
-      handleAutoCapture();
-    }
-  }, [showEditor, autoCaptureEnvironment]);
-
-  async function handleDelete(id: string) {
-    if (!confirm('确定删除这篇日记吗？此操作不可撤销。')) return;
-    try {
-      // 获取管理员token
-      const adminToken = localStorage.getItem('admin-token');
-      if (!adminToken) {
-        alert('请先登录');
-        return;
+  const handleSaved = (savedDiary: Diary, editingId?: string) => {
+    setDiaries((prev) => {
+      if (editingId) {
+        return prev.map((item) => (item.id === editingId ? savedDiary : item));
       }
-      
-      // 调用API删除日记
-      const response = await fetch(`/api/diaries/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${adminToken}`
-        }
-      });
-      
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.error || '删除日记失败');
-      }
-      
-      setDiaries(diaries.filter(d => d.id !== id));
-      if (selectedDiary?.id === id) setSelectedDiary(null);
-    } catch (error) {
-      console.error('删除失败:', error);
-    }
-  }
+      return [savedDiary, ...prev];
+    });
 
-  function handleEdit(diary: Diary) {
-    setEditingDiary(diary);
-    setShowEditor(true);
-  }
-
-  function handleDateFilterChange(start: string, end: string) {
-    if (!start || !end) {
-      setDateFilter(null);
-      return;
-    }
-    setDateFilter({ start, end });
-  }
+    setShowEditor(false);
+    setEditingDiary(null);
+  };
 
   return (
-    <NotebookBackground>
-      <div className="py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* 笔记本封面 */}
-          <NotebookCover 
-            isOpen={notebookOpen} 
-            onToggle={() => setNotebookOpen(!notebookOpen)} 
-          />
-          
-          <AnimatePresence>
-            {notebookOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
+    <DiaryNotebookBackground>
+      <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 md:px-8 md:pt-10">
+        <section className="surface-hero relative overflow-hidden bg-gradient-to-br from-[#6b4e2f] via-[#5b4026] to-[#3d2a1a] p-6 text-amber-50 shadow-2xl md:p-10">
+          <div className="pointer-events-none absolute inset-0 opacity-25" style={{ backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0))' }} />
+          <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full bg-amber-100/15 px-3 py-1 text-xs tracking-[0.18em] text-amber-100/90">
+                <NotebookPen className="h-3.5 w-3.5" />
+                PERSONAL JOURNAL
+              </p>
+              <h1 className="mt-4 text-4xl font-semibold md:text-5xl">我的日记本</h1>
+              <p className="mt-4 max-w-2xl text-amber-100/90">
+                像真正的手写日记一样记录每一天。支持自动获取当前位置、天气与温度，并可把图片视频直接插入正文。
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setCoverOpen((prev) => !prev)}
+                className="btn-secondary border-amber-200/35 bg-amber-200/10 px-4 py-2 text-sm text-amber-100 hover:bg-amber-200/20"
               >
-                {/* 功能工具面板 */}
-                <DiaryFeaturePanel
-                  diaries={diaries}
-                  isAdmin={isAdmin}
-                  onSearchResults={(results) => {
-                    setSearchFilteredIds(new Set(results.map(r => r.id)));
-                  }}
-                  onClearSearch={() => {
-                    setSearchFilteredIds(null);
-                  }}
+                {coverOpen ? '合上日记本' : '打开日记本'}
+              </button>
+              <button
+                onClick={openCreateEditor}
+                className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-300"
+              >
+                {isAdmin ? <Plus className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                {isAdmin ? '写今天的日记' : '管理员登录后写日记'}
+              </button>
+            </div>
+          </div>
+
+          <div className="relative z-10 mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+              <p className="text-2xl font-semibold">{stats.total}</p>
+              <p className="text-sm text-amber-100/90">总篇数</p>
+            </div>
+            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+              <p className="text-2xl font-semibold">{stats.publicCount}</p>
+              <p className="text-sm text-amber-100/90">公开篇数</p>
+            </div>
+            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+              <p className="text-2xl font-semibold">{stats.privateCount}</p>
+              <p className="text-sm text-amber-100/90">私密篇数</p>
+            </div>
+            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+              <p className="text-2xl font-semibold">{stats.wordCount.toLocaleString()}</p>
+              <p className="text-sm text-amber-100/90">累计字数</p>
+            </div>
+          </div>
+        </section>
+
+        {coverOpen && (
+          <>
+            <section className="surface-card diary-paper-surface mt-6 p-4">
+              <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto] md:items-center">
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={keyword}
+                    onChange={(event) => setKeyword(event.target.value)}
+                    placeholder="搜索标题、内容、地点..."
+                    className="input-modern py-2.5 pl-10 pr-3 text-base text-zinc-800 dark:text-zinc-100"
+                  />
+                </div>
+
+                <select
+                  value={moodFilter}
+                  onChange={(event) => setMoodFilter(event.target.value)}
+                  className="input-modern px-3 py-2.5 text-base text-zinc-800 dark:text-zinc-100"
+                >
+                  <option value="all">全部心情</option>
+                  {Object.entries(moodIcons).map(([key, mood]) => (
+                    <option key={key} value={key}>
+                      {mood.emoji} {mood.label}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="month"
+                  value={monthFilter}
+                  onChange={(event) => setMonthFilter(event.target.value)}
+                  className="input-modern px-3 py-2.5 text-base text-zinc-800 dark:text-zinc-100"
                 />
 
-                <NotebookPage pageNumber={1}>
-                  <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-3 mb-4">
-                      <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-orange-500/25">
-                        <PenLine className="w-8 h-8 text-white" />
-                      </div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200">
-                        我的日记收藏
-                      </h2>
-                    </div>
-                    <p className="text-lg text-gray-800 dark:text-gray-200 max-w-2xl mx-auto">
-                      翻开记忆的每一页，重温那些美好的时光 ✨
-                    </p>
-                  </div>
-                  
-                  {/* 简化的日记列表 */}
-                  <div className="mb-8">
-                    {loading ? (
-                      <div className="flex items-center justify-center py-20">
-                        <div className="text-center">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
-                          <p className="text-gray-800 dark:text-gray-200">正在加载日记...</p>
-                        </div>
-                      </div>
-                    ) : filteredDiaries.length === 0 ? (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-center py-20"
-                      >
-                        <NotebookPen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                        <p className="text-gray-700 dark:text-gray-300 mb-4">还没有日记呢</p>
-                        <button
-                          onClick={() => {
-                            if (!isAdmin) {
-                              showLoginModal();
-                              return;
-                            }
-                            setShowEditor(true);
-                          }}
-                          className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-                        >
-                          {isAdmin ? '写下第一篇日记' : '管理员登录后可写日记'}
-                        </button>
-                      </motion.div>
-                    ) : (
-                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <AnimatePresence>
-                          {filteredDiaries.map((diary, index) => (
-                            <DiaryCard
-                              key={diary.id}
-                              diary={diary}
-                              index={index}
-                              isAdmin={isAdmin}
-                              onClick={() => setSelectedDiary(diary)}
-                              onEdit={() => handleEdit(diary)}
-                              onDelete={() => handleDelete(diary.id)}
-                            />
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* 写日记按钮 */}
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => {
+                {isAdmin && (
+                  <label className="inline-flex items-center gap-2 rounded-xl border border-amber-200/70 bg-white/90 px-3 py-2.5 text-sm dark:bg-zinc-900/80">
+                    <input
+                      type="checkbox"
+                      checked={showPublicOnly}
+                      onChange={(event) => setShowPublicOnly(event.target.checked)}
+                      className="h-4 w-4 rounded"
+                    />
+                    仅公开
+                  </label>
+                )}
+              </div>
+            </section>
+
+            <section className="mt-6">
+              {loading ? (
+                <div className="surface-card diary-paper-surface py-20 text-center">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-amber-600" />
+                  <p className="mt-3 text-sm text-muted-foreground">正在翻开日记页...</p>
+                </div>
+              ) : filteredDiaries.length === 0 ? (
+                <div className="surface-card diary-paper-surface py-20 text-center">
+                  <BookOpen className="mx-auto h-10 w-10 text-amber-500/70" />
+                  <h3 className="mt-4 text-xl font-semibold">这一页还是空白</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">开始写下今天的心情、天气和发生的故事。</p>
+                  <button
+                    onClick={openCreateEditor}
+                    className="btn-primary mt-5 px-4 py-2 text-sm font-medium text-white"
+                  >
+                    立刻写日记
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredDiaries.map((diary, index) => (
+                    <DiaryEntryCard
+                      key={diary.id}
+                      diary={diary}
+                      index={index}
+                      isAdmin={isAdmin}
+                      onOpen={() => setActiveDiary(diary)}
+                      onEdit={() => {
                         if (!isAdmin) {
                           showLoginModal();
                           return;
                         }
-                        setEditingDiary(null);
+                        setEditingDiary(diary);
                         setShowEditor(true);
                       }}
-                      className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 font-medium"
-                    >
-                      {isAdmin ? <Plus className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
-                      {isAdmin ? '写新日记' : '管理员登录'}
-                    </button>
-                  </div>
-                </NotebookPage>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          {/* 编辑器和详情模态框保持原有逻辑 */}
-          <AnimatePresence>
-            {showEditor && (
-              <DiaryEditor
-                diary={editingDiary}
-                onClose={() => { 
-                  setShowEditor(false); 
-                  setEditingDiary(null);
-                  setEnvironmentInfo(null);
-                }}
-                onSave={async (diaryData) => {
-                  // 获取管理员token
-                  const adminToken = localStorage.getItem('admin-token');
-                  if (!adminToken) {
-                    alert('请先登录');
-                    return;
-                  }
-                
-                  if (editingDiary) {
-                    // 更新现有日记
-                    const response = await fetch(`/api/diaries/${editingDiary.id}`, {
-                      method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminToken}`
-                      },
-                      body: JSON.stringify(diaryData)
-                    });
-                    
-                    const result = await response.json();
-                    if (!result.success) {
-                      throw new Error(result.error || '更新日记失败');
-                    }
-                    
-                    setDiaries(diaries.map(d => d.id === editingDiary.id ? result.data : d));
-                  } else {
-                    // 创建新日记
-                    const response = await fetch('/api/diaries', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminToken}`
-                      },
-                      body: JSON.stringify(diaryData)
-                    });
-                    
-                    const result = await response.json();
-                    if (!result.success) {
-                      throw new Error(result.error || '创建日记失败');
-                    }
-                    
-                    setDiaries([result.data, ...diaries]);
-                  }
-                  setShowEditor(false);
-                  setEditingDiary(null);
-                  setEnvironmentInfo(null);
-                }}
-                autoCaptureEnvironment={autoCaptureEnvironment}
-                setAutoCaptureEnvironment={setAutoCaptureEnvironment}
-                capturingEnvironment={capturingEnvironment}
-                environmentInfo={environmentInfo}
-                captureEnvironmentInfo={captureEnvironmentInfo}
-              />
-            )}
-          </AnimatePresence>
-          
-          <AnimatePresence>
-            {selectedDiary && (
-              <DiaryDetail
-                diary={selectedDiary}
-                onClose={() => setSelectedDiary(null)}
-                onEdit={() => { handleEdit(selectedDiary); setSelectedDiary(null); }}
-                onDelete={() => { handleDelete(selectedDiary.id); setSelectedDiary(null); }}
-                isAdmin={isAdmin}
-              />
-            )}
-          </AnimatePresence>
-        </div>
+                      onDelete={() => void handleDelete(diary)}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </div>
-    </NotebookBackground>
+
+      <AnimatePresence>
+        {showEditor && (
+          <DiaryEditorModal
+            diary={editingDiary}
+            onClose={() => {
+              setShowEditor(false);
+              setEditingDiary(null);
+            }}
+            onSaved={handleSaved}
+            isAdmin={isAdmin}
+            showLoginModal={showLoginModal}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeDiary && (
+          <DiaryDetailModal
+            diary={activeDiary}
+            isAdmin={isAdmin}
+            onClose={() => setActiveDiary(null)}
+            onEdit={() => {
+              setEditingDiary(activeDiary);
+              setActiveDiary(null);
+              setShowEditor(true);
+            }}
+            onDelete={() => {
+              void handleDelete(activeDiary);
+              setActiveDiary(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </DiaryNotebookBackground>
   );
 }
 
-// Diary Card Component
-function DiaryCard({
+function DiaryEntryCard({
   diary,
   index,
   isAdmin,
-  onClick,
+  onOpen,
   onEdit,
-  onDelete
+  onDelete,
 }: {
   diary: Diary;
   index: number;
   isAdmin: boolean;
-  onClick: () => void;
+  onOpen: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const mood = diary.mood ? moodIcons[diary.mood] : null;
   const weather = diary.weather ? weatherIcons[diary.weather] : null;
+
   const date = new Date(diary.diary_date);
   const day = date.getDate();
   const month = date.toLocaleDateString('zh-CN', { month: 'short' });
-  const weekday = date.toLocaleDateString('zh-CN', { weekday: 'short' });
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ delay: index * 0.05 }}
-      className="group relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 hover:border-amber-400/50 transition-all hover:shadow-xl cursor-pointer backdrop-blur-sm"
-      onClick={onClick}
+      transition={{ delay: index * 0.04 }}
+      className="diary-paper-surface group relative overflow-hidden rounded-2xl border border-amber-300/50 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-zinc-900/70"
     >
-      {/* Date Badge */}
-      <div className="absolute top-4 left-4 text-center">
-        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-amber-700 dark:text-amber-300">{day}</span>
-          <span className="text-xs text-amber-600 dark:text-amber-400">{month}</span>
-        </div>
-      </div>
+      <button type="button" onClick={onOpen} className="w-full text-left">
+        <div className="absolute left-6 top-0 h-full w-0.5 bg-rose-300/50" />
+        <div className="grid gap-4 p-5 md:grid-cols-[76px_minmax(0,1fr)] md:items-start">
+          <div className="rounded-xl border border-amber-300/60 bg-amber-50/80 p-2 text-center dark:bg-zinc-800/80">
+            <p className="text-2xl font-semibold text-amber-700 dark:text-amber-300">{day}</p>
+            <p className="text-sm text-amber-700 dark:text-amber-200">{month}</p>
+          </div>
 
-      {/* Privacy Badge */}
-      <div className="absolute top-4 right-4">
-        {diary.is_public ? (
-          <Unlock className="w-4 h-4 text-green-500" />
-        ) : (
-          <Lock className="w-4 h-4 text-gray-400" />
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="pt-20 p-5">
-        {/* Title & Mood */}
-        <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="font-semibold text-lg line-clamp-1 text-gray-800 dark:text-gray-200">
-              {diary.title || formatDate(diary.diary_date)}
-            </h3>
-            <span className="text-sm text-gray-700 dark:text-gray-300">{weekday}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {mood && (
-              <span 
-                className="text-2xl"
-                title={mood.label}
-              >
-                {mood.emoji}
-              </span>
-            )}
-            {weather && (
-              <span title={weather.label}>{weather.emoji}</span>
-            )}
-          </div>
-        </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
+                {diary.title || formatDate(diary.diary_date)}
+              </h3>
 
-        {/* Preview */}
-        <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3 mb-4">
-          {diary.content.substring(0, 150)}...
-        </p>
-
-        {/* Meta */}
-        <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300">
-          <div className="flex items-center gap-3">
-            {diary.location && (
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                {diary.location}
-              </span>
-            )}
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {diary.word_count} 字
-            </span>
-          </div>
-          
-          {/* Actions - 只有管理员可见 */}
-          {isAdmin && (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="p-1.5 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-gray-700 hover:text-amber-600 transition-colors"
-                title="编辑"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 hover:text-red-500 transition-colors"
-                title="删除"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <div className="inline-flex items-center gap-2 text-sm">
+                {mood && <span title={mood.label}>{mood.emoji}</span>}
+                {weather && <span title={weather.label}>{weather.emoji}</span>}
+                {diary.is_public ? (
+                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <Unlock className="h-3.5 w-3.5" />公开
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-zinc-700 dark:text-zinc-300">
+                    <Lock className="h-3.5 w-3.5" />私密
+                  </span>
+                )}
+              </div>
             </div>
-          )}
+
+            <p className="diary-preview-text mt-3 line-clamp-2 text-base leading-8 text-zinc-800 dark:text-zinc-100">{diaryPreview(diary.content)}</p>
+
+            <div className="diary-meta-text mt-4 flex flex-wrap items-center gap-4 text-sm text-zinc-700 dark:text-zinc-300">
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5" />
+                {formatDateTime(diary.diary_date)}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {diary.word_count || diary.content.length} 字
+              </span>
+              {diary.location && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {diary.location}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </button>
+
+      {isAdmin && (
+        <div className="absolute right-3 top-3 flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onEdit();
+            }}
+            className="rounded-lg bg-white/95 p-2 text-amber-700 shadow-sm hover:bg-amber-50"
+            title="编辑"
+          >
+            <Edit3 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete();
+            }}
+            className="rounded-lg bg-white/95 p-2 text-rose-600 shadow-sm hover:bg-rose-50"
+            title="删除"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </motion.article>
   );
 }
 
-// Diary Detail Modal
-function DiaryDetail({
+function DiaryDetailModal({
   diary,
+  isAdmin,
   onClose,
   onEdit,
   onDelete,
-  isAdmin = false
 }: {
   diary: Diary;
+  isAdmin: boolean;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  isAdmin?: boolean;
 }) {
   const mood = diary.mood ? moodIcons[diary.mood] : null;
   const weather = diary.weather ? weatherIcons[diary.weather] : null;
+
+  const inlineMedia = useMemo(() => extractMediaUrlsFromContent(diary.content), [diary.content]);
+  const extraMedia = useMemo(
+    () => (diary.images || []).filter((url) => !inlineMedia.includes(stripVideoMarker(url))),
+    [diary.images, inlineMedia]
+  );
+
+  const markdownComponents: Components = {
+    p: ({ children }) => <p className="diary-preview-text mb-4 text-[1.03rem] leading-9 text-zinc-800 dark:text-zinc-100">{children}</p>,
+    h1: ({ children }) => <h1 className="mb-4 mt-8 text-2xl font-semibold">{children}</h1>,
+    h2: ({ children }) => <h2 className="mb-3 mt-7 text-xl font-semibold">{children}</h2>,
+    h3: ({ children }) => <h3 className="mb-2 mt-6 text-lg font-semibold">{children}</h3>,
+    ul: ({ children }) => <ul className="mb-4 list-disc space-y-1 pl-6">{children}</ul>,
+    ol: ({ children }) => <ol className="mb-4 list-decimal space-y-1 pl-6">{children}</ol>,
+    blockquote: ({ children }) => (
+      <blockquote className="my-4 rounded-r-xl border-l-4 border-amber-500 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
+        {children}
+      </blockquote>
+    ),
+    code: ({ className, children }) => {
+      if (className) {
+        return (
+          <pre className="my-4 overflow-x-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 text-sm text-zinc-100 dark:border-zinc-700">
+            <code className={className}>{children}</code>
+          </pre>
+        );
+      }
+
+      return <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-sm dark:bg-zinc-800">{children}</code>;
+    },
+    a: ({ href, children }) => (
+      <a href={href} target="_blank" rel="noreferrer" className="text-amber-700 underline underline-offset-4 dark:text-amber-300">
+        {children}
+      </a>
+    ),
+    img: ({ src, alt }) => {
+      if (!src) return null;
+      const raw = String(src);
+      const mediaUrl = stripVideoMarker(raw);
+
+      if (isVideoMedia(raw)) {
+        return (
+          <div className="my-5 overflow-hidden rounded-2xl border border-amber-300/50 bg-black">
+            <video src={mediaUrl} controls className="h-auto w-full" preload="metadata" />
+          </div>
+        );
+      }
+
+      return (
+        <div className="my-5 overflow-hidden rounded-2xl border border-amber-300/50 bg-white">
+          <img src={mediaUrl} alt={alt || '日记图片'} className="h-auto w-full object-cover" loading="lazy" />
+        </div>
+      );
+    },
+  };
+
+  const environment = (diary.environment_data || null) as EnvironmentSnapshot | null;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.96, y: 14 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 14 }}
+        className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-amber-300/50 bg-white shadow-2xl dark:bg-zinc-900"
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              {mood && <span className="text-3xl">{mood.emoji}</span>}
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold truncate text-gray-900 dark:text-gray-100">
-                  {diary.title || formatDate(diary.diary_date)}
-                </h2>
-                <div className="flex items-center flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {formatDateTime(diary.diary_date)}
+        <div className="border-b border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50 p-5 dark:border-zinc-700 dark:from-zinc-900 dark:to-zinc-800">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold">{diary.title || formatDate(diary.diary_date)}</h2>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-base text-zinc-700 dark:text-zinc-200">
+                <span className="inline-flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {formatDateTime(diary.diary_date)}
+                </span>
+                {mood && <span>{mood.emoji} {mood.label}</span>}
+                {weather && <span>{weather.emoji} {weather.label}</span>}
+                {diary.location && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    {diary.location}
                   </span>
-                  {weather && <span>{weather.emoji} {weather.label}</span>}
-                  {diary.location && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {diary.location}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
             </div>
+
+            <button onClick={onClose} className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="prose prose-neutral dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-relaxed font-serif">
-            {diary.content.split('\n').map((paragraph, i) => (
-              paragraph.trim() ? (
-                <p key={i} className="mb-4 last:mb-0 indent-8">{paragraph}</p>
-              ) : (
-                <br key={i} />
-              )
-            ))}
-          </div>
-          
-          {/* 显示日记中的图片 */}
-          {(diary as any).images && (diary as any).images.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-amber-200 dark:border-amber-800/50">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-                <FileImage className="w-5 h-5 text-amber-600" />
-                相关照片
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(diary as any).images.map((imageUrl: string, index: number) => (
-                  <div key={index} className="group relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-                    <div className="aspect-video flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={imageUrl} 
-                        alt={`日记照片 ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <button 
-                        onClick={() => window.open(imageUrl, '_blank')}
-                        className="p-3 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <Eye className="w-5 h-5 text-gray-800 dark:text-gray-200" />
-                      </button>
-                    </div>
+        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+            {diary.content}
+          </ReactMarkdown>
+
+          {extraMedia.length > 0 && (
+            <div className="mt-8 border-t border-amber-200/60 pt-6">
+              <h3 className="mb-3 text-lg font-semibold">附件</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {extraMedia.map((mediaUrl) => (
+                  <div key={mediaUrl} className="overflow-hidden rounded-2xl border border-amber-300/50 bg-zinc-50 dark:bg-zinc-800">
+                    {isVideoMedia(mediaUrl) ? (
+                      <video src={stripVideoMarker(mediaUrl)} controls className="h-auto w-full" preload="metadata" />
+                    ) : (
+                      <img src={stripVideoMarker(mediaUrl)} alt="日记附件" className="h-auto w-full object-cover" loading="lazy" />
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
-        </div>
 
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {diary.is_public ? (
-              <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                <Unlock className="w-4 h-4" />
-                公开日记
+          {environment && !environment.error && (
+            <div className="mt-8 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 dark:border-sky-800 dark:bg-sky-900/20">
+              <h3 className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-sky-700 dark:text-sky-300">
+                <Globe className="h-4 w-4" />
+                环境信息
+              </h3>
+              <div className="grid gap-2 text-sm text-sky-900 dark:text-sky-100 md:grid-cols-2">
+                {environment.location?.city && (
+                  <div className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    {environment.location.city}{environment.location.country ? `, ${environment.location.country}` : ''}
+                  </div>
+                )}
+                {environment.weather && (
+                  <div className="inline-flex items-center gap-1.5">
+                    <Thermometer className="h-4 w-4" />
+                    {environment.weather.temperature}°C · {environment.weather.condition}
+                  </div>
+                )}
+                {environment.weather?.humidity !== undefined && (
+                  <div className="inline-flex items-center gap-1.5">
+                    <Cloud className="h-4 w-4" />
+                    湿度 {environment.weather.humidity}%
+                  </div>
+                )}
+                {environment.astronomy?.sunset && (
+                  <div className="inline-flex items-center gap-1.5">
+                    <Sun className="h-4 w-4" />
+                    日落 {environment.astronomy.sunset}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <Lock className="w-4 h-4" />
-                私密日记
-              </div>
-            )}
-            {/* 社交分享 */}
-            {diary.is_public && (
-              <SocialShare diary={diary} />
-            )}
-          </div>
-          
-          {isAdmin && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onEdit}
-                className="px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-colors flex items-center gap-2"
-              >
-                <Edit2 className="w-4 h-4" />
-                编辑
-              </button>
-              <button
-                onClick={onDelete}
-                className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors flex items-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                删除
-              </button>
             </div>
           )}
         </div>
+
+        {isAdmin && (
+          <div className="flex justify-end gap-2 border-t border-amber-200/60 p-5 dark:border-zinc-700">
+            <button onClick={onEdit} className="inline-flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-sm text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-200">
+              <Edit3 className="h-4 w-4" />编辑
+            </button>
+            <button onClick={onDelete} className="inline-flex items-center gap-2 rounded-xl bg-rose-100 px-4 py-2 text-sm text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-200">
+              <Trash2 className="h-4 w-4" />删除
+            </button>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
 }
 
-// Diary Editor Component
-function DiaryEditor({
+function DiaryEditorModal({
   diary,
   onClose,
-  onSave,
-  autoCaptureEnvironment,
-  setAutoCaptureEnvironment,
-  capturingEnvironment,
-  environmentInfo,
-  captureEnvironmentInfo
+  onSaved,
+  isAdmin,
+  showLoginModal,
 }: {
   diary: Diary | null;
   onClose: () => void;
-  onSave: (data: Partial<Diary>) => Promise<void>;
-  autoCaptureEnvironment: boolean;
-  setAutoCaptureEnvironment: (value: boolean) => void;
-  capturingEnvironment: boolean;
-  environmentInfo: any;
-  captureEnvironmentInfo: () => Promise<void>;
+  onSaved: (savedDiary: Diary, editingId?: string) => void;
+  isAdmin: boolean;
+  showLoginModal: (callback?: () => void) => void;
 }) {
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState<DiaryFormState>({
     title: diary?.title || '',
     content: diary?.content || '',
     mood: diary?.mood || '',
     weather: diary?.weather || '',
     location: diary?.location || '',
     is_public: diary?.is_public || false,
-    diary_date: diary?.diary_date || new Date().toISOString().split('T')[0],
+    diary_date: diary?.diary_date || new Date().toISOString().slice(0, 10),
   });
-  const [loading, setLoading] = useState(false);
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const [uploadedMedia, setUploadedMedia] = useState<{url: string, type: string, name: string}[]>([]);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
-  const [generatedTags, setGeneratedTags] = useState<GeneratedTags>({
-    emotions: [],
-    activities: [],
-    weather: [],
-    locations: [],
-    custom: []
-  });
-  const [showTags, setShowTags] = useState(false);
-  
-  // 搜索相关状态
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchOptions, setSearchOptions] = useState<SearchOptions>({
-    sortBy: 'date',
-    sortOrder: 'desc'
-  });
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchStats, setSearchStats] = useState<any>(null);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const { isAdmin } = useAdmin();
 
-  // 处理媒体文件选择
-  const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    
-    // 验证文件类型和大小
-    const validFiles = files.filter(file => {
-      const maxSize = 50 * 1024 * 1024; // 50MB (与API保持一致)
-      if (file.size > maxSize) {
-        alert(`文件 ${file.name} 太大，请选择小于50MB的文件`);
-        return false;
-      }
-      
-      // 支持的文件类型 (与API的ALLOWED_TYPES保持一致)
-      const validTypes = [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-        'video/mp4', 'video/webm', 'video/quicktime',
-        'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 
-        'audio/flac', 'audio/m4a', 'audio/x-m4a', 'audio/aac', 'audio/ogg',
-        'application/pdf', 'text/plain', 'text/markdown', 'text/x-lrc'
-      ];
-      if (!validTypes.includes(file.type)) {
-        alert(`文件 ${file.name} 类型不支持，请选择图片、视频或音频文件`);
-        return false;
-      }
-      
-      return true;
+  const [autoCapture, setAutoCapture] = useState(!diary);
+  const [capturing, setCapturing] = useState(false);
+  const [environmentData, setEnvironmentData] = useState<EnvironmentSnapshot | null>(
+    (diary?.environment_data as EnvironmentSnapshot | null) || null
+  );
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>(() =>
+    diary ? buildUploadedMediaList(diary.content, diary.images) : []
+  );
+
+  const captureEnvironment = useCallback(async () => {
+    setCapturing(true);
+    setError('');
+
+    try {
+      const snapshot = await EnvironmentService.getEnvironmentInfo();
+      setEnvironmentData(snapshot as EnvironmentSnapshot);
+      setForm((prev) => {
+        const next = { ...prev };
+
+        if (snapshot.location?.city) {
+          next.location = `${snapshot.location.city}${snapshot.location.country ? `, ${snapshot.location.country}` : ''}`;
+        }
+
+        if (snapshot.weather?.condition) {
+          next.weather = weatherKeyFromCondition(snapshot.weather.condition);
+        }
+
+        // 自动导入到当前日记正文（会更新同一段环境记录，不会重复堆叠）
+        next.content = upsertEnvironmentBlock(next.content, snapshot as EnvironmentSnapshot);
+        return next;
+      });
+    } catch (captureError) {
+      console.error('自动获取环境信息失败:', captureError);
+      setError('无法自动获取环境信息，请检查浏览器定位权限。');
+    } finally {
+      setCapturing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoCapture) {
+      void captureEnvironment();
+    }
+  }, [autoCapture, captureEnvironment]);
+
+  const insertMediaMarkdown = (snippets: string[]) => {
+    if (snippets.length === 0) return;
+
+    setForm((prev) => {
+      const trimmed = prev.content.trimEnd();
+      const appended = trimmed ? `${trimmed}\n\n${snippets.join('\n\n')}\n` : `${snippets.join('\n\n')}\n`;
+      return { ...prev, content: appended };
     });
-    
-    setMediaFiles(prev => [...prev, ...validFiles]);
-    e.target.value = ''; // 重置input以便再次选择相同文件
   };
 
-  // 上传媒体文件
-  const uploadMediaFiles = async () => {
-    if (mediaFiles.length === 0) return [];
-    
-    setUploadingMedia(true);
-    const uploadedUrls: {url: string, type: string, name: string}[] = [];
-    
+  const uploadAndInsertFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setError('');
+
+    const snippets: string[] = [];
+    const newMedia: UploadedMedia[] = [];
+
     try {
-      for (const file of mediaFiles) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('folder', 'diary-media'); // 指定日记媒体文件夹
-        
+      for (const file of Array.from(files)) {
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+
+        if (!isImage && !isVideo) {
+          setError(`文件 ${file.name} 不是支持的图片/视频格式。`);
+          continue;
+        }
+
+        if (file.size > 50 * 1024 * 1024) {
+          setError(`文件 ${file.name} 超过 50MB 限制。`);
+          continue;
+        }
+
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('folder', 'diary-media');
+
         const response = await fetch('/api/upload', {
           method: 'POST',
-          body: formData,
+          body: fd,
         });
-        
+
         const result = await response.json();
-        
-        if (!result.success) {
-          throw new Error(result.error || '上传失败');
+        if (!response.ok || !result.success || !result.url) {
+          throw new Error(result.error || `上传 ${file.name} 失败`);
         }
-        
-        uploadedUrls.push({
-          url: result.url,
-          type: file.type.startsWith('image/') ? 'image' : 'video',
-          name: file.name
-        });
+
+        const url = String(result.url);
+        const mediaType: UploadedMedia['type'] = isVideo ? 'video' : 'image';
+        const markdown = isVideo ? `![视频](${url}#video)` : `![图片](${url})`;
+
+        snippets.push(markdown);
+        newMedia.push({ url, type: mediaType, name: file.name });
       }
-      
-      setUploadedMedia(prev => [...prev, ...uploadedUrls]);
-      setMediaFiles([]);
-      return uploadedUrls;
-    } catch (error) {
-      console.error('上传媒体文件失败:', error);
-      alert(`上传失败: ${(error as Error).message}`);
-      return [];
+
+      insertMediaMarkdown(snippets);
+      setUploadedMedia((prev) => [...prev, ...newMedia]);
+    } catch (uploadError) {
+      console.error('上传媒体失败:', uploadError);
+      setError(uploadError instanceof Error ? uploadError.message : '上传失败，请稍后重试。');
     } finally {
-      setUploadingMedia(false);
+      setUploading(false);
     }
   };
 
-  // 执行搜索
-  const performSearch = (allDiaries: Diary[]) => {
-    if (!searchQuery.trim() && Object.keys(searchOptions).length <= 2) {
-      setSearchResults([]);
-      setSearchStats(null);
+  const removeInsertedMedia = (url: string) => {
+    const normalized = stripVideoMarker(url).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`!\\[[^\\]]*\\]\\(${normalized}(#video)?\\)\\n?`, 'g');
+
+    setForm((prev) => ({
+      ...prev,
+      content: prev.content.replace(regex, '').replace(/\n{3,}/g, '\n\n').trimEnd(),
+    }));
+
+    setUploadedMedia((prev) => prev.filter((item) => stripVideoMarker(item.url) !== stripVideoMarker(url)));
+  };
+
+  const handleSubmit = async () => {
+    if (!form.content.trim()) {
+      setError('请先写一点日记内容。');
       return;
     }
-    
-    const options: SearchOptions = {
-      ...searchOptions,
-      query: searchQuery.trim()
-    };
-    
-    const results = DiarySearchService.searchDiaries(allDiaries, options);
-    const stats = DiarySearchService.getSearchStats(allDiaries, options);
-    
-    setSearchResults(results);
-    setSearchStats(stats);
-    setShowSearch(true);
-  };
 
-  // 更新搜索选项
-  const updateSearchOptions = (updates: Partial<SearchOptions>) => {
-    setSearchOptions(prev => ({ ...prev, ...updates }));
-  };
-
-  // 清空搜索
-  const clearSearch = () => {
-    setSearchQuery('');
-    setSearchOptions({ sortBy: 'date', sortOrder: 'desc' });
-    setSearchResults([]);
-    setSearchStats(null);
-    setShowSearch(false);
-  };
-
-  // 生成智能标签
-  const generateSmartTags = () => {
-    const content = formData.content;
-    const weatherCondition = formData.weather ? weatherIcons[formData.weather]?.label : undefined;
-    
-    if (content.trim().length < 10) {
-      alert('请先输入至少10个字符的内容再生成标签');
+    if (!isAdmin) {
+      showLoginModal();
       return;
     }
-    
-    const tags = SmartTagService.generateTags(content, weatherCondition);
-    setGeneratedTags(tags);
-    setShowTags(true);
-  };
 
-  async function handleSubmit() {
-    if (!formData.content.trim()) return;
-    
-    setLoading(true);
+    const token = getAdminToken();
+    if (!token) {
+      showLoginModal();
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
     try {
-      // 先上传媒体文件
-      const mediaUrls = await uploadMediaFiles();
-      
-      const allTags = [
-        ...generatedTags.emotions.map(tag => tag.name),
-        ...generatedTags.activities.map(tag => tag.name),
-        ...generatedTags.weather.map(tag => tag.name),
-        ...generatedTags.locations.map(tag => tag.name),
-        ...generatedTags.custom.map(tag => tag.name)
-      ];
-      
-      const diaryData = {
-        ...formData,
-        images: mediaUrls.map(media => media.url), // 将媒体URL添加到images数组
-        tags: allTags, // 添加生成的标签
-        environment: autoCaptureEnvironment && environmentInfo && !environmentInfo.error 
-          ? {
-              location: environmentInfo.location,
-              weather: environmentInfo.weather
-            }
-          : null
+      const inlineMedia = extractMediaUrlsFromContent(form.content);
+      const uploadedMediaUrls = uploadedMedia.map((item) => stripVideoMarker(item.url));
+      const mergedImages = Array.from(new Set([...inlineMedia, ...uploadedMediaUrls]));
+
+      const payload = {
+        ...form,
+        mood: form.mood || null,
+        weather: form.weather || null,
+        location: form.location || null,
+        images: mergedImages,
+        environment_data: environmentData && !environmentData.error ? environmentData : null,
       };
-      
-      await onSave(diaryData);
-      
-      // 重置表单
-      setGeneratedTags({
-        emotions: [],
-        activities: [],
-        weather: [],
-        locations: [],
-        custom: []
+
+      const endpoint = diary ? `/api/diaries/${diary.id}` : '/api/diaries';
+      const method = diary ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
       });
-      setShowTags(false);
-      setMediaFiles([]);
-      setUploadedMedia([]);
-      
-      // 注意：不需要在这里执行搜索，父组件会处理状态更新
+
+      const result = await response.json();
+      if (!response.ok || !result.success || !result.data) {
+        throw new Error(result.error || '保存日记失败');
+      }
+
+      onSaved(result.data as Diary, diary?.id);
+    } catch (submitError) {
+      console.error('保存日记失败:', submitError);
+      setError(submitError instanceof Error ? submitError.message : '保存失败，请稍后重试。');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
-  }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.96, y: 14 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 14 }}
+        className="diary-editor flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-amber-300/50 bg-white text-zinc-900 shadow-2xl dark:bg-zinc-900 dark:text-zinc-100"
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="p-6 border-b border-amber-200/50 bg-gradient-to-r from-amber-50/80 to-orange-50/80">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Sparkles className="w-6 h-6 text-amber-600" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
-              </div>
-              <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800 dark:text-gray-200">
-                {diary ? '编辑日记' : '写日记'}
-                <Feather className="w-5 h-5 text-amber-500" />
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowTemplateSelector(!showTemplateSelector)}
-                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                  showTemplateSelector 
-                    ? 'bg-indigo-100/80 text-indigo-700 border-indigo-300' 
-                    : 'bg-gray-100/80 text-gray-600 border-gray-300 hover:bg-indigo-50 hover:text-indigo-600'
-                }`}
-              >
-                📝 模板
-              </button>
-              <div className="px-3 py-1 bg-amber-100/80 rounded-full text-xs text-amber-700 font-medium border border-amber-300">
-                <Brush className="w-3 h-3 inline mr-1" />
-                手写模式
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-full hover:bg-amber-100/50 transition-colors group"
-              >
-                <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* 环境信息显示 */}
-          {environmentInfo && (
-            <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800/50">
-              <div className="flex items-center gap-2 mb-3">
-                <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <h3 className="font-semibold text-blue-800 dark:text-blue-200">环境信息</h3>
-                {capturingEnvironment && (
-                  <span className="text-sm text-blue-600 dark:text-blue-400 animate-pulse">获取中...</span>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {/* 位置信息 */}
-                {environmentInfo.location && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Navigation className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-700 dark:text-gray-300">位置信息</span>
-                    </div>
-                    <div className="ml-6 space-y-1 text-gray-600 dark:text-gray-400">
-                      <div>📍 {environmentInfo.location.city}{environmentInfo.location.country && `, ${environmentInfo.location.country}`}</div>
-                      <div>📏 精度: ±{environmentInfo.location.accuracy}米</div>
-                      {environmentInfo.location.altitude && (
-                        <div>🏔️ 海拔: {environmentInfo.location.altitude}米</div>
-                      )}
-                      {environmentInfo.location.timezone && (
-                        <div>🕐 时区: {environmentInfo.location.timezone}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 天气信息 */}
-                {environmentInfo.weather && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Cloud className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-700 dark:text-gray-300">天气状况</span>
-                    </div>
-                    <div className="ml-6 space-y-1 text-gray-600 dark:text-gray-400">
-                      <div>🌡️ 温度: {environmentInfo.weather.temperature}°C {environmentInfo.weather.feelsLike && `(体感${environmentInfo.weather.feelsLike}°C)`}</div>
-                      <div>☁️ 天气: {environmentInfo.weather.condition}</div>
-                      <div>💧 湿度: {environmentInfo.weather.humidity}%</div>
-                      <div>💨 风速: {environmentInfo.weather.windSpeed} km/h</div>
-                      {environmentInfo.weather.pressure && (
-                        <div>🔽 气压: {environmentInfo.weather.pressure} hPa</div>
-                      )}
-                      {environmentInfo.weather.visibility && (
-                        <div>👁️ 能见度: {(environmentInfo.weather.visibility / 1000).toFixed(1)} km</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 空气质量 */}
-                {environmentInfo.airQuality && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Wind className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-800 dark:text-gray-200">空气质量</span>
-                    </div>
-                    <div className="ml-6 space-y-1 text-gray-600 dark:text-gray-400">
-                      <div>📊 AQI: {environmentInfo.airQuality.aqi} ({getAQILevel(environmentInfo.airQuality.aqi)})</div>
-                      <div>🦠 PM2.5: {environmentInfo.airQuality.pm25} μg/m³</div>
-                      <div>🦠 PM10: {environmentInfo.airQuality.pm10} μg/m³</div>
-                      <div>🛡️ O₃: {environmentInfo.airQuality.o3} μg/m³</div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* 天文信息 */}
-                {environmentInfo.astronomy && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Sun className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      <span className="font-medium text-gray-800 dark:text-gray-200">天文信息</span>
-                    </div>
-                    <div className="ml-6 space-y-1 text-gray-600 dark:text-gray-400">
-                      <div>🌅 日出: {environmentInfo.astronomy.sunrise}</div>
-                      <div>🌇 日落: {environmentInfo.astronomy.sunset}</div>
-                      <div>🌙 月相: {environmentInfo.astronomy.moonPhase}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {environmentInfo.error && (
-                <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
-                  ⚠️ {environmentInfo.error}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 自动获取环境信息开关 */}
-          <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="auto-env-toggle"
-                checked={autoCaptureEnvironment}
-                onChange={e => setAutoCaptureEnvironment(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-              />
-              <label htmlFor="auto-env-toggle" className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
-                <Navigation className="w-4 h-4" />
-                自动获取环境信息
-              </label>
-            </div>
-            <button
-              onClick={captureEnvironmentInfo}
-              disabled={capturingEnvironment}
-              className="px-4 py-2 text-sm rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              {capturingEnvironment ? (
-                <>
-                  <span className="animate-spin">🔄</span>
-                  <span>获取中...</span>
-                </>
-              ) : (
-                <>
-                  <Navigation className="w-4 h-4" />
-                  <span>立即获取</span>
-                </>
-              )}
+        <div className="border-b border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50 p-5 dark:border-zinc-700 dark:from-zinc-900 dark:to-zinc-800">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="inline-flex items-center gap-2 text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              <NotebookPen className="h-5 w-5 text-amber-600" />
+              {diary ? '编辑日记' : '新建日记'}
+            </h2>
+            <button onClick={onClose} className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
+              <X className="h-5 w-5" />
             </button>
           </div>
-          {/* 模板选择器 */}
-          {showTemplateSelector && (
-            <div className="border-2 border-dashed border-indigo-300/50 rounded-2xl p-4 bg-gradient-to-br from-indigo-50/50 to-violet-50/50 dark:from-indigo-900/20 dark:to-violet-900/20">
-              <DiaryTemplateSelector
-                onSelect={(template, variables) => {
-                  let content = template.content;
-                  Object.entries(variables).forEach(([key, value]) => {
-                    content = content.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
-                  });
-                  setFormData(prev => ({ ...prev, content: prev.content ? prev.content + '\n\n' + content : content }));
-                  setShowTemplateSelector(false);
-                }}
-                currentContent={formData.content}
-              />
-            </div>
-          )}
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">日期</label>
-              <input
-                type="date"
-                value={formData.diary_date}
-                onChange={e => setFormData({ ...formData, diary_date: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-900 dark:text-gray-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">标题（可选）</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-900 dark:text-gray-100"
-                placeholder="给这篇日记起个标题"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">今天的心情</label>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(moodIcons).map(([value, info]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, mood: formData.mood === value ? '' : value })}
-                    className={`px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
-                      formData.mood === value
-                        ? 'ring-2 ring-offset-2 ring-amber-500 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
-                    }`}
-                    title={info.label}
-                  >
-                    {info.emoji} {info.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">天气</label>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(weatherIcons).map(([value, info]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, weather: formData.weather === value ? '' : value })}
-                    className={`px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
-                      formData.weather === value
-                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30'
-                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
-                    }`}
-                    title={info.label}
-                  >
-                    {info.emoji} {info.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">地点</label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={e => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-900 dark:text-gray-100"
-              placeholder="你在哪里写的这篇日记"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">内容</label>
-            <textarea
-              value={formData.content}
-              onChange={e => setFormData({ ...formData, content: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all resize-none text-gray-900 dark:text-gray-100"
-              rows={12}
-              placeholder="写下今天的故事...\n\n今天的感受是...\n\n今天发生的事情..."
-            />
-            <div className="text-right text-sm text-gray-700 dark:text-gray-300 mt-2">
-              {formData.content.length} 字
-            </div>
-          </div>
-
-          {/* 智能标签生成区域 */}
-          <div className="border-2 border-dashed border-purple-300/50 rounded-2xl p-6 bg-gradient-to-br from-purple-50/50 to-indigo-50/50 dark:from-purple-900/20 dark:to-indigo-900/20 hover:border-purple-400/70 transition-colors">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                  <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">智能标签</h3>
-              </div>
-              <button
-                onClick={generateSmartTags}
-                disabled={formData.content.trim().length < 10}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>生成标签</span>
-              </button>
-            </div>
-            
-            <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">
-              基于日记内容自动生成情绪、活动、天气等标签
-            </p>
-            
-            {/* 标签显示区域 */}
-            {showTags && (
-              <div className="space-y-4">
-                {/* 情绪标签 */}
-                {generatedTags.emotions.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                      情绪标签
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTags.emotions.map(tag => (
-                        <span 
-                          key={tag.id}
-                          className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
-                          style={{ 
-                            backgroundColor: `${tag.color}20`,
-                            color: tag.color,
-                            borderColor: `${tag.color}40`
-                          }}
-                        >
-                          {tag.name}
-                          <span className="text-xs opacity-70">{Math.round(tag.confidence * 100)}%</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 活动标签 */}
-                {generatedTags.activities.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      活动标签
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTags.activities.map(tag => (
-                        <span 
-                          key={tag.id}
-                          className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
-                          style={{ 
-                            backgroundColor: `${tag.color}20`,
-                            color: tag.color,
-                            borderColor: `${tag.color}40`
-                          }}
-                        >
-                          {tag.name}
-                          <span className="text-xs opacity-70">{Math.round(tag.confidence * 100)}%</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 天气标签 */}
-                {generatedTags.weather.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                      天气标签
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTags.weather.map(tag => (
-                        <span 
-                          key={tag.id}
-                          className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
-                          style={{ 
-                            backgroundColor: `${tag.color}20`,
-                            color: tag.color,
-                            borderColor: `${tag.color}40`
-                          }}
-                        >
-                          {tag.name}
-                          <span className="text-xs opacity-70">{Math.round(tag.confidence * 100)}%</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 位置标签 */}
-                {generatedTags.locations.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                      位置标签
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTags.locations.map(tag => (
-                        <span 
-                          key={tag.id}
-                          className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
-                          style={{ 
-                            backgroundColor: `${tag.color}20`,
-                            color: tag.color,
-                            borderColor: `${tag.color}40`
-                          }}
-                        >
-                          {tag.name}
-                          <span className="text-xs opacity-70">{Math.round(tag.confidence * 100)}%</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 自定义标签 */}
-                {generatedTags.custom.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-                      关键词
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTags.custom.map(tag => (
-                        <span 
-                          key={tag.id}
-                          className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
-                          style={{ 
-                            backgroundColor: `${tag.color}20`,
-                            color: tag.color,
-                            borderColor: `${tag.color}40`
-                          }}
-                        >
-                          {tag.name}
-                          <span className="text-xs opacity-70">{Math.round(tag.confidence * 100)}%</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {!showTags && formData.content.trim().length >= 10 && (
-              <div className="text-center py-4 text-gray-700 dark:text-gray-300">
-                点击"生成标签"按钮，基于您的日记内容自动生成智能标签
-              </div>
-            )}
-          </div>
-
-          {/* 媒体上传区域 */}
-          <div className="border-2 border-dashed border-amber-300/50 rounded-2xl p-6 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20 hover:border-amber-400/70 transition-colors">
-            <div className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-full bg-amber-100 dark:bg-amber-900/30">
-                  <Camera className="w-8 h-8 text-amber-600 dark:text-amber-400" />
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">添加图片或视频</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
-                支持图片、视频、音频等多种格式，最大50MB
-              </p>
-              
-              {/* 文件选择按钮 */}
-              <div className="flex flex-wrap gap-3 justify-center mb-4">
-                <label className="cursor-pointer">
-                  <div className="px-4 py-2 bg-white dark:bg-gray-700 border border-amber-300 dark:border-amber-600 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors flex items-center gap-2">
-                    <Image className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span className="text-amber-700 dark:text-amber-300 font-medium">选择图片</span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleMediaSelect}
-                    className="hidden"
-                  />
-                </label>
-                
-                <label className="cursor-pointer">
-                  <div className="px-4 py-2 bg-white dark:bg-gray-700 border border-amber-300 dark:border-amber-600 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors flex items-center gap-2">
-                    <Video className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span className="text-amber-700 dark:text-amber-300 font-medium">选择视频</span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    multiple
-                    onChange={handleMediaSelect}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              
-              {/* 已选择的文件预览 */}
-              {(mediaFiles.length > 0 || uploadedMedia.length > 0) && (
-                <div className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-800/50">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">已选择的媒体文件：</h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-48 overflow-y-auto">
-                    {/* 待上传文件 */}
-                    {mediaFiles.map((file, index) => (
-                      <div key={`pending-${index}`} className="relative group">
-                        <div className="aspect-square rounded-lg bg-gray-100 dark:bg-gray-700 border-2 border-amber-300/50 flex items-center justify-center overflow-hidden">
-                          {file.type.startsWith('image/') ? (
-                            <img 
-                              src={URL.createObjectURL(file)} 
-                              alt={file.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="text-center p-2">
-                              <Video className="w-8 h-8 text-amber-500 mx-auto mb-1" />
-                              <p className="text-xs text-gray-600 dark:text-gray-400 truncate px-1">{file.name}</p>
-                            </div>
-                          )}
-                        </div>
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                          <button
-                            onClick={() => setMediaFiles(prev => prev.filter((_, i) => i !== index))}
-                            className="p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded truncate">
-                          {file.name}
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* 已上传文件 */}
-                    {uploadedMedia.map((media, index) => (
-                      <div key={`uploaded-${index}`} className="relative group">
-                        <div className="aspect-square rounded-lg bg-gray-100 dark:bg-gray-700 border-2 border-green-400/50 flex items-center justify-center overflow-hidden">
-                          {media.type === 'image' ? (
-                            <img 
-                              src={media.url} 
-                              alt={media.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="text-center p-2">
-                              <PlayCircle className="w-8 h-8 text-green-500 mx-auto mb-1" />
-                              <p className="text-xs text-gray-600 dark:text-gray-400 truncate px-1">{media.name}</p>
-                            </div>
-                          )}
-                        </div>
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                          <button
-                            onClick={() => setUploadedMedia(prev => prev.filter((_, i) => i !== index))}
-                            className="p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                          已上传
-                        </div>
-                        <div className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded truncate">
-                          {media.name}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* 上传按钮 */}
-                  {mediaFiles.length > 0 && (
-                    <div className="mt-3 flex justify-center">
-                      <button
-                        onClick={uploadMediaFiles}
-                        disabled={uploadingMedia}
-                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {uploadingMedia ? (
-                          <>
-                            <span className="animate-spin">⏳</span>
-                            <span>上传中...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4" />
-                            <span>上传 {mediaFiles.length} 个文件</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="privacy-toggle"
-                checked={formData.is_public}
-                onChange={e => setFormData({ ...formData, is_public: e.target.checked })}
-                className="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-              />
-              <label htmlFor="privacy-toggle" className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200">
-                {formData.is_public ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                {formData.is_public ? '公开日记' : '私密日记'}
-              </label>
-            </div>
-            <span className="text-sm text-gray-800 dark:text-gray-200">
-              {formData.is_public ? '所有人可见' : '仅自己可见'}
-            </span>
-          </div>
         </div>
 
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            disabled={loading}
-          >
+        <div className="flex-1 space-y-5 overflow-y-auto p-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-zinc-900 dark:text-zinc-100">日期</label>
+              <input
+                type="date"
+                value={form.diary_date}
+                onChange={(event) => setForm((prev) => ({ ...prev, diary_date: event.target.value }))}
+                className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-base text-zinc-900 placeholder:text-zinc-500 outline-none ring-amber-500/20 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-zinc-900 dark:text-zinc-100">标题（可选）</label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                placeholder="今天发生了什么..."
+                className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-base text-zinc-900 placeholder:text-zinc-500 outline-none ring-amber-500/20 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-zinc-900 dark:text-zinc-100">心情</label>
+              <select
+                value={form.mood}
+                onChange={(event) => setForm((prev) => ({ ...prev, mood: event.target.value }))}
+                className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-base text-zinc-900 outline-none ring-amber-500/20 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              >
+                <option value="">未选择</option>
+                {Object.entries(moodIcons).map(([key, mood]) => (
+                  <option key={key} value={key}>
+                    {mood.emoji} {mood.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-zinc-900 dark:text-zinc-100">天气</label>
+              <select
+                value={form.weather}
+                onChange={(event) => setForm((prev) => ({ ...prev, weather: event.target.value }))}
+                className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-base text-zinc-900 outline-none ring-amber-500/20 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              >
+                <option value="">未选择</option>
+                {Object.entries(weatherIcons).map(([key, weather]) => (
+                  <option key={key} value={key}>
+                    {weather.emoji} {weather.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-zinc-900 dark:text-zinc-100">地点</label>
+            <input
+              type="text"
+              value={form.location}
+              onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
+              placeholder="例如：上海 · 静安"
+              className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2.5 text-base text-zinc-900 placeholder:text-zinc-500 outline-none ring-amber-500/20 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/70 p-4 dark:border-sky-800 dark:bg-sky-900/20">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <label className="inline-flex items-center gap-2 text-sm font-semibold text-sky-800 dark:text-sky-200">
+                <input
+                  type="checkbox"
+                  checked={autoCapture}
+                  onChange={(event) => setAutoCapture(event.target.checked)}
+                  className="h-4 w-4 rounded"
+                />
+                自动获取定位、天气、温度
+              </label>
+
+              <button
+                onClick={() => void captureEnvironment()}
+                disabled={capturing}
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3 py-1.5 text-sm text-white hover:bg-sky-700 disabled:opacity-60"
+              >
+                {capturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
+                {capturing ? '获取中...' : '立即获取'}
+              </button>
+            </div>
+
+            {environmentData && !environmentData.error && (
+              <div className="mt-3 grid gap-2 text-sm text-sky-900 dark:text-sky-100 md:grid-cols-2">
+                {environmentData.location?.city && (
+                  <p className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    {environmentData.location.city}{environmentData.location.country ? `, ${environmentData.location.country}` : ''}
+                  </p>
+                )}
+                {environmentData.weather && (
+                  <p className="inline-flex items-center gap-1.5">
+                    <Thermometer className="h-4 w-4" />
+                    {environmentData.weather.temperature}°C · {environmentData.weather.condition}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {environmentData?.error && <p className="mt-2 text-sm text-rose-600">{environmentData.error}</p>}
+          </div>
+
+          <div className="rounded-2xl border border-amber-300/55 bg-amber-50/60 p-4 dark:bg-zinc-800/60">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="inline-flex items-center gap-2 text-sm font-semibold">
+                <Camera className="h-4 w-4 text-amber-600" />
+                媒体插入（直接插入正文）
+              </h3>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-sm text-amber-700 hover:bg-amber-50 dark:bg-zinc-900">
+                <ImageIcon className="h-4 w-4" />
+                图片/视频
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  className="hidden"
+                  onChange={(event) => void uploadAndInsertFiles(event.target.files)}
+                />
+              </label>
+            </div>
+            <p className="mt-2 text-sm text-amber-800 dark:text-amber-200">
+              选择文件后会自动上传并插入到正文，阅读时直接显示图片或视频播放器。
+            </p>
+
+            {uploading && (
+              <p className="mt-3 inline-flex items-center gap-2 text-sm text-amber-700">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                正在上传并插入媒体...
+              </p>
+            )}
+
+            {uploadedMedia.length > 0 && (
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {uploadedMedia.map((media) => (
+                  <div key={media.url} className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm dark:bg-zinc-900">
+                    <span className="inline-flex min-w-0 items-center gap-2">
+                      {media.type === 'video' ? (
+                        <Video className="h-4 w-4 text-violet-600" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4 text-emerald-600" />
+                      )}
+                      <span className="truncate">{media.name}</span>
+                    </span>
+                    <button
+                      onClick={() => removeInsertedMedia(media.url)}
+                      className="rounded p-1 text-rose-600 hover:bg-rose-50"
+                      title="从正文移除"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-zinc-900 dark:text-zinc-100">正文</label>
+            <textarea
+              value={form.content}
+              onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
+              rows={14}
+              placeholder={'记录今天的故事...\n\n你上传的图片和视频会直接插入到这里。'}
+              className="w-full resize-y rounded-2xl border border-amber-300 bg-white px-4 py-3 text-[1.08rem] leading-9 text-zinc-900 placeholder:text-zinc-500 outline-none ring-amber-500/20 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+            />
+            <p className="mt-2 text-right text-sm text-zinc-700 dark:text-zinc-200">{form.content.length} 字</p>
+          </div>
+
+          <label className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100">
+            <input
+              type="checkbox"
+              checked={form.is_public}
+              onChange={(event) => setForm((prev) => ({ ...prev, is_public: event.target.checked }))}
+              className="h-4 w-4 rounded"
+            />
+            {form.is_public ? (
+              <span className="inline-flex items-center gap-1.5 text-emerald-600">
+                <Unlock className="h-4 w-4" /> 公开日记
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300">
+                <Lock className="h-4 w-4" /> 私密日记
+              </span>
+            )}
+          </label>
+
+          {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 border-t border-amber-200/60 p-5 dark:border-zinc-700">
+          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">
             取消
           </button>
           <button
-            onClick={handleSubmit}
-            disabled={loading || !formData.content.trim()}
-            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50 font-medium"
+            onClick={() => void handleSubmit()}
+            disabled={saving || !form.content.trim()}
+            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
           >
-            {loading ? (
-              <>
-                <span className="animate-spin">⏳</span>
-                <span>保存中...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-5 h-5" />
-                <span>{diary ? '保存修改' : '保存日记'}</span>
-              </>
-            )}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
+            {saving ? '保存中...' : diary ? '保存修改' : '写入日记本'}
           </button>
         </div>
       </motion.div>

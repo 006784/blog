@@ -24,6 +24,11 @@ const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
 
 export async function POST(request: NextRequest) {
   try {
+    const contentType = request.headers.get('content-type') || '';
+    if (!contentType.includes('multipart/form-data')) {
+      return NextResponse.json({ error: '请求格式错误，请使用 multipart/form-data' }, { status: 400 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const type = formData.get('type') as string; // 'audio' | 'cover' | 'lyrics'

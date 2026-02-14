@@ -440,72 +440,74 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="min-h-screen py-20">
+    <div className="min-h-screen py-20 pb-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 页面标题 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="mb-8"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
-            <FolderOpen className="w-4 h-4" />
-            <span className="text-sm font-medium">资源中心</span>
+          <div className="surface-hero px-6 py-10 sm:px-10 sm:py-12 text-center">
+            <div className="section-kicker mb-4">
+              <FolderOpen className="w-4 h-4" />
+              <span className="text-sm font-medium">资源中心</span>
+            </div>
+            <h1 className="apple-display mb-4">资源存储</h1>
+            <p className="text-soft">安全可靠的文件存储服务</p>
           </div>
-          <h1 className="text-4xl font-bold mb-4">资源存储</h1>
-          <p className="text-muted-foreground">安全可靠的文件存储服务</p>
         </motion.div>
 
         {/* 统计卡片 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 rounded-2xl bg-card border border-border">
+          <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <File className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">总文件数</p>
+                <p className="text-xs text-soft">总文件数</p>
               </div>
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-card border border-border">
+          <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-green-500/10">
                 <Eye className="w-5 h-5 text-green-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.public}</p>
-                <p className="text-xs text-muted-foreground">公开资源</p>
+                <p className="text-xs text-soft">公开资源</p>
               </div>
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-card border border-border">
+          <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-500/10">
                 <HardDrive className="w-5 h-5 text-blue-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{formatFileSize(stats.totalSize)}</p>
-                <p className="text-xs text-muted-foreground">总存储</p>
+                <p className="text-xs text-soft">总存储</p>
               </div>
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-card border border-border">
+          <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-purple-500/10">
                 <Download className="w-5 h-5 text-purple-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.totalDownloads}</p>
-                <p className="text-xs text-muted-foreground">总下载</p>
+                <p className="text-xs text-soft">总下载</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* 工具栏 */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+        <div className="surface-card flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6 p-4">
           <div className="flex flex-1 items-center gap-3">
             {/* 搜索 */}
             <div className="relative flex-1 max-w-md">
@@ -515,7 +517,7 @@ export default function ResourcesPage() {
                 placeholder="搜索资源..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                className="input-modern w-full pl-10 pr-4 py-2.5"
               />
             </div>
             
@@ -523,7 +525,7 @@ export default function ResourcesPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+              className="input-modern w-auto min-w-[140px] px-4 py-2.5"
             >
               <option value="all">全部分类</option>
               {categories.map((cat) => (
@@ -535,7 +537,7 @@ export default function ResourcesPage() {
             {isAdmin && (
               <button
                 onClick={() => setShowCategoryModal(true)}
-                className="p-2.5 rounded-xl bg-secondary/50 border border-border hover:border-primary transition-colors"
+                className="btn-secondary h-11 w-11 rounded-xl p-0"
                 title="管理分类"
               >
                 <Settings className="w-4 h-4" />
@@ -545,16 +547,16 @@ export default function ResourcesPage() {
 
           <div className="flex items-center gap-3">
             {/* 视图切换 */}
-            <div className="flex items-center rounded-xl border border-border overflow-hidden">
+            <div className="flex items-center rounded-xl border border-[var(--ui-line)] overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2.5 ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-secondary/50'}`}
+                className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2.5 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-secondary/50'}`}
+                className={`p-2.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -566,7 +568,7 @@ export default function ResourcesPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowUploadModal(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-medium shadow-lg shadow-primary/25"
+                className="btn-primary px-5 py-2.5"
               >
                 <Upload className="w-4 h-4" />
                 上传资源
@@ -577,17 +579,17 @@ export default function ResourcesPage() {
 
         {/* 资源列表 */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="surface-card flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : resources.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="surface-card text-center py-20">
             <FolderOpen className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
             <p className="text-muted-foreground">暂无资源</p>
             {isAdmin && (
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="mt-4 px-6 py-2 rounded-xl bg-primary text-white"
+                className="btn-primary mt-4 px-6 py-2"
               >
                 上传第一个资源
               </button>
@@ -605,7 +607,7 @@ export default function ResourcesPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all"
+                  className="surface-card interactive-card group p-4"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className={`p-3 rounded-xl ${config.bg}`}>
@@ -636,7 +638,7 @@ export default function ResourcesPage() {
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleDownloadClick(resource)}
-                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
+                      className="btn-secondary flex-1 rounded-lg py-2 text-sm"
                     >
                       <Download className="w-3.5 h-3.5" />
                       下载
@@ -649,7 +651,7 @@ export default function ResourcesPage() {
                     )}
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
-                      className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                      className="p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
                     >
                       {copiedId === resource.id ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -660,7 +662,7 @@ export default function ResourcesPage() {
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(resource.id)}
-                        className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                        className="p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -682,7 +684,7 @@ export default function ResourcesPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
+                  className="surface-card interactive-card flex items-center gap-4 p-4"
                 >
                   <div className={`p-2 rounded-lg ${config.bg}`}>
                     <Icon className={`w-5 h-5 ${config.color}`} />
@@ -708,7 +710,7 @@ export default function ResourcesPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDownloadClick(resource)}
-                      className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      className="p-2 rounded-lg border border-[var(--ui-line)] text-primary hover:border-primary/40 transition-colors"
                     >
                       <Download className="w-4 h-4" />
                     </button>
@@ -720,7 +722,7 @@ export default function ResourcesPage() {
                     )}
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
-                      className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                      className="p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
                     >
                       {copiedId === resource.id ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -731,7 +733,7 @@ export default function ResourcesPage() {
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(resource.id)}
-                        className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                        className="p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -757,7 +759,7 @@ export default function ResourcesPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-md bg-card rounded-2xl shadow-2xl p-6"
+                className="surface-card w-full max-w-md p-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-6">
@@ -770,12 +772,12 @@ export default function ResourcesPage() {
                       <p className="text-xs text-muted-foreground">请完成安全验证</p>
                     </div>
                   </div>
-                  <button onClick={() => setDownloadModal(null)} className="p-2 rounded-lg hover:bg-muted">
+                  <button onClick={() => setDownloadModal(null)} className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="p-4 rounded-xl bg-secondary/30 mb-4">
+                <div className="p-4 rounded-xl border border-[var(--ui-line)] bg-secondary/30 mb-4">
                   <p className="font-medium truncate">{downloadModal.name}</p>
                   <p className="text-sm text-muted-foreground">{formatFileSize(downloadModal.file_size)}</p>
                 </div>
@@ -796,14 +798,14 @@ export default function ResourcesPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setDownloadModal(null)}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-border hover:bg-muted transition-colors"
+                    className="btn-secondary flex-1 px-4 py-2.5 rounded-xl"
                   >
                     取消
                   </button>
                   <button
                     onClick={confirmDownload}
                     disabled={!downloadVerified || downloadProgress !== null}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="btn-primary flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {downloadProgress !== null ? (
                       <>
@@ -842,7 +844,7 @@ export default function ResourcesPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-lg bg-card rounded-2xl shadow-2xl p-6"
+                className="surface-card w-full max-w-lg p-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-6">
@@ -855,7 +857,7 @@ export default function ResourcesPage() {
                       <p className="text-xs text-muted-foreground">文件将经过安全检测</p>
                     </div>
                   </div>
-                  <button onClick={() => setShowUploadModal(false)} className="p-2 rounded-lg hover:bg-muted">
+                  <button onClick={() => setShowUploadModal(false)} className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -864,7 +866,7 @@ export default function ResourcesPage() {
                   {/* 文件选择 */}
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    className="rounded-xl border-2 border-dashed border-[var(--ui-line)] bg-secondary/20 p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
                   >
                     {uploadFile ? (
                       <div className="flex items-center justify-center gap-3">
@@ -903,7 +905,7 @@ export default function ResourcesPage() {
                       value={uploadName}
                       onChange={(e) => setUploadName(e.target.value)}
                       placeholder="为资源起个名字"
-                      className="w-full px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                      className="input-modern w-full px-4 py-2.5"
                     />
                   </div>
 
@@ -913,7 +915,7 @@ export default function ResourcesPage() {
                     <select
                       value={uploadCategory}
                       onChange={(e) => setUploadCategory(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                      className="input-modern w-full px-4 py-2.5"
                     >
                       <option value="">自动检测</option>
                       {categories.map((cat) => (
@@ -930,7 +932,7 @@ export default function ResourcesPage() {
                       onChange={(e) => setUploadDesc(e.target.value)}
                       placeholder="简单描述一下这个资源"
                       rows={2}
-                      className="w-full px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none resize-none"
+                      className="input-modern w-full px-4 py-2.5 resize-none"
                     />
                   </div>
 
@@ -942,7 +944,7 @@ export default function ResourcesPage() {
                       value={uploadTags}
                       onChange={(e) => setUploadTags(e.target.value)}
                       placeholder="用逗号分隔多个标签"
-                      className="w-full px-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                      className="input-modern w-full px-4 py-2.5"
                     />
                   </div>
 
@@ -968,14 +970,14 @@ export default function ResourcesPage() {
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={() => { setShowUploadModal(false); resetUploadForm(); }}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-border hover:bg-muted transition-colors"
+                    className="btn-secondary flex-1 px-4 py-2.5 rounded-xl"
                   >
                     取消
                   </button>
                   <button
                     onClick={handleUpload}
                     disabled={!uploadFile || uploading}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="btn-primary flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {uploading ? (
                       <>
@@ -1010,14 +1012,14 @@ export default function ResourcesPage() {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-2xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[80vh] flex flex-col"
+                className="surface-card w-full max-w-2xl overflow-hidden max-h-[80vh] flex flex-col"
               >
                 {/* 头部 */}
-                <div className="flex items-center justify-between p-6 border-b border-border">
+                <div className="flex items-center justify-between p-6 border-b border-[var(--ui-line)]">
                   <h3 className="text-xl font-bold">分类管理</h3>
                   <button
                     onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
-                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1026,7 +1028,7 @@ export default function ResourcesPage() {
                 {/* 内容 */}
                 <div className="p-6 overflow-y-auto flex-1">
                   {/* 添加/编辑表单 */}
-                  <div className="p-4 rounded-xl bg-secondary/30 mb-6">
+                  <div className="p-4 rounded-xl border border-[var(--ui-line)] bg-secondary/30 mb-6">
                     <h4 className="font-medium mb-4">
                       {editingCategory ? '编辑分类' : '添加新分类'}
                     </h4>
@@ -1038,7 +1040,7 @@ export default function ResourcesPage() {
                           value={newCatName}
                           onChange={(e) => setNewCatName(e.target.value)}
                           placeholder="例如：设计资源"
-                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                          className="input-modern w-full px-3 py-2 rounded-lg"
                         />
                       </div>
                       <div>
@@ -1049,7 +1051,7 @@ export default function ResourcesPage() {
                           onChange={(e) => setNewCatSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                           placeholder="例如：design"
                           disabled={editingCategory?.is_system}
-                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none disabled:opacity-50"
+                          className="input-modern w-full px-3 py-2 rounded-lg disabled:opacity-50"
                         />
                       </div>
                       <div className="col-span-2">
@@ -1059,7 +1061,7 @@ export default function ResourcesPage() {
                           value={newCatDesc}
                           onChange={(e) => setNewCatDesc(e.target.value)}
                           placeholder="分类说明"
-                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                          className="input-modern w-full px-3 py-2 rounded-lg"
                         />
                       </div>
                       <div>
@@ -1067,7 +1069,7 @@ export default function ResourcesPage() {
                         <select
                           value={newCatIcon}
                           onChange={(e) => setNewCatIcon(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                          className="input-modern w-full px-3 py-2 rounded-lg"
                         >
                           {Object.keys(iconMap).map(icon => (
                             <option key={icon} value={icon}>{icon}</option>
@@ -1079,7 +1081,7 @@ export default function ResourcesPage() {
                         <select
                           value={newCatColor}
                           onChange={(e) => setNewCatColor(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-background border border-border focus:border-primary outline-none"
+                          className="input-modern w-full px-3 py-2 rounded-lg"
                         >
                           {Object.keys(colorMap).map(color => (
                             <option key={color} value={color}>{color}</option>
@@ -1091,7 +1093,7 @@ export default function ResourcesPage() {
                       {editingCategory && (
                         <button
                           onClick={resetCategoryForm}
-                          className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                          className="btn-secondary px-4 py-2 rounded-lg"
                         >
                           取消
                         </button>
@@ -1099,7 +1101,7 @@ export default function ResourcesPage() {
                       <button
                         onClick={handleSaveCategory}
                         disabled={savingCategory || !newCatName || !newCatSlug}
-                        className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+                        className="btn-primary px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2"
                       >
                         {savingCategory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                         {editingCategory ? '保存' : '添加'}
@@ -1115,7 +1117,7 @@ export default function ResourcesPage() {
                       return (
                         <div
                           key={cat.id}
-                          className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                          className="flex items-center justify-between p-3 rounded-xl border border-[var(--ui-line)] bg-secondary/30 hover:bg-secondary/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-lg ${config.bg}`}>
@@ -1129,7 +1131,7 @@ export default function ResourcesPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEditCategory(cat)}
-                              className="p-2 hover:bg-muted rounded-lg transition-colors"
+                              className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>

@@ -86,7 +86,9 @@ export class NewsCollectionService {
 
     // 分类新闻项
     items.forEach(item => {
-      const primaryCategory = item.categories[0] || 'other';
+      const primaryCategory = typeof item.categories?.[0] === 'string' && item.categories[0]
+        ? item.categories[0]
+        : 'other';
       if (categoryMap.has(primaryCategory)) {
         categoryMap.get(primaryCategory)?.push(item);
       } else {

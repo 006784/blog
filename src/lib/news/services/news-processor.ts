@@ -252,7 +252,7 @@ export class NewsProcessor {
       'entertainment': 5,    // 娱乐文化
       'sports': 3            // 体育新闻
     };
-    const primaryCategory = item.categories[0] || 'other';
+    const primaryCategory = this.getPrimaryCategory(item);
     score += categoryWeights[primaryCategory] || 3;
 
     // 内容质量加分
@@ -309,7 +309,7 @@ export class NewsProcessor {
   private getCategoriesDistribution(items: ProcessedNewsItem[]): Record<string, number> {
     const distribution: Record<string, number> = {};
     items.forEach(item => {
-      const category = item.categories[0] || 'other';
+      const category = this.getPrimaryCategory(item);
       distribution[category] = (distribution[category] || 0) + 1;
     });
     return distribution;
@@ -324,5 +324,13 @@ export class NewsProcessor {
       distribution[item.source] = (distribution[item.source] || 0) + 1;
     });
     return distribution;
+  }
+
+  private getPrimaryCategory(item: Pick<ProcessedNewsItem, 'categories'>): string {
+    const raw = item.categories?.[0];
+    if (typeof raw === 'string' && raw.trim().length > 0) {
+      return raw;
+    }
+    return 'other';
   }
 }

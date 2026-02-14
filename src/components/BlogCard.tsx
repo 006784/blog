@@ -29,10 +29,8 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
   const mouseXSpring = useSpring(x, { stiffness: 150, damping: 15 });
   const mouseYSpring = useSpring(y, { stiffness: 150, damping: 15 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['12deg', '-12deg']);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-12deg', '12deg']);
-  const glowX = useTransform(mouseXSpring, [-0.5, 0.5], ['0%', '100%']);
-  const glowY = useTransform(mouseYSpring, [-0.5, 0.5], ['0%', '100%']);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['6deg', '-6deg']);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-6deg', '6deg']);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -118,33 +116,31 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       className={clsx(
-        'group relative overflow-hidden',
-        'rounded-[2rem] transition-all duration-700',
+        'surface-card interactive-card group relative overflow-hidden',
+        'rounded-[1.75rem] transition-all duration-500',
         featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
       )}
     >
       {/* Animated gradient border */}
-      <div className="absolute inset-0 rounded-[2rem] p-[1.5px] overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden rounded-[1.75rem] p-[1px] opacity-70">
         <motion.div
-          className="absolute inset-[-100%] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="absolute inset-[-100%] opacity-0 transition-opacity duration-500 group-hover:opacity-60"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, var(--gradient-start) 60deg, var(--gradient-end) 120deg, transparent 180deg)`,
+            background: 'conic-gradient(from 0deg, transparent 0deg, rgba(56,189,248,0.7) 60deg, rgba(249,115,22,0.65) 130deg, transparent 210deg)',
           }}
           animate={isHovered ? { rotate: 360 } : { rotate: 0 }}
           transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
         />
-        <div className="absolute inset-[1.5px] bg-card rounded-[calc(2rem-1.5px)]" />
+        <div className="absolute inset-[1px] rounded-[calc(1.75rem-1px)] bg-background/95 dark:bg-zinc-900/90" />
       </div>
 
       {/* Glass background with gradient */}
-      <div className="absolute inset-[1.5px] rounded-[calc(2rem-1.5px)] bg-gradient-to-br from-white/[0.07] to-transparent dark:from-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-[1px] rounded-[calc(1.75rem-1px)] bg-gradient-to-br from-white/[0.07] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-white/[0.03]" />
 
       {/* Mouse follow glow effect */}
-      <motion.div 
-        className="absolute inset-0 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{
-          background: `radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${colors.shadow}, transparent 40%)`,
-        }}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-[1.75rem] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{ background: `radial-gradient(420px circle at 52% 32%, ${colors.shadow}, transparent 58%)` }}
       />
 
       <Link href={`/blog/${post.slug}`} className="block h-full relative z-10">

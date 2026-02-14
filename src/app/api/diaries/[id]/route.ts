@@ -10,6 +10,16 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+function isMissingEnvironmentColumnError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: string; message?: string };
+  return (
+    err.code === 'PGRST204' &&
+    typeof err.message === 'string' &&
+    err.message.includes('environment_data')
+  );
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -96,7 +106,19 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, content, mood, weather, location, is_public, diary_date } = body;
+    const {
+      title,
+      content,
+      mood,
+      weather,
+      location,
+      images,
+      tags,
+      environment,
+      environment_data,
+      is_public,
+      diary_date
+    } = body;
 
     // 验证必要字段
     if (content !== undefined && (!content || content.trim().length === 0)) {
@@ -115,16 +137,43 @@ export async function PUT(
     if (mood !== undefined) updateData.mood = mood || null;
     if (weather !== undefined) updateData.weather = weather || null;
     if (location !== undefined) updateData.location = location || null;
+    if (images !== undefined) {
+      updateData.images = Array.isArray(images)
+        ? images.filter((item) => typeof item === 'string' && item.trim().length > 0)
+        : [];
+    }
+    if (tags !== undefined) {
+      updateData.tags = Array.isArray(tags)
+        ? tags.filter((item) => typeof item === 'string' && item.trim().length > 0)
+        : [];
+    }
+    if (environment_data !== undefined || environment !== undefined) {
+      updateData.environment_data = environment_data || environment || null;
+    }
     if (is_public !== undefined) updateData.is_public = is_public;
     if (diary_date !== undefined) updateData.diary_date = diary_date;
     updateData.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('diaries')
       .update(updateData)
       .eq('id', id)
       .select()
       .single();
+
+    // 兼容旧表结构：若环境字段不存在，则自动降级保存
+    if (isMissingEnvironmentColumnError(error)) {
+      const legacyUpdateData = { ...updateData };
+      delete (legacyUpdateData as { environment_data?: unknown }).environment_data;
+      const fallback = await supabase
+        .from('diaries')
+        .update(legacyUpdateData)
+        .eq('id', id)
+        .select()
+        .single();
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       if (error.code === 'PGRST116') {

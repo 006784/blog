@@ -54,6 +54,11 @@ const ALLOWED_TYPES: Record<string, { ext: string; category: string }> = {
 // POST - 上传文件到 R2
 export async function POST(request: NextRequest) {
   try {
+    const contentType = request.headers.get('content-type') || '';
+    if (!contentType.includes('multipart/form-data')) {
+      return NextResponse.json({ success: false, error: '请求格式错误，请使用 multipart/form-data' }, { status: 400 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const folder = formData.get('folder') as string || 'uploads';

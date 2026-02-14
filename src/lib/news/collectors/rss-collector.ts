@@ -11,7 +11,7 @@ interface RSSFeedItem {
   pubDate?: string;
   creator?: string;
   isoDate?: string;
-  categories?: string[];
+  categories?: unknown[];
 }
 
 export class RSSCollector {
@@ -71,7 +71,7 @@ export class RSSCollector {
     const imageUrl = this.extractImageUrl(content);
     
     // 提取分类标签
-    const categories = item.categories || [source.category];
+    const categories = this.normalizeCategories(item.categories, source.category);
     const tags = this.extractTags(content, item.title);
 
     return {
@@ -87,6 +87,32 @@ export class RSSCollector {
       categories,
       tags
     };
+  }
+
+  private normalizeCategories(rawCategories: unknown[] | undefined, fallback: string): string[] {
+    if (!Array.isArray(rawCategories)) {
+      return [fallback];
+    }
+
+    const normalized = rawCategories
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item.trim();
+        }
+
+        if (item && typeof item === 'object') {
+          const obj = item as { term?: unknown; label?: unknown; name?: unknown };
+          const candidate = [obj.term, obj.label, obj.name].find(
+            (value) => typeof value === 'string' && value.trim().length > 0
+          );
+          return typeof candidate === 'string' ? candidate.trim() : '';
+        }
+
+        return '';
+      })
+      .filter((value): value is string => value.length > 0);
+
+    return normalized.length > 0 ? normalized : [fallback];
   }
 
   private extractImageUrl(content: string): string | undefined {

@@ -74,7 +74,7 @@ export default function HomePageClient() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
       />
 
-      <section className="relative overflow-hidden px-6 pt-24 pb-20 md:pt-32 md:pb-28">
+      <section className="relative overflow-hidden px-6 pb-20 pt-24 md:pb-28 md:pt-32">
         <div className="pointer-events-none absolute inset-0 opacity-70">
           <div className="absolute -top-24 left-1/4 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(56,189,248,0.3)_0%,_rgba(56,189,248,0)_70%)]" />
           <div className="absolute -bottom-20 right-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,_rgba(251,146,60,0.28)_0%,_rgba(251,146,60,0)_70%)]" />
@@ -82,11 +82,12 @@ export default function HomePageClient() {
         </div>
 
         <motion.div style={{ opacity: heroOpacity, y: heroY }} className="relative mx-auto max-w-6xl">
+          <div className="surface-hero overflow-hidden p-7 md:p-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-4 py-2 text-sm text-muted-foreground backdrop-blur"
+            className="section-kicker"
           >
             <Sparkles className="h-4 w-4 text-cyan-500" />
             <span>设计升级版首页</span>
@@ -96,7 +97,7 @@ export default function HomePageClient() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="mt-6 max-w-4xl text-5xl font-semibold leading-tight tracking-tight md:text-7xl"
+            className="apple-display mt-6 max-w-5xl"
           >
             把想法写成作品，
             <span className="mt-2 block gradient-text">把作品沉淀成体系。</span>
@@ -106,7 +107,7 @@ export default function HomePageClient() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="mt-6 max-w-2xl text-base text-muted-foreground md:text-lg"
+            className="text-soft mt-6 max-w-2xl text-base md:text-lg"
           >
             这个站点聚焦技术、设计与创作流程，持续更新可落地的方法论和长期实践记录。
           </motion.p>
@@ -136,21 +137,22 @@ export default function HomePageClient() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
-            className="mt-12 grid grid-cols-3 gap-3 rounded-2xl border border-border/70 bg-card/60 p-4 backdrop-blur md:max-w-xl"
+            className="mt-12 grid grid-cols-3 gap-3 rounded-2xl border border-border/70 bg-background/70 p-4 backdrop-blur md:max-w-xl"
           >
             <div>
-              <p className="text-2xl font-semibold">{posts.length || 0}+</p>
-              <p className="text-xs text-muted-foreground">近期文章</p>
+              <p className="text-2xl font-semibold tracking-tight">{posts.length || 0}+</p>
+              <p className="text-soft text-xs">近期文章</p>
             </div>
             <div>
-              <p className="text-2xl font-semibold">3</p>
-              <p className="text-xs text-muted-foreground">核心方向</p>
+              <p className="text-2xl font-semibold tracking-tight">3</p>
+              <p className="text-soft text-xs">核心方向</p>
             </div>
             <div>
-              <p className="text-2xl font-semibold">持续更新</p>
-              <p className="text-xs text-muted-foreground">长期维护</p>
+              <p className="text-2xl font-semibold tracking-tight">持续更新</p>
+              <p className="text-soft text-xs">长期维护</p>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       </section>
 
@@ -159,8 +161,8 @@ export default function HomePageClient() {
           <AnimatedSection>
             <div className="mb-10 flex items-end justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Focus Areas</p>
-                <h2 className="mt-3 text-3xl font-semibold md:text-4xl">我在写什么</h2>
+                <p className="text-soft text-sm uppercase tracking-[0.2em]">Focus Areas</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">我在写什么</h2>
               </div>
             </div>
           </AnimatedSection>
@@ -173,13 +175,13 @@ export default function HomePageClient() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.5, delay: index * 0.12 }}
-                className="group rounded-3xl border border-border/70 bg-card/70 p-6 backdrop-blur"
+                className="surface-card interactive-card group p-6"
               >
                 <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.accent} text-white`}>
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-xl font-semibold">{feature.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{feature.description}</p>
+                <p className="text-soft mt-3 text-sm leading-7">{feature.description}</p>
                 <div className="mt-6 inline-flex items-center gap-2 text-sm text-foreground/80">
                   了解更多
                   <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -195,8 +197,8 @@ export default function HomePageClient() {
           <AnimatedSection>
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Latest Notes</p>
-                <h2 className="mt-3 text-3xl font-semibold md:text-4xl">最新文章</h2>
+                <p className="text-soft text-sm uppercase tracking-[0.2em]">Latest Notes</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">最新文章</h2>
               </div>
               <Link href="/blog" className="btn-ghost px-5 py-2.5 text-sm">
                 查看全部

@@ -5,6 +5,7 @@ import { FontProvider } from "@/components/FontProvider";
 import { AdminProvider } from "@/components/AdminProvider";
 import { ProfileProvider } from "@/components/ProfileProvider";
 import { Sidebar } from "@/components/Sidebar";
+import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 import { ReadingProgress } from "@/components/ReadingProgress";
@@ -43,6 +44,11 @@ export default function RootLayout({
         {/* 加载优质中文字体 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* 英文主字体（接近 Apple 风格） */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
         {/* 思源黑体 */}
         <link 
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" 
@@ -64,7 +70,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="antialiased min-h-screen" suppressHydrationWarning>
+      <body className="app-body antialiased min-h-screen" suppressHydrationWarning>
         <ThemeProvider>
           <FontProvider>
           <AdminProvider>
@@ -91,8 +97,9 @@ export default function RootLayout({
           <Sidebar />
           
           {/* 主内容区 */}
-          <main className="md:ml-[var(--sidebar-width,288px)] min-h-screen transition-all duration-300 pb-24 md:pb-0">
+          <main className="site-main md:ml-[var(--sidebar-width,260px)] min-h-screen transition-all duration-500 pb-24 md:pb-0">
             {children}
+            <Footer />
           </main>
           
           {/* Service Worker 注册 */}
@@ -101,6 +108,21 @@ export default function RootLayout({
               __html: `
                 if ('serviceWorker' in navigator) {
                   window.addEventListener('load', function() {
+                    var isLocalDev =
+                      location.hostname === 'localhost' ||
+                      location.hostname === '127.0.0.1' ||
+                      location.hostname === '0.0.0.0';
+
+                    if (isLocalDev) {
+                      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        registrations.forEach(function(registration) {
+                          registration.unregister();
+                        });
+                        console.log('SW unregistered in local dev');
+                      });
+                      return;
+                    }
+
                     navigator.serviceWorker.register('/sw.js').then(function(registration) {
                       console.log('SW registered: ', registration);
                     }).catch(function(registrationError) {

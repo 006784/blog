@@ -1,9 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Github, Twitter, Mail, Linkedin, MapPin, Briefcase, GraduationCap, Heart, Code2, Palette, Coffee, Music } from 'lucide-react';
+import { Github, Twitter, Mail, MapPin, Briefcase, GraduationCap, Heart, Code2, Palette, Coffee, Music } from 'lucide-react';
 import { AnimatedSection, Floating } from '@/components/Animations';
 import { useProfile } from '@/components/ProfileProvider';
 
@@ -44,13 +43,6 @@ const interests = [
   { icon: Music, label: '音乐', color: 'bg-green-500' },
 ];
 
-const socialLinks = [
-  { name: 'GitHub', href: 'https://github.com', icon: Github },
-  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter },
-  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin },
-  { name: 'Email', href: 'mailto:hello@example.com', icon: Mail },
-];
-
 export default function AboutPage() {
   const { profile } = useProfile();
   
@@ -61,7 +53,7 @@ export default function AboutPage() {
   ];
   
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-14">
       {/* Background decorations */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-r from-[var(--bg-gradient-1)] to-[var(--bg-gradient-2)] rounded-full blur-3xl opacity-20" />
@@ -69,7 +61,7 @@ export default function AboutPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative py-28 px-6 overflow-hidden">
+      <section className="relative px-6 pt-24 pb-16 overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-secondary/50 via-background to-background" />
         <Floating duration={10}>
@@ -80,7 +72,7 @@ export default function AboutPage() {
         </Floating>
 
         <div className="relative max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="surface-hero grid lg:grid-cols-2 gap-12 items-center p-7 sm:p-12">
             {/* Image */}
             <AnimatedSection>
               <motion.div
@@ -89,7 +81,7 @@ export default function AboutPage() {
                 className="relative aspect-square max-w-md mx-auto lg:max-w-none"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] rounded-3xl rotate-6 opacity-20" />
-                <div className="relative aspect-square rounded-3xl overflow-hidden border-4 border-card">
+                <div className="relative aspect-square rounded-3xl overflow-hidden border border-[var(--ui-line)] shadow-[var(--ui-shadow-soft)]">
                   {profile.avatar ? (
                     <img 
                       src={profile.avatar}
@@ -106,14 +98,14 @@ export default function AboutPage() {
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute -top-4 -right-4 px-4 py-2 bg-card border border-border rounded-xl shadow-lg"
+                  className="surface-card absolute -top-4 -right-4 px-4 py-2 rounded-xl"
                 >
                   <span className="text-2xl">👋</span>
                 </motion.div>
                 <motion.div
                   animate={{ y: [0, 10, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute -bottom-4 -left-4 px-4 py-2 bg-card border border-border rounded-xl shadow-lg"
+                  className="surface-card absolute -bottom-4 -left-4 px-4 py-2 rounded-xl"
                 >
                   <span className="text-sm font-medium">5+ 年经验</span>
                 </motion.div>
@@ -126,34 +118,34 @@ export default function AboutPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6"
+                  className="section-kicker mb-6"
                 >
                   <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                   开放合作机会
                 </motion.div>
 
-                <h1 className="text-4xl sm:text-5xl font-bold mb-6">
+                <h1 className="apple-display mb-6">
                   你好，我是 <span className="aurora-text">{profile.nickname}</span>
                 </h1>
 
-                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                <p className="text-lg text-soft mb-6 leading-relaxed">
                   {profile.bio || '一名热爱技术和设计的全栈开发者，专注于创建美观、高性能的 Web 应用。我相信优秀的产品来源于对细节的追求和对用户体验的深刻理解。'}
                 </p>
 
                 <div className="flex flex-wrap gap-4 mb-8">
                   {profile.location && (
-                    <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-secondary/35 px-3 py-1.5 text-sm text-soft">
                       <MapPin className="w-4 h-4" />
                       {profile.location}
                     </span>
                   )}
                   {profile.occupation && (
-                    <span className="flex items-center gap-2 text-muted-foreground">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-secondary/35 px-3 py-1.5 text-sm text-soft">
                       <Briefcase className="w-4 h-4" />
                       {profile.occupation}
                     </span>
                   )}
-                  <span className="flex items-center gap-2 text-muted-foreground">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-secondary/35 px-3 py-1.5 text-sm text-soft">
                     <GraduationCap className="w-4 h-4" />
                     计算机科学学士
                   </span>
@@ -169,7 +161,7 @@ export default function AboutPage() {
                       rel="noopener noreferrer"
                       whileHover={{ scale: 1.1, y: -3 }}
                       whileTap={{ scale: 0.9 }}
-                      className="w-12 h-12 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--ui-line)] bg-card/80 text-soft transition hover:border-primary hover:text-primary"
                     >
                       <social.icon className="w-5 h-5" />
                     </motion.a>
@@ -182,11 +174,12 @@ export default function AboutPage() {
       </section>
 
       {/* Skills Section */}
-      <section className="py-24 px-6 bg-secondary/30">
+      <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <AnimatedSection className="text-center mb-16">
+            <span className="section-kicker mb-4">Core Skills</span>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">技能专长</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-soft max-w-lg mx-auto">
               我专注于现代 Web 技术栈，持续学习和探索新技术
             </p>
           </AnimatedSection>
@@ -199,13 +192,13 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="group"
+                className="surface-card p-5 interactive-card"
               >
                 <div className="flex justify-between mb-2">
                   <span className="font-medium">{skill.name}</span>
-                  <span className="text-muted-foreground">{skill.level}%</span>
+                  <span className="text-soft">{skill.level}%</span>
                 </div>
-                <div className="h-3 bg-card rounded-full overflow-hidden">
+                <div className="h-3 bg-secondary/45 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${skill.level}%` }}
@@ -221,18 +214,19 @@ export default function AboutPage() {
       </section>
 
       {/* Experience Section */}
-      <section className="py-24 px-6">
+      <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <AnimatedSection className="text-center mb-16">
+            <span className="section-kicker mb-4">Timeline</span>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">工作经历</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-soft max-w-lg mx-auto">
               从初级开发者到技术负责人的成长之路
             </p>
           </AnimatedSection>
 
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-1/2" />
+            <div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-[var(--ui-line)] md:-translate-x-1/2" />
 
             {experiences.map((exp, index) => (
               <motion.div
@@ -252,7 +246,7 @@ export default function AboutPage() {
                 <div className={`flex-1 ${index % 2 === 0 ? 'md:text-right md:pr-12' : 'md:pl-12'} pl-8 md:pl-0`}>
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="p-6 bg-card border border-border rounded-2xl"
+                    className="surface-card interactive-card p-6"
                   >
                     <span className="text-sm text-primary font-medium">
                       {exp.period}
@@ -260,10 +254,10 @@ export default function AboutPage() {
                     <h3 className="text-xl font-semibold mt-1 mb-2">
                       {exp.title}
                     </h3>
-                    <p className="text-muted-foreground text-sm mb-2">
+                    <p className="text-soft text-sm mb-2">
                       {exp.company}
                     </p>
-                    <p className="text-muted-foreground">
+                    <p className="text-soft">
                       {exp.description}
                     </p>
                   </motion.div>
@@ -278,11 +272,12 @@ export default function AboutPage() {
       </section>
 
       {/* Interests Section */}
-      <section className="py-24 px-6 bg-secondary/30">
+      <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <AnimatedSection className="text-center mb-16">
+            <span className="section-kicker mb-4">Life</span>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">兴趣爱好</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-soft max-w-lg mx-auto">
               工作之外，我也热爱生活
             </p>
           </AnimatedSection>
@@ -296,7 +291,7 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
-                className="p-6 bg-card border border-border rounded-2xl text-center hover:border-primary/50 transition-colors"
+                className="surface-card interactive-card p-6 text-center"
               >
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 10 }}
@@ -312,22 +307,23 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6">
+      <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto">
           <AnimatedSection>
-            <div className="text-center p-12 bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] rounded-3xl text-white">
+            <div className="surface-hero relative overflow-hidden text-center p-12">
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--gradient-start)]/25 via-transparent to-[var(--gradient-end)]/30" />
               <Heart className="w-12 h-12 mx-auto mb-6 opacity-80" />
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              <h2 className="relative text-3xl sm:text-4xl font-bold mb-4">
                 让我们一起创造精彩
               </h2>
-              <p className="text-white/80 mb-8 max-w-lg mx-auto">
+              <p className="relative text-soft mb-8 max-w-lg mx-auto">
                 无论是项目合作、技术交流还是单纯的聊天，我都很期待与你连接
               </p>
               <Link href="/contact">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-white text-[var(--gradient-start)] font-medium rounded-full hover:bg-white/90 transition-colors"
+                  className="btn-primary px-8 py-4"
                 >
                   联系我
                 </motion.button>

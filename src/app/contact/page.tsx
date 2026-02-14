@@ -86,7 +86,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-14">
       {/* Background decorations */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-gradient-to-r from-[var(--bg-gradient-1)] to-[var(--bg-gradient-2)] rounded-full blur-3xl opacity-20" />
@@ -94,7 +94,7 @@ export default function ContactPage() {
       </div>
 
       {/* Header */}
-      <section className="relative py-28 px-6 overflow-hidden">
+      <section className="relative px-6 pt-24 pb-16 overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-secondary/50 via-background to-background" />
         <Floating duration={10}>
@@ -104,36 +104,39 @@ export default function ContactPage() {
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-full blur-3xl" />
         </Floating>
 
-        <div className="relative max-w-6xl mx-auto text-center">
+        <div className="relative max-w-5xl mx-auto">
           <AnimatedSection>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6"
-            >
-              <Mail className="w-4 h-4" />
-              随时欢迎联系
-            </motion.div>
+            <div className="surface-hero p-8 sm:p-12 text-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="section-kicker mb-6"
+              >
+                <Mail className="w-4 h-4" />
+                随时欢迎联系
+              </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
-              让我们 <span className="rainbow-shimmer">保持联系</span>
-            </h1>
+              <h1 className="apple-display mb-6">
+                让我们 <span className="rainbow-shimmer">保持联系</span>
+              </h1>
 
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              无论你是想讨论项目合作、交流技术想法，还是只是想打个招呼，
-              我都很期待收到你的消息！
-            </p>
+              <p className="text-lg text-soft max-w-2xl mx-auto">
+                无论你是想讨论项目合作、交流技术想法，还是只是想打个招呼，
+                我都很期待收到你的消息！
+              </p>
+            </div>
           </AnimatedSection>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="py-12 px-6">
+      <section className="py-10 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-5 gap-12">
             {/* Contact Info */}
             <div className="lg:col-span-2 space-y-8">
               <AnimatedSection>
+                <span className="section-kicker mb-4">Contact</span>
                 <h2 className="text-2xl font-bold mb-6">联系方式</h2>
                 <div className="space-y-4">
                   {contactInfo.map((info, index) => (
@@ -145,7 +148,7 @@ export default function ContactPage() {
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
                       whileHover={{ x: 5 }}
-                      className="flex items-center gap-4 p-4 bg-card border border-border rounded-2xl hover:border-primary/50 transition-colors group"
+                      className="surface-card interactive-card flex items-center gap-4 p-4 group"
                     >
                       <div className={`w-12 h-12 ${info.color} rounded-xl flex items-center justify-center text-white`}>
                         <info.icon className="w-5 h-5" />
@@ -163,6 +166,7 @@ export default function ContactPage() {
 
               {/* Social Links */}
               <AnimatedSection delay={0.2}>
+                <span className="section-kicker mb-4">Social</span>
                 <h2 className="text-2xl font-bold mb-6">社交媒体</h2>
                 <div className="flex flex-wrap gap-3">
                   {socialLinks.map((social, index) => (
@@ -177,7 +181,7 @@ export default function ContactPage() {
                       transition={{ delay: index * 0.1 }}
                       whileHover={{ scale: 1.1, y: -3 }}
                       whileTap={{ scale: 0.9 }}
-                      className={`w-12 h-12 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground transition-all ${social.color}`}
+                      className={`w-12 h-12 rounded-full border border-[var(--ui-line)] bg-card/80 flex items-center justify-center text-soft transition-all ${social.color}`}
                     >
                       <social.icon className="w-5 h-5" />
                     </motion.a>
@@ -187,7 +191,7 @@ export default function ContactPage() {
 
               {/* Quick response note */}
               <AnimatedSection delay={0.3}>
-                <div className="p-6 bg-gradient-to-br from-[var(--gradient-start)]/10 to-[var(--gradient-end)]/10 rounded-2xl border border-primary/20">
+                <div className="surface-card p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
                       <MessageCircle className="w-5 h-5 text-primary" />
@@ -206,11 +210,7 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="lg:col-span-3">
               <AnimatedSection delay={0.1}>
-                <div className="relative p-[2px] rounded-[2rem] overflow-hidden">
-                  {/* Animated border */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--gradient-start)] via-purple-500 to-[var(--gradient-end)] opacity-50" />
-                  
-                  <div className="relative p-10 bg-card rounded-[calc(2rem-2px)]">
+                  <div className="surface-card relative p-8 sm:p-10">
                     <h2 className="text-2xl font-bold mb-8 aurora-text">发送消息</h2>
 
                   <AnimatePresence mode="wait">
@@ -252,8 +252,8 @@ export default function ContactPage() {
                               className={clsx(
                                 'absolute left-4 transition-all duration-200 pointer-events-none',
                                 focusedField === 'name' || formState.name
-                                  ? '-top-2.5 text-xs bg-card px-2 text-primary'
-                                  : 'top-4 text-muted-foreground'
+                                  ? '-top-2.5 text-xs bg-[var(--ui-panel-strong)] px-2 text-primary'
+                                  : 'top-4 text-soft'
                               )}
                             >
                               姓名
@@ -267,7 +267,7 @@ export default function ContactPage() {
                               onFocus={() => setFocusedField('name')}
                               onBlur={() => setFocusedField(null)}
                               required
-                              className="w-full px-5 py-4 bg-secondary/50 backdrop-blur-sm border-2 border-border/50 rounded-2xl focus:outline-none focus:border-primary transition-all duration-300"
+                              className="input-modern w-full px-5 py-4"
                             />
                           </div>
 
@@ -278,8 +278,8 @@ export default function ContactPage() {
                               className={clsx(
                                 'absolute left-4 transition-all duration-200 pointer-events-none',
                                 focusedField === 'email' || formState.email
-                                  ? '-top-2.5 text-xs bg-card px-2 text-primary'
-                                  : 'top-4 text-muted-foreground'
+                                  ? '-top-2.5 text-xs bg-[var(--ui-panel-strong)] px-2 text-primary'
+                                  : 'top-4 text-soft'
                               )}
                             >
                               邮箱
@@ -293,7 +293,7 @@ export default function ContactPage() {
                               onFocus={() => setFocusedField('email')}
                               onBlur={() => setFocusedField(null)}
                               required
-                              className="w-full px-5 py-4 bg-secondary/50 backdrop-blur-sm border-2 border-border/50 rounded-2xl focus:outline-none focus:border-primary transition-all duration-300"
+                              className="input-modern w-full px-5 py-4"
                             />
                           </div>
                         </div>
@@ -305,8 +305,8 @@ export default function ContactPage() {
                             className={clsx(
                               'absolute left-4 transition-all duration-200 pointer-events-none',
                               focusedField === 'subject' || formState.subject
-                                ? '-top-2.5 text-xs bg-card px-2 text-primary'
-                                : 'top-4 text-muted-foreground'
+                                ? '-top-2.5 text-xs bg-[var(--ui-panel-strong)] px-2 text-primary'
+                                : 'top-4 text-soft'
                             )}
                           >
                             主题
@@ -320,7 +320,7 @@ export default function ContactPage() {
                             onFocus={() => setFocusedField('subject')}
                             onBlur={() => setFocusedField(null)}
                             required
-                            className="w-full px-5 py-4 bg-secondary/50 backdrop-blur-sm border-2 border-border/50 rounded-2xl focus:outline-none focus:border-primary transition-all duration-300"
+                            className="input-modern w-full px-5 py-4"
                           />
                         </div>
 
@@ -331,8 +331,8 @@ export default function ContactPage() {
                             className={clsx(
                               'absolute left-4 transition-all duration-200 pointer-events-none',
                               focusedField === 'message' || formState.message
-                                ? '-top-2.5 text-xs bg-card px-2 text-primary'
-                                : 'top-4 text-muted-foreground'
+                                ? '-top-2.5 text-xs bg-[var(--ui-panel-strong)] px-2 text-primary'
+                                : 'top-4 text-soft'
                             )}
                           >
                             消息内容
@@ -346,7 +346,7 @@ export default function ContactPage() {
                             onBlur={() => setFocusedField(null)}
                             required
                             rows={6}
-                            className="w-full px-5 py-4 bg-secondary/50 backdrop-blur-sm border-2 border-border/50 rounded-2xl focus:outline-none focus:border-primary transition-all duration-300 resize-none"
+                            className="input-modern w-full px-5 py-4 resize-none"
                           />
                         </div>
 
@@ -371,7 +371,7 @@ export default function ContactPage() {
                           className={clsx(
                             'w-full py-5 rounded-2xl font-semibold flex items-center justify-center gap-3 transition-all text-base',
                             isSubmitting
-                              ? 'bg-primary/50 cursor-not-allowed'
+                              ? 'bg-primary/50 cursor-not-allowed text-white'
                               : 'btn-primary'
                           )}
                         >
@@ -391,7 +391,6 @@ export default function ContactPage() {
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
               </AnimatedSection>
             </div>
           </div>
@@ -402,7 +401,7 @@ export default function ContactPage() {
       <section className="py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <AnimatedSection>
-            <div className="relative h-[400px] rounded-3xl overflow-hidden bg-secondary/50 border border-border">
+            <div className="surface-card relative h-[400px] overflow-hidden">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="w-12 h-12 text-primary mx-auto mb-4" />

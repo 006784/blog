@@ -170,14 +170,16 @@ export default function GuestbookPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
+          <div className="section-kicker mb-4">
             <MessageCircle className="w-4 h-4" />
             <span className="text-sm font-medium">留言板</span>
           </div>
-          <h1 className="text-4xl font-bold mb-4">给我留言</h1>
-          <p className="text-muted-foreground">有什么想说的？随时欢迎留言交流</p>
+          <div className="surface-hero px-6 py-10 sm:px-10 sm:py-12">
+            <h1 className="apple-display mb-4">给我留言</h1>
+            <p className="text-soft">有什么想说的？随时欢迎留言交流</p>
+          </div>
         </motion.div>
 
         {/* 留言表单 */}
@@ -186,7 +188,7 @@ export default function GuestbookPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           onSubmit={handleSubmit}
-          className="bg-card rounded-2xl border border-border p-6 mb-8"
+          className="surface-card p-6 mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="relative">
@@ -198,7 +200,7 @@ export default function GuestbookPage() {
                 placeholder="昵称 *"
                 required
                 maxLength={50}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                className="input-modern w-full pl-10 pr-4 py-2.5"
               />
             </div>
             <div className="relative">
@@ -208,7 +210,7 @@ export default function GuestbookPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="邮箱（用于头像）"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                className="input-modern w-full pl-10 pr-4 py-2.5"
               />
             </div>
             <div className="relative">
@@ -218,7 +220,7 @@ export default function GuestbookPage() {
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 placeholder="网站（可选）"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none"
+                className="input-modern w-full pl-10 pr-4 py-2.5"
               />
             </div>
           </div>
@@ -230,7 +232,7 @@ export default function GuestbookPage() {
             required
             maxLength={1000}
             rows={4}
-            className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border focus:border-primary outline-none resize-none mb-4"
+            className="input-modern w-full px-4 py-3 resize-none mb-4"
           />
           
           <div className="flex justify-between items-center">
@@ -242,7 +244,7 @@ export default function GuestbookPage() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={submitting || !nickname.trim() || !content.trim()}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-medium disabled:opacity-50"
+              className="btn-primary px-6 py-2.5 disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -257,11 +259,11 @@ export default function GuestbookPage() {
         {/* 留言列表 */}
         <div className="space-y-4">
           {loading ? (
-            <div className="text-center py-12">
+            <div className="surface-card text-center py-12">
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
             </div>
           ) : messages.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="surface-card text-center py-12 text-muted-foreground">
               <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>还没有留言，来做第一个吧！</p>
             </div>
@@ -274,7 +276,7 @@ export default function GuestbookPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`p-5 rounded-2xl bg-card border ${msg.is_pinned ? 'border-primary/50 bg-primary/5' : 'border-border'}`}
+                  className={`surface-card interactive-card p-5 ${msg.is_pinned ? 'border-primary/40 bg-primary/5' : ''}`}
                 >
                   <div className="flex gap-4">
                     {/* 头像 */}
@@ -313,14 +315,14 @@ export default function GuestbookPage() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleTogglePin(msg.id, msg.is_pinned)}
-                              className={`p-1.5 rounded-lg hover:bg-muted ${msg.is_pinned ? 'text-primary' : ''}`}
+                              className={`p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 ${msg.is_pinned ? 'text-primary' : ''}`}
                               title={msg.is_pinned ? '取消置顶' : '置顶'}
                             >
                               <Pin className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => { setReplyingId(msg.id); setReplyContent(msg.reply || ''); }}
-                              className="p-1.5 rounded-lg hover:bg-muted"
+                              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
                               title="回复"
                             >
                               <Reply className="w-4 h-4" />
@@ -343,7 +345,7 @@ export default function GuestbookPage() {
                       
                       {/* 博主回复 */}
                       {msg.reply && (
-                        <div className="mt-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                        <div className="mt-3 p-3 rounded-xl border border-primary/20 bg-primary/10">
                           <div className="flex items-center gap-2 mb-1">
                             <Heart className="w-3 h-3 text-primary" />
                             <span className="text-xs font-medium text-primary">博主回复</span>
@@ -360,17 +362,17 @@ export default function GuestbookPage() {
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
                             placeholder="输入回复..."
-                            className="flex-1 px-3 py-2 rounded-lg bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                            className="input-modern flex-1 px-3 py-2 text-sm"
                           />
                           <button
                             onClick={() => handleReply(msg.id)}
-                            className="px-3 py-2 rounded-lg bg-primary text-white text-sm"
+                            className="btn-primary px-3 py-2 text-sm"
                           >
                             <Check className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => { setReplyingId(null); setReplyContent(''); }}
-                            className="px-3 py-2 rounded-lg bg-muted text-sm"
+                            className="btn-secondary px-3 py-2 text-sm"
                           >
                             <X className="w-4 h-4" />
                           </button>

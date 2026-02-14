@@ -43,9 +43,22 @@ interface ExtendedEnvironmentData {
   };
 }
 
-// 使用免费的天气API服务
-const WEATHER_API_KEY = 'YOUR_WEATHER_API_KEY'; // 需要在环境变量中配置
+interface ReverseGeocodeResponse {
+  address?: {
+    city?: string;
+    town?: string;
+    village?: string;
+    country?: string;
+  };
+  display_name?: string;
+}
+
+// 使用 OpenWeatherMap（可选）+ Open-Meteo（默认免费）双通道
+const WEATHER_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || '';
 const WEATHER_API_BASE = 'https://api.openweathermap.org/data/2.5/weather';
+const OPEN_METEO_API_BASE = 'https://api.open-meteo.com/v1/forecast';
+const HAS_OPENWEATHER_KEY =
+  WEATHER_API_KEY.length > 0 && WEATHER_API_KEY !== 'YOUR_WEATHER_API_KEY';
 
 // 地理位置服务
 export class EnvironmentService {
@@ -78,7 +91,7 @@ export class EnvironmentService {
               address: locationInfo.address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
               timezone
             });
-          } catch (error) {
+          } catch {
             // 如果逆地理编码失败，返回基本坐标信息
             const { latitude, longitude, altitude, accuracy } = position.coords;
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -108,7 +121,7 @@ export class EnvironmentService {
   }
 
   // 逆地理编码获取地址信息
-  private static async reverseGeocode(lat: number, lon: number): Promise<any> {
+  private static async reverseGeocode(lat: number, lon: number): Promise<{ city: string; country: string; address: string }> {
     try {
       // 使用免费的逆地理编码服务
       const response = await fetch(
@@ -119,11 +132,11 @@ export class EnvironmentService {
         throw new Error('逆地理编码服务不可用');
       }
       
-      const data = await response.json();
+      const data = (await response.json()) as ReverseGeocodeResponse;
       
       return {
-        city: data.address.city || data.address.town || data.address.village || '',
-        country: data.address.country || '',
+        city: data.address?.city || data.address?.town || data.address?.village || '',
+        country: data.address?.country || '',
         address: data.display_name || ''
       };
     } catch (error) {
@@ -134,37 +147,88 @@ export class EnvironmentService {
 
   // 获取当前位置的天气信息
   static async getCurrentWeather(location: LocationData): Promise<WeatherData | null> {
-    try {
-      const response = await fetch(
-        `${WEATHER_API_BASE}?lat=${location.latitude}&lon=${location.longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=zh_cn`
-      );
-      
-      if (!response.ok) {
-        throw new Error('天气服务不可用');
+    if (HAS_OPENWEATHER_KEY) {
+      try {
+        const response = await fetch(
+          `${WEATHER_API_BASE}?lat=${location.latitude}&lon=${location.longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=zh_cn`
+        );
+
+        if (!response.ok) {
+          throw new Error('OpenWeather 天气服务不可用');
+        }
+
+        const data = await response.json();
+
+        return {
+          temperature: Math.round(data.main.temp),
+          condition: this.translateWeatherCondition(data.weather[0].description),
+          humidity: data.main.humidity,
+          windSpeed: Math.round(data.wind.speed * 3.6), // m/s -> km/h
+          windDirection: data.wind.deg,
+          pressure: data.main.pressure,
+          visibility: data.visibility,
+          feelsLike: Math.round(data.main.feels_like),
+          location: `${location.city}${location.country ? `, ${location.country}` : ''}`,
+          timestamp: Date.now()
+        };
+      } catch (error) {
+        console.warn('OpenWeather 获取失败，切换 Open-Meteo:', error);
       }
-      
+    }
+
+    return this.getOpenMeteoWeather(location);
+  }
+
+  // Open-Meteo 免费天气接口
+  private static async getOpenMeteoWeather(location: LocationData): Promise<WeatherData | null> {
+    try {
+      const currentFields = [
+        'temperature_2m',
+        'relative_humidity_2m',
+        'apparent_temperature',
+        'weather_code',
+        'wind_speed_10m',
+        'wind_direction_10m',
+        'pressure_msl'
+      ].join(',');
+
+      const response = await fetch(
+        `${OPEN_METEO_API_BASE}?latitude=${location.latitude}&longitude=${location.longitude}&current=${currentFields}&timezone=auto`
+      );
+
+      if (!response.ok) {
+        throw new Error('Open-Meteo 天气服务不可用');
+      }
+
       const data = await response.json();
-      
+      const current = data.current;
+      if (!current) {
+        throw new Error('Open-Meteo 返回数据为空');
+      }
+
       return {
-        temperature: Math.round(data.main.temp),
-        condition: this.translateWeatherCondition(data.weather[0].description),
-        humidity: data.main.humidity,
-        windSpeed: Math.round(data.wind.speed * 3.6), // 转换为 km/h
-        windDirection: data.wind.deg,
-        pressure: data.main.pressure, // 气压 hPa
-        visibility: data.visibility, // 能见度 米
-        feelsLike: Math.round(data.main.feels_like), // 体感温度
+        temperature: Math.round(current.temperature_2m),
+        condition: this.getOpenMeteoCondition(current.weather_code),
+        humidity: Math.round(current.relative_humidity_2m),
+        windSpeed: Math.round(current.wind_speed_10m),
+        windDirection: current.wind_direction_10m,
+        pressure: Math.round(current.pressure_msl),
+        feelsLike: Math.round(current.apparent_temperature),
         location: `${location.city}${location.country ? `, ${location.country}` : ''}`,
         timestamp: Date.now()
       };
     } catch (error) {
-      console.warn('获取天气信息失败:', error);
+      console.warn('Open-Meteo 获取天气失败:', error);
       return null;
     }
   }
 
   // 获取空气质量信息
   static async getAirQuality(location: LocationData): Promise<ExtendedEnvironmentData['airQuality'] | null> {
+    if (!HAS_OPENWEATHER_KEY) {
+      return null;
+    }
+
     try {
       // 使用 OpenWeatherMap 空气质量API
       const response = await fetch(
@@ -312,6 +376,42 @@ export class EnvironmentService {
     };
     
     return translations[condition.toLowerCase()] || condition;
+  }
+
+  // Open-Meteo 天气码 -> 中文描述
+  private static getOpenMeteoCondition(code: number): string {
+    const mapping: Record<number, string> = {
+      0: '晴天',
+      1: '大部晴朗',
+      2: '局部多云',
+      3: '阴天',
+      45: '雾',
+      48: '雾凇',
+      51: '毛毛雨',
+      53: '小雨',
+      55: '中雨',
+      56: '冻毛毛雨',
+      57: '冻雨',
+      61: '小雨',
+      63: '中雨',
+      65: '大雨',
+      66: '冻雨',
+      67: '强冻雨',
+      71: '小雪',
+      73: '中雪',
+      75: '大雪',
+      77: '冰粒',
+      80: '阵雨',
+      81: '中阵雨',
+      82: '强阵雨',
+      85: '阵雪',
+      86: '强阵雪',
+      95: '雷暴',
+      96: '雷暴伴冰雹',
+      99: '强雷暴伴冰雹'
+    };
+
+    return mapping[code] || '天气未知';
   }
 
   // 获取综合环境信息

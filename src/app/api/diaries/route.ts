@@ -5,29 +5,20 @@ import { getAdminPassword } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
-// 环境信息接口
-interface EnvironmentInfo {
-  location?: {
-    latitude: number;
-    longitude: number;
-    city: string;
-    country: string;
-    address: string;
-  };
-  weather?: {
-    temperature: number;
-    condition: string;
-    humidity: number;
-    windSpeed: number;
-    location: string;
-    timestamp: number;
-  };
-}
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+function isMissingEnvironmentColumnError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: string; message?: string };
+  return (
+    err.code === 'PGRST204' &&
+    typeof err.message === 'string' &&
+    err.message.includes('environment_data')
+  );
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -125,7 +116,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, mood, weather, location, environment, is_public, diary_date } = body;
+    const {
+      title,
+      content,
+      mood,
+      weather,
+      location,
+      environment,
+      environment_data,
+      images,
+      tags,
+      is_public,
+      diary_date
+    } = body;
 
     // 验证必要字段
     if (!content || content.trim().length === 0) {
@@ -135,24 +138,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const envData = environment_data || environment || null;
+
     // 验证环境信息格式
-    if (environment) {
+    if (envData) {
       const envErrors = [];
       
-      if (environment.location) {
-        if (typeof environment.location.latitude !== 'number' || 
-            typeof environment.location.longitude !== 'number') {
+      if (envData.location) {
+        if (typeof envData.location.latitude !== 'number' || 
+            typeof envData.location.longitude !== 'number') {
           envErrors.push('位置坐标必须是数字');
         }
-        if (typeof environment.location.city !== 'string' || 
-            typeof environment.location.country !== 'string') {
+        if (typeof envData.location.city !== 'string' || 
+            typeof envData.location.country !== 'string') {
           envErrors.push('城市和国家必须是字符串');
         }
       }
       
-      if (environment.weather) {
-        if (typeof environment.weather.temperature !== 'number' ||
-            typeof environment.weather.condition !== 'string') {
+      if (envData.weather) {
+        if (typeof envData.weather.temperature !== 'number' ||
+            typeof envData.weather.condition !== 'string') {
           envErrors.push('天气信息格式不正确');
         }
       }
@@ -165,6 +170,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const safeImages = Array.isArray(images)
+      ? images.filter((item) => typeof item === 'string' && item.trim().length > 0)
+      : [];
+    const safeTags = Array.isArray(tags)
+      ? tags.filter((item) => typeof item === 'string' && item.trim().length > 0)
+      : [];
+
     const newDiary: Partial<Diary> = {
       title: title || null,
       content: content.trim(),
@@ -173,22 +185,34 @@ export async function POST(request: NextRequest) {
       location: location || null,
       is_public: typeof is_public === 'boolean' ? is_public : false,
       diary_date: diary_date || new Date().toISOString().split('T')[0],
-      images: [],
-      tags: [],
+      images: safeImages,
+      tags: safeTags,
       word_count: content.length,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      environment_data: envData
     };
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('diaries')
       .insert([newDiary])
       .select()
       .single();
 
-    if (error) {
-      throw error;
+    // 兼容旧表结构：若环境字段不存在，则自动降级保存
+    if (isMissingEnvironmentColumnError(error)) {
+      const legacyDiary = { ...newDiary };
+      delete (legacyDiary as { environment_data?: unknown }).environment_data;
+      const fallback = await supabase
+        .from('diaries')
+        .insert([legacyDiary])
+        .select()
+        .single();
+      data = fallback.data;
+      error = fallback.error;
     }
+
+    if (error) throw error;
 
     return Response.json({
       success: true,
