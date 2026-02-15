@@ -28,13 +28,13 @@ export function ReadingProgress() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-1 bg-secondary/20 z-50">
+    <div className="fixed top-0 left-0 right-0 h-[2px] bg-secondary/15 z-50 backdrop-blur-xl">
       <motion.div
-        className="h-full bg-gradient-to-r from-[var(--gradient-start)] via-primary to-[var(--gradient-end)]"
+        className="h-full origin-left bg-gradient-to-r from-[var(--gradient-start)] via-primary to-[var(--gradient-end)] shadow-[0_0_12px_color-mix(in_srgb,var(--gradient-start)_35%,transparent)]"
         style={{ width: `${progress}%` }}
         initial={{ width: 0 }}
         animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.1 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 34, mass: 0.8 }}
       />
     </div>
   );

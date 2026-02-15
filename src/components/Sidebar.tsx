@@ -32,6 +32,14 @@ import { useTheme } from 'next-themes';
 import clsx from 'clsx';
 import { useAdmin } from './AdminProvider';
 import { useProfile } from './ProfileProvider';
+import {
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_BUTTON,
+  TAP_BUTTON,
+  bottomSheetVariants,
+  modalBackdropVariants,
+} from './Animations';
 
 interface NavItem {
   name: string;
@@ -79,7 +87,10 @@ function renderSection(
           const active = itemActive(pathname, item.href);
           return (
             <Link key={item.href} href={item.href} onClick={closeMenu}>
-              <div
+              <motion.div
+                whileHover={{ x: 2, scale: 1.008 }}
+                whileTap={{ scale: 0.992, x: 1 }}
+                transition={APPLE_SPRING_GENTLE}
                 className={clsx(
                   'nav-chip group flex items-center gap-3 px-3 py-2.5 text-sm',
                   collapsed && 'justify-center',
@@ -90,7 +101,7 @@ function renderSection(
               >
                 <item.icon className="h-4 w-4" />
                 {!collapsed && <span className="font-medium">{item.name}</span>}
-              </div>
+              </motion.div>
             </Link>
           );
         })}
@@ -133,11 +144,11 @@ export function Sidebar() {
   return (
     <>
       <motion.aside
-        initial={{ x: -30, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.35 }}
+        initial={{ x: -34, opacity: 0, filter: 'blur(8px)' }}
+        animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 0.56, ease: APPLE_EASE_SOFT }}
         className={clsx(
-          'fixed left-0 top-0 z-40 hidden h-screen border-r border-border/60 bg-background/85 shadow-[0_18px_50px_-34px_rgba(0,0,0,0.75)] backdrop-blur-2xl md:flex md:flex-col',
+          'fixed left-0 top-0 z-40 hidden h-screen border-r border-border/60 bg-background/74 shadow-[0_24px_56px_-34px_rgba(0,0,0,0.75)] backdrop-blur-2xl md:flex md:flex-col',
           isCollapsed ? 'w-[88px]' : 'w-[260px]'
         )}
       >
@@ -157,7 +168,7 @@ export function Sidebar() {
           </div>
 
           {!isCollapsed && (
-            <div className="mx-3.5 mt-4 rounded-2xl border border-border/70 bg-background/85 p-3 shadow-[0_10px_28px_-24px_rgba(0,0,0,0.45)]">
+            <div className="surface-card mx-3.5 mt-4 p-3">
               <p className="text-sm font-medium">{profile.nickname || '拾光'}</p>
               <p className="mt-1 line-clamp-2 text-xs text-soft">
                 {profile.signature || '记录技术与生活的长期写作。'}
@@ -176,7 +187,7 @@ export function Sidebar() {
               <Link href="/write" className="block">
                 <button
                   className={clsx(
-                    'btn-primary w-full px-3 py-2.5 text-sm',
+                    'btn-primary ios-button-press w-full px-3 py-2.5 text-sm',
                     isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
                   )}
                 >
@@ -188,7 +199,7 @@ export function Sidebar() {
               <button
                 onClick={() => showLoginModal()}
                 className={clsx(
-                  'btn-primary w-full px-3 py-2.5 text-sm',
+                  'btn-primary ios-button-press w-full px-3 py-2.5 text-sm',
                   isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
                 )}
               >
@@ -209,7 +220,7 @@ export function Sidebar() {
             <button
               onClick={toggleTheme}
               className={clsx(
-                'btn-secondary w-full px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground',
+                'btn-secondary ios-button-press w-full px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground',
                 isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
               )}
             >
@@ -224,7 +235,7 @@ export function Sidebar() {
             <button
               onClick={toggleCollapse}
               className={clsx(
-                'btn-secondary w-full px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground',
+                'btn-secondary ios-button-press w-full px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground',
                 isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
               )}
             >
@@ -237,8 +248,8 @@ export function Sidebar() {
             {isAdmin && (
               <button
                 onClick={logout}
-                className={clsx(
-                  'w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-500/15',
+              className={clsx(
+                  'ios-button-press w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-500/15',
                   isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
                 )}
               >
@@ -250,7 +261,7 @@ export function Sidebar() {
         </div>
       </motion.aside>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/90 backdrop-blur-2xl md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/88 backdrop-blur-2xl md:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-2.5">
           <Link href="/" className={clsx('rounded-xl p-2.5 transition', itemActive(pathname, '/') ? 'bg-primary/12 text-primary' : 'text-muted-foreground')}>
             <Home className="h-5 w-5" />
@@ -261,13 +272,13 @@ export function Sidebar() {
           </Link>
 
           {isAdmin ? (
-            <Link href="/write" className="-mt-8 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] p-4 text-white shadow-lg">
+            <Link href="/write" className="-mt-8 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] p-4 text-white shadow-lg ios-button-press">
               <PenLine className="h-5 w-5" />
             </Link>
           ) : (
             <button
               onClick={() => showLoginModal()}
-              className="-mt-8 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] p-4 text-white shadow-lg"
+              className="-mt-8 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] p-4 text-white shadow-lg ios-button-press"
             >
               <Shield className="h-5 w-5" />
             </button>
@@ -280,7 +291,7 @@ export function Sidebar() {
             <Archive className="h-5 w-5" />
           </Link>
 
-          <button onClick={() => setMobileOpen(true)} className="rounded-xl p-2.5 text-muted-foreground">
+          <button onClick={() => setMobileOpen(true)} className="ios-button-press rounded-xl p-2.5 text-muted-foreground">
             <Menu className="h-5 w-5" />
           </button>
         </div>
@@ -290,23 +301,24 @@ export function Sidebar() {
         {mobileOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm md:hidden"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-50 md:hidden"
               onClick={() => setMobileOpen(false)}
             />
 
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ duration: 0.25 }}
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl border-t border-border bg-background/95 p-5 backdrop-blur-2xl md:hidden"
+              variants={bottomSheetVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-sheet-card fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl border-t border-border bg-background/92 p-5 backdrop-blur-2xl md:hidden"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-base font-semibold">站点导航</h3>
-                <button onClick={() => setMobileOpen(false)} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary">
+                <button onClick={() => setMobileOpen(false)} className="ios-button-press rounded-lg p-2 text-muted-foreground hover:bg-secondary">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -321,7 +333,7 @@ export function Sidebar() {
                     onClick={() => {
                       toggleTheme();
                     }}
-                    className="btn-secondary inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm"
+                    className="btn-secondary ios-button-press inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm"
                   >
                     {resolvedTheme === 'dark' ? (
                       <Sun className="h-4 w-4" />
@@ -337,7 +349,7 @@ export function Sidebar() {
                         logout();
                         setMobileOpen(false);
                       }}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-500/20"
+                      className="ios-button-press inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-500/20"
                     >
                       <LogOut className="h-4 w-4" />
                       退出管理
@@ -348,7 +360,7 @@ export function Sidebar() {
                         showLoginModal();
                         setMobileOpen(false);
                       }}
-                      className="btn-secondary inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm"
+                      className="btn-secondary ios-button-press inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm"
                     >
                       <Shield className="h-4 w-4" />
                       管理员登录

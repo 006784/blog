@@ -31,6 +31,14 @@ import {
 import { Diary, formatDate, formatDateTime, moodIcons, weatherIcons } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import { EnvironmentService } from '@/services/environmentService';
+import {
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_LIFT,
+  TAP_BUTTON,
+  modalBackdropVariants,
+  modalPanelVariants,
+} from '@/components/Animations';
 
 interface EnvironmentSnapshot {
   location?: {
@@ -349,16 +357,17 @@ export default function DiaryPage() {
   return (
     <DiaryNotebookBackground>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 md:px-8 md:pt-10">
-        <section className="surface-hero relative overflow-hidden bg-gradient-to-br from-[#6b4e2f] via-[#5b4026] to-[#3d2a1a] p-6 text-amber-50 shadow-2xl md:p-10">
-          <div className="pointer-events-none absolute inset-0 opacity-25" style={{ backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0))' }} />
+        <section className="surface-hero relative overflow-hidden border-amber-300/25 bg-[linear-gradient(142deg,#75532d_0%,#5a3d22_45%,#3c2918_100%)] p-6 text-amber-50 shadow-[0_28px_68px_-36px_rgba(44,24,8,0.82)] md:p-10">
+          <div className="pointer-events-none absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0))' }} />
+          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(254,243,199,0.35),transparent_70%)]" />
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full bg-amber-100/15 px-3 py-1 text-xs tracking-[0.18em] text-amber-100/90">
+              <p className="section-kicker border-amber-200/35 bg-amber-100/15 text-amber-100/90">
                 <NotebookPen className="h-3.5 w-3.5" />
                 PERSONAL JOURNAL
               </p>
-              <h1 className="mt-4 text-4xl font-semibold md:text-5xl">我的日记本</h1>
-              <p className="mt-4 max-w-2xl text-amber-100/90">
+              <h1 className="section-title-xl mt-4 text-amber-50 md:text-5xl">我的日记本</h1>
+              <p className="mt-4 max-w-2xl text-amber-100/92">
                 像真正的手写日记一样记录每一天。支持自动获取当前位置、天气与温度，并可把图片视频直接插入正文。
               </p>
             </div>
@@ -366,13 +375,13 @@ export default function DiaryPage() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setCoverOpen((prev) => !prev)}
-                className="btn-secondary border-amber-200/35 bg-amber-200/10 px-4 py-2 text-sm text-amber-100 hover:bg-amber-200/20"
+                className="btn-secondary ios-button-press border-amber-200/35 bg-amber-200/10 px-4 py-2 text-sm text-amber-100 hover:bg-amber-200/20"
               >
                 {coverOpen ? '合上日记本' : '打开日记本'}
               </button>
               <button
                 onClick={openCreateEditor}
-                className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-300"
+                className="btn-primary ios-button-press inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-300"
               >
                 {isAdmin ? <Plus className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
                 {isAdmin ? '写今天的日记' : '管理员登录后写日记'}
@@ -381,19 +390,19 @@ export default function DiaryPage() {
           </div>
 
           <div className="relative z-10 mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+            <div className="metric-tile border-amber-200/30 bg-amber-100/10">
               <p className="text-2xl font-semibold">{stats.total}</p>
               <p className="text-sm text-amber-100/90">总篇数</p>
             </div>
-            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+            <div className="metric-tile border-amber-200/30 bg-amber-100/10">
               <p className="text-2xl font-semibold">{stats.publicCount}</p>
               <p className="text-sm text-amber-100/90">公开篇数</p>
             </div>
-            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+            <div className="metric-tile border-amber-200/30 bg-amber-100/10">
               <p className="text-2xl font-semibold">{stats.privateCount}</p>
               <p className="text-sm text-amber-100/90">私密篇数</p>
             </div>
-            <div className="rounded-2xl border border-amber-200/30 bg-amber-100/10 p-3">
+            <div className="metric-tile border-amber-200/30 bg-amber-100/10">
               <p className="text-2xl font-semibold">{stats.wordCount.toLocaleString()}</p>
               <p className="text-sm text-amber-100/90">累计字数</p>
             </div>
@@ -435,7 +444,7 @@ export default function DiaryPage() {
                 />
 
                 {isAdmin && (
-                  <label className="inline-flex items-center gap-2 rounded-xl border border-amber-200/70 bg-white/90 px-3 py-2.5 text-sm dark:bg-zinc-900/80">
+                  <label className="chip-filter h-11 border-amber-200/75 bg-white/90 px-3 py-2.5 text-sm text-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-200">
                     <input
                       type="checkbox"
                       checked={showPublicOnly}
@@ -461,7 +470,7 @@ export default function DiaryPage() {
                   <p className="mt-2 text-sm text-muted-foreground">开始写下今天的心情、天气和发生的故事。</p>
                   <button
                     onClick={openCreateEditor}
-                    className="btn-primary mt-5 px-4 py-2 text-sm font-medium text-white"
+                    className="btn-primary ios-button-press mt-5 px-4 py-2 text-sm font-medium text-white"
                   >
                     立刻写日记
                   </button>
@@ -554,10 +563,12 @@ function DiaryEntryCard({
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
-      className="diary-paper-surface group relative overflow-hidden rounded-2xl border border-amber-300/50 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-zinc-900/70"
+      initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      transition={{ delay: index * 0.04, duration: 0.58, ease: APPLE_EASE_SOFT }}
+      whileHover={HOVER_LIFT}
+      whileTap={{ y: -2, scale: 0.994 }}
+      className="diary-paper-surface ios-hover-surface group relative overflow-hidden rounded-2xl border border-amber-300/50 bg-white/80 shadow-sm dark:bg-zinc-900/70"
     >
       <button type="button" onClick={onOpen} className="w-full text-left">
         <div className="absolute left-6 top-0 h-full w-0.5 bg-rose-300/50" />
@@ -618,7 +629,7 @@ function DiaryEntryCard({
               event.stopPropagation();
               onEdit();
             }}
-            className="rounded-lg bg-white/95 p-2 text-amber-700 shadow-sm hover:bg-amber-50"
+            className="ios-button-press rounded-lg bg-white/95 p-2 text-amber-700 shadow-sm hover:bg-amber-50"
             title="编辑"
           >
             <Edit3 className="h-4 w-4" />
@@ -629,7 +640,7 @@ function DiaryEntryCard({
               event.stopPropagation();
               onDelete();
             }}
-            className="rounded-lg bg-white/95 p-2 text-rose-600 shadow-sm hover:bg-rose-50"
+            className="ios-button-press rounded-lg bg-white/95 p-2 text-rose-600 shadow-sm hover:bg-rose-50"
             title="删除"
           >
             <Trash2 className="h-4 w-4" />
@@ -715,17 +726,17 @@ function DiaryDetailModal({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+      variants={modalBackdropVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 14 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 14 }}
-        className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-amber-300/50 bg-white shadow-2xl dark:bg-zinc-900"
+        variants={modalPanelVariants}
+        transition={APPLE_SPRING_GENTLE}
+        className="ios-modal-card flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-amber-300/50 bg-white shadow-2xl dark:bg-zinc-900"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="border-b border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50 p-5 dark:border-zinc-700 dark:from-zinc-900 dark:to-zinc-800">
@@ -748,7 +759,7 @@ function DiaryDetailModal({
               </div>
             </div>
 
-            <button onClick={onClose} className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
+            <button onClick={onClose} className="ios-button-press rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -814,10 +825,10 @@ function DiaryDetailModal({
 
         {isAdmin && (
           <div className="flex justify-end gap-2 border-t border-amber-200/60 p-5 dark:border-zinc-700">
-            <button onClick={onEdit} className="inline-flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-sm text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-200">
+            <button onClick={onEdit} className="ios-button-press inline-flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-sm text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-200">
               <Edit3 className="h-4 w-4" />编辑
             </button>
-            <button onClick={onDelete} className="inline-flex items-center gap-2 rounded-xl bg-rose-100 px-4 py-2 text-sm text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-200">
+            <button onClick={onDelete} className="ios-button-press inline-flex items-center gap-2 rounded-xl bg-rose-100 px-4 py-2 text-sm text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-200">
               <Trash2 className="h-4 w-4" />删除
             </button>
           </div>
@@ -1038,17 +1049,17 @@ function DiaryEditorModal({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+      variants={modalBackdropVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 14 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 14 }}
-        className="diary-editor flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-amber-300/50 bg-white text-zinc-900 shadow-2xl dark:bg-zinc-900 dark:text-zinc-100"
+        variants={modalPanelVariants}
+        transition={APPLE_SPRING_GENTLE}
+        className="ios-modal-card diary-editor flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-amber-300/50 bg-white text-zinc-900 shadow-2xl dark:bg-zinc-900 dark:text-zinc-100"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="border-b border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50 p-5 dark:border-zinc-700 dark:from-zinc-900 dark:to-zinc-800">
@@ -1057,7 +1068,7 @@ function DiaryEditorModal({
               <NotebookPen className="h-5 w-5 text-amber-600" />
               {diary ? '编辑日记' : '新建日记'}
             </h2>
-            <button onClick={onClose} className="rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
+            <button onClick={onClose} className="ios-button-press rounded-full p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -1145,7 +1156,7 @@ function DiaryEditorModal({
               <button
                 onClick={() => void captureEnvironment()}
                 disabled={capturing}
-                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3 py-1.5 text-sm text-white hover:bg-sky-700 disabled:opacity-60"
+                className="ios-button-press inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3 py-1.5 text-sm text-white hover:bg-sky-700 disabled:opacity-60"
               >
                 {capturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
                 {capturing ? '获取中...' : '立即获取'}
@@ -1215,7 +1226,7 @@ function DiaryEditorModal({
                     </span>
                     <button
                       onClick={() => removeInsertedMedia(media.url)}
-                      className="rounded p-1 text-rose-600 hover:bg-rose-50"
+                      className="ios-button-press rounded p-1 text-rose-600 hover:bg-rose-50"
                       title="从正文移除"
                     >
                       <X className="h-4 w-4" />
@@ -1260,13 +1271,13 @@ function DiaryEditorModal({
         </div>
 
         <div className="flex items-center justify-end gap-3 border-t border-amber-200/60 p-5 dark:border-zinc-700">
-          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">
+          <button onClick={onClose} className="ios-button-press rounded-xl px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">
             取消
           </button>
           <button
             onClick={() => void handleSubmit()}
             disabled={saving || !form.content.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
+            className="ios-button-press inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
             {saving ? '保存中...' : diary ? '保存修改' : '写入日记本'}

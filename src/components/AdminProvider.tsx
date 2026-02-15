@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, X, Eye, EyeOff, Shield } from 'lucide-react';
+import { modalBackdropVariants, modalPanelVariants, TAP_BUTTON } from './Animations';
 
 interface AdminContextType {
   isAdmin: boolean;
@@ -111,23 +112,25 @@ export function AdminProvider({ children }: AdminProviderProps) {
         {showModal && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
               onClick={() => setShowModal(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
+              className="ios-modal-overlay fixed inset-0 z-[100]"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed left-4 right-4 top-1/2 -translate-y-1/2 max-w-sm mx-auto bg-card rounded-3xl shadow-2xl z-[100] overflow-hidden"
+              variants={modalPanelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-card fixed left-4 right-4 top-1/2 z-[100] mx-auto max-w-sm -translate-y-1/2 overflow-hidden rounded-3xl bg-card shadow-2xl"
             >
               {/* 头部 */}
               <div className="relative p-6 pb-4 bg-gradient-to-br from-primary/10 to-primary/5">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors"
+                  className="ios-button-press absolute right-4 top-4 rounded-full p-2 transition-colors hover:bg-secondary/50"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -162,7 +165,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="ios-button-press absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -179,9 +182,9 @@ export function AdminProvider({ children }: AdminProviderProps) {
                 )}
 
                 <motion.button
-                  whileTap={{ scale: 0.98 }}
+                  whileTap={TAP_BUTTON}
                   onClick={handleLogin}
-                  className="w-full mt-4 py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25"
+                  className="ios-button-press mt-4 w-full rounded-2xl bg-gradient-to-r from-primary to-primary/90 py-4 font-semibold text-white shadow-lg shadow-primary/25"
                 >
                   确认登录
                 </motion.button>

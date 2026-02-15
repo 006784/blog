@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronRight, Code2, Coffee, MessageCircle, Palette, PenTool, Sparkles } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
-import { AnimatedSection } from '@/components/Animations';
+import { APPLE_EASE, AnimatedSection } from '@/components/Animations';
 import { getPageStructuredData } from '@/lib/seo';
 import { getPublishedPosts, Post } from '@/lib/supabase';
 
@@ -30,13 +30,31 @@ const features = [
   },
 ];
 
+const nowTracks = [
+  {
+    title: '写作主线',
+    detail: '技术复盘与长期项目记录',
+    icon: PenTool,
+  },
+  {
+    title: '设计系统',
+    detail: '统一组件语义与动效节奏',
+    icon: Palette,
+  },
+  {
+    title: '社区互动',
+    detail: '留言、订阅、协作沟通',
+    icon: MessageCircle,
+  },
+];
+
 export default function HomePageClient() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 360], [1, 0.25]);
-  const heroY = useTransform(scrollY, [0, 360], [0, 72]);
+  const heroOpacity = useTransform(scrollY, [0, 420], [1, 0.42]);
+  const heroY = useTransform(scrollY, [0, 420], [0, 48]);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -83,75 +101,116 @@ export default function HomePageClient() {
 
         <motion.div style={{ opacity: heroOpacity, y: heroY }} className="relative mx-auto max-w-6xl">
           <div className="surface-hero overflow-hidden p-7 md:p-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="section-kicker"
-          >
-            <Sparkles className="h-4 w-4 text-cyan-500" />
-            <span>设计升级版首页</span>
-          </motion.div>
+            <div className="grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+              <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.62, ease: APPLE_EASE }}
+                  className="section-kicker"
+                >
+                  <Sparkles className="h-4 w-4 text-cyan-500" />
+                  <span>设计升级版首页</span>
+                </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="apple-display mt-6 max-w-5xl"
-          >
-            把想法写成作品，
-            <span className="mt-2 block gradient-text">把作品沉淀成体系。</span>
-          </motion.h1>
+                <motion.h1
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.78, delay: 0.1, ease: APPLE_EASE }}
+                  className="apple-display mt-6 max-w-5xl"
+                >
+                  把想法写成作品，
+                  <span className="mt-2 block gradient-text">把作品沉淀成体系。</span>
+                </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-soft mt-6 max-w-2xl text-base md:text-lg"
-          >
-            这个站点聚焦技术、设计与创作流程，持续更新可落地的方法论和长期实践记录。
-          </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.76, delay: 0.18, ease: APPLE_EASE }}
+                  className="text-soft mt-6 max-w-2xl text-base md:text-lg"
+                >
+                  这个站点聚焦技术、设计与创作流程，持续更新可落地的方法论和长期实践记录。
+                </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="mt-10 flex flex-wrap items-center gap-4"
-          >
-            <Link href="/blog" className="btn-primary px-7 py-3.5">
-              <span className="inline-flex items-center gap-2">
-                <PenTool className="h-4 w-4" />
-                开始阅读
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            </Link>
-            <Link href="/contact" className="btn-secondary px-7 py-3.5">
-              <span className="inline-flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                联系交流
-              </span>
-            </Link>
-          </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.72, delay: 0.24, ease: APPLE_EASE }}
+                  className="mt-5 flex flex-wrap gap-2"
+                >
+                  <span className="chip-filter" data-active="true">产品体验</span>
+                  <span className="chip-filter">工程实践</span>
+                  <span className="chip-filter">长期写作</span>
+                </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="mt-12 grid grid-cols-3 gap-3 rounded-2xl border border-border/70 bg-background/70 p-4 backdrop-blur md:max-w-xl"
-          >
-            <div>
-              <p className="text-2xl font-semibold tracking-tight">{posts.length || 0}+</p>
-              <p className="text-soft text-xs">近期文章</p>
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.72, delay: 0.3, ease: APPLE_EASE }}
+                  className="mt-10 flex flex-wrap items-center gap-4"
+                >
+                  <Link href="/blog" className="btn-primary px-7 py-3.5">
+                    <span className="inline-flex items-center gap-2">
+                      <PenTool className="h-4 w-4" />
+                      开始阅读
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </Link>
+                  <Link href="/contact" className="btn-secondary px-7 py-3.5">
+                    <span className="inline-flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      联系交流
+                    </span>
+                  </Link>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.72, delay: 0.38, ease: APPLE_EASE }}
+                  className="mt-12 grid grid-cols-3 gap-3 md:max-w-xl"
+                >
+                  <div className="metric-tile">
+                    <p className="text-2xl font-semibold tracking-tight">{posts.length || 0}+</p>
+                    <p className="text-soft text-xs">近期文章</p>
+                  </div>
+                  <div className="metric-tile">
+                    <p className="text-2xl font-semibold tracking-tight">3</p>
+                    <p className="text-soft text-xs">核心方向</p>
+                  </div>
+                  <div className="metric-tile">
+                    <p className="text-2xl font-semibold tracking-tight">持续更新</p>
+                    <p className="text-soft text-xs">长期维护</p>
+                  </div>
+                </motion.div>
+              </div>
+
+              <motion.aside
+                initial={{ opacity: 0, x: 18 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.76, delay: 0.26, ease: APPLE_EASE }}
+                className="surface-card p-5 md:p-6"
+              >
+                <p className="section-kicker">Now Focus</p>
+                <h3 className="section-title-xl mt-5 text-[clamp(1.3rem,3.2vw,2rem)]">当前构建重点</h3>
+                <div className="mt-5 space-y-3">
+                  {nowTracks.map((item) => (
+                    <div key={item.title} className="metric-tile flex items-start gap-3">
+                      <div className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{item.title}</p>
+                        <p className="text-soft mt-1 text-xs">{item.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Link href="/blog" className="btn-secondary mt-5 w-full px-4 py-2.5 text-sm">
+                  浏览博客目录
+                </Link>
+              </motion.aside>
             </div>
-            <div>
-              <p className="text-2xl font-semibold tracking-tight">3</p>
-              <p className="text-soft text-xs">核心方向</p>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold tracking-tight">持续更新</p>
-              <p className="text-soft text-xs">长期维护</p>
-            </div>
-          </motion.div>
           </div>
         </motion.div>
       </section>
@@ -161,8 +220,8 @@ export default function HomePageClient() {
           <AnimatedSection>
             <div className="mb-10 flex items-end justify-between gap-4">
               <div>
-                <p className="text-soft text-sm uppercase tracking-[0.2em]">Focus Areas</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">我在写什么</h2>
+                <p className="section-kicker">Focus Areas</p>
+                <h2 className="section-title-xl mt-3">我在写什么</h2>
               </div>
             </div>
           </AnimatedSection>
@@ -174,7 +233,7 @@ export default function HomePageClient() {
                 initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.5, delay: index * 0.12 }}
+                transition={{ duration: 0.62, delay: index * 0.1, ease: APPLE_EASE }}
                 className="surface-card interactive-card group p-6"
               >
                 <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.accent} text-white`}>
@@ -197,8 +256,8 @@ export default function HomePageClient() {
           <AnimatedSection>
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-soft text-sm uppercase tracking-[0.2em]">Latest Notes</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">最新文章</h2>
+                <p className="section-kicker">Latest Notes</p>
+                <h2 className="section-title-xl mt-3">最新文章</h2>
               </div>
               <Link href="/blog" className="btn-ghost px-5 py-2.5 text-sm">
                 查看全部
@@ -220,7 +279,7 @@ export default function HomePageClient() {
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.08 }}
+                  transition={{ duration: 0.6, delay: index * 0.07, ease: APPLE_EASE }}
                 >
                   <BlogCard post={post} index={index} />
                 </motion.div>

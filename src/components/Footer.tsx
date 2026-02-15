@@ -50,19 +50,19 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative mt-20 border-t border-border/60 bg-background/55 backdrop-blur-xl">
+    <footer className="relative mt-20 px-6 pb-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(56,189,248,0.1),transparent_45%),radial-gradient(circle_at_90%_20%,rgba(249,115,22,0.08),transparent_40%)]" />
       <motion.button
         whileHover={{ y: -4 }}
         whileTap={{ scale: 0.95 }}
         onClick={scrollToTop}
-        className="btn-secondary absolute -top-5 right-8 inline-flex h-10 w-10 items-center justify-center p-0 text-muted-foreground hover:text-foreground"
+        className="btn-secondary absolute -top-5 right-14 z-10 inline-flex h-10 w-10 items-center justify-center p-0 text-muted-foreground hover:text-foreground"
         aria-label="回到顶部"
       >
         <ArrowUp className="h-4 w-4" />
       </motion.button>
 
-      <div className="relative mx-auto max-w-6xl px-6 py-12">
+      <div className="surface-card relative mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))]">
           <div>
             <h3 className="text-xl font-semibold tracking-tight">拾光博客</h3>

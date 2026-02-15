@@ -10,6 +10,15 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
 import { Turnstile } from '@/components/Turnstile';
+import {
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_BUTTON,
+  HOVER_LIFT,
+  TAP_BUTTON,
+  modalBackdropVariants,
+  modalPanelVariants,
+} from '@/components/Animations';
 
 interface Resource {
   id: string;
@@ -444,8 +453,9 @@ export default function ResourcesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 页面标题 */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.62, ease: APPLE_EASE_SOFT }}
           className="mb-8"
         >
           <div className="surface-hero px-6 py-10 sm:px-10 sm:py-12 text-center">
@@ -537,7 +547,7 @@ export default function ResourcesPage() {
             {isAdmin && (
               <button
                 onClick={() => setShowCategoryModal(true)}
-                className="btn-secondary h-11 w-11 rounded-xl p-0"
+                className="btn-secondary ios-button-press h-11 w-11 rounded-xl p-0"
                 title="管理分类"
               >
                 <Settings className="w-4 h-4" />
@@ -550,13 +560,13 @@ export default function ResourcesPage() {
             <div className="flex items-center rounded-xl border border-[var(--ui-line)] overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
+                className={`ios-button-press p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
+                className={`ios-button-press p-2.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -565,10 +575,11 @@ export default function ResourcesPage() {
             {/* 上传按钮 */}
             {isAdmin && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={HOVER_BUTTON}
+                whileTap={TAP_BUTTON}
+                transition={APPLE_SPRING_GENTLE}
                 onClick={() => setShowUploadModal(true)}
-                className="btn-primary px-5 py-2.5"
+                className="btn-primary ios-button-press px-5 py-2.5"
               >
                 <Upload className="w-4 h-4" />
                 上传资源
@@ -604,10 +615,12 @@ export default function ResourcesPage() {
               return (
                 <motion.div
                   key={resource.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="surface-card interactive-card group p-4"
+                  initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: index * 0.05, duration: 0.58, ease: APPLE_EASE_SOFT }}
+                  whileHover={HOVER_LIFT}
+                  whileTap={{ y: -2, scale: 0.994 }}
+                  className="surface-card interactive-card ios-hover-surface group p-4"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className={`p-3 rounded-xl ${config.bg}`}>
@@ -638,7 +651,7 @@ export default function ResourcesPage() {
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleDownloadClick(resource)}
-                      className="btn-secondary flex-1 rounded-lg py-2 text-sm"
+                      className="btn-secondary ios-button-press flex-1 rounded-lg py-2 text-sm"
                     >
                       <Download className="w-3.5 h-3.5" />
                       下载
@@ -651,7 +664,7 @@ export default function ResourcesPage() {
                     )}
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
-                      className="p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
+                      className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
                     >
                       {copiedId === resource.id ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -662,7 +675,7 @@ export default function ResourcesPage() {
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(resource.id)}
-                        className="p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                        className="ios-button-press p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -681,10 +694,12 @@ export default function ResourcesPage() {
               return (
                 <motion.div
                   key={resource.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.03 }}
-                  className="surface-card interactive-card flex items-center gap-4 p-4"
+                  initial={{ opacity: 0, x: -20, filter: 'blur(5px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: index * 0.03, duration: 0.54, ease: APPLE_EASE_SOFT }}
+                  whileHover={{ x: 2, scale: 1.003 }}
+                  whileTap={{ scale: 0.995 }}
+                  className="surface-card interactive-card ios-hover-surface flex items-center gap-4 p-4"
                 >
                   <div className={`p-2 rounded-lg ${config.bg}`}>
                     <Icon className={`w-5 h-5 ${config.color}`} />
@@ -710,7 +725,7 @@ export default function ResourcesPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDownloadClick(resource)}
-                      className="p-2 rounded-lg border border-[var(--ui-line)] text-primary hover:border-primary/40 transition-colors"
+                      className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] text-primary hover:border-primary/40 transition-colors"
                     >
                       <Download className="w-4 h-4" />
                     </button>
@@ -722,7 +737,7 @@ export default function ResourcesPage() {
                     )}
                     <button
                       onClick={() => copyLink(resource.file_url, resource.id)}
-                      className="p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
+                      className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
                     >
                       {copiedId === resource.id ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -733,7 +748,7 @@ export default function ResourcesPage() {
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(resource.id)}
-                        className="p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                        className="ios-button-press p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -749,17 +764,16 @@ export default function ResourcesPage() {
         <AnimatePresence>
           {downloadModal && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
               onClick={() => setDownloadModal(null)}
             >
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="surface-card w-full max-w-md p-6"
+                variants={modalPanelVariants}
+                className="surface-card ios-modal-card w-full max-w-md p-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-6">
@@ -772,7 +786,7 @@ export default function ResourcesPage() {
                       <p className="text-xs text-muted-foreground">请完成安全验证</p>
                     </div>
                   </div>
-                  <button onClick={() => setDownloadModal(null)} className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+                  <button onClick={() => setDownloadModal(null)} className="ios-button-press p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -798,14 +812,14 @@ export default function ResourcesPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setDownloadModal(null)}
-                    className="btn-secondary flex-1 px-4 py-2.5 rounded-xl"
+                    className="btn-secondary ios-button-press flex-1 px-4 py-2.5 rounded-xl"
                   >
                     取消
                   </button>
                   <button
                     onClick={confirmDownload}
                     disabled={!downloadVerified || downloadProgress !== null}
-                    className="btn-primary flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="btn-primary ios-button-press flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {downloadProgress !== null ? (
                       <>
@@ -834,17 +848,16 @@ export default function ResourcesPage() {
         <AnimatePresence>
           {showUploadModal && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
               onClick={() => setShowUploadModal(false)}
             >
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="surface-card w-full max-w-lg p-6"
+                variants={modalPanelVariants}
+                className="surface-card ios-modal-card w-full max-w-lg p-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-6">
@@ -857,7 +870,7 @@ export default function ResourcesPage() {
                       <p className="text-xs text-muted-foreground">文件将经过安全检测</p>
                     </div>
                   </div>
-                  <button onClick={() => setShowUploadModal(false)} className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+                  <button onClick={() => setShowUploadModal(false)} className="ios-button-press p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -970,14 +983,14 @@ export default function ResourcesPage() {
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={() => { setShowUploadModal(false); resetUploadForm(); }}
-                    className="btn-secondary flex-1 px-4 py-2.5 rounded-xl"
+                    className="btn-secondary ios-button-press flex-1 px-4 py-2.5 rounded-xl"
                   >
                     取消
                   </button>
                   <button
                     onClick={handleUpload}
                     disabled={!uploadFile || uploading}
-                    className="btn-primary flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="btn-primary ios-button-press flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {uploading ? (
                       <>
@@ -1001,25 +1014,24 @@ export default function ResourcesPage() {
         <AnimatePresence>
           {showCategoryModal && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
               onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
             >
               <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
+                variants={modalPanelVariants}
                 onClick={(e) => e.stopPropagation()}
-                className="surface-card w-full max-w-2xl overflow-hidden max-h-[80vh] flex flex-col"
+                className="surface-card ios-modal-card flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden"
               >
                 {/* 头部 */}
                 <div className="flex items-center justify-between p-6 border-b border-[var(--ui-line)]">
                   <h3 className="text-xl font-bold">分类管理</h3>
                   <button
                     onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
-                    className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+                    className="ios-button-press rounded-lg p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1093,7 +1105,7 @@ export default function ResourcesPage() {
                       {editingCategory && (
                         <button
                           onClick={resetCategoryForm}
-                          className="btn-secondary px-4 py-2 rounded-lg"
+                          className="btn-secondary ios-button-press rounded-lg px-4 py-2"
                         >
                           取消
                         </button>
@@ -1101,7 +1113,7 @@ export default function ResourcesPage() {
                       <button
                         onClick={handleSaveCategory}
                         disabled={savingCategory || !newCatName || !newCatSlug}
-                        className="btn-primary px-4 py-2 rounded-lg disabled:opacity-50 flex items-center gap-2"
+                        className="btn-primary ios-button-press flex items-center gap-2 rounded-lg px-4 py-2 disabled:opacity-50"
                       >
                         {savingCategory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                         {editingCategory ? '保存' : '添加'}
@@ -1131,14 +1143,14 @@ export default function ResourcesPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEditCategory(cat)}
-                              className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+                              className="ios-button-press rounded-lg p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             {!cat.is_system && (
                               <button
                                 onClick={() => handleDeleteCategory(cat.id)}
-                                className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors"
+                                className="ios-button-press rounded-lg p-2 text-red-500 transition-colors hover:bg-red-500/10"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>

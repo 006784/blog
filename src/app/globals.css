@@ -1904,35 +1904,44 @@ textarea:focus {
 /* ============================================ */
 
 :root {
+  --ui-radius-2xl: 1.95rem;
   --ui-radius-xl: 1.6rem;
   --ui-radius-lg: 1.15rem;
   --ui-radius-md: 0.9rem;
-  --ui-shadow-soft: 0 14px 40px -24px rgba(17, 24, 39, 0.45);
-  --ui-shadow-float: 0 24px 55px -28px rgba(14, 165, 233, 0.45);
+  --ui-shadow-soft: 0 16px 38px -24px rgba(17, 24, 39, 0.42);
+  --ui-shadow-float: 0 28px 65px -34px rgba(14, 165, 233, 0.52);
   --ui-panel: color-mix(in srgb, #ffffff 88%, transparent);
   --ui-panel-strong: color-mix(in srgb, #ffffff 94%, transparent);
+  --ui-panel-edge: color-mix(in srgb, #ffffff 60%, transparent);
   --ui-line: color-mix(in srgb, var(--border) 86%, transparent);
-  --ui-text-soft: color-mix(in srgb, var(--foreground) 74%, transparent);
+  --ui-text-soft: color-mix(in srgb, var(--foreground) 78%, transparent);
+  --ui-ease-expressive: cubic-bezier(0.22, 1, 0.36, 1);
+  --ui-ease-quick: cubic-bezier(0.33, 1, 0.68, 1);
   --font-ui: "Plus Jakarta Sans", "Noto Sans SC", "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
 .dark {
-  --ui-shadow-soft: 0 16px 44px -26px rgba(0, 0, 0, 0.7);
-  --ui-shadow-float: 0 24px 58px -30px rgba(20, 184, 166, 0.4);
+  --ui-shadow-soft: 0 18px 44px -26px rgba(0, 0, 0, 0.74);
+  --ui-shadow-float: 0 30px 62px -34px rgba(20, 184, 166, 0.46);
   --ui-panel: color-mix(in srgb, #0f1117 80%, transparent);
   --ui-panel-strong: color-mix(in srgb, #11131a 88%, transparent);
+  --ui-panel-edge: color-mix(in srgb, #232838 78%, transparent);
   --ui-line: color-mix(in srgb, #2f3442 80%, transparent);
-  --ui-text-soft: color-mix(in srgb, #d6dae3 76%, transparent);
+  --ui-text-soft: color-mix(in srgb, #d6dae3 82%, transparent);
 }
 
 .app-body {
   font-family: var(--font-ui);
-  letter-spacing: -0.012em;
-  line-height: 1.65;
+  letter-spacing: -0.013em;
+  line-height: 1.68;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
 }
 
 .site-main {
   position: relative;
+  isolation: isolate;
 }
 
 .site-main::before {
@@ -1942,64 +1951,176 @@ textarea:focus {
   pointer-events: none;
   z-index: -5;
   background:
-    radial-gradient(900px circle at 8% 4%, color-mix(in srgb, var(--gradient-start) 18%, transparent), transparent 56%),
-    radial-gradient(760px circle at 88% 18%, color-mix(in srgb, var(--gradient-end) 15%, transparent), transparent 58%),
+    radial-gradient(900px circle at 8% 4%, color-mix(in srgb, var(--gradient-start) 20%, transparent), transparent 56%),
+    radial-gradient(760px circle at 88% 18%, color-mix(in srgb, var(--gradient-end) 18%, transparent), transparent 58%),
     linear-gradient(180deg, color-mix(in srgb, var(--background) 95%, transparent), var(--background));
 }
 
+.site-main::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -4;
+  opacity: 0.32;
+  background-image:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--foreground) 10%, transparent) 1px, transparent 0);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(180deg, black, transparent 92%);
+}
+
 .surface-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   background: linear-gradient(145deg, color-mix(in srgb, var(--ui-panel-strong) 92%, transparent), color-mix(in srgb, var(--ui-panel) 80%, transparent));
-  border: 1px solid var(--ui-line);
-  border-radius: calc(var(--ui-radius-xl) + 0.4rem);
-  box-shadow: var(--ui-shadow-soft);
+  border: 1px solid color-mix(in srgb, var(--ui-panel-edge) 70%, var(--ui-line));
+  border-radius: calc(var(--ui-radius-2xl) + 0.2rem);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, #ffffff 45%, transparent) inset,
+    0 -1px 0 0 color-mix(in srgb, #0f172a 10%, transparent) inset,
+    var(--ui-shadow-soft);
   backdrop-filter: blur(14px) saturate(130%);
   -webkit-backdrop-filter: blur(14px) saturate(130%);
 }
 
+.surface-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 120px;
+  pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in srgb, #ffffff 22%, transparent), transparent);
+  opacity: 0.7;
+}
+
+.surface-hero::after {
+  content: '';
+  position: absolute;
+  right: -120px;
+  top: -120px;
+  width: 300px;
+  height: 300px;
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--gradient-start) 28%, transparent), transparent 70%);
+  opacity: 0.58;
+}
+
 .surface-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   background: linear-gradient(150deg, color-mix(in srgb, var(--ui-panel-strong) 92%, transparent), color-mix(in srgb, var(--ui-panel) 84%, transparent));
-  border: 1px solid var(--ui-line);
+  border: 1px solid color-mix(in srgb, var(--ui-panel-edge) 60%, var(--ui-line));
   border-radius: var(--ui-radius-xl);
-  box-shadow: var(--ui-shadow-soft);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, #ffffff 40%, transparent) inset,
+    0 -1px 0 0 color-mix(in srgb, #0f172a 9%, transparent) inset,
+    var(--ui-shadow-soft);
   backdrop-filter: blur(10px) saturate(120%);
   -webkit-backdrop-filter: blur(10px) saturate(120%);
 }
 
+.surface-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in srgb, #ffffff 16%, transparent), transparent 34%);
+  opacity: 0.8;
+}
+
 .interactive-card {
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease;
+  transform-origin: 50% 86%;
+  will-change: transform, box-shadow, border-color;
+  transition:
+    transform 0.48s var(--ui-ease-expressive),
+    box-shadow 0.48s var(--ui-ease-expressive),
+    border-color 0.34s ease,
+    background-color 0.28s ease;
 }
 
 .interactive-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-10px) scale(1.006);
   border-color: color-mix(in srgb, var(--primary) 42%, var(--ui-line));
   box-shadow: var(--ui-shadow-float);
+}
+
+.interactive-card:active {
+  transform: translateY(-3px) scale(0.993);
 }
 
 .section-kicker {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 0.85rem;
+  padding: 0.46rem 0.88rem;
   border-radius: 999px;
   border: 1px solid var(--ui-line);
-  background: color-mix(in srgb, var(--ui-panel-strong) 88%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ui-panel-strong) 94%, transparent), color-mix(in srgb, var(--ui-panel) 84%, transparent));
   color: var(--ui-text-soft);
-  font-size: 0.72rem;
-  letter-spacing: 0.19em;
+  font-size: 0.71rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 640;
 }
 
 .apple-display {
-  font-size: clamp(2.3rem, 6vw, 4.9rem);
-  line-height: 1.04;
-  letter-spacing: -0.042em;
-  font-weight: 780;
+  font-size: clamp(2.35rem, 6.2vw, 5.05rem);
+  line-height: 1.01;
+  letter-spacing: -0.045em;
+  font-weight: 790;
   text-wrap: balance;
 }
 
 .text-soft {
   color: var(--ui-text-soft);
+}
+
+.section-title-xl {
+  font-size: clamp(1.85rem, 4.4vw, 3.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  font-weight: 730;
+  text-wrap: balance;
+}
+
+.metric-tile {
+  border-radius: 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--ui-line) 90%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ui-panel-strong) 90%, transparent), color-mix(in srgb, var(--ui-panel) 84%, transparent));
+  box-shadow: 0 14px 32px -28px color-mix(in srgb, var(--foreground) 40%, transparent);
+  padding: 0.86rem 0.95rem;
+}
+
+.chip-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--ui-line);
+  background: color-mix(in srgb, var(--ui-panel-strong) 88%, transparent);
+  color: var(--ui-text-soft);
+  padding: 0.36rem 0.8rem;
+  font-size: 0.78rem;
+  transition:
+    transform 0.22s var(--ui-ease-quick),
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background-color 0.22s ease;
+}
+
+.chip-filter:hover {
+  transform: translateY(-1px);
+  color: var(--foreground);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--ui-line));
+}
+
+.chip-filter[data-active="true"] {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 46%, var(--ui-line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 13%, transparent), color-mix(in srgb, var(--gradient-start) 9%, transparent));
 }
 
 .btn-primary,
@@ -2016,7 +2137,12 @@ textarea:focus {
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition:
+    transform 0.35s var(--ui-ease-expressive),
+    box-shadow 0.35s var(--ui-ease-expressive),
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .btn-primary::after,
@@ -2031,12 +2157,16 @@ textarea:focus {
   background: linear-gradient(135deg, color-mix(in srgb, var(--gradient-start) 92%, white 8%), color-mix(in srgb, var(--gradient-end) 95%, white 5%));
   color: white;
   border-color: color-mix(in srgb, var(--gradient-start) 75%, transparent);
-  box-shadow: 0 18px 38px -18px color-mix(in srgb, var(--gradient-start) 62%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, #ffffff 45%, transparent) inset,
+    0 20px 42px -20px color-mix(in srgb, var(--gradient-start) 62%, transparent);
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 26px 46px -20px color-mix(in srgb, var(--gradient-start) 65%, transparent);
+  transform: translateY(-3px) scale(1.012);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, #ffffff 48%, transparent) inset,
+    0 30px 54px -24px color-mix(in srgb, var(--gradient-start) 65%, transparent);
 }
 
 .btn-primary:active {
@@ -2072,23 +2202,31 @@ textarea:focus {
 .input-modern {
   width: 100%;
   border-radius: var(--ui-radius-lg);
-  border: 1px solid var(--ui-line);
-  background: color-mix(in srgb, var(--ui-panel-strong) 88%, transparent);
-  color: color-mix(in srgb, var(--foreground) 96%, transparent);
-  padding: 0.82rem 0.95rem;
-  font-size: 0.94rem;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  border: 1px solid color-mix(in srgb, var(--ui-panel-edge) 55%, var(--ui-line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ui-panel-strong) 92%, transparent), color-mix(in srgb, var(--ui-panel) 86%, transparent));
+  color: color-mix(in srgb, var(--foreground) 98%, transparent);
+  padding: 0.84rem 0.98rem;
+  min-height: 44px;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease,
+    transform 0.2s var(--ui-ease-quick);
 }
 
 .input-modern::placeholder {
-  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+  color: color-mix(in srgb, var(--foreground) 53%, transparent);
 }
 
 .input-modern:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--primary) 58%, var(--ui-line));
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 62%, var(--ui-line));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 17%, transparent);
   background: color-mix(in srgb, var(--ui-panel-strong) 96%, transparent);
+  transform: translateY(-1px);
 }
 
 .nav-chip {
@@ -2133,4 +2271,121 @@ textarea:focus {
 
 .animate-ui-float {
   animation: ui-float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive-card,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .input-modern,
+  .nav-chip {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================ */
+/* iOS/macOS Interaction Upgrade */
+/* ============================================ */
+
+:root {
+  --ios-overlay: rgba(9, 12, 20, 0.48);
+  --ios-overlay-dark: rgba(2, 4, 10, 0.62);
+  --ios-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ios-ease-snappy: cubic-bezier(0.3, 0.7, 0, 1);
+}
+
+.route-transition-layer {
+  will-change: opacity, transform, filter;
+  backface-visibility: hidden;
+}
+
+.ios-hover-surface {
+  transform-origin: 50% 86%;
+  will-change: transform, box-shadow, border-color;
+  transition:
+    transform 0.55s var(--ios-ease),
+    box-shadow 0.55s var(--ios-ease),
+    border-color 0.34s ease,
+    background-color 0.34s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ios-hover-surface:hover {
+    transform: translateY(-8px) scale(1.005);
+    box-shadow:
+      0 28px 62px -34px color-mix(in srgb, var(--foreground) 42%, transparent),
+      0 1px 0 0 color-mix(in srgb, #ffffff 40%, transparent) inset;
+  }
+}
+
+.ios-button-press {
+  transition:
+    transform 0.34s var(--ios-ease-snappy),
+    box-shadow 0.34s var(--ios-ease),
+    background-color 0.28s ease,
+    border-color 0.28s ease,
+    color 0.28s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ios-button-press:hover {
+    transform: translateY(-2px) scale(1.012);
+  }
+}
+
+.ios-button-press:active {
+  transform: translateY(-1px) scale(0.986);
+}
+
+.ios-modal-overlay {
+  background: var(--ios-overlay);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+.dark .ios-modal-overlay {
+  background: var(--ios-overlay-dark);
+}
+
+.ios-modal-card {
+  border-radius: calc(var(--ui-radius-2xl) + 0.12rem);
+  border: 1px solid color-mix(in srgb, var(--ui-panel-edge) 64%, var(--ui-line));
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--ui-panel-strong) 95%, transparent),
+    color-mix(in srgb, var(--ui-panel) 90%, transparent)
+  );
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, #ffffff 40%, transparent) inset,
+    0 -1px 0 0 color-mix(in srgb, #0f172a 9%, transparent) inset,
+    0 36px 72px -36px color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+
+.ios-sheet-card {
+  border-radius: 1.9rem 1.9rem 0 0;
+  border: 1px solid color-mix(in srgb, var(--ui-panel-edge) 58%, var(--ui-line));
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--ui-panel-strong) 94%, transparent),
+    color-mix(in srgb, var(--ui-panel) 90%, transparent)
+  );
+  box-shadow:
+    0 -1px 0 0 color-mix(in srgb, #ffffff 35%, transparent) inset,
+    0 -24px 54px -28px color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition-layer,
+  .ios-hover-surface,
+  .ios-button-press,
+  .ios-modal-overlay,
+  .ios-modal-card,
+  .ios-sheet-card {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }

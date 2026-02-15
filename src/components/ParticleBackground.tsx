@@ -18,24 +18,26 @@ export function ParticleBackground() {
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number | null>(null);
+  const reducedMotionRef = useRef(false);
   const { resolvedTheme } = useTheme();
 
   const createParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = [];
-    const count = Math.floor((width * height) / 15000); // 根据屏幕大小调整粒子数量
+    const area = width * height;
+    const count = Math.min(72, Math.max(18, Math.floor(area / 28000)));
     
     const colors = resolvedTheme === 'dark' 
-      ? ['#a78bfa', '#818cf8', '#6366f1', '#8b5cf6', '#c4b5fd']
-      : ['#667eea', '#764ba2', '#6366f1', '#8b5cf6', '#a78bfa'];
+      ? ['#7dd3fc', '#93c5fd', '#5eead4', '#fbbf24']
+      : ['#0ea5e9', '#38bdf8', '#14b8a6', '#f59e0b'];
 
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2 + 1,
-        opacity: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 0.24,
+        vy: (Math.random() - 0.5) * 0.24,
+        size: Math.random() * 1.2 + 0.7,
+        opacity: Math.random() * 0.16 + 0.08,
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
@@ -47,8 +49,8 @@ export function ParticleBackground() {
     
     const particles = particlesRef.current;
     const mouse = mouseRef.current;
-    const connectionDistance = 150;
-    const mouseDistance = 200;
+    const connectionDistance = 110;
+    const mouseDistance = 150;
 
     // 更新和绘制粒子
     particles.forEach((particle, i) => {
@@ -66,16 +68,16 @@ export function ParticleBackground() {
       const dist = Math.sqrt(dx * dx + dy * dy);
       
       if (dist < mouseDistance && dist > 0) {
-        const force = (mouseDistance - dist) / mouseDistance * 0.02;
+        const force = (mouseDistance - dist) / mouseDistance * 0.008;
         particle.vx -= (dx / dist) * force;
         particle.vy -= (dy / dist) * force;
       }
 
       // 限制速度
       const speed = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
-      if (speed > 1) {
-        particle.vx = (particle.vx / speed) * 1;
-        particle.vy = (particle.vy / speed) * 1;
+      if (speed > 0.35) {
+        particle.vx = (particle.vx / speed) * 0.35;
+        particle.vy = (particle.vy / speed) * 0.35;
       }
 
       // 绘制粒子
@@ -97,8 +99,8 @@ export function ParticleBackground() {
           ctx.moveTo(particle.x, particle.y);
           ctx.lineTo(other.x, other.y);
           ctx.strokeStyle = particle.color;
-          ctx.globalAlpha = (1 - distance / connectionDistance) * 0.15;
-          ctx.lineWidth = 0.5;
+          ctx.globalAlpha = (1 - distance / connectionDistance) * 0.08;
+          ctx.lineWidth = 0.45;
           ctx.stroke();
         }
       }
@@ -114,6 +116,12 @@ export function ParticleBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleReducedMotion = () => {
+      reducedMotionRef.current = mediaQuery.matches;
+    };
+    handleReducedMotion();
+
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -126,17 +134,26 @@ export function ParticleBackground() {
 
     const animate = () => {
       drawParticles(ctx, canvas.width, canvas.height);
-      animationRef.current = requestAnimationFrame(animate);
+      if (!reducedMotionRef.current) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
     };
 
     resize();
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', handleMouseMove);
-    animate();
+    mediaQuery.addEventListener('change', handleReducedMotion);
+
+    if (reducedMotionRef.current) {
+      drawParticles(ctx, canvas.width, canvas.height);
+    } else {
+      animate();
+    }
 
     return () => {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
+      mediaQuery.removeEventListener('change', handleReducedMotion);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -154,7 +171,7 @@ export function ParticleBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 pointer-events-none"
+      className="fixed inset-0 -z-10 pointer-events-none opacity-65 dark:opacity-55"
       style={{ background: 'transparent' }}
     />
   );

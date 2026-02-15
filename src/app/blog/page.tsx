@@ -19,6 +19,7 @@ import {
 import clsx from 'clsx';
 import { BlogCard } from '@/components/BlogCard';
 import { SubscribeForm } from '@/components/SubscribeForm';
+import { APPLE_EASE } from '@/components/Animations';
 import { useAdmin } from '@/components/AdminProvider';
 import { Collection, deletePost, getCollections, getPublishedPosts, Post } from '@/lib/supabase';
 import { formatDate } from '@/lib/types';
@@ -202,11 +203,12 @@ function BlogPageContent() {
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.35, ease: APPLE_EASE }}
             className={clsx(
-              'fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-xl px-4 py-2 text-sm shadow-lg',
+              'fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border px-4 py-2 text-sm shadow-lg backdrop-blur-xl',
               notification.type === 'success'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-rose-600 text-white'
+                ? 'border-emerald-400/35 bg-emerald-600/90 text-white'
+                : 'border-rose-400/35 bg-rose-600/90 text-white'
             )}
           >
             {notification.type === 'success' ? (
@@ -245,15 +247,15 @@ function BlogPageContent() {
           </div>
 
           <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-3">
+            <div className="metric-tile">
               <p className="text-2xl font-semibold">{posts.length}</p>
               <p className="text-soft text-xs">已发布文章</p>
             </div>
-            <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-3">
+            <div className="metric-tile">
               <p className="text-2xl font-semibold">{collections.length}</p>
               <p className="text-soft text-xs">专题集合</p>
             </div>
-            <div className="rounded-2xl border border-border/60 bg-background/70 px-4 py-3">
+            <div className="metric-tile">
               <p className="text-2xl font-semibold">{categories.filter((item) => item.count > 0).length}</p>
               <p className="text-soft text-xs">活跃分类</p>
             </div>
@@ -286,12 +288,8 @@ function BlogPageContent() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={clsx(
-                    'rounded-full border px-4 py-1.5 text-sm transition',
-                    selectedCategory === category.id
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-background/70 text-muted-foreground hover:border-primary/50 hover:bg-background/95 hover:text-foreground'
-                  )}
+                  className="chip-filter"
+                  data-active={selectedCategory === category.id}
                 >
                   {category.name}
                   <span className="ml-1 text-xs opacity-70">{category.count}</span>
@@ -308,12 +306,8 @@ function BlogPageContent() {
 
                 <button
                   onClick={() => setSelectedCollection(null)}
-                  className={clsx(
-                    'rounded-full border px-3 py-1 text-xs transition',
-                    !selectedCollection
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
-                  )}
+                  className="chip-filter"
+                  data-active={!selectedCollection}
                 >
                   全部
                 </button>
@@ -324,12 +318,8 @@ function BlogPageContent() {
                     <button
                       key={collection.id}
                       onClick={() => setSelectedCollection(collection.id)}
-                      className={clsx(
-                        'rounded-full border px-3 py-1 text-xs transition',
-                        selectedCollection === collection.id
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-background/95 hover:text-foreground'
-                      )}
+                      className="chip-filter"
+                      data-active={selectedCollection === collection.id}
                     >
                       {collection.name}
                       <span className="ml-1 opacity-70">{count}</span>
@@ -343,22 +333,23 @@ function BlogPageContent() {
 
         {loading ? (
           <section className="py-16">
-            <div className="flex items-center justify-center text-muted-foreground">
+            <div className="surface-card flex items-center justify-center py-16 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin" />
               <span className="ml-3">正在加载文章...</span>
             </div>
           </section>
         ) : (
           <section className="mt-8">
-            <p className="mb-6 text-sm text-muted-foreground">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-background/70 px-3 py-1.5 text-sm text-muted-foreground">
               共找到 <span className="font-medium text-foreground">{filteredPosts.length}</span> 篇文章
-            </p>
+            </div>
 
             {featuredPost && (
               <motion.article
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="surface-card overflow-hidden"
+                transition={{ duration: 0.64, ease: APPLE_EASE }}
+                className="surface-card interactive-card overflow-hidden"
               >
                 <Link href={`/blog/${featuredPost.slug}`} className="grid gap-0 md:grid-cols-2">
                   <div className="relative min-h-[240px] bg-secondary/50">
@@ -376,7 +367,7 @@ function BlogPageContent() {
                   </div>
 
                   <div className="p-6 md:p-8">
-                    <p className="text-xs uppercase tracking-[0.14em] text-primary">Featured</p>
+                    <p className="section-kicker">Featured</p>
                     <h2 className="mt-3 text-2xl font-semibold leading-tight">{featuredPost.title}</h2>
                     <p className="mt-4 line-clamp-3 text-sm leading-7 text-muted-foreground">
                       {featuredPost.description}
@@ -386,6 +377,9 @@ function BlogPageContent() {
                       <span>{formatDate(featuredPost.published_at || featuredPost.created_at)}</span>
                       <span>{featuredPost.reading_time || '约 5 分钟'}</span>
                     </div>
+                    <span className="btn-secondary mt-5 inline-flex px-4 py-2 text-sm">
+                      阅读全文
+                    </span>
                   </div>
                 </Link>
               </motion.article>
