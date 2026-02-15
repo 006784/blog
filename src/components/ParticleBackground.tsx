@@ -24,20 +24,20 @@ export function ParticleBackground() {
   const createParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = [];
     const area = width * height;
-    const count = Math.min(44, Math.max(12, Math.floor(area / 42000)));
+    const count = Math.min(24, Math.max(8, Math.floor(area / 90000)));
     
     const colors = resolvedTheme === 'dark' 
-      ? ['#7dd3fc', '#93c5fd', '#5eead4', '#fbbf24']
-      : ['#0ea5e9', '#38bdf8', '#14b8a6', '#f59e0b'];
+      ? ['#60a5fa', '#7dd3fc', '#93c5fd']
+      : ['#0284c7', '#0ea5e9', '#3b82f6'];
 
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.24,
-        vy: (Math.random() - 0.5) * 0.24,
-        size: Math.random() * 1.2 + 0.7,
-        opacity: Math.random() * 0.1 + 0.05,
+        vx: (Math.random() - 0.5) * 0.14,
+        vy: (Math.random() - 0.5) * 0.14,
+        size: Math.random() * 0.8 + 0.5,
+        opacity: Math.random() * 0.05 + 0.02,
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
@@ -49,8 +49,8 @@ export function ParticleBackground() {
     
     const particles = particlesRef.current;
     const mouse = mouseRef.current;
-    const connectionDistance = 96;
-    const mouseDistance = 150;
+    const connectionDistance = 0;
+    const mouseDistance = 120;
 
     // 更新和绘制粒子
     particles.forEach((particle, i) => {
@@ -68,16 +68,16 @@ export function ParticleBackground() {
       const dist = Math.sqrt(dx * dx + dy * dy);
       
       if (dist < mouseDistance && dist > 0) {
-        const force = (mouseDistance - dist) / mouseDistance * 0.008;
+        const force = (mouseDistance - dist) / mouseDistance * 0.002;
         particle.vx -= (dx / dist) * force;
         particle.vy -= (dy / dist) * force;
       }
 
       // 限制速度
       const speed = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
-      if (speed > 0.35) {
-        particle.vx = (particle.vx / speed) * 0.35;
-        particle.vy = (particle.vy / speed) * 0.35;
+      if (speed > 0.2) {
+        particle.vx = (particle.vx / speed) * 0.2;
+        particle.vy = (particle.vy / speed) * 0.2;
       }
 
       // 绘制粒子
@@ -87,21 +87,22 @@ export function ParticleBackground() {
       ctx.globalAlpha = particle.opacity;
       ctx.fill();
 
-      // 绘制连线
-      for (let j = i + 1; j < particles.length; j++) {
-        const other = particles[j];
-        const dx = particle.x - other.x;
-        const dy = particle.y - other.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+      if (connectionDistance > 0) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const other = particles[j];
+          const dx = particle.x - other.x;
+          const dy = particle.y - other.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < connectionDistance) {
-          ctx.beginPath();
-          ctx.moveTo(particle.x, particle.y);
-          ctx.lineTo(other.x, other.y);
-          ctx.strokeStyle = particle.color;
-          ctx.globalAlpha = (1 - distance / connectionDistance) * 0.045;
-          ctx.lineWidth = 0.4;
-          ctx.stroke();
+          if (distance < connectionDistance) {
+            ctx.beginPath();
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.strokeStyle = particle.color;
+            ctx.globalAlpha = (1 - distance / connectionDistance) * 0.02;
+            ctx.lineWidth = 0.35;
+            ctx.stroke();
+          }
         }
       }
     });
@@ -171,7 +172,7 @@ export function ParticleBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 pointer-events-none opacity-34 dark:opacity-30"
+      className="fixed inset-0 -z-10 pointer-events-none opacity-18 dark:opacity-14"
       style={{ background: 'transparent' }}
     />
   );

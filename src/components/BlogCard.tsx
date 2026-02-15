@@ -20,20 +20,20 @@ interface BlogCardProps {
 
 const categoryStyle: Record<string, { chip: string; glow: string }> = {
   tech: {
-    chip: 'bg-sky-500/85 text-white border-sky-300/45',
-    glow: 'radial-gradient(360px circle at 62% 26%, rgba(56,189,248,0.22), transparent 68%)',
+    chip: 'bg-sky-500/14 text-sky-700 border-sky-300/45 dark:text-sky-200',
+    glow: 'radial-gradient(360px circle at 62% 26%, rgba(56,189,248,0.12), transparent 72%)',
   },
   design: {
-    chip: 'bg-teal-500/85 text-white border-teal-300/45',
-    glow: 'radial-gradient(360px circle at 62% 26%, rgba(20,184,166,0.2), transparent 68%)',
+    chip: 'bg-teal-500/14 text-teal-700 border-teal-300/45 dark:text-teal-200',
+    glow: 'radial-gradient(360px circle at 62% 26%, rgba(20,184,166,0.1), transparent 72%)',
   },
   life: {
-    chip: 'bg-emerald-500/85 text-white border-emerald-300/45',
-    glow: 'radial-gradient(360px circle at 62% 26%, rgba(16,185,129,0.2), transparent 68%)',
+    chip: 'bg-emerald-500/14 text-emerald-700 border-emerald-300/45 dark:text-emerald-200',
+    glow: 'radial-gradient(360px circle at 62% 26%, rgba(16,185,129,0.1), transparent 72%)',
   },
   thoughts: {
-    chip: 'bg-amber-500/85 text-white border-amber-300/45',
-    glow: 'radial-gradient(360px circle at 62% 26%, rgba(245,158,11,0.2), transparent 68%)',
+    chip: 'bg-amber-500/14 text-amber-700 border-amber-300/45 dark:text-amber-200',
+    glow: 'radial-gradient(360px circle at 62% 26%, rgba(245,158,11,0.12), transparent 72%)',
   },
 };
 
@@ -46,12 +46,12 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 105, damping: 20, mass: 1.08 });
   const sy = useSpring(my, { stiffness: 105, damping: 20, mass: 1.08 });
-  const rotateX = useTransform(sy, [-0.5, 0.5], ['2.6deg', '-2.6deg']);
-  const rotateY = useTransform(sx, [-0.5, 0.5], ['-2.6deg', '2.6deg']);
+  const rotateX = useTransform(sy, [-0.5, 0.5], ['1.2deg', '-1.2deg']);
+  const rotateY = useTransform(sx, [-0.5, 0.5], ['-1.2deg', '1.2deg']);
 
   const style = categoryStyle[post.category] || {
-    chip: 'bg-zinc-500/80 text-white border-zinc-300/45',
-    glow: 'radial-gradient(360px circle at 62% 26%, rgba(148,163,184,0.2), transparent 68%)',
+    chip: 'bg-zinc-500/14 text-zinc-700 border-zinc-300/45 dark:text-zinc-200',
+    glow: 'radial-gradient(360px circle at 62% 26%, rgba(148,163,184,0.12), transparent 72%)',
   };
 
   const onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -85,12 +85,12 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={onMouseLeave}
       className={clsx(
-        'surface-card interactive-card group relative overflow-hidden rounded-[1.7rem]',
+        'surface-card premium-blog-card interactive-card group relative overflow-hidden rounded-[1.7rem]',
         featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
       )}
     >
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: style.glow }} />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-85 dark:from-white/[0.04]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/8 to-transparent opacity-70 dark:from-white/[0.03]" />
 
       <Link href={`/blog/${post.slug}`} className="relative z-10 block h-full">
         <div className={clsx('relative overflow-hidden', featured ? 'h-64 md:h-full' : 'h-56')}>
@@ -108,7 +108,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
             <div className="h-full w-full bg-gradient-to-br from-secondary via-secondary/70 to-secondary/30" />
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/68 via-black/18 to-transparent opacity-68 transition-opacity duration-500 group-hover:opacity-58" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/62 via-black/16 to-transparent opacity-62 transition-opacity duration-500 group-hover:opacity-54" />
 
           <span
             className={clsx(
@@ -232,7 +232,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
               initial={{ scaleX: 0.15, opacity: 0.45 }}
               whileHover={{ scaleX: 1, opacity: 1 }}
               transition={{ duration: 0.45, ease: APPLE_EASE_SOFT }}
-              className="h-[2px] w-28 origin-left rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)]"
+              className="h-[2px] w-28 origin-left rounded-full bg-gradient-to-r from-sky-500/65 to-blue-600/65"
             />
           </div>
         </div>

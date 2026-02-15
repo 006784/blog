@@ -93,11 +93,11 @@ function renderSection(
                 whileTap={{ scale: 0.992, x: 1 }}
                 transition={APPLE_SPRING_GENTLE}
                 className={clsx(
-                  'nav-chip group flex items-center gap-3 px-3 py-2.5 text-sm',
+                  'nav-chip premium-nav-chip group flex items-center gap-3 px-3 py-2.5 text-sm',
                   collapsed && 'justify-center',
                   active
-                    ? 'nav-chip-active text-foreground'
-                    : 'text-muted-foreground hover:border-border/60 hover:bg-background/60 hover:text-foreground'
+                    ? 'nav-chip-active premium-nav-chip-active text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -149,14 +149,14 @@ export function Sidebar() {
         animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.56, ease: APPLE_EASE_SOFT }}
         className={clsx(
-          'fixed left-0 top-0 z-40 hidden h-screen border-r border-border/60 bg-background/74 shadow-[0_24px_56px_-34px_rgba(0,0,0,0.75)] backdrop-blur-2xl md:flex md:flex-col',
+          'premium-sidebar fixed left-0 top-0 z-40 hidden h-screen md:flex md:flex-col',
           isCollapsed ? 'w-[88px]' : 'w-[260px]'
         )}
       >
         <div className="flex h-full flex-col">
-          <div className={clsx('border-b border-border/65 px-4 py-4', isCollapsed && 'px-3')}>
+          <div className={clsx('premium-sidebar-header px-4 py-4', isCollapsed && 'px-3')}>
             <Link href="/" className={clsx('flex items-center gap-3', isCollapsed && 'justify-center')}>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] text-white shadow-[0_14px_26px_-16px_rgba(56,189,248,0.65)]">
+              <div className="premium-sidebar-logo flex h-10 w-10 items-center justify-center rounded-2xl text-white">
                 <Sparkles className="h-4 w-4" />
               </div>
               {!isCollapsed && (
@@ -170,7 +170,7 @@ export function Sidebar() {
 
           {!isCollapsed && (
             <>
-              <div className="surface-card mx-3.5 mt-4 p-3">
+              <div className="surface-card premium-sidebar-profile mx-3.5 mt-4 p-3">
                 <p className="text-sm font-medium">{profile.nickname || '拾光'}</p>
                 <p className="mt-1 line-clamp-2 text-xs text-soft">
                   {profile.signature || '记录技术与生活的长期写作。'}
@@ -267,7 +267,7 @@ export function Sidebar() {
         </div>
       </motion.aside>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/88 backdrop-blur-2xl md:hidden">
+      <nav className="premium-mobile-nav fixed bottom-0 left-0 right-0 z-40 md:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-2.5">
           <Link href="/" className={clsx('rounded-xl p-2.5 transition', itemActive(pathname, '/') ? 'bg-primary/12 text-primary' : 'text-muted-foreground')}>
             <Home className="h-5 w-5" />
@@ -278,13 +278,13 @@ export function Sidebar() {
           </Link>
 
           {isAdmin ? (
-            <Link href="/write" className="-mt-8 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] p-4 text-white shadow-lg ios-button-press">
+            <Link href="/write" className="premium-fab -mt-8 rounded-full p-4 text-white shadow-lg ios-button-press">
               <PenLine className="h-5 w-5" />
             </Link>
           ) : (
             <button
               onClick={() => showLoginModal()}
-              className="-mt-8 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] p-4 text-white shadow-lg ios-button-press"
+              className="premium-fab -mt-8 rounded-full p-4 text-white shadow-lg ios-button-press"
             >
               <Shield className="h-5 w-5" />
             </button>

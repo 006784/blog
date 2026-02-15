@@ -82,10 +82,7 @@ export default function RootLayout({
           <ParticleBackground />
           
           {/* 渐变覆盖层 */}
-          <div className="fixed inset-0 -z-10 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-            <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-background via-background/80 to-transparent" />
-          </div>
+          <div className="premium-global-backdrop fixed inset-0 -z-10 pointer-events-none" />
 
           {/* 性能优化 */}
           <PerformanceOptimizer />
