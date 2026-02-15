@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, type DragEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
   Download, Trash2, Eye, EyeOff, Search, Grid, List, X,
   Copy, Check, Shield, HardDrive, Loader2, Settings, Plus, Edit2,
+  AlertCircle, CheckCircle2,
   Folder, Archive, Code, Database, Book, Link, Star
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
@@ -45,6 +46,11 @@ interface Category {
   color: string;
   sort_order: number;
   is_system: boolean;
+}
+
+interface ResourceNotice {
+  type: 'success' | 'error' | 'info';
+  message: string;
 }
 
 // 图标映射
@@ -115,6 +121,8 @@ export default function ResourcesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [notice, setNotice] = useState<ResourceNotice | null>(null);
+  const [isDropActive, setIsDropActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // 下载验证
@@ -141,6 +149,10 @@ export default function ResourcesPage() {
 
   // 下载进度
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+
+  const pushNotice = useCallback((type: ResourceNotice['type'], message: string) => {
+    setNotice({ type, message });
+  }, []);
   
   // Turnstile 回调
   const handleDownloadVerify = useCallback((token: string) => {
@@ -159,6 +171,7 @@ export default function ResourcesPage() {
     // 如果没配置 Turnstile，直接下载
     if (!siteKey) {
       window.open(resource.file_url, '_blank');
+      pushNotice('success', `已开始下载：${resource.name}`);
       return;
     }
     // 显示验证模态框
@@ -188,32 +201,27 @@ export default function ResourcesPage() {
         setDownloadToken(null);
         setDownloadVerified(false);
         setDownloadProgress(null);
+        pushNotice('success', `已开始下载：${downloadModal.name}`);
       } catch (error) {
         console.error('Download failed:', error);
         setDownloadProgress(null);
+        pushNotice('error', '下载失败，请稍后重试。');
       }
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-  
-  useEffect(() => {
-    fetchResources();
-  }, [selectedCategory, searchQuery]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('/api/categories');
       const data = await res.json();
       setCategories(data.categories || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
+      pushNotice('error', '分类加载失败，请稍后重试。');
     }
-  };
+  }, [pushNotice]);
 
-  const fetchResources = async () => {
+  const fetchResources = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -225,10 +233,63 @@ export default function ResourcesPage() {
       setResources(data.resources || []);
     } catch (error) {
       console.error('Failed to fetch resources:', error);
+      pushNotice('error', '资源加载失败，请稍后重试。');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, searchQuery, pushNotice]);
+
+  useEffect(() => {
+    void fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    void fetchResources();
+  }, [fetchResources]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
+  const hasModalOpen = Boolean(downloadModal || showUploadModal || showCategoryModal);
+  useEffect(() => {
+    if (!hasModalOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [hasModalOpen]);
+
+  useEffect(() => {
+    if (!hasModalOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+
+      if (showCategoryModal) {
+        setShowCategoryModal(false);
+        resetCategoryForm();
+        return;
+      }
+
+      if (showUploadModal) {
+        setShowUploadModal(false);
+        return;
+      }
+
+      if (downloadModal) {
+        setDownloadModal(null);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [hasModalOpen, showCategoryModal, showUploadModal, downloadModal]);
 
   const handleUpload = async () => {
     if (!uploadFile || !isAdmin) return;
@@ -254,7 +315,7 @@ export default function ResourcesPage() {
       const presignData = await presignRes.json();
       
       if (!presignData.success) {
-        alert(presignData.error || '获取上传链接失败');
+        pushNotice('error', presignData.error || '获取上传链接失败');
         return;
       }
       
@@ -298,14 +359,16 @@ export default function ResourcesPage() {
       if (saveData.success) {
         setUploadProgress(100);
         setShowUploadModal(false);
+        setIsDropActive(false);
         resetUploadForm();
-        fetchResources();
+        void fetchResources();
+        pushNotice('success', '资源上传成功。');
       } else {
-        alert(saveData.error || '保存失败');
+        pushNotice('error', saveData.error || '保存失败');
       }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('上传失败');
+      pushNotice('error', '上传失败，请稍后重试。');
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -326,19 +389,26 @@ export default function ResourcesPage() {
       
       if (data.success) {
         setResources(prev => prev.filter(r => r.id !== id));
+        pushNotice('success', '资源已删除。');
       } else {
-        alert(data.error || '删除失败');
+        pushNotice('error', data.error || '删除失败');
       }
     } catch (error) {
       console.error('Delete error:', error);
-      alert('删除失败');
+      pushNotice('error', '删除失败，请稍后重试。');
     }
   };
 
   const copyLink = async (url: string, id: string) => {
-    await navigator.clipboard.writeText(url);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      pushNotice('info', '资源链接已复制。');
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      console.error('Copy link failed:', error);
+      pushNotice('error', '复制链接失败。');
+    }
   };
 
   const resetUploadForm = () => {
@@ -349,6 +419,22 @@ export default function ResourcesPage() {
     setUploadPublic(false);
     setUploadCategory('');
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const pickUploadFile = useCallback((file: File | null) => {
+    if (!file) return;
+    setUploadFile(file);
+    setUploadName(file.name.replace(/\.[^/.]+$/, ''));
+    pushNotice('info', `已选择文件：${file.name}`);
+  }, [pushNotice]);
+
+  const handleDropUploadFile = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDropActive(false);
+
+    const file = event.dataTransfer.files?.[0] || null;
+    pickUploadFile(file);
   };
 
   // 分类管理函数
@@ -372,7 +458,7 @@ export default function ResourcesPage() {
 
   const handleSaveCategory = async () => {
     if (!newCatName || !newCatSlug) {
-      alert('请填写分类名称和标识符');
+      pushNotice('error', '请填写分类名称和标识符。');
       return;
     }
     
@@ -399,14 +485,15 @@ export default function ResourcesPage() {
       const data = await res.json();
       
       if (data.success) {
-        fetchCategories();
+        void fetchCategories();
         resetCategoryForm();
+        pushNotice('success', editingCategory ? '分类已更新。' : '分类已创建。');
       } else {
-        alert(data.error || '保存失败');
+        pushNotice('error', data.error || '保存失败');
       }
     } catch (error) {
       console.error('Save category error:', error);
-      alert('保存失败');
+      pushNotice('error', '保存失败，请稍后重试。');
     } finally {
       setSavingCategory(false);
     }
@@ -425,13 +512,14 @@ export default function ResourcesPage() {
       const data = await res.json();
       
       if (data.success) {
-        fetchCategories();
+        void fetchCategories();
+        pushNotice('success', '分类已删除。');
       } else {
-        alert(data.error || '删除失败');
+        pushNotice('error', data.error || '删除失败');
       }
     } catch (error) {
       console.error('Delete category error:', error);
-      alert('删除失败');
+      pushNotice('error', '删除失败，请稍后重试。');
     }
   };
 
@@ -450,6 +538,33 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen py-20 pb-14">
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.32, ease: APPLE_EASE_SOFT }}
+            className={`fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border px-4 py-2 text-sm shadow-lg backdrop-blur-xl ${
+              notice.type === 'success'
+                ? 'border-emerald-400/35 bg-emerald-600/92 text-white'
+                : notice.type === 'error'
+                  ? 'border-rose-400/35 bg-rose-600/92 text-white'
+                  : 'border-sky-400/35 bg-sky-600/92 text-white'
+            }`}
+          >
+            {notice.type === 'success' ? (
+              <CheckCircle2 className="h-4 w-4" />
+            ) : notice.type === 'error' ? (
+              <AlertCircle className="h-4 w-4" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
+            <span>{notice.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 页面标题 */}
         <motion.div
@@ -578,7 +693,10 @@ export default function ResourcesPage() {
                 whileHover={HOVER_BUTTON}
                 whileTap={TAP_BUTTON}
                 transition={APPLE_SPRING_GENTLE}
-                onClick={() => setShowUploadModal(true)}
+                onClick={() => {
+                  setIsDropActive(false);
+                  setShowUploadModal(true);
+                }}
                 className="btn-primary ios-button-press px-5 py-2.5"
               >
                 <Upload className="w-4 h-4" />
@@ -599,7 +717,10 @@ export default function ResourcesPage() {
             <p className="text-muted-foreground">暂无资源</p>
             {isAdmin && (
               <button
-                onClick={() => setShowUploadModal(true)}
+                onClick={() => {
+                  setIsDropActive(false);
+                  setShowUploadModal(true);
+                }}
                 className="btn-primary mt-4 px-6 py-2"
               >
                 上传第一个资源
@@ -853,7 +974,10 @@ export default function ResourcesPage() {
               animate="visible"
               exit="exit"
               className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
-              onClick={() => setShowUploadModal(false)}
+              onClick={() => {
+                setShowUploadModal(false);
+                setIsDropActive(false);
+              }}
             >
               <motion.div
                 variants={modalPanelVariants}
@@ -870,7 +994,13 @@ export default function ResourcesPage() {
                       <p className="text-xs text-muted-foreground">文件将经过安全检测</p>
                     </div>
                   </div>
-                  <button onClick={() => setShowUploadModal(false)} className="ios-button-press p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+                  <button
+                    onClick={() => {
+                      setShowUploadModal(false);
+                      setIsDropActive(false);
+                    }}
+                    className="ios-button-press p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -879,7 +1009,24 @@ export default function ResourcesPage() {
                   {/* 文件选择 */}
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="rounded-xl border-2 border-dashed border-[var(--ui-line)] bg-secondary/20 p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setIsDropActive(true);
+                    }}
+                    onDragEnter={(event) => {
+                      event.preventDefault();
+                      setIsDropActive(true);
+                    }}
+                    onDragLeave={(event) => {
+                      event.preventDefault();
+                      setIsDropActive(false);
+                    }}
+                    onDrop={handleDropUploadFile}
+                    className={`rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
+                      isDropActive
+                        ? 'border-primary bg-primary/10'
+                        : 'border-[var(--ui-line)] bg-secondary/20 hover:border-primary/50'
+                    }`}
                   >
                     {uploadFile ? (
                       <div className="flex items-center justify-center gap-3">
@@ -892,7 +1039,7 @@ export default function ResourcesPage() {
                     ) : (
                       <>
                         <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-muted-foreground">点击选择文件</p>
+                        <p className="text-muted-foreground">{isDropActive ? '松开即可上传' : '点击或拖拽文件到这里'}</p>
                         <p className="text-xs text-muted-foreground mt-1">支持图片、视频、文档、安装包等 (最大500MB)</p>
                       </>
                     )}
@@ -901,11 +1048,7 @@ export default function ResourcesPage() {
                     ref={fileInputRef}
                     type="file"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setUploadFile(file);
-                        setUploadName(file.name.replace(/\.[^/.]+$/, ''));
-                      }
+                      pickUploadFile(e.target.files?.[0] || null);
                     }}
                     className="hidden"
                   />
@@ -982,7 +1125,11 @@ export default function ResourcesPage() {
                 {/* 按钮 */}
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={() => { setShowUploadModal(false); resetUploadForm(); }}
+                    onClick={() => {
+                      setShowUploadModal(false);
+                      setIsDropActive(false);
+                      resetUploadForm();
+                    }}
                     className="btn-secondary ios-button-press flex-1 px-4 py-2.5 rounded-xl"
                   >
                     取消

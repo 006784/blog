@@ -88,6 +88,58 @@ interface UploadedMedia {
   name: string;
 }
 
+interface DiaryDraftPayload {
+  version: 1;
+  savedAt: string;
+  form: DiaryFormState;
+  autoCapture: boolean;
+  environmentData: EnvironmentSnapshot | null;
+  uploadedMedia: UploadedMedia[];
+}
+
+function buildEditorSignature(
+  form: DiaryFormState,
+  autoCapture: boolean,
+  environmentData: EnvironmentSnapshot | null,
+  uploadedMedia: UploadedMedia[]
+): string {
+  return JSON.stringify({
+    form,
+    autoCapture,
+    environmentData: environmentData && !environmentData.error ? environmentData : null,
+    uploadedMedia: uploadedMedia.map((item) => ({
+      url: stripVideoMarker(item.url),
+      type: item.type,
+      name: item.name,
+    })),
+  });
+}
+
+function parseDiaryDraft(raw: string | null): DiaryDraftPayload | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as DiaryDraftPayload;
+    if (
+      parsed &&
+      parsed.version === 1 &&
+      parsed.form &&
+      typeof parsed.form.content === 'string' &&
+      Array.isArray(parsed.uploadedMedia)
+    ) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function formatDraftTime(savedAt: string): string {
+  const date = new Date(savedAt);
+  if (Number.isNaN(date.getTime())) return '未知时间';
+  return date.toLocaleString('zh-CN', { hour12: false });
+}
+
 function getAdminToken(): string | null {
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem('admin-token');
@@ -724,6 +776,26 @@ function DiaryDetailModal({
 
   const environment = (diary.environment_data || null) as EnvironmentSnapshot | null;
 
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   return (
     <motion.div
       variants={modalBackdropVariants}
@@ -851,7 +923,7 @@ function DiaryEditorModal({
   isAdmin: boolean;
   showLoginModal: (callback?: () => void) => void;
 }) {
-  const [form, setForm] = useState<DiaryFormState>({
+  const initialFormState: DiaryFormState = {
     title: diary?.title || '',
     content: diary?.content || '',
     mood: diary?.mood || '',
@@ -859,19 +931,94 @@ function DiaryEditorModal({
     location: diary?.location || '',
     is_public: diary?.is_public || false,
     diary_date: diary?.diary_date || new Date().toISOString().slice(0, 10),
-  });
+  };
+  const initialEnvironmentData = (diary?.environment_data as EnvironmentSnapshot | null) || null;
+  const initialUploadedMedia = diary ? buildUploadedMediaList(diary.content, diary.images) : [];
+  const draftStorageKey = useMemo(() => `diary-editor-draft:${diary?.id || 'new'}`, [diary?.id]);
 
+  const [form, setForm] = useState<DiaryFormState>(initialFormState);
   const [autoCapture, setAutoCapture] = useState(!diary);
   const [capturing, setCapturing] = useState(false);
-  const [environmentData, setEnvironmentData] = useState<EnvironmentSnapshot | null>(
-    (diary?.environment_data as EnvironmentSnapshot | null) || null
-  );
+  const [environmentData, setEnvironmentData] = useState<EnvironmentSnapshot | null>(initialEnvironmentData);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>(() =>
-    diary ? buildUploadedMediaList(diary.content, diary.images) : []
+  const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>(initialUploadedMedia);
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const [initialSignature, setInitialSignature] = useState<string>(() =>
+    buildEditorSignature(initialFormState, !diary, initialEnvironmentData, initialUploadedMedia)
   );
+
+  const currentSignature = useMemo(
+    () => buildEditorSignature(form, autoCapture, environmentData, uploadedMedia),
+    [form, autoCapture, environmentData, uploadedMedia]
+  );
+  const isDirty = currentSignature !== initialSignature;
+
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    const cached = parseDiaryDraft(window.localStorage.getItem(draftStorageKey));
+    if (!cached) return;
+
+    const savedLabel = formatDraftTime(cached.savedAt);
+    const shouldRestore = window.confirm(`检测到 ${savedLabel} 的本地草稿，是否恢复？`);
+
+    if (!shouldRestore) {
+      window.localStorage.removeItem(draftStorageKey);
+      return;
+    }
+
+    setForm(cached.form);
+    setAutoCapture(Boolean(cached.autoCapture));
+    setEnvironmentData(cached.environmentData || null);
+    setUploadedMedia(Array.isArray(cached.uploadedMedia) ? cached.uploadedMedia : []);
+    setInitialSignature(
+      buildEditorSignature(
+        cached.form,
+        Boolean(cached.autoCapture),
+        cached.environmentData || null,
+        Array.isArray(cached.uploadedMedia) ? cached.uploadedMedia : []
+      )
+    );
+    setDraftSavedAt(savedLabel);
+  }, [draftStorageKey]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const timer = window.setTimeout(() => {
+      const payload: DiaryDraftPayload = {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        form,
+        autoCapture,
+        environmentData,
+        uploadedMedia,
+      };
+
+      const hasMeaningfulContent =
+        payload.form.content.trim().length > 0 ||
+        payload.form.title.trim().length > 0 ||
+        payload.uploadedMedia.length > 0;
+
+      if (!hasMeaningfulContent && !diary) {
+        window.localStorage.removeItem(draftStorageKey);
+        return;
+      }
+
+      window.localStorage.setItem(draftStorageKey, JSON.stringify(payload));
+      setDraftSavedAt(formatDraftTime(payload.savedAt));
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [isDirty, form, autoCapture, environmentData, uploadedMedia, diary, draftStorageKey]);
 
   const captureEnvironment = useCallback(async () => {
     setCapturing(true);
@@ -987,7 +1134,18 @@ function DiaryEditorModal({
     setUploadedMedia((prev) => prev.filter((item) => stripVideoMarker(item.url) !== stripVideoMarker(url)));
   };
 
-  const handleSubmit = async () => {
+  const requestClose = useCallback(() => {
+    if (saving) return;
+
+    if (isDirty) {
+      const confirmed = window.confirm('当前有未保存内容。关闭后草稿仍会保存在本地，下次可恢复。确定关闭吗？');
+      if (!confirmed) return;
+    }
+
+    onClose();
+  }, [isDirty, onClose, saving]);
+
+  const handleSubmit = useCallback(async () => {
     if (!form.content.trim()) {
       setError('请先写一点日记内容。');
       return;
@@ -1038,6 +1196,9 @@ function DiaryEditorModal({
         throw new Error(result.error || '保存日记失败');
       }
 
+      window.localStorage.removeItem(draftStorageKey);
+      setDraftSavedAt(null);
+      setInitialSignature(currentSignature);
       onSaved(result.data as Diary, diary?.id);
     } catch (submitError) {
       console.error('保存日记失败:', submitError);
@@ -1045,7 +1206,35 @@ function DiaryEditorModal({
     } finally {
       setSaving(false);
     }
-  };
+  }, [
+    form,
+    isAdmin,
+    showLoginModal,
+    uploadedMedia,
+    environmentData,
+    diary,
+    draftStorageKey,
+    currentSignature,
+    onSaved,
+  ]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        requestClose();
+        return;
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        void handleSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [requestClose, handleSubmit]);
 
   return (
     <motion.div
@@ -1054,7 +1243,7 @@ function DiaryEditorModal({
       animate="visible"
       exit="exit"
       className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={requestClose}
     >
       <motion.div
         variants={modalPanelVariants}
@@ -1270,18 +1459,24 @@ function DiaryEditorModal({
           {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-amber-200/60 p-5 dark:border-zinc-700">
-          <button onClick={onClose} className="ios-button-press rounded-xl px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">
-            取消
-          </button>
-          <button
-            onClick={() => void handleSubmit()}
-            disabled={saving || !form.content.trim()}
-            className="ios-button-press inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
-            {saving ? '保存中...' : diary ? '保存修改' : '写入日记本'}
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-amber-200/60 p-5 dark:border-zinc-700">
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            {draftSavedAt ? `草稿已自动保存：${draftSavedAt}` : '支持 Cmd/Ctrl + S 快速保存'}
+          </p>
+
+          <div className="ml-auto flex items-center gap-3">
+            <button onClick={requestClose} className="ios-button-press rounded-xl px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800">
+              取消
+            </button>
+            <button
+              onClick={() => void handleSubmit()}
+              disabled={saving || !form.content.trim()}
+              className="ios-button-press inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
+              {saving ? '保存中...' : diary ? '保存修改' : '写入日记本'}
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>

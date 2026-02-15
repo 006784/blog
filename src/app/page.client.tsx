@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronRight, Code2, Coffee, MessageCircle, Palette, PenTool, Sparkles } from 'lucide-react';
 import { BlogCard } from '@/components/BlogCard';
-import { APPLE_EASE, AnimatedSection } from '@/components/Animations';
+import { APPLE_EASE, AnimatedSection, APPLE_SPRING_GENTLE, HOVER_BUTTON, HOVER_LIFT, TAP_BUTTON } from '@/components/Animations';
 import { getPageStructuredData } from '@/lib/seo';
 import { getPublishedPosts, Post } from '@/lib/supabase';
 
@@ -149,19 +149,23 @@ export default function HomePageClient() {
                   transition={{ duration: 0.72, delay: 0.3, ease: APPLE_EASE }}
                   className="mt-10 flex flex-wrap items-center gap-4"
                 >
-                  <Link href="/blog" className="btn-primary px-7 py-3.5">
-                    <span className="inline-flex items-center gap-2">
-                      <PenTool className="h-4 w-4" />
-                      开始阅读
-                      <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </Link>
-                  <Link href="/contact" className="btn-secondary px-7 py-3.5">
-                    <span className="inline-flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4" />
-                      联系交流
-                    </span>
-                  </Link>
+                  <motion.div whileHover={HOVER_BUTTON} whileTap={TAP_BUTTON} transition={APPLE_SPRING_GENTLE}>
+                    <Link href="/blog" className="btn-primary ios-button-press px-7 py-3.5">
+                      <span className="inline-flex items-center gap-2">
+                        <PenTool className="h-4 w-4" />
+                        开始阅读
+                        <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </Link>
+                  </motion.div>
+                  <motion.div whileHover={HOVER_BUTTON} whileTap={TAP_BUTTON} transition={APPLE_SPRING_GENTLE}>
+                    <Link href="/contact" className="btn-secondary ios-button-press px-7 py-3.5">
+                      <span className="inline-flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        联系交流
+                      </span>
+                    </Link>
+                  </motion.div>
                 </motion.div>
 
                 <motion.div
@@ -233,8 +237,10 @@ export default function HomePageClient() {
                 initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
+                whileHover={HOVER_LIFT}
+                whileTap={{ y: -2, scale: 0.993 }}
                 transition={{ duration: 0.62, delay: index * 0.1, ease: APPLE_EASE }}
-                className="surface-card interactive-card group p-6"
+                className="surface-card interactive-card ios-hover-surface group p-6"
               >
                 <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.accent} text-white`}>
                   <feature.icon className="h-6 w-6" />
@@ -259,7 +265,7 @@ export default function HomePageClient() {
                 <p className="section-kicker">Latest Notes</p>
                 <h2 className="section-title-xl mt-3">最新文章</h2>
               </div>
-              <Link href="/blog" className="btn-ghost px-5 py-2.5 text-sm">
+              <Link href="/blog" className="btn-ghost ios-button-press px-5 py-2.5 text-sm">
                 查看全部
               </Link>
             </div>

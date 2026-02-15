@@ -19,7 +19,7 @@ import {
 import clsx from 'clsx';
 import { BlogCard } from '@/components/BlogCard';
 import { SubscribeForm } from '@/components/SubscribeForm';
-import { APPLE_EASE } from '@/components/Animations';
+import { APPLE_EASE, HOVER_BUTTON, HOVER_LIFT, TAP_BUTTON, APPLE_SPRING_GENTLE } from '@/components/Animations';
 import { useAdmin } from '@/components/AdminProvider';
 import { Collection, deletePost, getCollections, getPublishedPosts, Post } from '@/lib/supabase';
 import { formatDate } from '@/lib/types';
@@ -239,7 +239,7 @@ function BlogPageContent() {
             </div>
 
             {isAdmin && (
-              <Link href="/write" className="btn-primary inline-flex items-center gap-2 px-5 py-3 text-sm">
+              <Link href="/write" className="btn-primary ios-button-press inline-flex items-center gap-2 px-5 py-3 text-sm">
                 <Plus className="h-4 w-4" />
                 写新文章
               </Link>
@@ -275,7 +275,7 @@ function BlogPageContent() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-secondary"
+                  className="ios-button-press absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-secondary"
                   aria-label="清空搜索"
                 >
                   <X className="h-4 w-4" />
@@ -285,15 +285,18 @@ function BlogPageContent() {
 
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
-                <button
+                <motion.button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
+                  whileHover={HOVER_BUTTON}
+                  whileTap={TAP_BUTTON}
+                  transition={APPLE_SPRING_GENTLE}
                   className="chip-filter"
                   data-active={selectedCategory === category.id}
                 >
                   {category.name}
                   <span className="ml-1 text-xs opacity-70">{category.count}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
 
@@ -304,26 +307,32 @@ function BlogPageContent() {
                   专题
                 </span>
 
-                <button
+                <motion.button
                   onClick={() => setSelectedCollection(null)}
+                  whileHover={HOVER_BUTTON}
+                  whileTap={TAP_BUTTON}
+                  transition={APPLE_SPRING_GENTLE}
                   className="chip-filter"
                   data-active={!selectedCollection}
                 >
                   全部
-                </button>
+                </motion.button>
 
                 {collections.map((collection) => {
                   const count = posts.filter((post) => post.collection_id === collection.id).length;
                   return (
-                    <button
+                    <motion.button
                       key={collection.id}
                       onClick={() => setSelectedCollection(collection.id)}
+                      whileHover={HOVER_BUTTON}
+                      whileTap={TAP_BUTTON}
+                      transition={APPLE_SPRING_GENTLE}
                       className="chip-filter"
                       data-active={selectedCollection === collection.id}
                     >
                       {collection.name}
                       <span className="ml-1 opacity-70">{count}</span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -346,10 +355,11 @@ function BlogPageContent() {
 
             {featuredPost && (
               <motion.article
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                whileHover={HOVER_LIFT}
                 transition={{ duration: 0.64, ease: APPLE_EASE }}
-                className="surface-card interactive-card overflow-hidden"
+                className="surface-card interactive-card ios-hover-surface overflow-hidden"
               >
                 <Link href={`/blog/${featuredPost.slug}`} className="grid gap-0 md:grid-cols-2">
                   <div className="relative min-h-[240px] bg-secondary/50">
@@ -377,7 +387,7 @@ function BlogPageContent() {
                       <span>{formatDate(featuredPost.published_at || featuredPost.created_at)}</span>
                       <span>{featuredPost.reading_time || '约 5 分钟'}</span>
                     </div>
-                    <span className="btn-secondary mt-5 inline-flex px-4 py-2 text-sm">
+                    <span className="btn-secondary ios-button-press mt-5 inline-flex px-4 py-2 text-sm">
                       阅读全文
                     </span>
                   </div>
@@ -416,7 +426,7 @@ function BlogPageContent() {
                     setSelectedCategory('all');
                     setSelectedCollection(null);
                   }}
-                  className="btn-secondary mt-6 px-5 py-2.5 text-sm"
+                  className="btn-secondary ios-button-press mt-6 px-5 py-2.5 text-sm"
                 >
                   重置筛选
                 </button>
