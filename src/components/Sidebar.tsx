@@ -32,6 +32,7 @@ import { useTheme } from 'next-themes';
 import clsx from 'clsx';
 import { useAdmin } from './AdminProvider';
 import { useProfile } from './ProfileProvider';
+import { EnhancedSearch } from './EnhancedSearch';
 import {
   APPLE_EASE_SOFT,
   APPLE_SPRING_GENTLE,
@@ -155,7 +156,7 @@ export function Sidebar() {
         <div className="flex h-full flex-col">
           <div className={clsx('border-b border-border/65 px-4 py-4', isCollapsed && 'px-3')}>
             <Link href="/" className={clsx('flex items-center gap-3', isCollapsed && 'justify-center')}>
-              <div className="animate-ui-float flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] text-white shadow-[0_14px_26px_-16px_rgba(56,189,248,0.65)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] text-white shadow-[0_14px_26px_-16px_rgba(56,189,248,0.65)]">
                 <Sparkles className="h-4 w-4" />
               </div>
               {!isCollapsed && (
@@ -168,12 +169,17 @@ export function Sidebar() {
           </div>
 
           {!isCollapsed && (
-            <div className="surface-card mx-3.5 mt-4 p-3">
-              <p className="text-sm font-medium">{profile.nickname || '拾光'}</p>
-              <p className="mt-1 line-clamp-2 text-xs text-soft">
-                {profile.signature || '记录技术与生活的长期写作。'}
-              </p>
-            </div>
+            <>
+              <div className="surface-card mx-3.5 mt-4 p-3">
+                <p className="text-sm font-medium">{profile.nickname || '拾光'}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-soft">
+                  {profile.signature || '记录技术与生活的长期写作。'}
+                </p>
+              </div>
+              <div className="mx-3.5 mt-3">
+                <EnhancedSearch />
+              </div>
+            </>
           )}
 
           <div className="custom-scrollbar mt-4 flex-1 space-y-5 overflow-y-auto px-3 pb-4">
@@ -210,7 +216,7 @@ export function Sidebar() {
 
             {isAdmin && !isCollapsed && (
               <Link href="/admin" className="block">
-                <button className="btn-secondary inline-flex w-full items-center gap-2 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
+                <button className="btn-secondary ios-button-press inline-flex w-full items-center gap-2 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
                   <Settings className="h-4 w-4" />
                   管理后台
                 </button>
@@ -370,7 +376,7 @@ export function Sidebar() {
 
                 {isAdmin && (
                   <Link href="/admin" onClick={() => setMobileOpen(false)}>
-                    <div className="btn-secondary inline-flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm">
+                    <div className="btn-secondary ios-button-press inline-flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm">
                       <Settings className="h-4 w-4" />
                       打开管理后台
                     </div>

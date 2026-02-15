@@ -24,7 +24,7 @@ export function ParticleBackground() {
   const createParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = [];
     const area = width * height;
-    const count = Math.min(72, Math.max(18, Math.floor(area / 28000)));
+    const count = Math.min(44, Math.max(12, Math.floor(area / 42000)));
     
     const colors = resolvedTheme === 'dark' 
       ? ['#7dd3fc', '#93c5fd', '#5eead4', '#fbbf24']
@@ -37,7 +37,7 @@ export function ParticleBackground() {
         vx: (Math.random() - 0.5) * 0.24,
         vy: (Math.random() - 0.5) * 0.24,
         size: Math.random() * 1.2 + 0.7,
-        opacity: Math.random() * 0.16 + 0.08,
+        opacity: Math.random() * 0.1 + 0.05,
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
@@ -49,7 +49,7 @@ export function ParticleBackground() {
     
     const particles = particlesRef.current;
     const mouse = mouseRef.current;
-    const connectionDistance = 110;
+    const connectionDistance = 96;
     const mouseDistance = 150;
 
     // 更新和绘制粒子
@@ -99,8 +99,8 @@ export function ParticleBackground() {
           ctx.moveTo(particle.x, particle.y);
           ctx.lineTo(other.x, other.y);
           ctx.strokeStyle = particle.color;
-          ctx.globalAlpha = (1 - distance / connectionDistance) * 0.08;
-          ctx.lineWidth = 0.45;
+          ctx.globalAlpha = (1 - distance / connectionDistance) * 0.045;
+          ctx.lineWidth = 0.4;
           ctx.stroke();
         }
       }
@@ -171,7 +171,7 @@ export function ParticleBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 pointer-events-none opacity-65 dark:opacity-55"
+      className="fixed inset-0 -z-10 pointer-events-none opacity-34 dark:opacity-30"
       style={{ background: 'transparent' }}
     />
   );
