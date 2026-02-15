@@ -101,6 +101,30 @@ npm test
 npm run test:coverage
 ```
 
+### 每天自动推送到 GitHub（macOS）
+
+```bash
+# 1) 手动执行一次自动提交+推送（有改动才会提交）
+npm run git:auto-push
+
+# 2) 先预览（不提交不推送）
+npm run git:auto-push:dry-run
+
+# 3) 安装每日定时任务（默认 23:30）
+npm run git:auto-push:install
+
+# 4) 自定义时间安装（例如每天 22:10）
+bash scripts/install-daily-git-push-macos.sh 22 10
+
+# 5) 卸载定时任务
+npm run git:auto-push:uninstall
+```
+
+说明：
+- 定时任务使用 macOS `launchd`。
+- 日志文件：`logs/daily-git-push.log`。
+- 无文件变更时会自动跳过，不会产生空提交。
+
 ## 📖 文档
 
 - [开发者指南](./docs/DEVELOPER_GUIDE.md) - 完整的开发文档

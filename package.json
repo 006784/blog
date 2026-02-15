@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "api:smoke": "bash scripts/api-smoke.sh",
+    "git:auto-push": "bash scripts/auto-push.sh",
+    "git:auto-push:dry-run": "bash scripts/auto-push.sh --dry-run",
+    "git:auto-push:install": "bash scripts/install-daily-git-push-macos.sh 23 30",
+    "git:auto-push:uninstall": "bash scripts/uninstall-daily-git-push-macos.sh",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
