@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check } from 'lucide-react';
+import { APPLE_EASE_SOFT, APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
 
 interface CodeBlockProps {
   children: string;
@@ -13,9 +14,13 @@ export function CodeBlock({ children, language }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(children);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(children);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('复制代码失败:', error);
+    }
   };
 
   return (
@@ -31,10 +36,11 @@ export function CodeBlock({ children, language }: CodeBlockProps) {
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={handleCopy}
-        className="absolute top-3 right-3 p-2 rounded-lg bg-secondary/80 hover:bg-secondary border border-border/50 text-muted-foreground hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
+        className="ios-button-press absolute top-3 right-3 border border-border/50 bg-secondary/80 p-2 text-muted-foreground opacity-0 transition-all hover:bg-secondary hover:text-foreground group-hover:opacity-100 rounded-lg"
         title="复制代码"
       >
         <AnimatePresence mode="wait">
@@ -44,6 +50,7 @@ export function CodeBlock({ children, language }: CodeBlockProps) {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
+              transition={{ duration: 0.22, ease: APPLE_EASE_SOFT }}
             >
               <Check className="w-4 h-4 text-green-500" />
             </motion.div>
@@ -53,6 +60,7 @@ export function CodeBlock({ children, language }: CodeBlockProps) {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
+              transition={{ duration: 0.22, ease: APPLE_EASE_SOFT }}
             >
               <Copy className="w-4 h-4" />
             </motion.div>
@@ -74,6 +82,7 @@ export function CodeBlock({ children, language }: CodeBlockProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.24, ease: APPLE_EASE_SOFT }}
             className="absolute top-3 right-14 px-2 py-1 text-xs bg-green-500 text-white rounded-lg"
           >
             已复制

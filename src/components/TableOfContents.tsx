@@ -3,6 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { List, ChevronRight, X } from 'lucide-react';
+import {
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_BUTTON,
+  TAP_BUTTON,
+  bottomSheetVariants,
+  modalBackdropVariants,
+} from './Animations';
 
 interface TocItem {
   id: string;
@@ -81,6 +89,15 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
 
   if (headings.length === 0) return null;
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   return (
     <>
       {/* 桌面端侧边目录 */}
@@ -98,7 +115,7 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
               >
                 <button
                   onClick={() => scrollToHeading(heading.id)}
-                  className={`text-left w-full py-1 px-2 rounded-lg transition-all duration-200 hover:bg-primary/5 ${
+                  className={`ios-button-press text-left w-full py-1 px-2 rounded-lg transition-all duration-200 hover:bg-primary/5 ${
                     activeId === heading.id
                       ? 'text-primary font-medium bg-primary/10 border-l-2 border-primary'
                       : 'text-muted-foreground hover:text-foreground'
@@ -116,10 +133,11 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
       <div className="xl:hidden">
         {/* 浮动按钮 */}
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={HOVER_BUTTON}
+          whileTap={TAP_BUTTON}
+          transition={APPLE_SPRING_GENTLE}
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-24 right-4 z-40 p-3 rounded-full bg-primary text-white shadow-lg shadow-primary/25"
+          className="ios-button-press fixed bottom-24 right-4 z-40 p-3 rounded-full bg-primary text-white shadow-lg shadow-primary/25"
         >
           <List className="w-5 h-5" />
         </motion.button>
@@ -129,41 +147,48 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
           {isOpen && (
             <>
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+                variants={modalBackdropVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="ios-modal-overlay fixed inset-0 z-50"
                 onClick={() => setIsOpen(false)}
               />
               <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed right-0 top-0 bottom-0 z-50 w-80 bg-card border-l border-border shadow-2xl"
+                variants={bottomSheetVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="ios-sheet-card fixed bottom-0 left-0 right-0 z-50 max-h-[82vh] overflow-hidden border-t border-border shadow-2xl"
               >
                 <div className="flex items-center justify-between p-4 border-b border-border">
                   <h3 className="font-semibold flex items-center gap-2">
                     <List className="w-5 h-5" />
                     文章目录
                   </h3>
-                  <button
+                  <motion.button
+                    whileHover={HOVER_BUTTON}
+                    whileTap={TAP_BUTTON}
+                    transition={APPLE_SPRING_GENTLE}
                     onClick={() => setIsOpen(false)}
-                    className="p-2 rounded-lg hover:bg-muted"
+                    className="ios-button-press p-2 rounded-lg hover:bg-muted"
                   >
                     <X className="w-5 h-5" />
-                  </button>
+                  </motion.button>
                 </div>
-                <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+                <div className="p-4 overflow-y-auto max-h-[calc(82vh-80px)]">
                   <ul className="space-y-2">
                     {headings.map((heading) => (
                       <li
                         key={heading.id}
                         style={{ paddingLeft: `${(heading.level - 1) * 12}px` }}
                       >
-                        <button
+                        <motion.button
+                          whileHover={HOVER_BUTTON}
+                          whileTap={TAP_BUTTON}
+                          transition={APPLE_SPRING_GENTLE}
                           onClick={() => scrollToHeading(heading.id)}
-                          className={`flex items-center gap-2 w-full py-2 px-3 rounded-lg text-left transition-all ${
+                          className={`ios-button-press flex items-center gap-2 w-full py-2 px-3 rounded-lg text-left transition-all ${
                             activeId === heading.id
                               ? 'bg-primary/10 text-primary font-medium'
                               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -173,7 +198,7 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
                             activeId === heading.id ? 'rotate-90' : ''
                           }`} />
                           <span className="line-clamp-2">{heading.text}</span>
-                        </button>
+                        </motion.button>
                       </li>
                     ))}
                   </ul>

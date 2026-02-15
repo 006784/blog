@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Bookmark, Eye, Share2, Check } from 'lucide-react';
+import { APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
 
 interface PostInteractionsProps {
   postId: string;
@@ -102,17 +103,18 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       {/* 浏览量 */}
-      <div className="flex items-center gap-1.5 text-muted-foreground">
+      <div className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-secondary/35 px-2.5 py-1.5 text-muted-foreground">
         <Eye className="w-4 h-4" />
         <span className="text-sm">{stats.views}</span>
       </div>
       
       {/* 点赞 */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={() => handleInteraction('like')}
-        className={`flex items-center gap-1.5 transition-colors ${
+        className={`ios-button-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
           userLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
         }`}
       >
@@ -122,10 +124,11 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
       
       {/* 收藏 */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={() => handleInteraction('bookmark')}
-        className={`flex items-center gap-1.5 transition-colors ${
+        className={`ios-button-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
           userBookmarked ? 'text-yellow-500' : 'text-muted-foreground hover:text-yellow-500'
         }`}
       >
@@ -135,10 +138,11 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
       
       {/* 分享 */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={handleShare}
-        className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+        className="ios-button-press inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1.5 text-muted-foreground transition-colors hover:text-primary"
       >
         {copied ? (
           <Check className="w-4 h-4 text-green-500" />

@@ -1,10 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, FileText, Music, Calendar, Image, ArrowRight, Loader2, Clock, TrendingUp, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_BUTTON,
+  TAP_BUTTON,
+  modalBackdropVariants,
+  modalPanelVariants,
+} from './Animations';
 
 interface SearchResult {
   type: 'blog' | 'music' | 'diary' | 'gallery';
@@ -29,7 +37,7 @@ export function EnhancedSearch() {
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
-  const [trending, setTrending] = useState<string[]>([]);
+  const [trending] = useState<string[]>(['Next.js', '日记', '设计系统', 'API']);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -66,6 +74,16 @@ export function EnhancedSearch() {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [isOpen]);
 
   // 高亮搜索关键词
@@ -168,10 +186,11 @@ export function EnhancedSearch() {
     <>
       {/* 搜索按钮 - 增强版 */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={() => setIsOpen(true)}
-        className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/50 hover:bg-secondary border border-border/50 backdrop-blur-sm transition-all group"
+        className="ios-button-press relative flex items-center gap-2 rounded-xl border border-border/50 bg-secondary/50 px-4 py-2.5 backdrop-blur-sm transition-all group"
       >
         <Search className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
         <span className="hidden sm:inline text-sm text-muted-foreground group-hover:text-foreground transition-colors">
@@ -193,22 +212,23 @@ export function EnhancedSearch() {
           <>
             {/* 遮罩 */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-[100]"
               onClick={() => setIsOpen(false)}
             />
             
             {/* 搜索框 */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              variants={modalPanelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
               className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[101] w-full max-w-3xl px-4"
             >
-              <div className="bg-card/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-border/50 overflow-hidden">
+              <div className="ios-modal-card overflow-hidden rounded-3xl border border-border/50 bg-card/95 shadow-2xl backdrop-blur-xl">
                 {/* 输入框 - 增强版 */}
                 <div className="relative flex items-center gap-3 px-6 py-5 border-b border-border/50">
                   <motion.div
@@ -236,14 +256,15 @@ export function EnhancedSearch() {
                     <motion.button
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={HOVER_BUTTON}
+                      whileTap={TAP_BUTTON}
+                      transition={APPLE_SPRING_GENTLE}
                       onClick={() => {
                         setQuery('');
                         setResults([]);
                         inputRef.current?.focus();
                       }}
-                      className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                      className="ios-button-press rounded-lg p-2 transition-colors hover:bg-secondary"
                     >
                       <X className="w-4 h-4" />
                     </motion.button>
@@ -266,7 +287,7 @@ export function EnhancedSearch() {
                               key={`${result.type}-${result.id}`}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.03 }}
+                              transition={{ delay: index * 0.03, duration: 0.34, ease: APPLE_EASE_SOFT }}
                             >
                               <Link
                                 href={result.url}
@@ -280,7 +301,8 @@ export function EnhancedSearch() {
                                 <div className="flex items-center gap-4 px-4 py-4">
                                   {/* 图标 */}
                                   <motion.div
-                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    whileHover={{ scale: 1.04, rotate: 2 }}
+                                    transition={APPLE_SPRING_GENTLE}
                                     className={`p-3 rounded-xl ${
                                       isSelected
                                         ? 'bg-primary/20 text-primary'
@@ -360,13 +382,14 @@ export function EnhancedSearch() {
                             {recentSearches.map((item, index) => (
                               <motion.button
                                 key={index}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={HOVER_BUTTON}
+                                whileTap={TAP_BUTTON}
+                                transition={APPLE_SPRING_GENTLE}
                                 onClick={() => {
                                   setQuery(item.query);
                                   inputRef.current?.focus();
                                 }}
-                                className="px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-sm transition-colors flex items-center gap-2"
+                                className="ios-button-press flex items-center gap-2 rounded-xl bg-secondary px-4 py-2 text-sm transition-colors hover:bg-secondary/80"
                               >
                                 <Clock className="w-3 h-3 text-muted-foreground" />
                                 {item.query}
@@ -387,13 +410,14 @@ export function EnhancedSearch() {
                             {trending.map((term, index) => (
                               <motion.button
                                 key={index}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={HOVER_BUTTON}
+                                whileTap={TAP_BUTTON}
+                                transition={APPLE_SPRING_GENTLE}
                                 onClick={() => {
                                   setQuery(term);
                                   inputRef.current?.focus();
                                 }}
-                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-primary/10 to-purple-500/10 hover:from-primary/20 hover:to-purple-500/20 text-sm transition-all flex items-center gap-2 border border-primary/20"
+                                className="ios-button-press flex items-center gap-2 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 to-purple-500/10 px-4 py-2 text-sm transition-all hover:from-primary/20 hover:to-purple-500/20"
                               >
                                 <Sparkles className="w-3 h-3 text-primary" />
                                 {term}

@@ -4,6 +4,14 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, FileText, Music, Calendar, Image, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import {
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_BUTTON,
+  TAP_BUTTON,
+  modalBackdropVariants,
+  modalPanelVariants,
+} from './Animations';
 
 interface SearchResult {
   type: 'blog' | 'music' | 'diary' | 'gallery';
@@ -43,6 +51,15 @@ export function GlobalSearch() {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [isOpen]);
 
   // 搜索函数
@@ -112,16 +129,19 @@ export function GlobalSearch() {
   return (
     <>
       {/* 搜索按钮 */}
-      <button
+      <motion.button
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border border-border/50"
+        className="ios-button-press flex items-center gap-2 rounded-lg border border-border/50 bg-muted/50 px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
         <Search className="w-4 h-4" />
         <span className="hidden sm:inline text-sm">搜索</span>
         <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 ml-2 text-xs bg-background rounded border border-border">
           <span className="text-xs">⌘</span>K
         </kbd>
-      </button>
+      </motion.button>
 
       {/* 搜索弹窗 */}
       <AnimatePresence>
@@ -129,21 +149,23 @@ export function GlobalSearch() {
           <>
             {/* 遮罩 */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-50"
               onClick={() => setIsOpen(false)}
             />
             
             {/* 搜索框 */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              variants={modalPanelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
               className="fixed top-[20%] left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4"
             >
-              <div className="bg-card rounded-2xl shadow-2xl border border-border overflow-hidden">
+              <div className="ios-modal-card overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
                 {/* 输入框 */}
                 <div className="flex items-center gap-3 px-4 py-4 border-b border-border">
                   <Search className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -161,12 +183,15 @@ export function GlobalSearch() {
                   />
                   {loading && <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />}
                   {query && !loading && (
-                    <button
+                    <motion.button
+                      whileHover={HOVER_BUTTON}
+                      whileTap={TAP_BUTTON}
+                      transition={APPLE_SPRING_GENTLE}
                       onClick={() => setQuery('')}
-                      className="p-1 rounded-lg hover:bg-muted"
+                      className="ios-button-press rounded-lg p-1 hover:bg-muted"
                     >
                       <X className="w-4 h-4" />
-                    </button>
+                    </motion.button>
                   )}
                 </div>
 
@@ -177,34 +202,40 @@ export function GlobalSearch() {
                       {results.map((result, index) => {
                         const Icon = getIcon(result.type);
                         return (
-                          <Link
+                          <motion.div
                             key={`${result.type}-${result.id}`}
-                            href={result.url}
-                            onClick={() => setIsOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
-                              index === selectedIndex
-                                ? 'bg-primary/10 text-primary'
-                                : 'hover:bg-muted'
-                            }`}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.025, duration: 0.3, ease: APPLE_EASE_SOFT }}
                           >
-                            <div className={`p-2 rounded-lg ${
-                              index === selectedIndex ? 'bg-primary/20' : 'bg-muted'
-                            }`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate">{result.title}</div>
-                              {result.description && (
-                                <div className="text-sm text-muted-foreground truncate">
-                                  {result.description}
-                                </div>
-                              )}
-                            </div>
-                            <span className="text-xs text-muted-foreground px-2 py-1 rounded-full bg-muted">
-                              {getTypeName(result.type)}
-                            </span>
-                            <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                          </Link>
+                            <Link
+                              href={result.url}
+                              onClick={() => setIsOpen(false)}
+                              className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+                                index === selectedIndex
+                                  ? 'bg-primary/10 text-primary'
+                                  : 'hover:bg-muted'
+                              }`}
+                            >
+                              <div className={`p-2 rounded-lg ${
+                                index === selectedIndex ? 'bg-primary/20' : 'bg-muted'
+                              }`}>
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium truncate">{result.title}</div>
+                                {result.description && (
+                                  <div className="text-sm text-muted-foreground truncate">
+                                    {result.description}
+                                  </div>
+                                )}
+                              </div>
+                              <span className="text-xs text-muted-foreground px-2 py-1 rounded-full bg-muted">
+                                {getTypeName(result.type)}
+                              </span>
+                              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                            </Link>
+                          </motion.div>
                         );
                       })}
                     </div>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Bell, Calendar, Clock, Edit2, Eye, Tag, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
-import { APPLE_EASE, APPLE_EASE_SOFT, APPLE_SPRING_GENTLE } from './Animations';
+import { APPLE_EASE, APPLE_EASE_SOFT, APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
 import { useAdmin } from './AdminProvider';
 import { Post, formatDate } from '@/lib/types';
 
@@ -127,15 +127,15 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
           >
             {isAdmin && onNotify && (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={HOVER_BUTTON}
+                whileTap={TAP_BUTTON}
                 transition={APPLE_SPRING_GENTLE}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
                   onNotify(post);
                 }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/20 text-white backdrop-blur-xl hover:bg-emerald-500/85"
+                className="ios-button-press inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/20 text-white backdrop-blur-xl hover:bg-emerald-500/85"
                 title="推送通知"
               >
                 <Bell className="h-4 w-4" />
@@ -145,10 +145,10 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
             {isAdmin && (
               <Link href={`/write?edit=${post.slug}`} onClick={(event) => event.stopPropagation()}>
                 <motion.span
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={HOVER_BUTTON}
+                  whileTap={TAP_BUTTON}
                   transition={APPLE_SPRING_GENTLE}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/20 text-white backdrop-blur-xl hover:bg-primary/85"
+                  className="ios-button-press inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/20 text-white backdrop-blur-xl hover:bg-primary/85"
                 >
                   <Edit2 className="h-4 w-4" />
                 </motion.span>
@@ -157,15 +157,15 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
 
             {isAdmin && onDelete && (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={HOVER_BUTTON}
+                whileTap={TAP_BUTTON}
                 transition={APPLE_SPRING_GENTLE}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
                   onDelete(post.slug);
                 }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/20 text-white backdrop-blur-xl hover:bg-rose-500/85"
+                className="ios-button-press inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/35 bg-white/20 text-white backdrop-blur-xl hover:bg-rose-500/85"
               >
                 <Trash2 className="h-4 w-4" />
               </motion.button>

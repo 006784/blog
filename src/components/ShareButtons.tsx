@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Share2, Twitter, Link2, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
+import { APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
 
 interface ShareButtonsProps {
   url: string;
@@ -55,30 +56,33 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
   return (
     <div className="flex items-center gap-3">
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={handleShare}
-        className="p-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+        className="ios-button-press p-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
         title="分享"
       >
         <Share2 className="w-5 h-5" />
       </motion.button>
 
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={shareToTwitter}
-        className="p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 transition-colors"
+        className="ios-button-press p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 transition-colors"
         title="分享到 Twitter"
       >
         <Twitter className="w-5 h-5" />
       </motion.button>
 
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={shareToFacebook}
-        className="p-3 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 transition-colors"
+        className="ios-button-press p-3 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 transition-colors"
         title="分享到 Facebook"
       >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -87,10 +91,11 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
       </motion.button>
 
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={HOVER_BUTTON}
+        whileTap={TAP_BUTTON}
+        transition={APPLE_SPRING_GENTLE}
         onClick={handleCopy}
-        className="p-3 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
+        className="ios-button-press p-3 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
         title="复制链接"
       >
         {copied ? (

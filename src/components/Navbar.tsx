@@ -1,12 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion';
 import { Menu, X, Sun, Moon, Sparkles, PenLine } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import clsx from 'clsx';
+import {
+  APPLE_EASE,
+  APPLE_EASE_SOFT,
+  APPLE_SPRING_GENTLE,
+  HOVER_BUTTON,
+  TAP_BUTTON,
+  modalBackdropVariants,
+} from './Animations';
 
 const navItems = [
   { name: '首页', href: '/' },
@@ -16,25 +24,37 @@ const navItems = [
   { name: '联系', href: '/contact' },
 ];
 
-// 磁性按钮组件
-function MagneticButton({ children, className, onClick }: { 
-  children: React.ReactNode; 
-  className?: string;
-  onClick?: () => void;
-}) {
+const drawerVariants = {
+  hidden: { x: '100%', opacity: 0.94, scale: 0.992, filter: 'blur(8px)' },
+  visible: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { ...APPLE_SPRING_GENTLE, stiffness: 210, damping: 28 },
+  },
+  exit: {
+    x: '100%',
+    opacity: 0.96,
+    scale: 0.994,
+    filter: 'blur(7px)',
+    transition: { duration: 0.24, ease: APPLE_EASE_SOFT },
+  },
+};
+
+function MagneticButton({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const springConfig = { damping: 15, stiffness: 150 };
-  const springX = useSpring(x, springConfig);
-  const springY = useSpring(y, springConfig);
+  const springX = useSpring(x, { stiffness: 170, damping: 20, mass: 0.9 });
+  const springY = useSpring(y, { stiffness: 170, damping: 20, mass: 0.9 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    x.set((e.clientX - centerX) * 0.3);
-    y.set((e.clientY - centerY) * 0.3);
+    x.set((e.clientX - centerX) * 0.16);
+    y.set((e.clientY - centerY) * 0.16);
   };
 
   const handleMouseLeave = () => {
@@ -47,7 +67,9 @@ function MagneticButton({ children, className, onClick }: {
       style={{ x: springX, y: springY }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      whileTap={{ scale: 0.9 }}
+      whileHover={HOVER_BUTTON}
+      whileTap={TAP_BUTTON}
+      transition={APPLE_SPRING_GENTLE}
       onClick={onClick}
       className={className}
     >
@@ -61,13 +83,14 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -81,263 +104,219 @@ export function Navbar() {
   return (
     <>
       <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ y: -48, opacity: 0, filter: 'blur(8px)' }}
+        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 0.62, ease: APPLE_EASE }}
         className={clsx(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+          'fixed left-0 right-0 top-0 z-50 transition-all duration-500',
           isScrolled
-            ? 'glass border-b border-border/50 shadow-lg shadow-black/5'
+            ? 'glass border-b border-border/55 shadow-[0_16px_40px_-28px_rgba(0,0,0,0.45)]'
             : 'bg-transparent'
         )}
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="group flex items-center gap-2">
+            <motion.div
+              whileHover={{ rotate: 8, scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              transition={APPLE_SPRING_GENTLE}
+              className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)]"
+            >
               <motion.div
-                whileHover={{ rotate: 180, scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center overflow-hidden"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-white/20"
-                  initial={{ x: '-100%', opacity: 0 }}
-                  whileHover={{ x: '100%', opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                />
-                <Sparkles className="w-4 h-4 text-white relative z-10" />
-              </motion.div>
-              <motion.span 
-                className="font-semibold text-base hidden sm:block text-foreground"
-                whileHover={{ x: 2 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              >
-                拾光
-              </motion.span>
-            </Link>
+                className="absolute inset-0 bg-white/22"
+                initial={{ x: '-100%', opacity: 0 }}
+                whileHover={{ x: '100%', opacity: 1 }}
+                transition={{ duration: 0.55, ease: APPLE_EASE_SOFT }}
+              />
+              <Sparkles className="relative z-10 h-4 w-4 text-white" />
+            </motion.div>
+            <motion.span
+              className="hidden text-base font-semibold text-foreground sm:block"
+              whileHover={{ x: 1.5 }}
+              transition={APPLE_SPRING_GENTLE}
+            >
+              拾光
+            </motion.span>
+          </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1 p-1.5 bg-secondary/50 rounded-full backdrop-blur-sm">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="relative px-4 py-2 group"
-                >
+          <div className="hidden items-center gap-1 rounded-full border border-border/60 bg-secondary/50 p-1.5 backdrop-blur-sm md:flex">
+            {navItems.map((item) => {
+              const active = pathname === item.href;
+
+              return (
+                <Link key={item.name} href={item.href} className="relative px-4 py-2">
                   <motion.span
                     className={clsx(
                       'relative z-10 text-sm font-medium transition-colors duration-300',
-                      pathname === item.href
-                        ? 'text-primary-foreground'
-                        : 'text-muted-foreground group-hover:text-foreground'
+                      active ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                     )}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    whileHover={HOVER_BUTTON}
+                    whileTap={TAP_BUTTON}
+                    transition={APPLE_SPRING_GENTLE}
                   >
                     {item.name}
                   </motion.span>
-                  {pathname === item.href && (
+                  {active && (
                     <motion.div
                       layoutId="navbar-indicator"
-                      className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/25"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 380,
-                        damping: 30,
-                      }}
+                      className="absolute inset-0 rounded-full bg-primary shadow-lg shadow-primary/25"
+                      transition={{ ...APPLE_SPRING_GENTLE, stiffness: 240, damping: 24 }}
                     />
                   )}
                 </Link>
-              ))}
-            </div>
+              );
+            })}
+          </div>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-3">
-              {/* Write Button - Desktop */}
-              <Link href="/write" className="hidden sm:block">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 rounded-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white text-sm font-medium flex items-center gap-2 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
-                >
-                  <PenLine className="w-4 h-4" />
-                  <span>写文章</span>
-                </motion.button>
-              </Link>
-
-              {/* Theme Toggle - 增强版 */}
-              <MagneticButton
-                onClick={toggleTheme}
-                className="relative w-11 h-11 rounded-full bg-secondary/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors overflow-hidden group"
+          <div className="flex items-center gap-3">
+            <Link href="/write" className="hidden sm:block">
+              <motion.button
+                whileHover={HOVER_BUTTON}
+                whileTap={TAP_BUTTON}
+                transition={APPLE_SPRING_GENTLE}
+                className="btn-primary ios-button-press flex items-center gap-2 px-4 py-2 text-sm"
               >
-                {/* 背景光晕效果 */}
-                <motion.div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: currentTheme === 'dark' 
+                <PenLine className="h-4 w-4" />
+                <span>写文章</span>
+              </motion.button>
+            </Link>
+
+            <MagneticButton
+              onClick={toggleTheme}
+              className="ios-button-press group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-secondary/80 text-muted-foreground backdrop-blur-sm hover:text-foreground"
+            >
+              <motion.div
+                className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background:
+                    currentTheme === 'dark'
                       ? 'radial-gradient(circle, rgba(251,191,36,0.2) 0%, transparent 70%)'
-                      : 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)'
-                  }}
-                />
-                
-                <AnimatePresence mode="wait">
-                  {mounted && (
-                    <motion.div
-                      key={currentTheme}
-                      initial={{ y: -30, opacity: 0, rotate: -90, scale: 0.5 }}
-                      animate={{ y: 0, opacity: 1, rotate: 0, scale: 1 }}
-                      exit={{ y: 30, opacity: 0, rotate: 90, scale: 0.5 }}
-                      transition={{ 
-                        duration: 0.4, 
-                        ease: [0.25, 0.46, 0.45, 0.94],
-                        scale: { type: 'spring', stiffness: 300, damping: 20 }
-                      }}
-                      className="relative z-10"
-                    >
-                      {currentTheme === 'dark' ? (
-                        <Sun className="w-5 h-5 text-amber-400" />
-                      ) : (
-                        <Moon className="w-5 h-5 text-indigo-500" />
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      : 'radial-gradient(circle, rgba(14,165,233,0.22) 0%, transparent 70%)',
+                }}
+              />
 
-                {/* 点击涟漪效果 */}
-                <motion.div
-                  className="absolute inset-0 bg-foreground/10 rounded-full"
-                  initial={{ scale: 0, opacity: 1 }}
-                  whileTap={{ scale: 2, opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                />
-              </MagneticButton>
-
-              {/* Mobile Menu Button */}
-              <MagneticButton
-                onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden relative w-11 h-11 rounded-full bg-secondary/80 backdrop-blur-sm flex items-center justify-center overflow-hidden group"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                />
-                <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait">
+                {mounted && (
                   <motion.div
-                    key={isOpen ? 'close' : 'open'}
-                    initial={{ rotate: -180, opacity: 0, scale: 0.5 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: 180, opacity: 0, scale: 0.5 }}
-                    transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    key={currentTheme}
+                    initial={{ y: -16, opacity: 0, scale: 0.7 }}
+                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                    exit={{ y: 16, opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.32, ease: APPLE_EASE_SOFT }}
                     className="relative z-10"
                   >
-                    {isOpen ? (
-                      <X className="w-5 h-5" />
+                    {currentTheme === 'dark' ? (
+                      <Sun className="h-5 w-5 text-amber-400" />
                     ) : (
-                      <Menu className="w-5 h-5" />
+                      <Moon className="h-5 w-5 text-sky-500" />
                     )}
                   </motion.div>
-                </AnimatePresence>
-              </MagneticButton>
-            </div>
+                )}
+              </AnimatePresence>
+            </MagneticButton>
+
+            <MagneticButton
+              onClick={() => setIsOpen(!isOpen)}
+              className="ios-button-press relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-secondary/80 backdrop-blur-sm md:hidden"
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isOpen ? 'close' : 'open'}
+                  initial={{ rotate: -90, opacity: 0, scale: 0.7 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 90, opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.28, ease: APPLE_EASE_SOFT }}
+                  className="relative z-10"
+                >
+                  {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </motion.div>
+              </AnimatePresence>
+            </MagneticButton>
           </div>
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 md:hidden"
-          >
+          <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/60 backdrop-blur-2xl"
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-overlay fixed inset-0 z-40 md:hidden"
               onClick={() => setIsOpen(false)}
             />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-0 bottom-0 w-80 bg-card/95 backdrop-blur-xl border-l border-border p-6 pt-24 shadow-2xl"
+
+            <motion.aside
+              variants={drawerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="ios-modal-card fixed bottom-0 right-0 top-0 z-50 w-80 border-l border-border p-6 pt-24 shadow-2xl md:hidden"
             >
               <nav className="flex flex-col gap-2">
-                {navItems.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className="relative block overflow-hidden"
+                {navItems.map((item, index) => {
+                  const active = pathname === item.href;
+
+                  return (
+                    <motion.div
+                      key={item.name}
+                      initial={{ x: 16, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.06, duration: 0.34, ease: APPLE_EASE_SOFT }}
                     >
-                      <motion.div
-                        whileHover={{ x: 8 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={clsx(
-                          'px-5 py-4 rounded-2xl text-lg font-medium transition-all flex items-center justify-between',
-                          pathname === item.href
-                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                            : 'hover:bg-secondary'
-                        )}
-                      >
-                        {item.name}
-                        <motion.span
-                          initial={{ x: -10, opacity: 0 }}
-                          whileHover={{ x: 0, opacity: 1 }}
-                          className="text-xl"
+                      <Link href={item.href} onClick={() => setIsOpen(false)} className="block overflow-hidden rounded-2xl">
+                        <motion.div
+                          whileHover={{ x: 2, scale: 1.006 }}
+                          whileTap={{ scale: 0.992 }}
+                          transition={APPLE_SPRING_GENTLE}
+                          className={clsx(
+                            'flex items-center justify-between rounded-2xl px-5 py-4 text-lg font-medium',
+                            active
+                              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                              : 'bg-secondary/70 text-foreground hover:bg-secondary'
+                          )}
                         >
-                          →
-                        </motion.span>
-                      </motion.div>
-                    </Link>
-                  </motion.div>
-                ))}
+                          {item.name}
+                          <span className={clsx('text-base transition-opacity', active ? 'opacity-100' : 'opacity-45')}>→</span>
+                        </motion.div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </nav>
 
-              {/* Mobile theme toggle */}
               <motion.div
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 14, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-8 pt-6 border-t border-border"
+                transition={{ delay: 0.28, duration: 0.34, ease: APPLE_EASE_SOFT }}
+                className="mt-8 border-t border-border pt-6"
               >
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={HOVER_BUTTON}
+                  whileTap={TAP_BUTTON}
+                  transition={APPLE_SPRING_GENTLE}
                   onClick={toggleTheme}
-                  className="w-full px-5 py-4 rounded-2xl bg-secondary flex items-center justify-between"
+                  className="ios-button-press flex w-full items-center justify-between rounded-2xl bg-secondary px-5 py-4"
                 >
-                  <span className="font-medium">
-                    {currentTheme === 'dark' ? '浅色模式' : '深色模式'}
-                  </span>
-                  <motion.div
-                    whileHover={{ rotate: 15 }}
+                  <span className="font-medium">{currentTheme === 'dark' ? '浅色模式' : '深色模式'}</span>
+                  <span
                     className={clsx(
-                      'w-10 h-10 rounded-full flex items-center justify-center',
-                      currentTheme === 'dark' ? 'bg-amber-400/20' : 'bg-indigo-500/20'
+                      'flex h-10 w-10 items-center justify-center rounded-full',
+                      currentTheme === 'dark' ? 'bg-amber-400/20' : 'bg-sky-500/20'
                     )}
                   >
                     {currentTheme === 'dark' ? (
-                      <Sun className="w-5 h-5 text-amber-400" />
+                      <Sun className="h-5 w-5 text-amber-400" />
                     ) : (
-                      <Moon className="w-5 h-5 text-indigo-500" />
+                      <Moon className="h-5 w-5 text-sky-500" />
                     )}
-                  </motion.div>
+                  </span>
                 </motion.button>
               </motion.div>
-            </motion.div>
-          </motion.div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </>
