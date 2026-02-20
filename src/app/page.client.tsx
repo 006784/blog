@@ -1,299 +1,398 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowRight, ChevronRight, Code2, Coffee, MessageCircle, Palette, PenTool, Sparkles } from 'lucide-react';
-import { BlogCard } from '@/components/BlogCard';
-import { APPLE_EASE, AnimatedSection, APPLE_SPRING_GENTLE, HOVER_BUTTON, HOVER_LIFT, TAP_BUTTON } from '@/components/Animations';
+import { motion } from 'framer-motion';
+import { ArrowRight, CalendarDays, Clock3, Search } from 'lucide-react';
+import clsx from 'clsx';
 import { getPageStructuredData } from '@/lib/seo';
-import { getPublishedPosts, Post } from '@/lib/supabase';
+import { defaultPosts, formatDate, type Post as LocalPost } from '@/lib/types';
+import { getPublishedPosts, type Post as SupabasePost } from '@/lib/supabase';
 
-const features = [
-  {
-    icon: Code2,
-    title: '工程实践',
-    description: '记录前端、后端与架构经验，聚焦可复用的解决方案。',
-    accent: 'from-sky-500 to-cyan-500',
-  },
-  {
-    icon: Palette,
-    title: '设计系统',
-    description: '沉淀 UI 规范与交互策略，让产品在细节上更统一。',
-    accent: 'from-emerald-500 to-teal-500',
-  },
-  {
-    icon: Coffee,
-    title: '生活观察',
-    description: '关于阅读、创作与日常思考，记录长期主义的节奏。',
-    accent: 'from-amber-500 to-orange-500',
-  },
+interface HomePost {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  tags: string[];
+  image: string;
+  readingTime: string;
+  isPinned: boolean;
+  pinnedAt: string | null;
+}
+
+const navItems = [
+  { name: '首页', href: '/' },
+  { name: '文章', href: '/blog' },
+  { name: '关于', href: '/about' },
 ];
 
-const nowTracks = [
-  {
-    title: '写作主线',
-    detail: '技术复盘与长期项目记录',
-    icon: PenTool,
-  },
-  {
-    title: '设计系统',
-    detail: '统一组件语义与动效节奏',
-    icon: Palette,
-  },
-  {
-    title: '社区互动',
-    detail: '留言、订阅、协作沟通',
-    icon: MessageCircle,
-  },
+const categoryLabels: Record<string, string> = {
+  tech: '技术',
+  design: '设计',
+  life: '生活',
+  thoughts: '思考',
+};
+
+const fallbackImages = [
+  'https://images.unsplash.com/photo-1436978913421-dad2ebd01d17?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=1400&q=80',
 ];
+
+function getCategoryLabel(category: string): string {
+  const normalized = category.toLowerCase();
+  return categoryLabels[normalized] || category;
+}
+
+function normalizePost(post: SupabasePost | LocalPost, index: number): HomePost {
+  if ('created_at' in post) {
+    const image = post.cover_image || post.image || fallbackImages[index % fallbackImages.length];
+
+    return {
+      slug: post.slug,
+      title: post.title,
+      description: post.description,
+      date: post.published_at || post.created_at,
+      category: getCategoryLabel(post.category),
+      tags: Array.isArray(post.tags) ? post.tags : [],
+      image,
+      readingTime: post.reading_time || '5 分钟',
+      isPinned: Boolean(post.is_pinned),
+      pinnedAt: post.pinned_at || null,
+    };
+  }
+
+  return {
+    slug: post.slug,
+    title: post.title,
+    description: post.description,
+    date: post.date,
+    category: getCategoryLabel(post.category),
+    tags: Array.isArray(post.tags) ? post.tags : [],
+    image: post.image || fallbackImages[index % fallbackImages.length],
+    readingTime: post.readingTime || '5 分钟',
+    isPinned: false,
+    pinnedAt: null,
+  };
+}
+
+const fallbackHomePosts = defaultPosts.map((post, index) => normalizePost(post, index));
+
+function ProgressiveImage({
+  src,
+  alt,
+  className,
+  sizes,
+  priority = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  sizes: string;
+  priority?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className={clsx('frost-image-shell', className, loaded && 'is-loaded')}>
+      <span className="frost-image-placeholder" />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        className="frost-image"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
+
+function FrostFeedCard({ post, index }: { post: HomePost; index: number }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.45, delay: index * 0.06 }}
+      className="frost-glass-card frost-feed-card"
+    >
+      <Link href={`/blog/${post.slug}`} className="frost-card-link">
+        <ProgressiveImage
+          src={post.image}
+          alt={post.title}
+          className="frost-feed-thumb"
+          sizes="(max-width: 1024px) 100vw, 50vw"
+        />
+
+        <div className="frost-feed-content">
+          <h3 className="frost-feed-title">{post.title}</h3>
+          <p className="frost-feed-desc">{post.description}</p>
+
+          <div className="frost-tag-row">
+            {post.tags.slice(0, 3).map((tag, tagIndex) => (
+              <span key={`${post.slug}-${tag}`} className={clsx('frost-tag', tagIndex % 2 === 0 ? 'is-blue' : 'is-sage')}>
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="frost-meta-line frost-meta-line-card">
+            <span>
+              <CalendarDays strokeWidth={1.5} className="h-3.5 w-3.5" />
+              {formatDate(post.date)}
+            </span>
+            <span>
+              <Clock3 strokeWidth={1.5} className="h-3.5 w-3.5" />
+              {post.readingTime}
+            </span>
+          </div>
+        </div>
+      </Link>
+    </motion.article>
+  );
+}
 
 export default function HomePageClient() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<HomePost[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 420], [1, 0.42]);
-  const heroY = useTransform(scrollY, [0, 420], [0, 48]);
+  const [visibleCount, setVisibleCount] = useState(4);
+  const [scrollRatio, setScrollRatio] = useState(0);
 
   useEffect(() => {
+    document.body.classList.add('frost-home-route');
+    return () => {
+      document.body.classList.remove('frost-home-route');
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
     const loadPosts = async () => {
       try {
         const data = await getPublishedPosts();
-        setPosts(data.slice(0, 4));
+
+        if (!mounted) return;
+
+        if (data.length > 0) {
+          const normalizedPosts = data.map((post, index) => normalizePost(post, index));
+          const latestPinnedPost = normalizedPosts
+            .filter((post) => post.isPinned)
+            .sort((a, b) => {
+              const aTime = new Date(a.pinnedAt || a.date).getTime();
+              const bTime = new Date(b.pinnedAt || b.date).getTime();
+              return bTime - aTime;
+            })[0];
+
+          const visiblePosts = normalizedPosts.slice(0, 12);
+          if (latestPinnedPost && !visiblePosts.some((post) => post.slug === latestPinnedPost.slug)) {
+            visiblePosts.unshift(latestPinnedPost);
+          }
+
+          setPosts(visiblePosts);
+        } else {
+          setPosts(fallbackHomePosts);
+        }
       } catch (error) {
         console.error('加载文章失败:', error);
+        if (mounted) {
+          setPosts(fallbackHomePosts);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadPosts();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const formattedPosts = posts.map((post) => ({
-    slug: post.slug,
-    title: post.title,
-    description: post.description,
-    date: post.published_at || post.created_at,
-    category: post.category,
-    tags: post.tags || [],
-    image: post.cover_image || post.image,
-    author: post.author,
-    readingTime: post.reading_time,
-  }));
+  useEffect(() => {
+    let frameId = 0;
+
+    const handleScroll = () => {
+      if (frameId) return;
+      frameId = window.requestAnimationFrame(() => {
+        setScrollRatio(Math.min(window.scrollY / 240, 1));
+        frameId = 0;
+      });
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
 
   const websiteSchema = getPageStructuredData('homepage');
 
+  const activePosts = posts.length > 0 ? posts : fallbackHomePosts;
+  const heroPost = activePosts[0];
+  const heroPinnedPost = useMemo(
+    () =>
+      activePosts
+        .filter((post) => post.isPinned)
+        .sort((a, b) => {
+          const aTime = new Date(a.pinnedAt || a.date).getTime();
+          const bTime = new Date(b.pinnedAt || b.date).getTime();
+          return bTime - aTime;
+        })[0] || null,
+    [activePosts]
+  );
+  const heroMediaPost = heroPinnedPost || heroPost;
+  const feedPosts = useMemo(() => activePosts.slice(1), [activePosts]);
+  const visiblePosts = useMemo(() => feedPosts.slice(0, visibleCount), [feedPosts, visibleCount]);
+  const canLoadMore = visibleCount < feedPosts.length;
+
+  const navStyle = useMemo(
+    () =>
+      ({
+        '--frost-nav-blur': `${5 + scrollRatio * 10}px`,
+        '--frost-nav-bg': `rgba(255, 255, 255, ${0.4 + scrollRatio * 0.25})`,
+      }) as CSSProperties,
+    [scrollRatio]
+  );
+
   return (
-    <div className="min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-      />
+    <div className="frost-home">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
 
-      <section className="relative overflow-hidden px-6 pb-20 pt-24 md:pb-28 md:pt-32">
-        <div className="pointer-events-none absolute inset-0 opacity-70">
-          <div className="absolute -top-24 left-1/4 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(56,189,248,0.3)_0%,_rgba(56,189,248,0)_70%)]" />
-          <div className="absolute -bottom-20 right-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,_rgba(251,146,60,0.28)_0%,_rgba(251,146,60,0)_70%)]" />
-          <div className="studio-grid absolute inset-0" />
+      <div className="frost-home-decor" aria-hidden>
+        <span className="frost-geo frost-geo-one" />
+        <span className="frost-geo frost-geo-two" />
+        <span className="frost-bokeh frost-bokeh-one" />
+        <span className="frost-bokeh frost-bokeh-two" />
+      </div>
+
+      <header className="frost-nav" style={navStyle}>
+        <div className="frost-shell">
+          <div className="frost-nav-grid">
+            <Link href="/" className="frost-brand">
+              拾光博客
+            </Link>
+
+            <nav className="frost-nav-links" aria-label="主导航">
+              {navItems.map((item) => (
+                <Link key={item.href} href={item.href} className="frost-link">
+                  {item.name}
+                </Link>
+              ))}
+
+              <Link href="/blog?search=1" className="frost-search-link" aria-label="搜索文章">
+                <Search strokeWidth={1.5} className="h-4 w-4" />
+              </Link>
+            </nav>
+          </div>
         </div>
+      </header>
 
-        <motion.div style={{ opacity: heroOpacity, y: heroY }} className="relative mx-auto max-w-6xl">
-          <div className="surface-hero overflow-hidden p-7 md:p-12">
-            <div className="grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-              <div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.62, ease: APPLE_EASE }}
-                  className="section-kicker"
-                >
-                  <Sparkles className="h-4 w-4 text-cyan-500" />
-                  <span>设计升级版首页</span>
-                </motion.div>
+      <main className="frost-main">
+        <section className="frost-hero-section">
+          <div className="frost-shell">
+            <div className="frost-grid frost-hero-grid">
+              <motion.article
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="frost-hero-copy"
+              >
+                <p className="frost-meta-line frost-meta-line-hero">
+                  <span>
+                    <CalendarDays strokeWidth={1.5} className="h-3.5 w-3.5" />
+                    {formatDate(heroPost.date)}
+                  </span>
+                  <span>
+                    <Clock3 strokeWidth={1.5} className="h-3.5 w-3.5" />
+                    {heroPost.readingTime}
+                  </span>
+                  <span>{heroPost.category}</span>
+                </p>
 
-                <motion.h1
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.78, delay: 0.1, ease: APPLE_EASE }}
-                  className="apple-display mt-6 max-w-5xl"
-                >
-                  把想法写成作品，
-                  <span className="mt-2 block gradient-text">把作品沉淀成体系。</span>
-                </motion.h1>
+                <h1 className="frost-hero-title">{heroPost.title}</h1>
+                <p className="frost-hero-desc">{heroPost.description}</p>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.76, delay: 0.18, ease: APPLE_EASE }}
-                  className="text-soft mt-6 max-w-2xl text-base md:text-lg"
-                >
-                  这个站点聚焦技术、设计与创作流程，持续更新可落地的方法论和长期实践记录。
-                </motion.p>
+                <Link href={`/blog/${heroPost.slug}`} className="frost-outline-btn frost-link-inline">
+                  阅读更多
+                  <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+                </Link>
+              </motion.article>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.72, delay: 0.24, ease: APPLE_EASE }}
-                  className="mt-5 flex flex-wrap gap-2"
-                >
-                  <span className="chip-filter" data-active="true">产品体验</span>
-                  <span className="chip-filter">工程实践</span>
-                  <span className="chip-filter">长期写作</span>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.72, delay: 0.3, ease: APPLE_EASE }}
-                  className="mt-10 flex flex-wrap items-center gap-4"
-                >
-                  <motion.div whileHover={HOVER_BUTTON} whileTap={TAP_BUTTON} transition={APPLE_SPRING_GENTLE}>
-                    <Link href="/blog" className="btn-primary ios-button-press px-7 py-3.5">
-                      <span className="inline-flex items-center gap-2">
-                        <PenTool className="h-4 w-4" />
-                        开始阅读
-                        <ArrowRight className="h-4 w-4" />
-                      </span>
-                    </Link>
-                  </motion.div>
-                  <motion.div whileHover={HOVER_BUTTON} whileTap={TAP_BUTTON} transition={APPLE_SPRING_GENTLE}>
-                    <Link href="/contact" className="btn-secondary ios-button-press px-7 py-3.5">
-                      <span className="inline-flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4" />
-                        联系交流
-                      </span>
-                    </Link>
-                  </motion.div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.72, delay: 0.38, ease: APPLE_EASE }}
-                  className="mt-12 grid grid-cols-3 gap-3 md:max-w-xl"
-                >
-                  <div className="metric-tile">
-                    <p className="text-2xl font-semibold tracking-tight">{posts.length || 0}+</p>
-                    <p className="text-soft text-xs">近期文章</p>
-                  </div>
-                  <div className="metric-tile">
-                    <p className="text-2xl font-semibold tracking-tight">3</p>
-                    <p className="text-soft text-xs">核心方向</p>
-                  </div>
-                  <div className="metric-tile">
-                    <p className="text-2xl font-semibold tracking-tight">持续更新</p>
-                    <p className="text-soft text-xs">长期维护</p>
-                  </div>
-                </motion.div>
-              </div>
-
-              <motion.aside
+              <motion.div
                 initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.76, delay: 0.26, ease: APPLE_EASE }}
-                className="surface-card p-5 md:p-6"
+                transition={{ duration: 0.5, delay: 0.08 }}
+                className="frost-hero-media-wrap"
               >
-                <p className="section-kicker">Now Focus</p>
-                <h3 className="section-title-xl mt-5 text-[clamp(1.3rem,3.2vw,2rem)]">当前构建重点</h3>
-                <div className="mt-5 space-y-3">
-                  {nowTracks.map((item) => (
-                    <div key={item.title} className="metric-tile flex items-start gap-3">
-                      <div className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <item.icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold">{item.title}</p>
-                        <p className="text-soft mt-1 text-xs">{item.detail}</p>
-                      </div>
-                    </div>
+                <Link href={`/blog/${heroMediaPost.slug}`} className="frost-glass-card frost-hero-media">
+                  {heroPinnedPost && <span className="frost-pinned-badge">置顶封面</span>}
+                  <ProgressiveImage
+                    src={heroMediaPost.image}
+                    alt={heroMediaPost.title}
+                    className="frost-hero-image"
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    priority
+                  />
+                </Link>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        <section className="frost-feed-section">
+          <div className="frost-shell">
+            <div className="frost-feed-head">
+              <h2>最新文章</h2>
+              <p>低饱和度影像与毛玻璃卡片，适合长期阅读。</p>
+            </div>
+
+            {loading ? (
+              <div className="frost-grid frost-feed-grid" aria-label="加载中">
+                {[1, 2, 3, 4].map((item) => (
+                  <div key={item} className="frost-glass-card frost-feed-card frost-skeleton" />
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="frost-grid frost-feed-grid">
+                  {visiblePosts.map((post, index) => (
+                    <FrostFeedCard key={post.slug} post={post} index={index} />
                   ))}
                 </div>
-                <Link href="/blog" className="btn-secondary mt-5 w-full px-4 py-2.5 text-sm">
-                  浏览博客目录
-                </Link>
-              </motion.aside>
-            </div>
+
+                {canLoadMore && (
+                  <div className="frost-load-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((count) => count + 4)}
+                      className="frost-load-more"
+                    >
+                      加载更多
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        </motion.div>
-      </section>
-
-      <section className="px-6 pb-20 md:pb-28">
-        <div className="mx-auto max-w-6xl">
-          <AnimatedSection>
-            <div className="mb-10 flex items-end justify-between gap-4">
-              <div>
-                <p className="section-kicker">Focus Areas</p>
-                <h2 className="section-title-xl mt-3">我在写什么</h2>
-              </div>
-            </div>
-          </AnimatedSection>
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {features.map((feature, index) => (
-              <motion.article
-                key={feature.title}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                whileHover={HOVER_LIFT}
-                whileTap={{ y: -2, scale: 0.993 }}
-                transition={{ duration: 0.62, delay: index * 0.1, ease: APPLE_EASE }}
-                className="surface-card interactive-card ios-hover-surface group p-6"
-              >
-                <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.accent} text-white`}>
-                  <feature.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-semibold">{feature.title}</h3>
-                <p className="text-soft mt-3 text-sm leading-7">{feature.description}</p>
-                <div className="mt-6 inline-flex items-center gap-2 text-sm text-foreground/80">
-                  了解更多
-                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 pb-20 md:pb-28">
-        <div className="mx-auto max-w-6xl">
-          <AnimatedSection>
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="section-kicker">Latest Notes</p>
-                <h2 className="section-title-xl mt-3">最新文章</h2>
-              </div>
-              <Link href="/blog" className="btn-ghost ios-button-press px-5 py-2.5 text-sm">
-                查看全部
-              </Link>
-            </div>
-          </AnimatedSection>
-
-          {loading ? (
-            <div className="grid gap-6 md:grid-cols-2">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="h-[360px] animate-pulse rounded-3xl border border-border/60 bg-card/60" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid gap-8 md:grid-cols-2">
-              {formattedPosts.map((post, index) => (
-                <motion.div
-                  key={post.slug}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.07, ease: APPLE_EASE }}
-                >
-                  <BlogCard post={post} index={index} />
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
+      </main>
     </div>
   );
 }

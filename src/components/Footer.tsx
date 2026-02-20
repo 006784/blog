@@ -41,7 +41,7 @@ const footerGroups = [
 export function Footer() {
   const pathname = usePathname();
 
-  if (hiddenPrefixes.some((prefix) => pathname.startsWith(prefix))) {
+  if (pathname === '/' || hiddenPrefixes.some((prefix) => pathname.startsWith(prefix))) {
     return null;
   }
 

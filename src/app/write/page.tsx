@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   ArrowLeft, Save, Send, Settings, X, Plus, 
   Tag, Folder, Check, AlertCircle, Loader2, 
-  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield, FolderOpen, Bell
+  Clock, Eye, BookOpen, Sparkles, ImageIcon, Shield, FolderOpen, Bell, Pin
 } from 'lucide-react';
 import { RichEditor } from '@/components/RichEditor';
 import { ImageUploader } from '@/components/ImageUploader';
-import { Post, Collection, createPost, updatePost, getPostById, getCollections, createCollection } from '@/lib/supabase';
+import { Collection, createPost, updatePost, getPostById, getCollections, createCollection, setPostPinStatus } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import MobileWritePage from './mobile/page';
 
@@ -54,6 +54,8 @@ function WritePageContent() {
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [collectionId, setCollectionId] = useState<string | null>(null);
+  const [isPinned, setIsPinned] = useState(false);
+  const [pinnedAt, setPinnedAt] = useState<string | null>(null);
   
   // 集合数据
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -98,7 +100,7 @@ function WritePageContent() {
 
   function saveLocalDraft() {
     if (!title.trim() && !content.trim()) return;
-    const draft = { title, description, content, category, tags, coverImage, savedAt: new Date().toISOString() };
+    const draft = { title, description, content, category, tags, coverImage, isPinned, savedAt: new Date().toISOString() };
     localStorage.setItem('blog-draft', JSON.stringify(draft));
   }
 
@@ -114,6 +116,7 @@ function WritePageContent() {
           setCategory(draft.category || 'tech');
           setTags(draft.tags || []);
           setCoverImage(draft.coverImage || '');
+          setIsPinned(Boolean(draft.isPinned));
           showNotification('success', '已恢复本地草稿');
         }
       }
@@ -149,6 +152,8 @@ function WritePageContent() {
         setMetaTitle(post.meta_title || '');
         setMetaDescription(post.meta_description || '');
         setCollectionId(post.collection_id || null);
+        setIsPinned(Boolean(post.is_pinned));
+        setPinnedAt(post.pinned_at || null);
         setCurrentPostId(post.id);
       }
     } catch (error) {
@@ -183,6 +188,11 @@ function WritePageContent() {
     if (!title.trim() && !content.trim()) return;
     
     try {
+      const resolvedPinnedAt = isPinned ? (pinnedAt || new Date().toISOString()) : null;
+      if (isPinned && !pinnedAt) {
+        setPinnedAt(resolvedPinnedAt);
+      }
+
       const postData = {
         title: title || '未命名草稿',
         slug: currentPostId ? undefined : generateSlug(title || '未命名草稿'),
@@ -197,6 +207,8 @@ function WritePageContent() {
         status: 'draft' as const,
         meta_title: metaTitle,
         meta_description: metaDescription,
+        is_pinned: isPinned,
+        pinned_at: resolvedPinnedAt,
         collection_id: collectionId || undefined,
       };
 
@@ -264,6 +276,11 @@ function WritePageContent() {
 
     setIsSaving(true);
     try {
+      const resolvedPinnedAt = isPinned ? (pinnedAt || new Date().toISOString()) : null;
+      if (isPinned && !pinnedAt) {
+        setPinnedAt(resolvedPinnedAt);
+      }
+
       const postData = {
         title,
         slug: currentPostId ? undefined : generateSlug(title),
@@ -278,14 +295,27 @@ function WritePageContent() {
         status: 'draft' as const,
         meta_title: metaTitle,
         meta_description: metaDescription,
+        is_pinned: isPinned,
+        pinned_at: resolvedPinnedAt,
         collection_id: collectionId || undefined,
       };
 
+      let savedPost;
       if (currentPostId) {
-        await updatePost(currentPostId, postData);
+        savedPost = await updatePost(currentPostId, postData);
       } else {
-        const newPost = await createPost(postData);
-        setCurrentPostId(newPost.id);
+        savedPost = await createPost(postData);
+        setCurrentPostId(savedPost.id);
+      }
+
+      if (savedPost && (isPinned || pinnedAt)) {
+        try {
+          const pinnedPost = await setPostPinStatus(savedPost.id, isPinned);
+          setPinnedAt(pinnedPost.pinned_at || null);
+        } catch (pinError) {
+          console.error('同步置顶状态失败:', pinError);
+          showNotification('error', '置顶状态保存失败，请先执行数据库迁移');
+        }
       }
       
       setLastSaved(new Date());
@@ -312,6 +342,11 @@ function WritePageContent() {
     setIsPublishing(true);
     try {
       const slug = currentPostId ? undefined : generateSlug(title);
+      const resolvedPinnedAt = isPinned ? (pinnedAt || new Date().toISOString()) : null;
+      if (isPinned && !pinnedAt) {
+        setPinnedAt(resolvedPinnedAt);
+      }
+
       const postData = {
         title,
         slug,
@@ -326,6 +361,8 @@ function WritePageContent() {
         status: 'published' as const,
         meta_title: metaTitle,
         meta_description: metaDescription,
+        is_pinned: isPinned,
+        pinned_at: resolvedPinnedAt,
         published_at: new Date().toISOString(),
         collection_id: collectionId || undefined,
       };
@@ -335,6 +372,16 @@ function WritePageContent() {
         savedPost = await updatePost(currentPostId, postData);
       } else {
         savedPost = await createPost(postData);
+      }
+
+      if (savedPost && (isPinned || pinnedAt)) {
+        try {
+          const pinnedPost = await setPostPinStatus(savedPost.id, isPinned);
+          setPinnedAt(pinnedPost.pinned_at || null);
+        } catch (pinError) {
+          console.error('同步置顶状态失败:', pinError);
+          showNotification('error', '置顶状态保存失败，请先执行数据库迁移');
+        }
       }
       
       showNotification('success', '文章已发布');
@@ -915,6 +962,40 @@ Markdown 语法支持：
                     <Bell className="w-4 h-4" />
                     发布设置
                   </h3>
+
+                  <label className="mb-3 flex items-center justify-between p-4 rounded-xl bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Pin className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">置顶到首页 Hero 封面</p>
+                        <p className="text-xs text-muted-foreground">自动优先展示最新置顶文章的封面</p>
+                      </div>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-colors relative ${
+                      isPinned ? 'bg-primary' : 'bg-muted'
+                    }`}>
+                      <input
+                        type="checkbox"
+                        checked={isPinned}
+                        onChange={(e) => {
+                          const nextPinned = e.target.checked;
+                          setIsPinned(nextPinned);
+                          if (nextPinned && !pinnedAt) {
+                            setPinnedAt(new Date().toISOString());
+                          }
+                          if (!nextPinned) {
+                            setPinnedAt(null);
+                          }
+                        }}
+                        className="sr-only"
+                      />
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        isPinned ? 'translate-x-7' : 'translate-x-1'
+                      }`} />
+                    </div>
+                  </label>
                   
                   <label className="flex items-center justify-between p-4 rounded-xl bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors">
                     <div className="flex items-center gap-3">

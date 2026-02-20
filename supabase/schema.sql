@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS posts (
     meta_description TEXT,
     views INTEGER DEFAULT 0,
     likes INTEGER DEFAULT 0,
+    is_pinned BOOLEAN DEFAULT FALSE,
+    pinned_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     published_at TIMESTAMPTZ
@@ -34,6 +36,8 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
 CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category);
+CREATE INDEX IF NOT EXISTS idx_posts_is_pinned ON posts(is_pinned);
+CREATE INDEX IF NOT EXISTS idx_posts_pinned_at ON posts(pinned_at DESC);
 
 -- =============================================
 -- 歌单表 - 歌曲推荐

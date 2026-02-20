@@ -48,6 +48,8 @@ export interface Post {
   meta_description?: string;
   views: number;
   likes: number;
+  is_pinned?: boolean;
+  pinned_at?: string | null;
   collection_id?: string; // 文章集合ID
   created_at: string;
   updated_at: string;
@@ -122,7 +124,7 @@ export interface Photo {
   width?: number;
   height?: number;
   size?: number;
-  exif_data?: any;
+  exif_data?: Record<string, unknown> | null;
   tags: string[];
   is_favorite: boolean;
   views: number;
@@ -225,6 +227,39 @@ export async function updatePost(id: string, updates: Partial<Post>) {
     .eq('id', id)
     .select()
     .single();
+  if (error) throw error;
+  return data as Post;
+}
+
+export async function setPostPinStatus(postId: string, pin: boolean) {
+  if (pin) {
+    const pinnedAt = new Date().toISOString();
+    const { error: clearError } = await supabase
+      .from('posts')
+      .update({ is_pinned: false })
+      .eq('is_pinned', true)
+      .neq('id', postId);
+
+    if (clearError) throw clearError;
+
+    const { data, error } = await supabase
+      .from('posts')
+      .update({ is_pinned: true, pinned_at: pinnedAt })
+      .eq('id', postId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Post;
+  }
+
+  const { data, error } = await supabase
+    .from('posts')
+    .update({ is_pinned: false, pinned_at: null })
+    .eq('id', postId)
+    .select()
+    .single();
+
   if (error) throw error;
   return data as Post;
 }
@@ -368,7 +403,7 @@ export async function updateCollectionPostCount(collectionId: string) {
     .eq('id', collectionId);
 }
 
-export function subscribeRealtime(table: string, callback: (payload: any) => void) {
+export function subscribeRealtime(table: string, callback: (payload: unknown) => void) {
   return supabase
     .channel(`public:${table}`)
     .on('postgres_changes', { event: '*', schema: 'public', table }, callback)

@@ -36,8 +36,6 @@ import { EnhancedSearch } from './EnhancedSearch';
 import {
   APPLE_EASE_SOFT,
   APPLE_SPRING_GENTLE,
-  HOVER_BUTTON,
-  TAP_BUTTON,
   bottomSheetVariants,
   modalBackdropVariants,
 } from './Animations';
@@ -113,6 +111,7 @@ function renderSection(
 
 export function Sidebar() {
   const pathname = usePathname();
+  const isHome = pathname === '/';
   const { resolvedTheme, setTheme } = useTheme();
   const { isAdmin, showLoginModal, logout } = useAdmin();
   const { profile } = useProfile();
@@ -141,6 +140,10 @@ export function Sidebar() {
   };
 
   const themeText = resolvedTheme === 'dark' ? '切换浅色' : '切换深色';
+
+  if (isHome) {
+    return null;
+  }
 
   return (
     <>
