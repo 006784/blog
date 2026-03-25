@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
+import { requireAdminSession } from '@/lib/auth-server';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -23,6 +24,9 @@ const R2_BUCKET = process.env.R2_BUCKET_NAME || 'resources';
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
 
 export async function POST(request: NextRequest) {
+  if (!await requireAdminSession(request)) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
   try {
     const contentType = request.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {

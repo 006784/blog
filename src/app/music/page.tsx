@@ -11,7 +11,6 @@ import {
 import {
   Song, Playlist,
   getAllSongs, getFavoriteSongs, getPlaylists,
-  createSong, updateSong, deleteSong, toggleSongFavorite,
   createPlaylist, platformIcons
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
@@ -75,7 +74,12 @@ export default function MusicPage() {
 
   async function handleToggleFavorite(id: string, current: boolean) {
     try {
-      await toggleSongFavorite(id, !current);
+      await fetch(`/api/music/songs/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_favorite: !current }),
+        credentials: 'include',
+      });
       setSongs(songs.map(s => s.id === id ? { ...s, is_favorite: !current } : s));
     } catch (error) {
       console.error('操作失败:', error);
@@ -85,7 +89,7 @@ export default function MusicPage() {
   async function handleDeleteSong(id: string) {
     if (!confirm('确定删除这首歌吗？')) return;
     try {
-      await deleteSong(id);
+      await fetch(`/api/music/songs/${id}`, { method: 'DELETE', credentials: 'include' });
       setSongs(songs.filter(s => s.id !== id));
       if (currentSong?.id === id) {
         setCurrentSong(null);
@@ -245,7 +249,13 @@ export default function MusicPage() {
             <AddSongModal
               onClose={() => setShowAddModal(false)}
               onAdd={async (song) => {
-                const newSong = await createSong(song);
+                const res = await fetch('/api/music/songs', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(song),
+                  credentials: 'include',
+                });
+                const { song: newSong } = await res.json();
                 setSongs([newSong, ...songs]);
                 setShowAddModal(false);
               }}
