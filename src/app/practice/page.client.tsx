@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Code2, Search, SlidersHorizontal, CheckCircle, Clock, Zap, BookOpen, HelpCircle, MessageSquare } from 'lucide-react';
+import { Code2, Search, Terminal, Zap, BookOpen, HelpCircle, MessageSquare } from 'lucide-react';
 import { DifficultyBadge } from '@/components/practice/DifficultyBadge';
 
 interface Problem {
@@ -67,6 +67,13 @@ export function PracticeListClient() {
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             算法题、选择题、面试题 — 支持 Python、JS、Java、C++、C、PHP、TypeScript 在线运行
           </p>
+          <Link
+            href="/code"
+            className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl border border-[var(--line)] hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors text-sm text-muted-foreground"
+          >
+            <Terminal className="w-4 h-4" />
+            打开代码运行环境
+          </Link>
         </motion.div>
 
         {/* Stats */}
