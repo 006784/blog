@@ -6,9 +6,10 @@ import {
   Shield, FileText, Camera, BookOpen, Folder,
   Plus, Edit2, Trash2, X, Loader2, Save,
   Eye, EyeOff, Calendar, Users, TrendingUp,
-  Settings, ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles
+  Settings, ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2
 } from 'lucide-react';
 import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
+import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -19,7 +20,7 @@ import {
   formatDate
 } from '@/lib/supabase';
 
-type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums' | 'analytics';
+type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums' | 'analytics' | 'practice';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -125,6 +126,7 @@ export default function AdminPage() {
     { id: 'diary' as TabType,      label: '日记', icon: BookOpen,  count: diaries.length },
     { id: 'albums' as TabType,     label: '相册', icon: Folder,    count: albums.length },
     { id: 'analytics' as TabType,  label: '统计', icon: BarChart2 },
+    { id: 'practice' as TabType,   label: '题库', icon: Code2 },
   ];
 
   return (
@@ -229,6 +231,16 @@ export default function AdminPage() {
                 exit={{ opacity: 0 }}
               >
                 <AnalyticsDashboard />
+              </motion.div>
+            )}
+            {activeTab === 'practice' && (
+              <motion.div
+                key="practice"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <PracticeAdminTab />
               </motion.div>
             )}
           </AnimatePresence>
