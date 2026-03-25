@@ -10,12 +10,15 @@ import { logger } from './logger';
 
 // ─── 速率限制器实例 ────────────────────────────────────────────────────────────
 
-const limiter5m  = new RateLimiterMemory({ keyPrefix: 'auth_5m',  points: 5,  duration: 5 * 60 });
-const limiter1h  = new RateLimiterMemory({ keyPrefix: 'auth_1h',  points: 15, duration: 60 * 60 });
-const limiter24h = new RateLimiterMemory({ keyPrefix: 'auth_24h', points: 50, duration: 24 * 60 * 60 });
+// 开发环境放宽限制，避免本地调试时反复触发封禁
+const isDev = process.env.NODE_ENV !== 'production';
 
-/** 失败计数器，10 次 / 24h 触发封禁 */
-const failureCounter = new RateLimiterMemory({ keyPrefix: 'auth_fail', points: 10, duration: 24 * 60 * 60 });
+const limiter5m  = new RateLimiterMemory({ keyPrefix: 'auth_5m',  points: isDev ? 100 : 5,  duration: 5 * 60 });
+const limiter1h  = new RateLimiterMemory({ keyPrefix: 'auth_1h',  points: isDev ? 500 : 15, duration: 60 * 60 });
+const limiter24h = new RateLimiterMemory({ keyPrefix: 'auth_24h', points: isDev ? 1000 : 50, duration: 24 * 60 * 60 });
+
+/** 失败计数器，生产环境 10 次 / 24h 触发封禁，开发环境不封禁 */
+const failureCounter = new RateLimiterMemory({ keyPrefix: 'auth_fail', points: isDev ? 9999 : 10, duration: 24 * 60 * 60 });
 
 /** IP 封禁表（内存存储，重启后重置） */
 const bannedIPs = new Map<string, number>(); // ip → banUntilMs

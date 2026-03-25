@@ -4,17 +4,21 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
-import { getUsesItems, type UsesItem } from '@/lib/supabase';
+import { type UsesItem } from '@/lib/supabase';
 
 // ── 分类配置 ──────────────────────────────────────────────
 
 const CATEGORY_META: Record<string, { label: string; icon: string }> = {
-  hardware:   { label: '硬件设备',   icon: '💻' },
-  software:   { label: '常用软件',   icon: '📱' },
-  'dev-tools':{ label: '开发工具',   icon: '🛠' },
-  services:   { label: '云服务',     icon: '☁️' },
-  design:     { label: '设计工具',   icon: '🎨' },
-  daily:      { label: '日常',       icon: '✨' },
+  hardware:   { label: '硬件设备',      icon: '💻' },
+  chips:      { label: '芯片 / CPU',   icon: '⚡' },
+  software:   { label: '常用软件',      icon: '📱' },
+  notes:      { label: '笔记工具',      icon: '📝' },
+  opensource: { label: 'Mac 开源工具',  icon: '🐙' },
+  'dev-tools':{ label: '开发工具 / IDE', icon: '🛠' },
+  languages:  { label: '编程语言',      icon: '🔤' },
+  services:   { label: '云服务',        icon: '☁️' },
+  design:     { label: '设计工具',      icon: '🎨' },
+  daily:      { label: '日常',          icon: '✨' },
 };
 
 function getCategoryMeta(cat: string) {
@@ -43,7 +47,7 @@ export default function UsesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getUsesItems().then(setItems).finally(() => setLoading(false));
+    fetch('/api/uses').then(r => r.json()).then(setItems).finally(() => setLoading(false));
   }, []);
 
   // 按分类分组，保留 CATEGORY_META 中定义的顺序
@@ -101,15 +105,10 @@ export default function UsesPage() {
 
                   {/* 工具网格 */}
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {grouped[category].map((item, ii) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: ci * 0.07 + ii * 0.03 }}
-                        className="group relative rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 p-4 backdrop-blur hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
+                    {grouped[category].map((item, ii) => {
+                      const cardClass = `group relative flex items-start gap-3 rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 p-4 backdrop-blur transition-all hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md hover:-translate-y-0.5`;
+                      const inner = (
+                        <>
                           {item.icon_url ? (
                             <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-zinc-100 dark:border-zinc-800">
                               <Image
@@ -125,21 +124,13 @@ export default function UsesPage() {
                               {meta.icon}
                             </div>
                           )}
-
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1">
-                              <h3 className="text-sm font-medium text-zinc-800 dark:text-zinc-100 truncate">
+                              <h3 className="text-sm font-medium text-zinc-800 dark:text-zinc-100 truncate group-hover:text-blue-500 transition-colors">
                                 {item.name}
                               </h3>
                               {item.link && (
-                                <a
-                                  href={item.link}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-zinc-300 dark:text-zinc-600 hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors shrink-0"
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                </a>
+                                <ExternalLink className="w-3 h-3 shrink-0 text-zinc-300 dark:text-zinc-600 group-hover:text-blue-400 transition-colors" />
                               )}
                             </div>
                             {item.description && (
@@ -148,9 +139,23 @@ export default function UsesPage() {
                               </p>
                             )}
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </>
+                      );
+                      return (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: ci * 0.07 + ii * 0.03 }}
+                        >
+                          {item.link ? (
+                            <a href={item.link} className={cardClass}>{inner}</a>
+                          ) : (
+                            <div className={cardClass}>{inner}</div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </motion.section>
               );

@@ -19,7 +19,7 @@ export async function sendNewPostNotification(
   const results = await Promise.allSettled(
     subscribers.map(async (subscriber) => {
       return resend.emails.send({
-        from: '拾光博客 <noreply@artchain.icu>',
+        from: 'Lumen <noreply@artchain.icu>',
         to: subscriber.email,
         subject: `新文章发布: ${post.title}`,
         headers: {
@@ -33,7 +33,7 @@ ${post.description}
 阅读全文: ${postUrl}
 
 ---
-你收到这封邮件是因为你订阅了拾光博客。
+你收到这封邮件是因为你订阅了Lumen。
 取消订阅: ${unsubscribeUrl}?email=${encodeURIComponent(subscriber.email)}`,
         html: `
           <!DOCTYPE html>
@@ -47,7 +47,7 @@ ${post.description}
             <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto;">
               <tr>
                 <td style="text-align: center; padding-bottom: 20px;">
-                  <h1 style="color: #333333; font-size: 24px; margin: 0;">拾光博客</h1>
+                  <h1 style="color: #333333; font-size: 24px; margin: 0;">Lumen</h1>
                   <p style="color: #666666; font-size: 14px; margin: 5px 0 0 0;">在文字中拾起生活的微光</p>
                 </td>
               </tr>
@@ -65,7 +65,7 @@ ${post.description}
               <tr>
                 <td style="border-top: 1px solid #eeeeee; padding-top: 20px; text-align: center;">
                   <p style="color: #999999; font-size: 12px; margin: 0;">
-                    你收到这封邮件是因为你订阅了拾光博客。<br>
+                    你收到这封邮件是因为你订阅了Lumen。<br>
                     <a href="${unsubscribeUrl}?email=${encodeURIComponent(subscriber.email)}" style="color: #999999;">取消订阅</a>
                   </p>
                 </td>
@@ -116,9 +116,9 @@ export async function sendSubscriptionConfirmation(
     : '';
 
   await resend.emails.send({
-    from: '拾光博客 <noreply@artchain.icu>',
+    from: 'Lumen <noreply@artchain.icu>',
     to: email,
-    subject: '感谢订阅拾光博客',
+    subject: '感谢订阅Lumen',
     headers: {
       'List-Unsubscribe': `<${unsubscribeUrl}>`,
     },
@@ -126,7 +126,7 @@ export async function sendSubscriptionConfirmation(
 
 Hi${name ? ` ${name}` : ''},
 
-真诚地感谢你订阅拾光博客！
+真诚地感谢你订阅Lumen！
 
 从现在开始，每当有新文章发布，你都会第一时间收到通知。
 
@@ -149,13 +149,13 @@ Hi${name ? ` ${name}` : ''},
           <tr>
             <td style="text-align: center; padding-bottom: 20px;">
               <h1 style="color: #667eea; font-size: 28px; margin: 0;">感谢订阅</h1>
-              <p style="color: #666666; font-size: 14px; margin: 10px 0 0 0;">欢迎加入拾光博客的读者大家庭</p>
+              <p style="color: #666666; font-size: 14px; margin: 10px 0 0 0;">欢迎加入Lumen的读者大家庭</p>
             </td>
           </tr>
           <tr>
             <td style="padding: 25px; background-color: #f8f9fa; border-radius: 8px;">
               <p style="margin: 0 0 15px 0; font-size: 16px;">Hi${name ? ` ${name}` : ''},</p>
-              <p style="margin: 0 0 15px 0;">真诚地感谢你订阅拾光博客！</p>
+              <p style="margin: 0 0 15px 0;">真诚地感谢你订阅Lumen！</p>
               <p style="margin: 0 0 15px 0;">从现在开始，每当有新文章发布，你都会第一时间收到通知。我会用心创作每一篇内容，希望能给你带来一些启发和思考。</p>
               <p style="margin: 0;">期待与你在文字中相遇。</p>
             </td>
@@ -168,7 +168,7 @@ Hi${name ? ` ${name}` : ''},
           </tr>
           <tr>
             <td style="border-top: 1px solid #eeeeee; padding-top: 20px;">
-              <p style="color: #666666; font-size: 14px; margin: 0;">— 拾光</p>
+              <p style="color: #666666; font-size: 14px; margin: 0;">— Lumen</p>
             </td>
           </tr>
           <tr>

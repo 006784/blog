@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, Clock3, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
+import AdminFloatButton from '@/components/AdminFloatButton';
 import { getPageStructuredData } from '@/lib/seo';
 import { defaultPosts, formatDate, type Post as LocalPost } from '@/lib/types';
 import { getPublishedPosts, type Post as SupabasePost } from '@/lib/supabase';
@@ -567,6 +568,8 @@ export default function HomePageClient({
           </div>
         </section>
       </main>
+
+      <AdminFloatButton />
     </div>
   );
 }

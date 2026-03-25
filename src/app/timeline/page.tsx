@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getTimelineEvents, type TimelineEvent } from '@/lib/supabase';
+import { type TimelineEvent } from '@/lib/supabase';
 
 // ── 分类颜色 ──────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ export default function TimelinePage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
   useEffect(() => {
-    getTimelineEvents().then(setEvents).finally(() => setLoading(false));
+    fetch('/api/timeline').then(r => r.json()).then(setEvents).finally(() => setLoading(false));
   }, []);
 
   // 分类列表

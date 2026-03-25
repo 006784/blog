@@ -5,10 +5,8 @@ import { verifyAdminPassword } from '@/lib/env';
 import { logger } from '@/lib/logger';
 import { supabase } from '@/lib/supabase';
 import {
-  signTotpStepToken,
   setAuthCookies,
   createDbSession,
-  COOKIE_TOTP_STEP,
 } from '@/lib/auth-server';
 import {
   checkLoginRateLimit,
@@ -74,23 +72,7 @@ export async function POST(request: NextRequest) {
   // 密码验证成功 → 重置失败计数
   await resetLoginFailures(ip);
 
-  // 检查 TOTP
-  const totpSecret = await isTotpEnabled();
-  if (totpSecret) {
-    // 需要 TOTP 第二步
-    const stepToken = await signTotpStepToken(ip);
-    const res = NextResponse.json({ success: true, data: { requires_totp: true } });
-    res.cookies.set(COOKIE_TOTP_STEP, stepToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 5 * 60, // 5 分钟
-    });
-    return res;
-  }
-
-  // 直接颁发完整 session
+  // 直接颁发完整 session（TOTP 已全局禁用）
   const sessionId = crypto.randomUUID();
   const ua = request.headers.get('user-agent') ?? 'unknown';
   await createDbSession(sessionId, ip, ua);

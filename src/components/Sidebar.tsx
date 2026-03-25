@@ -32,6 +32,7 @@ import {
   User,
   Wrench,
   X,
+  BotMessageSquare,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import clsx from 'clsx';
@@ -58,8 +59,6 @@ const group2: NavItem[] = [
   { key: 'diary',       href: '/diary',       icon: BookOpen,      label: '日记',  kana: '記' },
   { key: 'gallery',     href: '/gallery',     icon: Camera,        label: '相册',  kana: '影' },
   { key: 'music',       href: '/music',       icon: Music,         label: '歌单',  kana: '音' },
-  { key: 'practice',    href: '/practice',    icon: Code2,         label: '练习',  kana: '練' },
-  { key: 'code',        href: '/code',        icon: Terminal,      label: '运行',  kana: '行' },
   { key: 'collections', href: '/collections', icon: BookMarked,    label: '合集',  kana: '選' },
   { key: 'media',       href: '/media',       icon: Film,          label: '书影音', kana: '覧' },
   { key: 'timeline',    href: '/timeline',    icon: Clock,         label: '时间线', kana: '史' },
@@ -70,22 +69,30 @@ const group2: NavItem[] = [
 ];
 
 const group3: NavItem[] = [
+  { key: 'practice', href: '/practice',     icon: Code2,            label: '练习',  kana: '練' },
+  { key: 'code',     href: '/code',         icon: Terminal,         label: '运行',  kana: '行' },
+  { key: 'ciyuan',   href: '/tools/ciyuan', icon: BotMessageSquare, label: '词元',  kana: 'AI' },
+];
+
+const group4: NavItem[] = [
   { key: 'now',     href: '/now',     icon: Sparkles, label: '此刻', kana: '今' },
   { key: 'about',   href: '/about',   icon: User,     label: '关于', kana: '我' },
   { key: 'contact', href: '/contact', icon: Mail,     label: '联系', kana: '信' },
 ];
 
-const allItems = [...group1, ...group2, ...group3];
+const allItems = [...group1, ...group2, ...group3, ...group4];
 
 const groupMeta: Record<string, { title: string; items: NavItem[] }> = {
   content: { title: '内容', items: group1 },
   explore: { title: '探索', items: group2 },
-  site:    { title: '站点', items: group3 },
+  tools:   { title: '工具', items: group3 },
+  site:    { title: '站点', items: group4 },
 };
 
 function getGroupKey(iconKey: string): string {
   if (group1.some(i => i.key === iconKey)) return 'content';
   if (group2.some(i => i.key === iconKey)) return 'explore';
+  if (group3.some(i => i.key === iconKey)) return 'tools';
   return 'site';
 }
 

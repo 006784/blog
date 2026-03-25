@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Link as LinkIcon, ExternalLink, Star, Plus, Trash2, Edit2, X, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ExternalLink, Star, Plus, Trash2, Edit2,
+  X, Loader2, Heart, Globe,
+} from 'lucide-react';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
+
+// ─────────────────────────────────────────────────────────────
+// Types & constants
+// ─────────────────────────────────────────────────────────────
 
 interface FriendLink {
   id: string;
@@ -18,447 +24,534 @@ interface FriendLink {
   created_at: string;
 }
 
-const defaultCategories = ['技术博客', '生活记录', '设计创意', '其他'];
+const CATEGORIES = ['技术博客', '生活记录', '设计创意', '其他'];
+const EMPTY_FORM  = { name: '', url: '', description: '', avatar: '', category: '技术博客', is_featured: false };
+const PALETTE     = ['#c4a96d', '#8b6f3a', '#9a9188', '#5a5650', '#c8c4bb'];
 
-export default function LinksPage() {
-  const { isAdmin } = useAdmin();
-  const [links, setLinks] = useState<FriendLink[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingLink, setEditingLink] = useState<FriendLink | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    url: '',
-    description: '',
-    avatar: '',
-    category: '技术博客',
-    is_featured: false,
-  });
+function safeHostname(url: string) {
+  try { return new URL(url).hostname; } catch { return url; }
+}
 
-  useEffect(() => {
-    fetchLinks();
-  }, []);
+// ─────────────────────────────────────────────────────────────
+// Small reusable components  (NO hooks inside these)
+// ─────────────────────────────────────────────────────────────
 
-  const fetchLinks = async () => {
-    try {
-      const { data } = await supabase
-        .from('friend_links')
-        .select('*')
-        .order('is_featured', { ascending: false })
-        .order('created_at', { ascending: false });
+function LetterAvatar({ name, size }: { name: string; size: number }) {
+  const bg = PALETTE[(name.charCodeAt(0) || 0) % PALETTE.length];
+  return (
+    <div
+      className="rounded-full flex items-center justify-center font-semibold text-white flex-shrink-0"
+      style={{ width: size, height: size, background: bg, fontSize: size * 0.38 }}
+    >
+      {(name[0] ?? '?').toUpperCase()}
+    </div>
+  );
+}
 
-      if (data) {
-        setLinks(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch links:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+// Avatar with error fallback — keeps useState at top, always called
+function Avatar({ src, name, size = 40 }: { src?: string; name: string; size?: number }) {
+  const [imgErr, setImgErr] = useState(false);
+  return imgErr || !src ? (
+    <LetterAvatar name={name} size={size} />
+  ) : (
+    <Image
+      src={src} alt={name} width={size} height={size} unoptimized
+      className="rounded-full object-cover flex-shrink-0"
+      style={{ width: size, height: size }}
+      onError={() => setImgErr(true)}
+    />
+  );
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      if (editingLink) {
-        const { error } = await supabase
-          .from('friend_links')
-          .update(formData)
-          .eq('id', editingLink.id);
+function Divider() {
+  return <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />;
+}
 
-        if (!error) {
-          setLinks((prev) =>
-            prev.map((link) =>
-              link.id === editingLink.id ? { ...link, ...formData } : link
-            )
-          );
-        }
-      } else {
-        const { data, error } = await supabase
-          .from('friend_links')
-          .insert([formData])
-          .select()
-          .single();
+function SectionLabel({ text, icon }: { text: string; icon?: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+      {icon}
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>
+        {text}
+      </span>
+      <Divider />
+    </div>
+  );
+}
 
-        if (data) {
-          setLinks((prev) => [data, ...prev]);
-        }
-      }
+const cardBase: React.CSSProperties = {
+  display: 'block',
+  borderRadius: 14,
+  border: '1px solid var(--line)',
+  background: 'var(--paper-warm)',
+  textDecoration: 'none',
+  transition: 'border-color .18s, box-shadow .18s, transform .18s',
+};
 
-      setShowAddModal(false);
-      setEditingLink(null);
-      setFormData({
-        name: '',
-        url: '',
-        description: '',
-        avatar: '',
-        category: '技术博客',
-        is_featured: false,
-      });
-    } catch (error) {
-      console.error('Failed to save link:', error);
-    }
-  };
+// ─────────────────────────────────────────────────────────────
+// Card components (NO hooks)
+// ─────────────────────────────────────────────────────────────
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个链接吗？')) return;
+function FeaturedCard({
+  link, isAdmin, onEdit, onDelete,
+}: {
+  link: FriendLink; isAdmin: boolean;
+  onEdit: () => void; onDelete: () => void;
+}) {
+  return (
+    <div className="group relative">
+      <a
+        href={link.url} target="_blank" rel="noopener noreferrer"
+        style={{ ...cardBase, padding: '16px 18px' }}
+        onMouseEnter={e => {
+          e.currentTarget.style.borderColor = 'var(--gold)';
+          e.currentTarget.style.boxShadow  = '0 6px 20px rgba(0,0,0,.13)';
+          e.currentTarget.style.transform  = 'translateY(-2px)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.borderColor = 'var(--line)';
+          e.currentTarget.style.boxShadow  = 'none';
+          e.currentTarget.style.transform  = 'none';
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+          <Avatar src={link.avatar} name={link.name} size={44} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+              <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>{link.name}</span>
+              <Star size={11} style={{ fill: 'var(--gold)', color: 'var(--gold)', flexShrink: 0 }} />
+            </div>
+            {link.description && (
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-secondary)', lineHeight: 1.5,
+                overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                {link.description}
+              </p>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 7 }}>
+              <Globe size={10} style={{ color: 'var(--ink-ghost)', flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: 'var(--ink-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {safeHostname(link.url)}
+              </span>
+            </div>
+          </div>
+          <ExternalLink size={13} style={{ color: 'var(--ink-ghost)', flexShrink: 0, marginTop: 2 }} />
+        </div>
+      </a>
 
-    try {
-      const { error } = await supabase.from('friend_links').delete().eq('id', id);
+      {isAdmin && (
+        <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <AdminBtn onClick={e => { e.preventDefault(); onEdit(); }}><Edit2 size={11} /></AdminBtn>
+          <AdminBtn onClick={e => { e.preventDefault(); onDelete(); }}><Trash2 size={11} /></AdminBtn>
+        </div>
+      )}
+    </div>
+  );
+}
 
-      if (!error) {
-        setLinks((prev) => prev.filter((link) => link.id !== id));
-      }
-    } catch (error) {
-      console.error('Failed to delete link:', error);
-    }
-  };
+function LinkCard({
+  link, isAdmin, onEdit, onDelete,
+}: {
+  link: FriendLink; isAdmin: boolean;
+  onEdit: () => void; onDelete: () => void;
+}) {
+  return (
+    <div className="group relative">
+      <a
+        href={link.url} target="_blank" rel="noopener noreferrer"
+        style={{ ...cardBase, display: 'flex', alignItems: 'center', gap: 10, padding: '11px 13px' }}
+        onMouseEnter={e => {
+          e.currentTarget.style.borderColor = 'var(--gold)';
+          e.currentTarget.style.boxShadow  = '0 4px 14px rgba(0,0,0,.1)';
+          e.currentTarget.style.transform  = 'translateY(-1px)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.borderColor = 'var(--line)';
+          e.currentTarget.style.boxShadow  = 'none';
+          e.currentTarget.style.transform  = 'none';
+        }}
+      >
+        <Avatar src={link.avatar} name={link.name} size={32} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'var(--ink)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {link.name}
+          </p>
+          {link.description && (
+            <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--ink-muted)',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {link.description}
+            </p>
+          )}
+        </div>
+        <ExternalLink size={12} style={{ color: 'var(--ink-ghost)', flexShrink: 0, opacity: 0, transition: 'opacity .15s' }}
+          className="group-hover:opacity-100" />
+      </a>
 
-  const openEditModal = (link: FriendLink) => {
-    setEditingLink(link);
-    setFormData({
-      name: link.name,
-      url: link.url,
-      description: link.description || '',
-      avatar: link.avatar || '',
-      category: link.category || '技术博客',
-      is_featured: link.is_featured || false,
-    });
-    setShowAddModal(true);
-  };
+      {isAdmin && (
+        <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <AdminBtn onClick={e => { e.preventDefault(); onEdit(); }}><Edit2 size={10} /></AdminBtn>
+          <AdminBtn onClick={e => { e.preventDefault(); onDelete(); }}><Trash2 size={10} /></AdminBtn>
+        </div>
+      )}
+    </div>
+  );
+}
 
-  // 按分类分组
-  const groupedLinks = links.reduce((acc, link) => {
-    const category = link.category || '其他';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(link);
-    return acc;
-  }, {} as Record<string, FriendLink[]>);
+function AdminBtn({ onClick, children }: { onClick: React.MouseEventHandler; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick}
+      style={{ padding: 5, borderRadius: 6, border: '1px solid var(--line)',
+        background: 'var(--paper-warm)', cursor: 'pointer', color: 'var(--ink-secondary)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {children}
+    </button>
+  );
+}
 
-  const featuredLinks = links.filter((link) => link.is_featured);
+// ─────────────────────────────────────────────────────────────
+// Modal (has hooks — kept separate from page)
+// ─────────────────────────────────────────────────────────────
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+function LinkModal({ editing, onClose, onSaved }: {
+  editing: FriendLink | null;
+  onClose: () => void;
+  onSaved: (link: FriendLink, isNew: boolean) => void;
+}) {
+  const [form, setForm]     = useState(() => editing
+    ? { name: editing.name, url: editing.url, description: editing.description ?? '',
+        avatar: editing.avatar ?? '', category: editing.category ?? '技术博客',
+        is_featured: editing.is_featured ?? false }
+    : { ...EMPTY_FORM });
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState('');
+
+  function setField<K extends keyof typeof form>(k: K) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setForm(f => ({ ...f, [k]: e.target.value }));
   }
 
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim() || !form.url.trim()) return;
+    setSaving(true); setError('');
+    try {
+      const res = await fetch(editing ? `/api/links/${editing.id}` : '/api/links', {
+        method: editing ? 'PUT' : 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? '保存失败'); return; }
+      onSaved(data, !editing);
+      onClose();
+    } catch {
+      setError('网络错误');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const iStyle: React.CSSProperties = {
+    width: '100%', padding: '8px 11px', borderRadius: 8,
+    border: '1px solid var(--line)', background: 'var(--paper-deep)',
+    color: 'var(--ink)', fontSize: 13, outline: 'none', boxSizing: 'border-box',
+  };
+
   return (
-    <div className="min-h-screen py-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 页面标题 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
-            <LinkIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">友情链接</span>
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: .96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: .96, y: 12 }}
+        style={{ width: '100%', maxWidth: 480, borderRadius: 18,
+          border: '1px solid var(--line)', background: 'var(--paper-warm)',
+          boxShadow: '0 24px 60px rgba(0,0,0,.3)', overflow: 'hidden' }}
+      >
+        {/* 标题栏 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '15px 22px', borderBottom: '1px solid var(--line)' }}>
+          <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--ink)' }}>
+            {editing ? '编辑友链' : '添加友链'}
+          </span>
+          <button onClick={onClose}
+            style={{ padding: 5, borderRadius: 7, border: 'none', background: 'transparent',
+              cursor: 'pointer', color: 'var(--ink-muted)' }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        <form onSubmit={submit} style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 13 }}>
+
+          {/* 预览 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 12px',
+            borderRadius: 10, background: 'var(--paper-deep)', border: '1px solid var(--line)' }}>
+            <Avatar src={form.avatar} name={form.name || '?'} size={36} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'var(--ink)',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {form.name || <span style={{ color: 'var(--ink-ghost)' }}>博客名称</span>}
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--ink-muted)',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {form.url || 'https://...'}
+              </p>
+            </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4">朋友们</h1>
-          <p className="text-muted-foreground">
-            一些有趣的朋友和他们的网站
-          </p>
+
+          {/* 名称 + 分类 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--ink-secondary)', marginBottom: 4 }}>名称 *</label>
+              <input value={form.name} onChange={setField('name')} placeholder="我的博客" required autoFocus style={iStyle}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--gold)')}
+                onBlur={e => (e.currentTarget.style.borderColor  = 'var(--line)')} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--ink-secondary)', marginBottom: 4 }}>分类</label>
+              <select value={form.category} onChange={setField('category')}
+                style={{ ...iStyle, cursor: 'pointer' }}>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* 网址 */}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--ink-secondary)', marginBottom: 4 }}>网址 *</label>
+            <input type="url" value={form.url} onChange={setField('url')} placeholder="https://example.com" required style={iStyle}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--gold)')}
+              onBlur={e => (e.currentTarget.style.borderColor  = 'var(--line)')} />
+          </div>
+
+          {/* 头像 */}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--ink-secondary)', marginBottom: 4 }}>头像链接</label>
+            <input type="url" value={form.avatar} onChange={setField('avatar')} placeholder="https://..." style={iStyle}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--gold)')}
+              onBlur={e => (e.currentTarget.style.borderColor  = 'var(--line)')} />
+          </div>
+
+          {/* 简介 */}
+          <div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--ink-secondary)', marginBottom: 4 }}>一句话介绍</label>
+            <input value={form.description} onChange={setField('description')} placeholder="这个博客写什么…" style={iStyle}
+              onFocus={e => (e.currentTarget.style.borderColor = 'var(--gold)')}
+              onBlur={e => (e.currentTarget.style.borderColor  = 'var(--line)')} />
+          </div>
+
+          {/* 精选开关 */}
+          <button type="button"
+            onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '9px 13px', borderRadius: 10, cursor: 'pointer',
+              border: `1px solid ${form.is_featured ? 'var(--gold)' : 'var(--line)'}`,
+              background: form.is_featured ? 'rgba(196,169,109,.1)' : 'transparent' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <Star size={14} style={{ fill: form.is_featured ? 'var(--gold)' : 'none', color: form.is_featured ? 'var(--gold)' : 'var(--ink-ghost)' }} />
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>精选推荐</p>
+                <p style={{ margin: 0, fontSize: 11, color: 'var(--ink-muted)' }}>在顶部以大卡片展示</p>
+              </div>
+            </div>
+            <div style={{ width: 34, height: 19, borderRadius: 10, position: 'relative', flexShrink: 0,
+              background: form.is_featured ? 'var(--gold)' : 'var(--line)', transition: 'background .2s' }}>
+              <div style={{ position: 'absolute', top: 1.5, width: 16, height: 16, borderRadius: 8,
+                background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.2)', transition: 'transform .2s',
+                transform: form.is_featured ? 'translateX(17px)' : 'translateX(1.5px)' }} />
+            </div>
+          </button>
+
+          {error && <p style={{ margin: 0, fontSize: 12, color: '#ef4444' }}>{error}</p>}
+
+          {/* 按钮 */}
+          <div style={{ display: 'flex', gap: 9, paddingTop: 5, borderTop: '1px solid var(--line)' }}>
+            <button type="button" onClick={onClose}
+              style={{ flex: 1, padding: '9px 0', borderRadius: 10, border: '1px solid var(--line)',
+                background: 'transparent', fontSize: 13, color: 'var(--ink-secondary)', cursor: 'pointer' }}>
+              取消
+            </button>
+            <button type="submit" disabled={saving || !form.name.trim() || !form.url.trim()}
+              style={{ flex: 1, padding: '9px 0', borderRadius: 10, border: 'none',
+                background: 'var(--gold)', fontSize: 13, fontWeight: 600, color: 'var(--paper)',
+                cursor: 'pointer', opacity: (saving || !form.name.trim() || !form.url.trim()) ? .4 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              {saving && <Loader2 size={13} className="animate-spin" />}
+              {editing ? '保存修改' : '添加友链'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Main page
+// ─────────────────────────────────────────────────────────────
+
+export default function LinksPage() {
+  // All hooks at top — never conditional
+  const { isAdmin }  = useAdmin();
+  const [links,    setLinks]    = useState<FriendLink[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [modal,    setModal]    = useState(false);
+  const [editing,  setEditing]  = useState<FriendLink | null>(null);
+  const [activeCat, setActiveCat] = useState('全部');
+
+  useEffect(() => {
+    fetch('/api/links')
+      .then(r => r.json())
+      .then(d => { if (Array.isArray(d)) setLinks(d); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  function openCreate()           { setEditing(null);  setModal(true); }
+  function openEdit(l: FriendLink){ setEditing(l);     setModal(true); }
+  function closeModal()           { setModal(false);   setEditing(null); }
+
+  function handleSaved(link: FriendLink, isNew: boolean) {
+    setLinks(prev => isNew ? [link, ...prev] : prev.map(l => l.id === link.id ? link : l));
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('确认删除？')) return;
+    await fetch(`/api/links/${id}`, { method: 'DELETE', credentials: 'include' });
+    setLinks(prev => prev.filter(l => l.id !== id));
+  }
+
+  const featured = links.filter(l => l.is_featured);
+  const regular  = links.filter(l => !l.is_featured);
+  const catList  = ['全部', ...Array.from(new Set(regular.map(l => l.category || '其他')))];
+  const filtered = activeCat === '全部'
+    ? regular
+    : regular.filter(l => (l.category || '其他') === activeCat);
+  const grouped = filtered.reduce<Record<string, FriendLink[]>>((acc, l) => {
+    const c = l.category || '其他'; (acc[c] ??= []).push(l); return acc;
+  }, {});
+
+  return (
+    <div style={{ minHeight: '100vh', padding: '64px 24px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+
+        {/* 标题 */}
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 44 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', color: 'var(--ink)' }}>
+                友情链接
+              </h1>
+              <p style={{ margin: '7px 0 0', fontSize: 14, color: 'var(--ink-secondary)' }}>
+                一些有趣的朋友和他们的角落
+              </p>
+            </div>
+            {isAdmin && (
+              <button onClick={openCreate}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px',
+                  borderRadius: 10, border: 'none', background: 'var(--gold)', color: 'var(--paper)',
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0, marginTop: 4 }}>
+                <Plus size={14} /> 添加
+              </button>
+            )}
+          </div>
         </motion.div>
 
-        {/* 管理员添加按钮 */}
-        {isAdmin && (
-          <div className="flex justify-center mb-8">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/25"
-            >
-              <Plus className="w-5 h-5" />
-              添加链接
-            </motion.button>
+        {/* loading */}
+        {loading && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+            <Loader2 size={22} className="animate-spin" style={{ color: 'var(--ink-ghost)' }} />
           </div>
         )}
 
-        {/* 精选链接 */}
-        {featuredLinks.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-12"
-          >
-            <h2 className="flex items-center gap-2 text-xl font-semibold mb-6">
-              <Star className="w-5 h-5 text-[var(--gold)]" />
-              精选推荐
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {featuredLinks.map((link, index) => (
-                <motion.a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -4 }}
-                  className="group relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-all"
-                >
-                  <div className="absolute top-3 right-3">
-                    <Star className="w-4 h-4 text-[var(--gold)] fill-[var(--gold)]" />
-                  </div>
-                  <div className="flex items-center gap-4 mb-3">
-                    {link.avatar ? (
-                      <Image
-                        src={link.avatar}
-                        alt={link.name}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                        {link.name[0]}
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">
-                        {link.name}
-                      </h3>
-                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                  {link.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {link.description}
-                    </p>
-                  )}
-                  
-                  {isAdmin && (
-                    <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          openEditModal(link);
-                        }}
-                        className="p-1.5 rounded-lg bg-[var(--paper-deep)] hover:bg-[var(--paper)] text-[var(--ink)]"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDelete(link.id);
-                        }}
-                        className="p-1.5 rounded-lg bg-[var(--paper-deep)] hover:bg-[var(--paper)] text-[var(--ink-secondary)]"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* 分类链接 */}
-        {Object.entries(groupedLinks).map(([category, categoryLinks]) => (
-          <motion.div
-            key={category}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-10"
-          >
-            <h2 className="text-xl font-semibold mb-6">{category}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {categoryLinks.filter((l) => !l.is_featured).map((link, index) => (
-                <motion.a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -2 }}
-                  className="group flex items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all"
-                >
-                  {link.avatar ? (
-                    <Image
-                      src={link.avatar}
-                      alt={link.name}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground font-medium flex-shrink-0">
-                      {link.name[0]}
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-medium truncate group-hover:text-primary transition-colors">
-                      {link.name}
-                    </h3>
-                    {link.description && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {link.description}
-                      </p>
-                    )}
-                  </div>
-                  <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                  
-                  {isAdmin && (
-                    <div className="absolute right-2 top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          openEditModal(link);
-                        }}
-                        className="p-1 rounded bg-[var(--paper-deep)] text-[var(--ink-muted)] hover:bg-[var(--paper)]"
-                      >
-                        <Edit2 className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDelete(link.id);
-                        }}
-                        className="p-1 rounded bg-[var(--paper-deep)] text-[var(--ink-muted)] hover:bg-[var(--paper)]"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-
-        {links.length === 0 && (
-          <div className="text-center py-20">
-            <LinkIcon className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">暂无友情链接</p>
+        {/* empty */}
+        {!loading && links.length === 0 && (
+          <div style={{ borderRadius: 16, border: '1px dashed var(--line)',
+            padding: '60px 24px', textAlign: 'center' }}>
+            <Heart size={30} style={{ margin: '0 auto 10px', color: 'var(--ink-ghost)' }} />
+            <p style={{ margin: 0, color: 'var(--ink-muted)', fontSize: 14 }}>还没有友链，快来交换吧</p>
           </div>
         )}
 
-        {/* 添加/编辑弹窗 */}
-        {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="w-full max-w-md bg-card rounded-2xl shadow-2xl p-6"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold">
-                  {editingLink ? '编辑链接' : '添加链接'}
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowAddModal(false);
-                    setEditingLink(null);
-                  }}
-                  className="p-2 rounded-lg hover:bg-muted"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+        {/* content */}
+        {!loading && links.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+
+            {/* 精选 */}
+            {featured.length > 0 && (
+              <section>
+                <SectionLabel text="精选推荐"
+                  icon={<Star size={13} style={{ fill: 'var(--gold)', color: 'var(--gold)', flexShrink: 0 }} />} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
+                  {featured.map(link => (
+                    <FeaturedCard key={link.id} link={link} isAdmin={isAdmin}
+                      onEdit={() => openEdit(link)} onDelete={() => handleDelete(link.id)} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* 分类 tabs */}
+            {catList.length > 2 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {catList.map(cat => (
+                  <button key={cat} onClick={() => setActiveCat(cat)}
+                    style={{ padding: '4px 13px', borderRadius: 20, fontSize: 12, fontWeight: 500,
+                      cursor: 'pointer', transition: 'all .15s',
+                      border: `1px solid ${activeCat === cat ? 'var(--ink)' : 'var(--line)'}`,
+                      background: activeCat === cat ? 'var(--ink)' : 'transparent',
+                      color: activeCat === cat ? 'var(--paper)' : 'var(--ink-secondary)' }}>
+                    {cat}
+                    <span style={{ marginLeft: 4, opacity: .5, fontSize: 11 }}>
+                      {cat === '全部' ? regular.length : regular.filter(l => (l.category || '其他') === cat).length}
+                    </span>
+                  </button>
+                ))}
               </div>
+            )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">名称 *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-muted border border-border focus:border-primary outline-none"
-                    required
-                  />
+            {/* 卡片 */}
+            {Object.entries(grouped).map(([cat, catLinks]) => (
+              <section key={cat}>
+                {activeCat === '全部' && <SectionLabel text={cat} />}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(195px, 1fr))', gap: 9 }}>
+                  {catLinks.map(link => (
+                    <LinkCard key={link.id} link={link} isAdmin={isAdmin}
+                      onEdit={() => openEdit(link)} onDelete={() => handleDelete(link.id)} />
+                  ))}
                 </div>
+              </section>
+            ))}
+          </div>
+        )}
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">网址 *</label>
-                  <input
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-muted border border-border focus:border-primary outline-none"
-                    placeholder="https://"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">描述</label>
-                  <input
-                    type="text"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-muted border border-border focus:border-primary outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">头像URL</label>
-                  <input
-                    type="url"
-                    value={formData.avatar}
-                    onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-muted border border-border focus:border-primary outline-none"
-                    placeholder="https://"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">分类</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-muted border border-border focus:border-primary outline-none"
-                  >
-                    {defaultCategories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="is_featured"
-                    checked={formData.is_featured}
-                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                    className="w-4 h-4 rounded"
-                  />
-                  <label htmlFor="is_featured" className="text-sm">精选推荐</label>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddModal(false);
-                      setEditingLink(null);
-                    }}
-                    className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
-                  >
-                    取消
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-                  >
-                    {editingLink ? '保存' : '添加'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+        {/* 申请友链 */}
+        {!isAdmin && !loading && (
+          <div style={{ marginTop: 56, padding: '24px 20px', borderRadius: 14,
+            border: '1px dashed var(--line)', textAlign: 'center' }}>
+            <Heart size={26} style={{ margin: '0 auto 8px', color: 'var(--ink-ghost)' }} />
+            <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>想交换友链？</p>
+            <p style={{ margin: '0 0 14px', fontSize: 13, color: 'var(--ink-muted)' }}>欢迎通过联系页面告诉我你的博客</p>
+            <a href="/contact"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 16px',
+                borderRadius: 9, border: '1px solid var(--line)', fontSize: 13,
+                color: 'var(--ink-secondary)', textDecoration: 'none' }}>
+              去联系我 →
+            </a>
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {modal && (
+          <LinkModal key="link-modal" editing={editing} onClose={closeModal} onSaved={handleSaved} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

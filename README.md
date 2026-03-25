@@ -1,7 +1,7 @@
-# 拾光博客 - 现代化个人博客系统
+# Lumen - 现代化个人博客系统
 
 <p align="center">
-  <img src="./public/favicon.ico" alt="拾光博客" width="100" height="100">
+  <img src="./public/favicon.ico" alt="Lumen" width="100" height="100">
 </p>
 
 <p align="center">

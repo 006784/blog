@@ -136,7 +136,7 @@ export class NewsCollectionService {
       const resend = new Resend(process.env.RESEND_API_KEY);
       
       await resend.emails.send({
-        from: '拾光博客新闻 <news@artchain.icu>',
+        from: 'Lumen新闻 <news@artchain.icu>',
         to: config.recipientEmail,
         subject: newsletter.title,
         text: textContent,
@@ -274,11 +274,11 @@ export class NewsCollectionService {
           <div style="background-color: #f9fafb; border-top: 1px solid #e5e7eb; padding: 30px; text-align: center; color: #6b7280; font-size: 13px;">
             <div style="margin-bottom: 15px;">
               <p style="margin: 0 0 10px 0; font-weight: 500;">📬 邮件信息</p>
-              <p style="margin: 0;">此邮件由拾光博客新闻收集系统自动生成</p>
+              <p style="margin: 0;">此邮件由Lumen新闻收集系统自动生成</p>
               <p style="margin: 5px 0 0 0;">如需调整订阅设置，请联系管理员</p>
             </div>
             <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: 15px; font-size: 12px; color: #9ca3af;">
-              <p style="margin: 0;">© 2026 拾光博客 • 致力于为您提供优质的新闻资讯服务</p>
+              <p style="margin: 0;">© 2026 Lumen • 致力于为您提供优质的新闻资讯服务</p>
             </div>
           </div>
 
@@ -310,7 +310,7 @@ export class NewsCollectionService {
       });
     });
 
-    text += '\n--\n本邮件由拾光博客新闻收集系统自动生成\n如需调整订阅设置，请联系管理员';
+    text += '\n--\n本邮件由Lumen新闻收集系统自动生成\n如需调整订阅设置，请联系管理员';
 
     return text;
   }

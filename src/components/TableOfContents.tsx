@@ -87,8 +87,6 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
     }
   }, []);
 
-  if (headings.length === 0) return null;
-
   useEffect(() => {
     if (!isOpen) return;
     const previousOverflow = document.body.style.overflow;
@@ -97,6 +95,8 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
       document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
+
+  if (headings.length === 0) return null;
 
   return (
     <>

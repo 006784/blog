@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Star, ExternalLink } from 'lucide-react';
-import { getMediaItems, type MediaItem } from '@/lib/supabase';
+import { type MediaItem } from '@/lib/supabase';
 
 // ── 常量 ──────────────────────────────────────────────────
 
@@ -129,7 +129,7 @@ export default function MediaPage() {
   const [activeStatus, setActiveStatus] = useState('all');
 
   useEffect(() => {
-    getMediaItems().then(setItems).finally(() => setLoading(false));
+    fetch('/api/media').then(r => r.json()).then(setItems).finally(() => setLoading(false));
   }, []);
 
   const filtered = items.filter((item) => {

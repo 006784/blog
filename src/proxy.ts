@@ -47,7 +47,7 @@ function isNoIndexPath(pathname: string): boolean {
 
 // ─── 中间件主体 ───────────────────────────────────────────────────────────────
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 统一去掉尾部斜线再比较（next.config.ts 有 trailingSlash: true）

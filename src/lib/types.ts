@@ -57,7 +57,7 @@ export const defaultPosts: Post[] = [
     category: 'tech',
     tags: ['Next.js', 'React', 'Web开发'],
     image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: '8 min read',
   },
   {
@@ -68,7 +68,7 @@ export const defaultPosts: Post[] = [
     category: 'design',
     tags: ['设计', 'UI/UX', '产品'],
     image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: '6 min read',
   },
   {
@@ -79,7 +79,7 @@ export const defaultPosts: Post[] = [
     category: 'life',
     tags: ['极简主义', '生活方式', '思考'],
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: '5 min read',
   },
   {
@@ -90,7 +90,7 @@ export const defaultPosts: Post[] = [
     category: 'tech',
     tags: ['Tailwind CSS', 'CSS', '前端'],
     image: 'https://images.unsplash.com/photo-1517134191118-9d595e4c8c2b?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: '10 min read',
   },
   {
@@ -101,7 +101,7 @@ export const defaultPosts: Post[] = [
     category: 'thoughts',
     tags: ['AI', '科技', '未来'],
     image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: '7 min read',
   },
   {
@@ -112,7 +112,7 @@ export const defaultPosts: Post[] = [
     category: 'tech',
     tags: ['Framer Motion', 'React', '动画'],
     image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: '9 min read',
   },
 ];

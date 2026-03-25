@@ -5,13 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Plus, Edit2, Trash2, X, Loader2, Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAdmin } from '@/components/AdminProvider';
-import {
-  TimelineEvent,
-  getTimelineEvents,
-  createTimelineEvent,
-  updateTimelineEvent,
-  deleteTimelineEvent,
-} from '@/lib/supabase';
+import { TimelineEvent } from '@/lib/supabase';
 
 const CATEGORY_OPTIONS = [
   { value: 'work',        label: '工作', color: 'bg-blue-400' },
@@ -38,7 +32,7 @@ export default function AdminTimelinePage() {
 
   useEffect(() => {
     if (!isAdmin) { showLoginModal(); return; }
-    getTimelineEvents().then(setEvents).finally(() => setLoading(false));
+    fetch('/api/timeline').then(r => r.json()).then(setEvents).finally(() => setLoading(false));
   }, [isAdmin]);
 
   function openCreate() {
@@ -58,10 +52,16 @@ export default function AdminTimelinePage() {
     setSaving(true);
     try {
       if (editing) {
-        const updated = await updateTimelineEvent(editing.id, form);
+        const res = await fetch(`/api/timeline/${editing.id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
+        });
+        const updated = await res.json();
         setEvents((prev) => prev.map((e) => (e.id === editing.id ? updated : e)));
       } else {
-        const created = await createTimelineEvent(form);
+        const res = await fetch('/api/timeline', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
+        });
+        const created = await res.json();
         setEvents((prev) => [created, ...prev]);
       }
       setShowModal(false);
@@ -76,7 +76,7 @@ export default function AdminTimelinePage() {
     if (!confirm('确认删除？')) return;
     setDeleting(id);
     try {
-      await deleteTimelineEvent(id);
+      await fetch(`/api/timeline/${id}`, { method: 'DELETE' });
       setEvents((prev) => prev.filter((e) => e.id !== id));
     } finally {
       setDeleting(null);

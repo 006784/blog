@@ -1,5 +1,5 @@
 -- =============================================
--- 拾光博客 - Supabase 数据库完整初始化脚本
+-- Lumen - Supabase 数据库完整初始化脚本
 -- 包含：文章、歌单、相册、日记功能
 -- =============================================
 
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS posts (
     tags TEXT[] DEFAULT '{}',
     image TEXT DEFAULT 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop',
     cover_image TEXT,
-    author TEXT DEFAULT '拾光',
+    author TEXT DEFAULT 'Lumen',
     reading_time TEXT DEFAULT '5 分钟',
     status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
     meta_title TEXT,
