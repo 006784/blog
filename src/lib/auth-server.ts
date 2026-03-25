@@ -5,7 +5,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from './supabase';
+import { supabaseAdmin } from './supabase';
 
 // 重新导出 Edge 兼容的类型和函数，API Route 只需导入此文件
 export {
@@ -162,7 +162,7 @@ export async function createDbSession(
   userAgent: string
 ): Promise<boolean> {
   const expiresAt = new Date(Date.now() + REFRESH_EXPIRY_S * 1000).toISOString();
-  const { error } = await supabase.from('admin_sessions').insert({
+  const { error } = await supabaseAdmin.from('admin_sessions').insert({
     id: sessionId,
     session_token: hashValue(sessionId),
     ip_address: ip,
@@ -173,7 +173,7 @@ export async function createDbSession(
 }
 
 export async function validateDbSession(sessionId: string): Promise<boolean> {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('admin_sessions')
     .select('expires_at')
     .eq('id', sessionId)
@@ -183,25 +183,25 @@ export async function validateDbSession(sessionId: string): Promise<boolean> {
 }
 
 export async function updateSessionActivity(sessionId: string): Promise<void> {
-  await supabase
+  await supabaseAdmin
     .from('admin_sessions')
     .update({ last_activity: new Date().toISOString() })
     .eq('id', sessionId);
 }
 
 export async function deleteDbSession(sessionId: string): Promise<void> {
-  await supabase.from('admin_sessions').delete().eq('id', sessionId);
+  await supabaseAdmin.from('admin_sessions').delete().eq('id', sessionId);
 }
 
 export async function deleteAllDbSessions(): Promise<void> {
-  await supabase
+  await supabaseAdmin
     .from('admin_sessions')
     .delete()
     .neq('id', '00000000-0000-0000-0000-000000000000');
 }
 
 export async function listDbSessions() {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('admin_sessions')
     .select('id, ip_address, user_agent, last_activity, created_at, expires_at')
     .gt('expires_at', new Date().toISOString())

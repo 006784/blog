@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
   const sessions = await listDbSessions();
   return ok(
-    sessions.map((s) => ({
+    sessions.map((s: { id: string; ip_address: string; user_agent: string; last_activity: string; created_at: string; expires_at: string }) => ({
       id: s.id,
       ip: s.ip_address,
       userAgent: s.user_agent,
