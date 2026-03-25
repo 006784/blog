@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
 import { parseBody, ok, err, z } from '@/lib/api';
 
 // 配置静态导出
@@ -18,23 +18,15 @@ export async function POST(request: NextRequest) {
   if (parsed instanceof Response) return parsed;
   const { name, email, subject, message } = parsed;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { error } = await supabaseAdmin.from('contact_messages').insert([{
+    name, email, subject, message,
+    is_read: false,
+    created_at: new Date().toISOString(),
+  }]);
 
-  if (supabaseUrl && supabaseKey) {
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { error } = await supabase.from('contact_messages').insert([{
-      name, email, subject, message,
-      is_read: false,
-      created_at: new Date().toISOString(),
-    }]);
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return err('保存消息失败，请稍后重试', 500);
-    }
-  } else {
-    console.log('Contact form submission:', { name, email, subject, message });
+  if (error) {
+    console.error('Supabase error:', error);
+    return err('保存消息失败，请稍后重试', 500);
   }
 
   return ok({ message: '消息已发送成功！我们会尽快回复您。' });

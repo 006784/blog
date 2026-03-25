@@ -1,15 +1,11 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
 import { sendSubscriptionConfirmation } from '@/lib/email';
 import { ok, err } from '@/lib/api';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-// 创建 Supabase 客户端
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // 验证 Turnstile token
 async function verifyTurnstile(token: string): Promise<boolean> {
@@ -60,73 +56,55 @@ export async function POST(request: NextRequest) {
     let isNewSubscriber = false;
     let isReactivated = false;
 
-    // 如果配置了 Supabase，保存到数据库
-    if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      
-      // 检查是否已订阅
-      const { data: existing } = await supabase
+    // 检查是否已订阅
+    const { data: existing } = await supabaseAdmin
+      .from('subscribers')
+      .select('id, email, is_active')
+      .eq('email', email)
+      .single();
+
+    if (existing) {
+      if (existing.is_active) return err('该邮箱已订阅', 400);
+
+      // 重新激活订阅
+      const { error } = await supabaseAdmin
         .from('subscribers')
-        .select('id, email, is_active')
-        .eq('email', email)
-        .single();
+        .update({ is_active: true })
+        .eq('email', email);
 
-      if (existing) {
-        if (existing.is_active) return err('该邮箱已订阅', 400);
-
-        // 重新激活订阅
-        const { error } = await supabase
-          .from('subscribers')
-          .update({ is_active: true })
-          .eq('email', email);
-
-        if (error) {
-          console.error('Supabase error:', error);
-          return err('订阅失败，请稍后重试', 500);
-        }
-        isReactivated = true;
-      } else {
-        // 新订阅
-        const { error } = await supabase
-          .from('subscribers')
-          .insert([{
-            email,
-            is_active: true,
-            subscribed_at: new Date().toISOString(),
-          }]);
-
-        if (error) {
-          console.error('Supabase error:', error);
-          return err('订阅失败，请稍后重试', 500);
-        }
-        isNewSubscriber = true;
+      if (error) {
+        console.error('Supabase error:', error);
+        return err('订阅失败，请稍后重试', 500);
       }
+      isReactivated = true;
     } else {
-      console.log('New subscription:', email);
+      // 新订阅
+      const { error } = await supabaseAdmin
+        .from('subscribers')
+        .insert([{
+          email,
+          is_active: true,
+          subscribed_at: new Date().toISOString(),
+        }]);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        return err('订阅失败，请稍后重试', 500);
+      }
       isNewSubscriber = true;
     }
 
     // 发送欢迎邮件（包含最近文章）
     if ((isNewSubscriber || isReactivated) && process.env.RESEND_API_KEY) {
       try {
-        // 获取最近的文章
-        let recentPosts: { title: string; slug: string; description: string }[] = [];
-        
-        if (supabaseUrl && supabaseKey) {
-          const supabase = createClient(supabaseUrl, supabaseKey);
-          const { data: posts } = await supabase
-            .from('posts')
-            .select('title, slug, description')
-            .eq('is_published', true)
-            .order('published_at', { ascending: false })
-            .limit(3);
-          
-          if (posts) {
-            recentPosts = posts;
-          }
-        }
-        
-        await sendSubscriptionConfirmation(email, undefined, recentPosts);
+        const { data: posts } = await supabaseAdmin
+          .from('posts')
+          .select('title, slug, description')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false })
+          .limit(3);
+
+        await sendSubscriptionConfirmation(email, undefined, posts ?? []);
         console.log('订阅确认邮件已发送:', email);
       } catch (emailError) {
         console.error('发送订阅确认邮件失败:', emailError);
@@ -152,18 +130,14 @@ export async function DELETE(request: NextRequest) {
 
     if (!email) return err('请提供邮箱地址', 400);
 
-    if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
+    const { error } = await supabaseAdmin
+      .from('subscribers')
+      .update({ is_active: false })
+      .eq('email', email);
 
-      const { error } = await supabase
-        .from('subscribers')
-        .update({ is_active: false })
-        .eq('email', email);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        return err('取消订阅失败', 500);
-      }
+    if (error) {
+      console.error('Supabase error:', error);
+      return err('取消订阅失败', 500);
     }
 
     return ok({ message: '已取消订阅' });

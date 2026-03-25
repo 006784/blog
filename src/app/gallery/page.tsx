@@ -9,10 +9,9 @@ import {
   Grid3X3, LayoutGrid, Sparkles, Upload, Loader2, Shield, Edit2, Save
 } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
-import { 
+import {
   Photo, Album,
   getAllPhotos, getAlbums, getPhotos,
-  createPhoto, createAlbum, deletePhoto, updatePhoto,
   formatDate
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
@@ -51,7 +50,8 @@ export default function GalleryPage() {
   async function handleDeletePhoto(id: string) {
     if (!confirm('确定删除这张照片吗？')) return;
     try {
-      await deletePhoto(id);
+      const res = await fetch(`/api/gallery/photos/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('删除失败');
       setPhotos(photos.filter(p => p.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
@@ -60,8 +60,14 @@ export default function GalleryPage() {
 
   async function handleUpdatePhoto(id: string, updates: Partial<Photo>) {
     try {
-      const updated = await updatePhoto(id, updates);
-      setPhotos(photos.map(p => p.id === id ? updated : p));
+      const res = await fetch(`/api/gallery/photos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('更新失败');
+      const { photo } = await res.json();
+      setPhotos(photos.map(p => p.id === id ? photo : p));
       setEditingPhoto(null);
     } catch (error) {
       console.error('更新失败:', error);
@@ -255,7 +261,13 @@ export default function GalleryPage() {
               albums={albums}
               onClose={() => setShowAddModal(false)}
               onAdd={async (photo) => {
-                const newPhoto = await createPhoto(photo);
+                const res = await fetch('/api/gallery/photos', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(photo),
+                });
+                if (!res.ok) throw new Error('添加失败');
+                const { photo: newPhoto } = await res.json();
                 setPhotos([newPhoto, ...photos]);
                 setShowAddModal(false);
               }}

@@ -14,10 +14,27 @@ import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ImageUploader } from '@/components/ImageUploader';
-import { Collection, createPost, updatePost, getPostById, getCollections, createCollection, setPostPinStatus } from '@/lib/supabase';
+import { Collection, Post, getPostById } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
-import { decodeAdminToken } from '@/lib/admin-token';
 import MobileWritePage from './mobile/page';
+
+async function apiCreatePost(body: Partial<Post>): Promise<Post> {
+  const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error((await res.json()).error || '创建失败');
+  return (await res.json()).post;
+}
+
+async function apiUpdatePost(id: string, body: Partial<Post>): Promise<Post> {
+  const res = await fetch(`/api/posts/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error((await res.json()).error || '更新失败');
+  return (await res.json()).post;
+}
+
+async function apiCreateCollection(body: Partial<Collection>): Promise<Collection> {
+  const res = await fetch('/api/collections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error((await res.json()).error || '创建失败');
+  return (await res.json()).collection;
+}
 
 const RichEditor = dynamic(
   () => import('@/components/RichEditor').then((m) => m.RichEditor),
@@ -153,7 +170,11 @@ function WritePageContent() {
 
   async function loadCollections() {
     try {
-      setCollections(await getCollections());
+      const res = await fetch('/api/collections');
+      if (res.ok) {
+        const { collections } = await res.json();
+        setCollections(collections);
+      }
     } catch (error) {
       console.error('加载集合失败:', error);
     }
@@ -205,9 +226,9 @@ function WritePageContent() {
         is_pinned: isPinned, pinned_at: resolvedPinnedAt, collection_id: collectionId || undefined,
       };
       if (currentPostId) {
-        await updatePost(currentPostId, postData);
+        await apiUpdatePost(currentPostId, postData);
       } else {
-        const newPost = await createPost(postData);
+        const newPost = await apiCreatePost(postData);
         setCurrentPostId(newPost.id);
       }
       setLastSaved(new Date());
@@ -220,7 +241,7 @@ function WritePageContent() {
     if (!newCollectionName.trim()) return;
     setCreatingCollection(true);
     try {
-      const newCol = await createCollection({ name: newCollectionName.trim(), color: `#${Math.floor(Math.random() * 16777215).toString(16)}` });
+      const newCol = await apiCreateCollection({ name: newCollectionName.trim(), color: `#${Math.floor(Math.random() * 16777215).toString(16)}` });
       setCollections([...collections, newCol]);
       setCollectionId(newCol.id);
       setShowNewCollection(false);
@@ -259,19 +280,10 @@ function WritePageContent() {
       };
       let savedPost;
       if (currentPostId) {
-        savedPost = await updatePost(currentPostId, postData);
+        savedPost = await apiUpdatePost(currentPostId, postData);
       } else {
-        savedPost = await createPost(postData);
+        savedPost = await apiCreatePost(postData);
         setCurrentPostId(savedPost.id);
-      }
-      if (savedPost && (isPinned || pinnedAt)) {
-        try {
-          const pinnedPost = await setPostPinStatus(savedPost.id, isPinned);
-          setPinnedAt(pinnedPost.pinned_at || null);
-        } catch (pinError) {
-          console.error('同步置顶状态失败:', pinError);
-          showNotification('error', '置顶状态保存失败，请先执行数据库迁移');
-        }
       }
       setLastSaved(new Date());
       showNotification('success', '草稿已保存');
@@ -301,28 +313,17 @@ function WritePageContent() {
       };
       let savedPost;
       if (currentPostId) {
-        savedPost = await updatePost(currentPostId, postData);
+        savedPost = await apiUpdatePost(currentPostId, postData);
       } else {
-        savedPost = await createPost(postData);
-      }
-      if (savedPost && (isPinned || pinnedAt)) {
-        try {
-          const pinnedPost = await setPostPinStatus(savedPost.id, isPinned);
-          setPinnedAt(pinnedPost.pinned_at || null);
-        } catch (pinError) {
-          console.error('同步置顶状态失败:', pinError);
-          showNotification('error', '置顶状态保存失败，请先执行数据库迁移');
-        }
+        savedPost = await apiCreatePost(postData);
       }
       showNotification('success', '文章已发布');
       clearLocalDraft();
       if (notifySubscribers && savedPost) {
         try {
-          const adminToken = localStorage.getItem('admin-token');
-          const password = adminToken ? (decodeAdminToken(adminToken) || '') : '';
           const res = await fetch('/api/notify', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${password}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ postId: savedPost.id, postSlug: savedPost.slug, title: savedPost.title, description: savedPost.description, author: savedPost.author }),
           });
           const data = await res.json();

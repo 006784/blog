@@ -1,15 +1,10 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { Diary } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 function isMissingEnvironmentColumnError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;

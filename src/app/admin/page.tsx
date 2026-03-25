@@ -13,11 +13,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/components/AdminProvider';
-import { 
+import {
   Post, Photo, Diary, Album,
   getAllPosts, getAllPhotos, getDiaries, getAlbums,
-  deletePost, deletePhoto, deleteDiary,
-  createAlbum, updateAlbum, deleteAlbum,
   formatDate
 } from '@/lib/supabase';
 
@@ -68,7 +66,8 @@ export default function AdminPage() {
   async function handleDeletePost(id: string) {
     if (!confirm('确定删除这篇文章吗？')) return;
     try {
-      await deletePost(id);
+      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('删除失败');
       setPosts(posts.filter(p => p.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
@@ -78,7 +77,8 @@ export default function AdminPage() {
   async function handleDeletePhoto(id: string) {
     if (!confirm('确定删除这张照片吗？')) return;
     try {
-      await deletePhoto(id);
+      const res = await fetch(`/api/gallery/photos/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('删除失败');
       setPhotos(photos.filter(p => p.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
@@ -88,7 +88,8 @@ export default function AdminPage() {
   async function handleDeleteDiary(id: string) {
     if (!confirm('确定删除这篇日记吗？')) return;
     try {
-      await deleteDiary(id);
+      const res = await fetch(`/api/diaries/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('删除失败');
       setDiaries(diaries.filter(d => d.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
@@ -98,7 +99,8 @@ export default function AdminPage() {
   async function handleDeleteAlbum(id: string) {
     if (!confirm('确定删除这个相册吗？相册内的照片不会被删除。')) return;
     try {
-      await deleteAlbum(id);
+      const res = await fetch(`/api/gallery/albums/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('删除失败');
       setAlbums(albums.filter(a => a.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
@@ -240,10 +242,22 @@ export default function AdminPage() {
               onClose={() => { setShowAlbumModal(false); setEditingAlbum(null); }}
               onSave={async (data) => {
                 if (editingAlbum) {
-                  const updated = await updateAlbum(editingAlbum.id, data);
+                  const res = await fetch(`/api/gallery/albums/${editingAlbum.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                  });
+                  if (!res.ok) throw new Error('更新失败');
+                  const { album: updated } = await res.json();
                   setAlbums(albums.map(a => a.id === editingAlbum.id ? updated : a));
                 } else {
-                  const newAlbum = await createAlbum(data);
+                  const res = await fetch('/api/gallery/albums', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                  });
+                  if (!res.ok) throw new Error('创建失败');
+                  const { album: newAlbum } = await res.json();
                   setAlbums([newAlbum, ...albums]);
                 }
                 setShowAlbumModal(false);
