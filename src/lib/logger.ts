@@ -41,39 +41,50 @@ const consoleFormat = winston.format.combine(
   )
 );
 
+const isServerlessRuntime = Boolean(
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.AWS_EXECUTION_ENV
+);
+
 // 定义传输器
-const transports = [
+const transports: winston.transport[] = [
   // 控制台输出
   new winston.transports.Console({
     format: consoleFormat,
   }),
-  
-  // 错误日志文件 - 按天轮转
-  new winston.transports.DailyRotateFile({
-    filename: path.join(logDir, 'error-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    level: 'error',
-    format,
-    maxFiles: '14d', // 保留14天
-  }),
-  
-  // 所有日志文件 - 按天轮转
-  new winston.transports.DailyRotateFile({
-    filename: path.join(logDir, 'combined-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    format,
-    maxFiles: '30d', // 保留30天
-  }),
-  
-  // HTTP请求日志
-  new winston.transports.DailyRotateFile({
-    filename: path.join(logDir, 'http-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    level: 'http',
-    format,
-    maxFiles: '7d', // 保留7天
-  }),
 ];
+
+// Serverless / Vercel 环境使用 stdout/stderr 聚合日志，避免只读文件系统导致 API 500
+if (!isServerlessRuntime) {
+  transports.push(
+    // 错误日志文件 - 按天轮转
+    new winston.transports.DailyRotateFile({
+      filename: path.join(logDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'error',
+      format,
+      maxFiles: '14d', // 保留14天
+    }),
+
+    // 所有日志文件 - 按天轮转
+    new winston.transports.DailyRotateFile({
+      filename: path.join(logDir, 'combined-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      format,
+      maxFiles: '30d', // 保留30天
+    }),
+
+    // HTTP请求日志
+    new winston.transports.DailyRotateFile({
+      filename: path.join(logDir, 'http-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'http',
+      format,
+      maxFiles: '7d', // 保留7天
+    })
+  );
+}
 
 // 创建logger实例
 export const logger = winston.createLogger({
