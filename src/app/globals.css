@@ -144,6 +144,36 @@
   --color-kana-ghost: var(--kana-ghost);
 }
 
+/* ── iOS / 安卓 移动端基础修复 ─────────────────────────────────── */
+
+/* 禁用 iOS 点击灰色闪烁 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area CSS 变量（刘海屏 / Dynamic Island / Home 键） */
+:root {
+  --sat: env(safe-area-inset-top,    0px);
+  --sar: env(safe-area-inset-right,  0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left,   0px);
+}
+
+/* 所有可点击元素禁用双击缩放，提升响应速度 */
+button, a, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* 工具类：safe area 内边距 */
+.pt-safe  { padding-top:    env(safe-area-inset-top,    0px); }
+.pb-safe  { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pl-safe  { padding-left:   env(safe-area-inset-left,   0px); }
+.pr-safe  { padding-right:  env(safe-area-inset-right,  0px); }
+
+/* dvh / svh 工具类（解决 iOS 100vh 地址栏问题） */
+.h-dvh  { height: 100vh; height: 100dvh; }
+.min-h-dvh { min-height: 100vh; min-height: 100dvh; }
+
 /* 全局主题切换过渡 */
 *,
 *::before,
@@ -178,6 +208,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   line-height: 2;
+  /* 防止 iOS 旋转时字号自动放大 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* 纸张噪点纹理 */

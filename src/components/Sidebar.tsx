@@ -199,7 +199,7 @@ export function Sidebar() {
           position: 'fixed',
           left: 0,
           top: 0,
-          height: '100vh',
+          height: '100dvh',
           zIndex: 40,
         }}
       >
@@ -504,6 +504,7 @@ export function Sidebar() {
           zIndex: 40,
           background: 'var(--paper)',
           borderTop: '1px solid var(--line)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         <div
@@ -611,7 +612,8 @@ export function Sidebar() {
                 overflowY: 'auto',
                 background: 'var(--paper)',
                 borderTop: '1px solid var(--line)',
-                padding: '24px 0 40px',
+                padding: '24px 0 0',
+                paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))',
               }}
             >
               {/* Header */}

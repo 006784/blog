@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -18,6 +18,17 @@ import { generateWebsiteSchema } from "@/lib/seo";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com';
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'Lumen';
 const SITE_DESC = process.env.NEXT_PUBLIC_SITE_DESCRIPTION || '在文字中拾起生活的微光';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',        // iOS 刘海屏 / Dynamic Island 全屏
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#faf8f5' },
+    { media: '(prefers-color-scheme: dark)',  color: '#1a1a18' },
+  ],
+};
 
 export const metadata: Metadata = {
   title: {
@@ -66,9 +77,12 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#c4a96d" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        {/* black-translucent = 状态栏透明，内容延伸到刘海/Dynamic Island 下方 */}
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <link rel="apple-touch-icon" href="/favicon.ico" />
+        {/* 安卓 Chrome 沉浸式状态栏 */}
+        <meta name="mobile-web-app-capable" content="yes" />
         
         {/* RSS */}
         <link rel="alternate" type="application/rss+xml" title="Lumen RSS" href="/feed.xml" />
@@ -136,7 +150,7 @@ export default function RootLayout({
           <Sidebar />
           
           {/* 主内容区 */}
-          <main className="site-main md:ml-[var(--sidebar-width,52px)] min-h-screen pb-24 md:pb-0">
+          <main className="site-main md:ml-[var(--sidebar-width,52px)] min-h-screen pb-[calc(72px+env(safe-area-inset-bottom,0px))] md:pb-0">
             <ErrorBoundary>{children}</ErrorBoundary>
             <Footer />
           </main>
