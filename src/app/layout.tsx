@@ -117,13 +117,6 @@ export default function RootLayout({
         />
       </head>
       <body className="app-body antialiased min-h-screen" suppressHydrationWarning>
-        <Script
-          id="sw-register"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`,
-          }}
-        />
         <ThemeProvider>
           <FontProvider>
           <AdminProvider>
