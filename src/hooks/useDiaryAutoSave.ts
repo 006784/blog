@@ -14,16 +14,6 @@ interface DiaryPayload {
   [key: string]: unknown;
 }
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('admin-token');
-}
-
-function authHeaders(): HeadersInit {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
-}
-
 export function useDiaryAutoSave(payload: DiaryPayload | null, debounceMs = 3000) {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -39,7 +29,8 @@ export function useDiaryAutoSave(payload: DiaryPayload | null, debounceMs = 3000
     try {
       const res = await fetch(`/api/diary/${p.diary_date}`, {
         method: 'PUT',
-        headers: authHeaders(),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(p),
       });
       if (!res.ok) throw new Error('save failed');

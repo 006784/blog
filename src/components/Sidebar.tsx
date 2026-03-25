@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Archive,
@@ -156,6 +156,7 @@ function RailDivider() {
 // ── Main Sidebar ──────────────────────────────────────────
 export function Sidebar() {
   const pathname  = usePathname();
+  const router = useRouter();
   const isHome    = pathname === '/';
   const { resolvedTheme, setTheme } = useTheme();
   const { isAdmin, showLoginModal, logout } = useAdmin();
@@ -180,12 +181,19 @@ export function Sidebar() {
     );
   }, [panelOpen]);
 
-  const handleIconClick = (key: string) => {
-    if (activeIcon === key && panelOpen) {
+  const handleIconClick = (item: NavItem) => {
+    const isCurrentPage = itemActive(pathname, item.href);
+
+    if (isCurrentPage && activeIcon === item.key && panelOpen) {
       setPanelOpen(false);
-    } else {
-      setPanelIcon(key);
-      setPanelOpen(true);
+      return;
+    }
+
+    setPanelIcon(item.key);
+    setPanelOpen(true);
+
+    if (!isCurrentPage) {
+      router.push(item.href);
     }
   };
 
@@ -274,7 +282,7 @@ export function Sidebar() {
                 item={item}
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
-                onClick={() => handleIconClick(item.key)}
+                onClick={() => handleIconClick(item)}
               />
             ))}
 
@@ -286,7 +294,7 @@ export function Sidebar() {
                 item={item}
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
-                onClick={() => handleIconClick(item.key)}
+                onClick={() => handleIconClick(item)}
               />
             ))}
 
@@ -298,7 +306,19 @@ export function Sidebar() {
                 item={item}
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
-                onClick={() => handleIconClick(item.key)}
+                onClick={() => handleIconClick(item)}
+              />
+            ))}
+
+            <RailDivider />
+
+            {group4.map(item => (
+              <RailBtn
+                key={item.key}
+                item={item}
+                isCurrentPage={itemActive(pathname, item.href)}
+                isPanelOpen={activeIcon === item.key && panelOpen}
+                onClick={() => handleIconClick(item)}
               />
             ))}
           </div>
@@ -316,10 +336,15 @@ export function Sidebar() {
             }}
           >
             {/* Avatar */}
-            <div
+            <button
+              type="button"
+              onClick={() => router.push(isAdmin ? '/profile' : '/about')}
+              title={isAdmin ? '个人资料' : '关于我'}
+              aria-label={isAdmin ? '个人资料' : '关于我'}
+              className="rail-btn"
               style={{
-                width: 24,
-                height: 24,
+                width: 30,
+                height: 30,
                 borderRadius: '50%',
                 background: 'var(--paper-deep)',
                 border: '1px solid var(--line)',
@@ -328,6 +353,7 @@ export function Sidebar() {
                 justifyContent: 'center',
                 overflow: 'hidden',
                 flexShrink: 0,
+                padding: 0,
               }}
             >
               {profile.avatar ? (
@@ -335,9 +361,9 @@ export function Sidebar() {
                 <img
                   src={profile.avatar}
                   alt={profile.nickname}
-                  width={24}
-                  height={24}
-                  style={{ width: 24, height: 24, objectFit: 'cover' }}
+                  width={30}
+                  height={30}
+                  style={{ width: 30, height: 30, objectFit: 'cover' }}
                 />
               ) : (
                 <span
@@ -350,7 +376,7 @@ export function Sidebar() {
                   {(profile.nickname || '拾').charAt(0)}
                 </span>
               )}
-            </div>
+            </button>
 
             {/* 搜索按钮 — 触发 Cmd+K */}
             <button
@@ -641,7 +667,8 @@ export function Sidebar() {
               {[
                 { title: '内容', items: group1 },
                 { title: '探索', items: group2 },
-                { title: '站点', items: group3 },
+                { title: '工具', items: group3 },
+                { title: '站点', items: group4 },
               ].map((g, gi) => (
                 <div key={g.title}>
                   {gi > 0 && <div style={{ height: 1, background: 'var(--line)', margin: '8px 28px' }} />}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Plus, Edit2, Trash2, X, Loader2, Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/components/AdminProvider';
 import { TimelineEvent } from '@/lib/supabase';
 
@@ -21,19 +22,36 @@ const EMPTY: Partial<TimelineEvent> = {
 };
 
 export default function AdminTimelinePage() {
-  const { isAdmin, showLoginModal } = useAdmin();
+  const { isAdmin, loading: authLoading } = useAdmin();
+  const router = useRouter();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<TimelineEvent | null>(null);
   const [form, setForm] = useState<Partial<TimelineEvent>>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAdmin) { showLoginModal(); return; }
-    fetch('/api/timeline').then(r => r.json()).then(setEvents).finally(() => setLoading(false));
-  }, [isAdmin]);
+    if (authLoading) return;
+    if (!isAdmin) {
+      router.replace('/admin/login?redirect=/admin/timeline');
+      return;
+    }
+
+    fetch('/api/timeline')
+      .then(async (r) => {
+        if (!r.ok) throw new Error('load failed');
+        return r.json();
+      })
+      .then((data) => setEvents(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        console.error('加载时间线失败:', error);
+        setEvents([]);
+      })
+      .finally(() => setLoading(false));
+  }, [authLoading, isAdmin, router]);
 
   function openCreate() {
     setEditing(null);
@@ -87,6 +105,31 @@ export default function AdminTimelinePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
+  async function handleSeedDefaults() {
+    setSeeding(true);
+    try {
+      const res = await fetch('/api/timeline/seed', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'seed failed');
+      setEvents(Array.isArray(data.events) ? data.events : []);
+    } catch (error) {
+      console.error('初始化时间线失败:', error);
+    } finally {
+      setSeeding(false);
+    }
+  }
+
+  if (authLoading || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center text-zinc-500">
+          <Clock className="w-12 h-12 mx-auto mb-4 text-zinc-300" />
+          <p>{authLoading ? '验证中...' : '正在跳转到登录页...'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen px-6 py-12 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -110,7 +153,23 @@ export default function AdminTimelinePage() {
         <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-zinc-400" /></div>
       ) : events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-700 py-16 text-center text-zinc-400">
-          暂无事件
+          <p className="mb-4">暂无事件</p>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={handleSeedDefaults}
+              disabled={seeding}
+              className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-85 disabled:opacity-50 dark:bg-white dark:text-zinc-900"
+            >
+              {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              初始化示例时间线
+            </button>
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-white"
+            >
+              手动添加
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">

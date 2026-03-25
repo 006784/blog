@@ -14,21 +14,10 @@ import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ImageUploader } from '@/components/ImageUploader';
-import { Collection, Post, getPostById } from '@/lib/supabase';
+import { Collection, getPostById, getPostBySlug } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import MobileWritePage from './mobile/page';
-
-async function apiCreatePost(body: Partial<Post>): Promise<Post> {
-  const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error((await res.json()).error || '创建失败');
-  return (await res.json()).post;
-}
-
-async function apiUpdatePost(id: string, body: Partial<Post>): Promise<Post> {
-  const res = await fetch(`/api/posts/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error((await res.json()).error || '更新失败');
-  return (await res.json()).post;
-}
+import { apiCreatePost, apiUpdatePost } from '@/lib/post-api-client';
 
 async function apiCreateCollection(body: Partial<Collection>): Promise<Collection> {
   const res = await fetch('/api/collections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -86,7 +75,7 @@ function WritePageContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
   const isMobile = useIsMobile();
-  const { isAdmin, showLoginModal } = useAdmin();
+  const { isAdmin, loading: adminLoading, showLoginModal } = useAdmin();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -183,7 +172,7 @@ function WritePageContent() {
   async function loadPost(id: string) {
     try {
       setLoading(true);
-      const post = await getPostById(id);
+      const post = await getPostById(id) || await getPostBySlug(id);
       if (post) {
         setTitle(post.title);
         setDescription(post.description);
@@ -289,7 +278,7 @@ function WritePageContent() {
       showNotification('success', '草稿已保存');
     } catch (error) {
       console.error('保存失败:', error);
-      showNotification('error', '保存失败');
+      showNotification('error', error instanceof Error ? error.message : '保存失败');
     } finally {
       setIsSaving(false);
     }
@@ -335,7 +324,7 @@ function WritePageContent() {
       setTimeout(() => router.push('/blog'), 1500);
     } catch (error) {
       console.error('发布失败:', error);
-      showNotification('error', '发布失败');
+      showNotification('error', error instanceof Error ? error.message : '发布失败');
     } finally {
       setIsPublishing(false);
     }
@@ -352,6 +341,14 @@ function WritePageContent() {
   const readingMin = Math.max(1, Math.ceil(wordCount / 300));
 
   // ── Non-admin gate ──────────────────────────────────────────
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[var(--gold)] animate-spin" />
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -667,6 +664,14 @@ function WritePageContent() {
             onChange={setContent}
             onSave={handleSaveDraft}
             initialShowPreview={false}
+            aiTitle={title}
+            aiDescription={description}
+            onSummaryGenerated={(summary) => {
+              setDescription(summary);
+              if (!metaDescription.trim()) {
+                setMetaDescription(summary);
+              }
+            }}
             placeholder={`開始書く…\n\nMarkdown 支持粗体、斜体、标题、链接、图片、代码块等。\n快捷键：Ctrl/Cmd+B 粗体  Ctrl/Cmd+I 斜体  Ctrl/Cmd+S 保存`}
           />
         </div>

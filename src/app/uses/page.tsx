@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
-import Image from 'next/image';
 import { type UsesItem } from '@/lib/supabase';
+import { UsesIcon } from '@/components/UsesIcon';
 
 // ── 分类配置 ──────────────────────────────────────────────
 
@@ -110,15 +110,16 @@ export default function UsesPage() {
                       const inner = (
                         <>
                           {item.icon_url ? (
-                            <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-zinc-100 dark:border-zinc-800">
-                              <Image
-                                src={item.icon_url}
-                                alt={item.name}
-                                width={36}
-                                height={36}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
+                            <UsesIcon
+                              key={`${item.id}:${item.icon_url ?? ''}:${item.link ?? ''}`}
+                              iconUrl={item.icon_url}
+                              link={item.link}
+                              name={item.name}
+                              fallback={meta.icon}
+                              wrapperClassName="w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center bg-white dark:bg-zinc-950"
+                              imgClassName="w-full h-full object-cover"
+                              fallbackClassName="text-base"
+                            />
                           ) : (
                             <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 shrink-0 flex items-center justify-center text-base">
                               {meta.icon}

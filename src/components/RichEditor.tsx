@@ -1,19 +1,25 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bold, Italic, Strikethrough, Code, Link2, Image, 
   List, ListOrdered, Quote, Heading1, Heading2, Heading3,
   Table, Minus, Eye, EyeOff, Maximize2, Minimize2,
   Undo, Redo, CheckSquare, FileCode, Upload, X, Loader2, Sparkles,
-  AlignLeft, AlignCenter, AlignRight, Palette, Type, Copy, Scissors, RotateCcw,
-  Wand2, Brain, Zap, FileText, MessageSquare, BookOpen, AlertCircle
+  Copy, Scissors, RotateCcw, Wand2, Brain, Zap, FileText, BookOpen, AlertCircle, Bot, Check
 } from 'lucide-react';
 import { uploadFile, compressImage } from '@/lib/storage';
 import { autoFormatContent } from '@/lib/auto-format';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import type { CiyuanProviderConfig } from '@/lib/ciyuan-providers';
+import {
+  BUILTIN_CIYUAN_PROVIDERS,
+  buildCiyuanProviderMap,
+  getDefaultCiyuanProviderId,
+  getDefaultModelId,
+} from '@/lib/ciyuan-providers';
 
 interface RichEditorProps {
   value: string;
@@ -22,9 +28,118 @@ interface RichEditorProps {
   onImageUpload?: (url: string) => void;
   onSave?: () => void;
   initialShowPreview?: boolean;
+  aiTitle?: string;
+  aiDescription?: string;
+  onSummaryGenerated?: (summary: string) => void;
 }
 
-export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave, initialShowPreview }: RichEditorProps) {
+const CIYUAN_KEYS_STORAGE = 'ciyuan_api_keys';
+const CIYUAN_CUSTOM_PROVIDERS_STORAGE = 'ciyuan_custom_providers_v2';
+
+type ArticleAIMode = 'improve' | 'summary';
+
+interface ArticleAIMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+function loadStoredAIKeys() {
+  try {
+    return JSON.parse(localStorage.getItem(CIYUAN_KEYS_STORAGE) || '{}') as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+function loadStoredAIProviders() {
+  try {
+    return JSON.parse(localStorage.getItem(CIYUAN_CUSTOM_PROVIDERS_STORAGE) || '[]') as CiyuanProviderConfig[];
+  } catch {
+    return [];
+  }
+}
+
+function extractMarkdownRewrite(content: string) {
+  const match = content.match(/```(?:markdown|md)?\n([\s\S]*?)```/i);
+  return (match?.[1] || content).trim();
+}
+
+function extractSummaryText(content: string) {
+  return content
+    .replace(/```[\s\S]*?```/g, '')
+    .split('\n')
+    .map((line) => line.replace(/^[-*>\s]+/, '').trim())
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+}
+
+function buildArticleAIMessages(options: {
+  mode: ArticleAIMode;
+  title?: string;
+  description?: string;
+  content: string;
+  selectedText: string;
+  prompt: string;
+}): ArticleAIMessage[] {
+  const { mode, title, description, content, selectedText, prompt } = options;
+  const scopedContent = selectedText.trim() || content.trim();
+  const scopeLabel = selectedText.trim() ? '选中的段落' : '全文';
+
+  const sharedContext = [
+    title?.trim() ? `文章标题：${title.trim()}` : '',
+    description?.trim() ? `当前摘要：${description.trim()}` : '',
+    scopedContent ? `${scopeLabel}内容：\n${scopedContent}` : '',
+    prompt.trim() ? `额外要求：${prompt.trim()}` : '',
+  ].filter(Boolean).join('\n\n');
+
+  if (mode === 'summary') {
+    return [
+      {
+        role: 'system',
+        content: [
+          '你是一名擅长博客编辑的中文写作助手。',
+          '请根据文章内容生成 1 到 2 句中文摘要。',
+          '摘要要适合放在文章简介或 SEO 描述中，简洁、准确、自然。',
+          '只输出摘要正文，不要标题、不要列表、不要解释。',
+        ].join('\n'),
+      },
+      {
+        role: 'user',
+        content: sharedContext || '请根据当前文章生成简短摘要。',
+      },
+    ];
+  }
+
+  return [
+    {
+      role: 'system',
+      content: [
+        '你是一名专业中文编辑和技术写作者。',
+        '请先给出 3 条以内的简短优化建议。',
+        '然后输出一个 markdown 代码块，里面只放优化后的 Markdown 正文。',
+        '如果用户提供的是选中片段，就只重写该片段；否则重写全文。',
+        '不要编造事实，不要改变技术结论，尽量保留原作者语气。',
+      ].join('\n'),
+    },
+    {
+      role: 'user',
+      content: sharedContext || '请帮我优化当前文章内容。',
+    },
+  ];
+}
+
+export function RichEditor({
+  value,
+  onChange,
+  placeholder,
+  onImageUpload,
+  onSave,
+  initialShowPreview,
+  aiTitle,
+  aiDescription,
+  onSummaryGenerated,
+}: RichEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreview, setShowPreview] = useState(initialShowPreview ?? true);
@@ -34,11 +149,37 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTableModal, setShowTableModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiMode, setAiMode] = useState<ArticleAIMode>('improve');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiResult, setAiResult] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiCopied, setAiCopied] = useState(false);
+  const [aiProviderId, setAiProviderId] = useState(getDefaultCiyuanProviderId());
+  const [aiModel, setAiModel] = useState('');
+  const [aiKeys, setAiKeys] = useState<Record<string, string>>({});
+  const [aiCustomProviders, setAiCustomProviders] = useState<CiyuanProviderConfig[]>([]);
+  const [aiSelection, setAiSelection] = useState<{ start: number; end: number; hasSelection: boolean } | null>(null);
+  const aiAbortRef = useRef<AbortController | null>(null);
   
   // 历史记录
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const lastValueRef = useRef(value);
+  const historyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aiProviders = useMemo(
+    () => [...BUILTIN_CIYUAN_PROVIDERS, ...aiCustomProviders],
+    [aiCustomProviders]
+  );
+  const aiProviderMap = useMemo(
+    () => buildCiyuanProviderMap(aiCustomProviders),
+    [aiCustomProviders]
+  );
+  const activeAIProvider =
+    aiProviderMap[aiProviderId] ||
+    aiProviderMap[getDefaultCiyuanProviderId()] ||
+    aiProviders[0] ||
+    null;
 
   // 初始化历史
   useEffect(() => {
@@ -46,6 +187,30 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave
       setHistory([value]);
       setHistoryIndex(0);
     }
+  }, [history.length, value]);
+
+  useEffect(() => {
+    setAiKeys(loadStoredAIKeys());
+    setAiCustomProviders(loadStoredAIProviders());
+  }, []);
+
+  useEffect(() => {
+    if (!activeAIProvider) return;
+    if (!aiProviderMap[aiProviderId]) {
+      setAiProviderId(activeAIProvider.id);
+    }
+    if (!aiModel.trim()) {
+      setAiModel(getDefaultModelId(activeAIProvider));
+    }
+  }, [activeAIProvider, aiModel, aiProviderId, aiProviderMap]);
+
+  useEffect(() => {
+    return () => {
+      if (historyTimeoutRef.current) {
+        clearTimeout(historyTimeoutRef.current);
+      }
+      aiAbortRef.current?.abort();
+    };
   }, []);
 
   // 保存到历史（防抖）
@@ -148,13 +313,35 @@ export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave
     }
   };
 
-  // AI辅助功能
+  function handleAIProviderChange(nextProviderId: string) {
+    const nextProvider = aiProviderMap[nextProviderId];
+    setAiProviderId(nextProviderId);
+    setAiModel(getDefaultModelId(nextProvider));
+  }
+
+  function openAIModal(mode: ArticleAIMode) {
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? 0;
+    const end = textarea?.selectionEnd ?? 0;
+
+    setAiMode(mode);
+    setAiPrompt('');
+    setAiResult('');
+    setAiCopied(false);
+    setAiSelection({
+      start,
+      end,
+      hasSelection: end > start,
+    });
+    setShowAIModal(true);
+  }
+
   const showAIAssistant = () => {
-    alert('AI写作助手功能正在开发中...');
+    openAIModal('improve');
   };
 
   const generateSummary = () => {
-    alert('AI自动生成摘要功能正在开发中...');
+    openAIModal('summary');
   };
 
   // 一键排版功能
@@ -266,7 +453,6 @@ console.log('Hello World');
     // 设置光标位置
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = start + before.length + selectedText.length;
       textarea.setSelectionRange(
         start + before.length,
         start + before.length + selectedText.length
@@ -309,6 +495,139 @@ console.log('Hello World');
       textarea.setSelectionRange(start + text.length, start + text.length);
     }, 0);
   };
+
+  const runAI = useCallback(async () => {
+    if (!activeAIProvider) return;
+
+    const currentText = value.trim();
+    const selectionStart = aiSelection?.start ?? textareaRef.current?.selectionStart ?? 0;
+    const selectionEnd = aiSelection?.end ?? textareaRef.current?.selectionEnd ?? 0;
+    const selectedText = selectionEnd > selectionStart ? value.slice(selectionStart, selectionEnd) : '';
+
+    if (!aiModel.trim()) {
+      setAiResult('请先填写模型 ID。');
+      return;
+    }
+
+    if (activeAIProvider.authMode !== 'none' && !aiKeys[activeAIProvider.id]?.trim()) {
+      setAiResult('当前浏览器还没有这个提供商的 API Key，请先去词元配置后再回来使用。');
+      return;
+    }
+
+    if (!currentText && aiMode !== 'summary') {
+      setAiResult('文章内容还是空的，先写一点内容，再让 AI 给你优化会更准确。');
+      return;
+    }
+
+    if (!currentText && aiMode === 'summary') {
+      setAiResult('还没有可供总结的文章内容。');
+      return;
+    }
+
+    setAiLoading(true);
+    setAiResult('');
+    aiAbortRef.current?.abort();
+    aiAbortRef.current = new AbortController();
+
+    try {
+      const response = await fetch('/api/tools/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerId: activeAIProvider.id,
+          providerConfig: activeAIProvider,
+          model: aiModel.trim(),
+          apiKey: aiKeys[activeAIProvider.id] || '',
+          messages: buildArticleAIMessages({
+            mode: aiMode,
+            title: aiTitle,
+            description: aiDescription,
+            content: value,
+            selectedText,
+            prompt: aiPrompt,
+          }),
+        }),
+        signal: aiAbortRef.current.signal,
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`AI 请求失败 (${response.status})`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullText = '';
+
+      while (true) {
+        const { done, value: chunk } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(chunk, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const payload = JSON.parse(line.slice(6));
+            if (payload.text) {
+              fullText += payload.text;
+              setAiResult(fullText);
+            }
+            if (payload.done) break;
+          } catch {
+            // ignore malformed SSE chunks
+          }
+        }
+      }
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        setAiResult(`[错误] ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  }, [
+    activeAIProvider,
+    aiDescription,
+    aiKeys,
+    aiMode,
+    aiModel,
+    aiPrompt,
+    aiSelection,
+    aiTitle,
+    value,
+  ]);
+
+  async function copyAIResult() {
+    if (!aiResult.trim()) return;
+    await navigator.clipboard.writeText(aiResult);
+    setAiCopied(true);
+    setTimeout(() => setAiCopied(false), 1500);
+  }
+
+  function applyAIRewrite() {
+    const rewritten = extractMarkdownRewrite(aiResult);
+    if (!rewritten) return;
+
+    const selectionStart = aiSelection?.start ?? 0;
+    const selectionEnd = aiSelection?.end ?? 0;
+    const shouldReplaceSelection = !!aiSelection?.hasSelection && selectionEnd > selectionStart;
+    const nextValue = shouldReplaceSelection
+      ? `${value.slice(0, selectionStart)}${rewritten}${value.slice(selectionEnd)}`
+      : rewritten;
+
+    onChange(nextValue);
+    saveToHistory(nextValue);
+    setShowAIModal(false);
+  }
+
+  function applyAISummary() {
+    const summary = extractSummaryText(aiResult);
+    if (!summary) return;
+    onSummaryGenerated?.(summary);
+    setShowAIModal(false);
+  }
 
   // 工具栏操作
   type ToolItem = 
@@ -474,8 +793,10 @@ console.log('Hello World');
     const newValue = e.target.value;
     onChange(newValue);
     // 延迟保存到历史，避免每个字符都保存
-    clearTimeout((window as any).editorHistoryTimeout);
-    (window as any).editorHistoryTimeout = setTimeout(() => {
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current);
+    }
+    historyTimeoutRef.current = setTimeout(() => {
       saveToHistory(newValue);
     }, 500);
   };
@@ -652,13 +973,202 @@ console.log('Hello World');
             }} />
           </Modal>
         )}
+
+        {showAIModal && (
+          <Modal
+            title={aiMode === 'summary' ? 'AI 生成摘要' : 'AI 优化建议'}
+            maxWidthClass="max-w-4xl"
+            onClose={() => {
+              aiAbortRef.current?.abort();
+              setShowAIModal(false);
+            }}
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setAiMode('improve')}
+                  className={`rounded-xl border px-3 py-2 text-sm transition ${
+                    aiMode === 'improve'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-secondary hover:bg-secondary/80'
+                  }`}
+                >
+                  AI优化建议
+                </button>
+                <button
+                  onClick={() => setAiMode('summary')}
+                  className={`rounded-xl border px-3 py-2 text-sm transition ${
+                    aiMode === 'summary'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-secondary hover:bg-secondary/80'
+                  }`}
+                >
+                  AI生成摘要
+                </button>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-2">AI 提供商</label>
+                  <select
+                    value={activeAIProvider?.id || aiProviderId}
+                    onChange={(e) => handleAIProviderChange(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-secondary border border-border focus:border-primary outline-none"
+                  >
+                    {aiProviders.map((provider) => (
+                      <option key={provider.id} value={provider.id}>
+                        {provider.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">模型 ID</label>
+                  <input
+                    list="article-ai-models"
+                    value={aiModel}
+                    onChange={(e) => setAiModel(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-secondary border border-border focus:border-primary outline-none font-mono text-sm"
+                    placeholder="输入或选择模型 ID"
+                  />
+                  <datalist id="article-ai-models">
+                    {(activeAIProvider?.models || []).map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.label}
+                      </option>
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-secondary/40 px-4 py-3 text-xs text-muted-foreground leading-relaxed">
+                {activeAIProvider?.authMode === 'none'
+                  ? '当前提供商不需要 API Key，可直接请求。'
+                  : aiKeys[activeAIProvider?.id || '']?.trim()
+                    ? '已检测到这个提供商的 API Key，将直接复用词元中的配置。'
+                    : '当前浏览器还没找到这个提供商的 API Key，请先去词元完成配置。'}
+                <div className="mt-2 text-primary">
+                  未配置时可前往 /tools/ciyuan 填写密钥。
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  {aiMode === 'summary' ? '摘要要求' : '润色要求'}
+                </label>
+                <textarea
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  rows={4}
+                  placeholder={
+                    aiMode === 'summary'
+                      ? '例如：控制在 80 字以内，适合首页卡片展示。'
+                      : aiSelection?.hasSelection
+                        ? '例如：把这段改得更简洁、更像教程风格。'
+                        : '例如：让全文更像一篇教程，段落更清晰，保留原有观点。'
+                  }
+                  className="w-full px-4 py-3 rounded-xl bg-secondary border border-border focus:border-primary outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-muted-foreground">
+                  {aiMode === 'improve'
+                    ? aiSelection?.hasSelection
+                      ? '将优先优化当前选中的内容。'
+                      : '将基于当前全文给出优化建议。'
+                    : '将根据标题、摘要和正文生成简介。'}
+                </div>
+                <button
+                  onClick={runAI}
+                  disabled={aiLoading || !aiModel.trim()}
+                  className="btn-primary px-4 py-2 disabled:opacity-50 inline-flex items-center gap-2"
+                >
+                  {aiLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      生成中...
+                    </>
+                  ) : (
+                    <>
+                      <Bot className="w-4 h-4" />
+                      开始生成
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-border bg-background min-h-[240px] max-h-[420px] overflow-auto">
+                <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
+                  <span className="text-sm font-medium">结果</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={copyAIResult}
+                      disabled={!aiResult.trim()}
+                      className="px-3 py-1.5 rounded-lg text-xs border border-border hover:bg-secondary disabled:opacity-40"
+                    >
+                      {aiCopied ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Check className="w-3.5 h-3.5" />
+                          已复制
+                        </span>
+                      ) : (
+                        '复制结果'
+                      )}
+                    </button>
+                    {aiMode === 'summary' ? (
+                      <button
+                        onClick={applyAISummary}
+                        disabled={!extractSummaryText(aiResult)}
+                        className="btn-primary px-3 py-1.5 text-xs disabled:opacity-40"
+                      >
+                        写入摘要
+                      </button>
+                    ) : (
+                      <button
+                        onClick={applyAIRewrite}
+                        disabled={!extractMarkdownRewrite(aiResult)}
+                        className="btn-primary px-3 py-1.5 text-xs disabled:opacity-40"
+                      >
+                        {aiSelection?.hasSelection ? '替换选中内容' : '替换全文'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 prose prose-sm dark:prose-invert max-w-none">
+                  {aiResult ? (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {aiResult}
+                    </ReactMarkdown>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {aiMode === 'summary'
+                        ? '生成后会在这里显示可直接写入文章摘要的结果。'
+                        : '生成后会先显示优化建议，再给出可直接替换的 Markdown 内容。'}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Modal>
+        )}
       </AnimatePresence>
     </div>
   );
 }
 
 // 弹窗组件
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({
+  title,
+  onClose,
+  children,
+  maxWidthClass = 'max-w-md',
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  maxWidthClass?: string;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -671,7 +1181,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-md bg-card rounded-2xl shadow-2xl"
+        className={`w-full ${maxWidthClass} bg-card rounded-2xl shadow-2xl`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminSession } from '@/lib/auth-server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createPostRecord, sanitizePostPayload } from '@/lib/post-persistence';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,12 +9,12 @@ export async function POST(request: NextRequest) {
   if (!await requireAdminSession(request)) {
     return NextResponse.json({ error: '未授权' }, { status: 401 });
   }
-  const body = await request.json();
-  const { data, error } = await supabaseAdmin
-    .from('posts')
-    .insert([{ ...body, views: 0, likes: 0 }])
-    .select()
-    .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ post: data }, { status: 201 });
+  try {
+    const body = await request.json();
+    const post = await createPostRecord(sanitizePostPayload(body, 'create'));
+    return NextResponse.json({ post }, { status: 201 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '创建文章失败';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

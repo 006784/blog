@@ -9,6 +9,7 @@ import {
 import Link from 'next/link';
 import { useAdmin } from '@/components/AdminProvider';
 import { UsesItem } from '@/lib/supabase';
+import { UsesIcon } from '@/components/UsesIcon';
 
 // ── 分类配置 ────────────────────────────────────────────────
 const CATEGORIES = [
@@ -108,8 +109,16 @@ function ItemModal({
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-xl border border-[var(--line)] bg-[var(--paper-deep)] flex items-center justify-center shrink-0 overflow-hidden">
               {form.icon_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={form.icon_url} alt="" className="w-10 h-10 object-contain" onError={e => (e.currentTarget.style.display = 'none')} />
+                <UsesIcon
+                  key={`preview:${form.icon_url ?? ''}:${form.link ?? ''}`}
+                  iconUrl={form.icon_url}
+                  link={form.link}
+                  name={form.name || '工具图标'}
+                  fallback={getCat(form.category ?? '').icon}
+                  wrapperClassName="w-10 h-10 flex items-center justify-center"
+                  imgClassName="w-10 h-10 object-contain"
+                  fallbackClassName="text-2xl"
+                />
               ) : (
                 <span className="text-2xl">{getCat(form.category ?? '').icon}</span>
               )}
@@ -192,7 +201,7 @@ export default function AdminUsesPage() {
   useEffect(() => {
     if (!isAdmin) { showLoginModal(); return; }
     fetch('/api/uses').then(r => r.json()).then(setItems).finally(() => setLoading(false));
-  }, [isAdmin]);
+  }, [isAdmin, showLoginModal]);
 
   function openCreate() {
     setEditing(null);
@@ -444,8 +453,16 @@ export default function AdminUsesPage() {
                         <div className="flex items-center gap-2.5 mb-1.5">
                           <div className="w-8 h-8 rounded-lg border border-[var(--line)] bg-[var(--paper)] flex items-center justify-center shrink-0 overflow-hidden">
                             {item.icon_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={item.icon_url} alt={item.name} className="w-5 h-5 object-contain" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                              <UsesIcon
+                                key={`${item.id}:${item.icon_url ?? ''}:${item.link ?? ''}`}
+                                iconUrl={item.icon_url}
+                                link={item.link}
+                                name={item.name}
+                                fallback={meta.icon}
+                                wrapperClassName="w-5 h-5 flex items-center justify-center"
+                                imgClassName="w-5 h-5 object-contain"
+                                fallbackClassName="text-sm"
+                              />
                             ) : (
                               <span className="text-sm">{meta.icon}</span>
                             )}

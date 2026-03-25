@@ -3053,6 +3053,43 @@ textarea:focus {
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12) !important;
 }
 
+.guestbook-field {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Noto Sans SC",
+    "Microsoft YaHei",
+    sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+  font-feature-settings: normal !important;
+  font-variant-ligatures: none !important;
+  text-rendering: auto !important;
+}
+
+.guestbook-field::placeholder {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Noto Sans SC",
+    "Microsoft YaHei",
+    sans-serif !important;
+  letter-spacing: 0 !important;
+  font-feature-settings: normal !important;
+}
+
+.guestbook-textarea {
+  min-height: 132px;
+}
+
 .chip-filter {
   border-color: var(--premium-line) !important;
   background: rgba(255, 255, 255, 0.65) !important;

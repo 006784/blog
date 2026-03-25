@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Diary } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
-import { DiaryTheme, DIARY_THEMES, applyThemeVars } from '@/lib/diary/themes';
+import { DiaryTheme, applyThemeVars } from '@/lib/diary/themes';
 import { DiaryShell } from '@/components/diary/DiaryShell';
 import { DiaryEditor } from '@/components/diary/DiaryEditor';
 import { CalendarView } from '@/components/diary/CalendarView';
@@ -13,14 +13,6 @@ import { MoodReport } from '@/components/diary/MoodReport';
 import { ExportModal } from '@/components/diary/ExportModal';
 
 // ── Helpers ────────────────────────────────────────────────────
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('admin-token');
-}
-function authHeaders(): HeadersInit {
-  const t = getToken();
-  return t ? { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' } : {};
-}
 function getSavedTheme(): DiaryTheme {
   if (typeof window === 'undefined') return 'kraft';
   return (localStorage.getItem('diary-theme') as DiaryTheme) || 'kraft';
@@ -75,7 +67,7 @@ export default function DiaryPage() {
     setLoading(true);
     try {
       const res = await fetch(`/api/diary?year=${calYear}&month=${calMonth}&view=calendar`, {
-        headers: authHeaders(),
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('failed');
       const data = await res.json();
@@ -94,7 +86,7 @@ export default function DiaryPage() {
   const [allDiaries, setAllDiaries] = useState<Diary[]>([]);
   useEffect(() => {
     if (view !== 'report' && view !== 'timeline') return;
-    fetch(`/api/diary?year=${calYear}`, { headers: authHeaders() })
+    fetch(`/api/diary?year=${calYear}`, { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => setAllDiaries(Array.isArray(d.diaries) ? d.diaries : []))
       .catch(() => {});
@@ -103,7 +95,7 @@ export default function DiaryPage() {
   // ── Load diary for selected date ──────────────────────────
   const loadDiaryForDate = useCallback(async (date: string) => {
     try {
-      const res = await fetch(`/api/diary/${date}`, { headers: authHeaders() });
+      const res = await fetch(`/api/diary/${date}`, { credentials: 'include' });
       if (!res.ok) return null;
       const data = await res.json();
       return data.diary as Diary | null;

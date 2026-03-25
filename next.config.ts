@@ -1,5 +1,39 @@
 import type { NextConfig } from "next";
 
+type RemotePattern = {
+  protocol: 'http' | 'https';
+  hostname: string;
+  port?: string;
+  pathname?: string;
+};
+
+function createRemotePattern(value?: string): RemotePattern | null {
+  if (!value) return null;
+
+  try {
+    const url = new URL(value);
+    const protocol = url.protocol.replace(':', '');
+
+    if (protocol !== 'http' && protocol !== 'https') {
+      return null;
+    }
+
+    return {
+      protocol,
+      hostname: url.hostname,
+      port: url.port || undefined,
+      pathname: '/**',
+    };
+  } catch {
+    return null;
+  }
+}
+
+const envRemotePatterns = [
+  createRemotePattern(process.env.NEXT_PUBLIC_SITE_URL),
+  createRemotePattern(process.env.R2_PUBLIC_URL),
+].filter((pattern): pattern is RemotePattern => pattern !== null);
+
 const nextConfig: NextConfig = {
   // distDir: 'out',  // 注释掉自定义输出目录以适配Vercel
   trailingSlash: true,
@@ -19,6 +53,7 @@ const nextConfig: NextConfig = {
       // 其他常见 CDN（可按需追加）
       { protocol: 'https', hostname: '*.cloudfront.net' },
       { protocol: 'https', hostname: '*.githubusercontent.com' },
+      ...envRemotePatterns,
     ],
     // 开发环境关闭优化以加速热重载
     ...(process.env.NODE_ENV === 'development' ? { unoptimized: true } : {}),

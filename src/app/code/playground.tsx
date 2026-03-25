@@ -1,13 +1,23 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
-  Play, Square, Trash2, Copy, Check, ChevronDown, ChevronUp,
-  Terminal, Code2, RotateCcw, Download, Share2, BookOpen,
+  Play, Trash2, Copy, Check, ChevronDown, ChevronUp,
+  Terminal, Code2, RotateCcw, Download, BookOpen,
+  Bot, Wand2, Sparkles, Bug, X, Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import type { CiyuanProviderConfig } from '@/lib/ciyuan-providers';
+import {
+  BUILTIN_CIYUAN_PROVIDERS,
+  buildCiyuanProviderMap,
+  getDefaultCiyuanProviderId,
+  getDefaultModelId,
+} from '@/lib/ciyuan-providers';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
 
@@ -244,8 +254,151 @@ echo "反转: " . strrev($text) . "\\n";
   </div>
 </body>
 </html>
-`,
+	`,
 };
+
+const CIYUAN_KEYS_STORAGE = 'ciyuan_api_keys';
+const CIYUAN_CUSTOM_PROVIDERS_STORAGE = 'ciyuan_custom_providers_v2';
+
+type AssistantMode = 'generate' | 'explain' | 'fix' | 'optimize';
+
+interface AssistantMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+const ASSISTANT_ACTIONS: Array<{
+  id: AssistantMode;
+  label: string;
+  icon: typeof Wand2;
+  placeholder: string;
+}> = [
+  {
+    id: 'generate',
+    label: '生成代码',
+    icon: Wand2,
+    placeholder: '描述你要实现的功能、输入输出、框架或约束，例如：写一个 Python 爬虫，抓取标题并导出 CSV。',
+  },
+  {
+    id: 'explain',
+    label: '解释代码',
+    icon: Sparkles,
+    placeholder: '可补充你最想知道的点，例如：重点解释这段递归、复杂度和边界条件。',
+  },
+  {
+    id: 'fix',
+    label: '修复报错',
+    icon: Bug,
+    placeholder: '可粘贴报错、预期结果或异常现象，例如：TypeError 在第 23 行，点击按钮没反应。',
+  },
+  {
+    id: 'optimize',
+    label: '优化代码',
+    icon: Bot,
+    placeholder: '说明你希望优化什么，例如：提升性能、重构结构、改成更清晰的 TypeScript 写法。',
+  },
+];
+
+function loadStoredKeys() {
+  try {
+    return JSON.parse(localStorage.getItem(CIYUAN_KEYS_STORAGE) || '{}') as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+function loadStoredCustomProviders() {
+  try {
+    return JSON.parse(localStorage.getItem(CIYUAN_CUSTOM_PROVIDERS_STORAGE) || '[]') as CiyuanProviderConfig[];
+  } catch {
+    return [];
+  }
+}
+
+function extractAssistantCode(content: string) {
+  const match = content.match(/```(?:[\w#+.-]+)?\n([\s\S]*?)```/);
+  return (match?.[1] || content).trim();
+}
+
+function buildAssistantMessages(options: {
+  mode: AssistantMode;
+  prompt: string;
+  code: string;
+  languageLabel: string;
+  output: RunOutput | null;
+}): AssistantMessage[] {
+  const { mode, prompt, code, languageLabel, output } = options;
+
+  const system = [
+    '你是一名资深软件工程师和代码助手。',
+    `当前主要处理的语言是 ${languageLabel}。`,
+    '回答默认使用简体中文。',
+    '如果需要返回代码，请优先返回完整、可运行的版本，并放在 Markdown 代码块中。',
+    '如果在解释代码，也请指出关键逻辑、边界情况和潜在风险。',
+  ].join('\n');
+
+  const codeSection = code.trim() ? `当前代码：\n\`\`\`${languageLabel.toLowerCase()}\n${code}\n\`\`\`` : '当前代码为空。';
+  const stderrSection = output?.stderr?.trim() ? `当前报错或 stderr：\n${output.stderr.trim()}` : '';
+  const stdoutSection = output?.stdout?.trim() ? `当前 stdout：\n${output.stdout.trim()}` : '';
+  const extraPrompt = prompt.trim() ? `补充说明：\n${prompt.trim()}` : '';
+
+  if (mode === 'generate') {
+    return [
+      { role: 'system', content: system },
+      {
+        role: 'user',
+        content: [
+          `请根据下面需求生成一份 ${languageLabel} 代码。`,
+          extraPrompt || '请生成一份完整、可运行、结构清晰的示例代码。',
+          code.trim() ? `如有必要，也可以参考或重写我当前编辑器中的代码。\n\n${codeSection}` : '',
+          '请先简短说明思路，再给出完整代码。',
+        ].filter(Boolean).join('\n\n'),
+      },
+    ];
+  }
+
+  if (mode === 'explain') {
+    return [
+      { role: 'system', content: system },
+      {
+        role: 'user',
+        content: [
+          `请解释这段 ${languageLabel} 代码。`,
+          extraPrompt || '请从作用、执行流程、关键语法、复杂度和注意事项几个方面解释。',
+          codeSection,
+        ].join('\n\n'),
+      },
+    ];
+  }
+
+  if (mode === 'fix') {
+    return [
+      { role: 'system', content: system },
+      {
+        role: 'user',
+        content: [
+          `请帮我修复这段 ${languageLabel} 代码。`,
+          extraPrompt || '请定位问题原因，并给出修复后的完整代码。',
+          stderrSection,
+          stdoutSection,
+          codeSection,
+        ].filter(Boolean).join('\n\n'),
+      },
+    ];
+  }
+
+  return [
+    { role: 'system', content: system },
+    {
+      role: 'user',
+      content: [
+        `请优化这段 ${languageLabel} 代码。`,
+        extraPrompt || '请优先提升可读性、健壮性和性能，并说明你改了什么。',
+        codeSection,
+      ].join('\n\n'),
+    },
+  ];
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -268,10 +421,50 @@ export function CodePlayground() {
   const [running, setRunning] = useState(false);
   const [copied, setCopied] = useState(false);
   const [htmlPreview, setHtmlPreview] = useState(STARTER['html']);
+  const [showAssistant, setShowAssistant] = useState(false);
+  const [assistantMode, setAssistantMode] = useState<AssistantMode>('generate');
+  const [assistantPrompt, setAssistantPrompt] = useState('');
+  const [assistantResult, setAssistantResult] = useState('');
+  const [assistantLoading, setAssistantLoading] = useState(false);
+  const [assistantCopied, setAssistantCopied] = useState(false);
+  const [assistantProviderId, setAssistantProviderId] = useState(getDefaultCiyuanProviderId());
+  const [assistantModel, setAssistantModel] = useState('');
+  const [assistantKeys, setAssistantKeys] = useState<Record<string, string>>({});
+  const [assistantCustomProviders, setAssistantCustomProviders] = useState<CiyuanProviderConfig[]>([]);
   const htmlDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const assistantAbortRef = useRef<AbortController | null>(null);
 
   const lang = LANGUAGES.find(l => l.id === langId)!;
   const isHtml = langId === 'html';
+  const assistantProviders = useMemo(
+    () => [...BUILTIN_CIYUAN_PROVIDERS, ...assistantCustomProviders],
+    [assistantCustomProviders]
+  );
+  const assistantProviderMap = useMemo(
+    () => buildCiyuanProviderMap(assistantCustomProviders),
+    [assistantCustomProviders]
+  );
+  const activeAssistantProvider =
+    assistantProviderMap[assistantProviderId] ||
+    assistantProviderMap[getDefaultCiyuanProviderId()] ||
+    assistantProviders[0] ||
+    null;
+  const assistantAction = ASSISTANT_ACTIONS.find((item) => item.id === assistantMode) || ASSISTANT_ACTIONS[0];
+
+  useEffect(() => {
+    setAssistantKeys(loadStoredKeys());
+    setAssistantCustomProviders(loadStoredCustomProviders());
+  }, []);
+
+  useEffect(() => {
+    if (!activeAssistantProvider) return;
+    if (!assistantProviderMap[assistantProviderId]) {
+      setAssistantProviderId(activeAssistantProvider.id);
+    }
+    if (!assistantModel.trim()) {
+      setAssistantModel(getDefaultModelId(activeAssistantProvider));
+    }
+  }, [activeAssistantProvider, assistantModel, assistantProviderId, assistantProviderMap]);
 
   // HTML 实时预览防抖
   useEffect(() => {
@@ -338,6 +531,126 @@ export function CodePlayground() {
     a.click();
   }
 
+  function handleAssistantProviderChange(nextProviderId: string) {
+    const nextProvider = assistantProviderMap[nextProviderId];
+    setAssistantProviderId(nextProviderId);
+    setAssistantModel(getDefaultModelId(nextProvider));
+  }
+
+  async function handleAssistantCopy() {
+    if (!assistantResult.trim()) return;
+    await navigator.clipboard.writeText(assistantResult);
+    setAssistantCopied(true);
+    setTimeout(() => setAssistantCopied(false), 1500);
+  }
+
+  function applyAssistantCode(mode: 'replace' | 'append') {
+    if (!assistantResult.trim()) return;
+    const nextSnippet = extractAssistantCode(assistantResult);
+    if (!nextSnippet) return;
+    setCode((current) => (
+      mode === 'replace'
+        ? nextSnippet
+        : `${current.trimEnd()}\n\n${nextSnippet}`.trim()
+    ));
+    setShowAssistant(false);
+  }
+
+  const runAssistant = useCallback(async () => {
+    if (!activeAssistantProvider) return;
+
+    if (!assistantModel.trim()) {
+      setAssistantResult('请先填写模型 ID。');
+      setShowAssistant(true);
+      return;
+    }
+
+    if (activeAssistantProvider.authMode !== 'none' && !assistantKeys[activeAssistantProvider.id]?.trim()) {
+      setAssistantResult('请先去词元或当前页面配置可用的 API Key，再使用 AI 编程助手。');
+      setShowAssistant(true);
+      return;
+    }
+
+    if (assistantMode !== 'generate' && !code.trim()) {
+      setAssistantResult('当前编辑器还是空的，先写一点代码，再让 AI 帮你解释、修复或优化会更准确。');
+      setShowAssistant(true);
+      return;
+    }
+
+    setShowAssistant(true);
+    setAssistantLoading(true);
+    setAssistantResult('');
+    assistantAbortRef.current?.abort();
+    assistantAbortRef.current = new AbortController();
+
+    try {
+      const response = await fetch('/api/tools/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerId: activeAssistantProvider.id,
+          providerConfig: activeAssistantProvider,
+          model: assistantModel.trim(),
+          apiKey: assistantKeys[activeAssistantProvider.id] || '',
+          messages: buildAssistantMessages({
+            mode: assistantMode,
+            prompt: assistantPrompt,
+            code,
+            languageLabel: lang.label,
+            output,
+          }),
+        }),
+        signal: assistantAbortRef.current.signal,
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`AI 请求失败 (${response.status})`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const payload = JSON.parse(line.slice(6));
+            if (payload.text) {
+              fullText += payload.text;
+              setAssistantResult(fullText);
+            }
+            if (payload.done) break;
+          } catch {
+            // ignore malformed SSE chunks
+          }
+        }
+      }
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        setAssistantResult(`[错误] ${error instanceof Error ? error.message : String(error)}`);
+      }
+    } finally {
+      setAssistantLoading(false);
+    }
+  }, [
+    activeAssistantProvider,
+    assistantKeys,
+    assistantMode,
+    assistantModel,
+    assistantPrompt,
+    code,
+    lang.label,
+    output,
+  ]);
+
   return (
     <div className="flex flex-col h-screen bg-[#1e1e1e] text-gray-100 overflow-hidden">
       {/* ── Top bar ── */}
@@ -375,6 +688,14 @@ export function CodePlayground() {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowAssistant(true)}
+            title="AI 编程助手"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#3d3d3d] hover:border-[var(--gold,#c4a96d)] text-gray-300 hover:text-white transition-colors mr-1"
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium hidden sm:inline">AI 写代码</span>
+          </button>
           <button onClick={handleReset} title="重置代码" className="p-1.5 rounded hover:bg-[#3d3d3d] text-gray-400 hover:text-white transition-colors">
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -586,6 +907,204 @@ export function CodePlayground() {
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {showAssistant && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowAssistant(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.18 }}
+              className="w-full max-w-5xl h-[82vh] rounded-3xl border border-[#3d3d3d] bg-[#161616] text-gray-100 shadow-2xl overflow-hidden flex flex-col"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2f2f2f] bg-[#1b1b1b]">
+                <div className="w-10 h-10 rounded-2xl bg-[var(--gold,#c4a96d)]/15 border border-[var(--gold,#c4a96d)]/25 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-[var(--gold,#c4a96d)]" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold">AI 编程助手</h2>
+                  <p className="text-xs text-gray-400">
+                    复用词元的 API 配置，支持生成、解释、修复和优化当前代码。
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    assistantAbortRef.current?.abort();
+                    setShowAssistant(false);
+                  }}
+                  className="ml-auto p-2 rounded-xl hover:bg-[#252526] text-gray-400 hover:text-white transition-colors"
+                  title="关闭"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid lg:grid-cols-[360px_minmax(0,1fr)] flex-1 min-h-0">
+                <div className="border-r border-[#2f2f2f] p-5 space-y-5 overflow-y-auto">
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500">动作</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {ASSISTANT_ACTIONS.map((item) => {
+                        const Icon = item.icon;
+                        const active = assistantMode === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setAssistantMode(item.id)}
+                            className={`flex items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm transition-colors ${
+                              active
+                                ? 'border-[var(--gold,#c4a96d)] bg-[var(--gold,#c4a96d)]/10 text-white'
+                                : 'border-[#333] hover:border-[#555] text-gray-300'
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400">AI 提供商</label>
+                      <select
+                        value={activeAssistantProvider?.id || assistantProviderId}
+                        onChange={(event) => handleAssistantProviderChange(event.target.value)}
+                        className="w-full rounded-2xl border border-[#333] bg-[#101010] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold,#c4a96d)]"
+                      >
+                        {assistantProviders.map((providerOption) => (
+                          <option key={providerOption.id} value={providerOption.id}>
+                            {providerOption.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400">模型 ID</label>
+                      <input
+                        list="code-ai-models"
+                        value={assistantModel}
+                        onChange={(event) => setAssistantModel(event.target.value)}
+                        className="w-full rounded-2xl border border-[#333] bg-[#101010] px-3 py-2.5 text-sm font-mono outline-none focus:border-[var(--gold,#c4a96d)]"
+                        placeholder="输入或选择模型 ID"
+                      />
+                      <datalist id="code-ai-models">
+                        {(activeAssistantProvider?.models || []).map((modelOption) => (
+                          <option key={modelOption.id} value={modelOption.id}>
+                            {modelOption.label}
+                          </option>
+                        ))}
+                      </datalist>
+                    </div>
+
+                    <div className="rounded-2xl border border-[#2d2d2d] bg-[#111] px-3 py-3 text-xs text-gray-400 leading-relaxed">
+                      {activeAssistantProvider?.authMode === 'none'
+                        ? '当前提供商不需要 API Key，可以直接请求。'
+                        : assistantKeys[activeAssistantProvider?.id || '']?.trim()
+                          ? '已检测到该提供商的 API Key，会直接复用词元里的配置。'
+                          : '当前浏览器还没找到这个提供商的 API Key，请先去词元配置后再用。'}
+                      <div className="mt-2">
+                        <Link href="/tools/ciyuan" className="text-[var(--gold,#c4a96d)] hover:underline">
+                          去词元配置模型与密钥
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400">{assistantAction.label}说明</label>
+                    <textarea
+                      value={assistantPrompt}
+                      onChange={(event) => setAssistantPrompt(event.target.value)}
+                      placeholder={assistantAction.placeholder}
+                      className="w-full min-h-[180px] rounded-2xl border border-[#333] bg-[#101010] px-3 py-3 text-sm resize-none outline-none focus:border-[var(--gold,#c4a96d)] placeholder:text-gray-600"
+                    />
+                  </div>
+
+                  <button
+                    onClick={runAssistant}
+                    disabled={assistantLoading || !assistantModel.trim()}
+                    className="w-full rounded-2xl bg-[var(--gold,#c4a96d)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {assistantLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        正在思考...
+                      </>
+                    ) : (
+                      <>
+                        <Bot className="w-4 h-4" />
+                        开始处理
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex flex-col min-h-0">
+                  <div className="flex items-center gap-2 px-5 py-3 border-b border-[#2f2f2f] bg-[#181818]">
+                    <span className="text-sm font-medium">结果</span>
+                    <span className="text-xs text-gray-500">
+                      AI 会优先返回说明和完整代码，生成结果可直接回填到编辑器。
+                    </span>
+                    <div className="ml-auto flex items-center gap-2">
+                      <button
+                        onClick={handleAssistantCopy}
+                        disabled={!assistantResult.trim()}
+                        className="px-3 py-1.5 rounded-xl border border-[#333] text-xs text-gray-300 hover:text-white hover:border-[#555] disabled:opacity-40"
+                      >
+                        {assistantCopied ? '已复制' : '复制结果'}
+                      </button>
+                      <button
+                        onClick={() => applyAssistantCode('append')}
+                        disabled={!assistantResult.trim()}
+                        className="px-3 py-1.5 rounded-xl border border-[#333] text-xs text-gray-300 hover:text-white hover:border-[#555] disabled:opacity-40"
+                      >
+                        追加到编辑器
+                      </button>
+                      <button
+                        onClick={() => applyAssistantCode('replace')}
+                        disabled={!assistantResult.trim()}
+                        className="px-3 py-1.5 rounded-xl bg-[var(--gold,#c4a96d)] text-xs font-medium text-white disabled:opacity-40"
+                      >
+                        替换当前代码
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto px-5 py-5">
+                    {!assistantResult.trim() && !assistantLoading ? (
+                      <div className="h-full flex items-center justify-center text-center text-gray-500 px-8">
+                        <div className="space-y-3 max-w-lg">
+                          <Bot className="w-10 h-10 mx-auto opacity-40" />
+                          <p className="text-sm">
+                            选择动作后点击“开始处理”，AI 会结合当前编辑器里的 {lang.label} 代码一起分析。
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="prose prose-invert prose-pre:bg-[#0f0f0f] prose-pre:border prose-pre:border-[#2f2f2f] prose-code:text-amber-200 max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {assistantResult || (assistantLoading ? '正在生成结果...' : '')}
+                        </ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

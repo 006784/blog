@@ -324,6 +324,8 @@ function PhotoCard({
   isAdmin?: boolean;
   square?: boolean;
 }) {
+  const previewSrc = photo.thumbnail_url || photo.url;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -335,7 +337,7 @@ function PhotoCard({
       onClick={onClick}
     >
       <Image
-        src={photo.url}
+        src={previewSrc}
         alt={photo.title || '照片'}
         fill={square}
         width={square ? undefined : 800}

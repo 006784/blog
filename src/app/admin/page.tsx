@@ -560,7 +560,13 @@ function PhotosTab({ photos, onDelete }: { photos: Photo[]; onDelete: (id: strin
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {photos.map(photo => (
             <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden bg-muted">
-              <Image src={photo.url} alt={photo.title || ''} fill sizes="(max-width: 768px) 50vw, 16vw" className="object-cover" />
+              <Image
+                src={photo.thumbnail_url || photo.url}
+                alt={photo.title || ''}
+                fill
+                sizes="(max-width: 768px) 50vw, 16vw"
+                className="object-cover"
+              />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button 
                   onClick={() => onDelete(photo.id)}

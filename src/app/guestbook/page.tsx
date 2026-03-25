@@ -202,7 +202,7 @@ export default function GuestbookPage() {
                 placeholder="昵称 *"
                 required
                 maxLength={50}
-                className="input-modern w-full pl-10 pr-4 py-2.5"
+                className="input-modern guestbook-field w-full pl-12 pr-4 py-3"
               />
             </div>
             <div className="relative">
@@ -212,7 +212,7 @@ export default function GuestbookPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="邮箱（用于头像）"
-                className="input-modern w-full pl-10 pr-4 py-2.5"
+                className="input-modern guestbook-field w-full pl-12 pr-4 py-3"
               />
             </div>
             <div className="relative">
@@ -222,7 +222,7 @@ export default function GuestbookPage() {
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 placeholder="网站（可选）"
-                className="input-modern w-full pl-10 pr-4 py-2.5"
+                className="input-modern guestbook-field w-full pl-12 pr-4 py-3"
               />
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function GuestbookPage() {
             required
             maxLength={1000}
             rows={4}
-            className="input-modern w-full px-4 py-3 resize-none mb-4"
+            className="input-modern guestbook-field guestbook-textarea w-full px-4 py-3 resize-none mb-4"
           />
           
           <div className="flex justify-between items-center">
@@ -377,7 +377,7 @@ export default function GuestbookPage() {
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
                             placeholder="输入回复..."
-                            className="input-modern flex-1 px-3 py-2 text-sm"
+                            className="input-modern guestbook-field flex-1 px-3 py-2 text-sm"
                           />
                           <button
                             onClick={() => handleReply(msg.id)}

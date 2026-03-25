@@ -5,12 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Send, Save, Settings, X, Check, 
-  AlertCircle, Loader2, ChevronDown, Image, Shield
+  ArrowLeft, Send, Check, AlertCircle, Loader2, ChevronDown, Shield
 } from 'lucide-react';
 import { MobileEditor } from '@/components/MobileEditor';
-import { Post, createPost, updatePost, getPostById } from '@/lib/supabase';
-import { uploadFile, compressImage } from '@/lib/storage';
+import { getPostById, getPostBySlug } from '@/lib/supabase';
+import { apiCreatePost, apiUpdatePost } from '@/lib/post-api-client';
 import { useAdmin } from '@/components/AdminProvider';
 
 const categories = [
@@ -24,7 +23,7 @@ function MobileWriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
-  const { isAdmin, showLoginModal } = useAdmin();
+  const { isAdmin, loading: adminLoading, showLoginModal } = useAdmin();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -43,14 +42,14 @@ function MobileWriteContent() {
   async function loadPost(id: string) {
     try {
       setLoading(true);
-      const post = await getPostById(id);
+      const post = await getPostById(id) || await getPostBySlug(id);
       if (post) {
         setTitle(post.title);
         setContent(post.content ?? '');
         setCategory(post.category);
         setCurrentPostId(post.id);
       }
-    } catch (error) {
+    } catch {
       showNotification('error', '加载失败');
     } finally {
       setLoading(false);
@@ -97,14 +96,14 @@ function MobileWriteContent() {
       };
 
       if (currentPostId) {
-        await updatePost(currentPostId, postData);
+        await apiUpdatePost(currentPostId, postData);
       } else {
-        const newPost = await createPost(postData);
+        const newPost = await apiCreatePost(postData);
         setCurrentPostId(newPost.id);
       }
       showNotification('success', '已保存');
     } catch (error) {
-      showNotification('error', '保存失败');
+      showNotification('error', error instanceof Error ? error.message : '保存失败');
     } finally {
       setIsSaving(false);
     }
@@ -136,15 +135,15 @@ function MobileWriteContent() {
       };
 
       if (currentPostId) {
-        await updatePost(currentPostId, postData);
+        await apiUpdatePost(currentPostId, postData);
       } else {
-        await createPost(postData);
+        await apiCreatePost(postData);
       }
       
       showNotification('success', '发布成功');
       setTimeout(() => router.push('/blog'), 1000);
     } catch (error) {
-      showNotification('error', '发布失败');
+      showNotification('error', error instanceof Error ? error.message : '发布失败');
     } finally {
       setIsPublishing(false);
     }
@@ -153,6 +152,14 @@ function MobileWriteContent() {
   const currentCategory = categories.find(c => c.value === category);
 
   // 非管理员显示登录提示
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">

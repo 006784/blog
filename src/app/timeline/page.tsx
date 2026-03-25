@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { type TimelineEvent } from '@/lib/supabase';
+import { useAdmin } from '@/components/AdminProvider';
 
 // ── 分类颜色 ──────────────────────────────────────────────
 
@@ -47,12 +49,23 @@ function Skeleton() {
 // ── 主页面 ────────────────────────────────────────────────
 
 export default function TimelinePage() {
+  const { isAdmin, loading: authLoading } = useAdmin();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
   useEffect(() => {
-    fetch('/api/timeline').then(r => r.json()).then(setEvents).finally(() => setLoading(false));
+    fetch('/api/timeline')
+      .then(async (r) => {
+        if (!r.ok) throw new Error('load failed');
+        return r.json();
+      })
+      .then((data) => setEvents(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        console.error('加载时间线失败:', error);
+        setEvents([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   // 分类列表
@@ -111,6 +124,14 @@ export default function TimelinePage() {
           <div className="rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-700 py-16 text-center text-zinc-400">
             <p className="text-3xl mb-3">⏳</p>
             <p>时间线尚未配置</p>
+            {!authLoading && isAdmin && (
+              <Link
+                href="/admin/timeline"
+                className="inline-flex items-center justify-center mt-5 rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-white"
+              >
+                去后台配置时间线
+              </Link>
+            )}
           </div>
         ) : (
           <div className="space-y-12">

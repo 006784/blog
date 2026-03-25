@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { requireAdminSession } from '@/lib/auth-server';
+import { buildDiaryPayload, saveDiaryByDate } from '@/lib/diary-persistence';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,19 +26,13 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
 
   const { date } = await ctx.params;
   const body = await req.json();
+  const payload = buildDiaryPayload(body, date);
 
-  const payload = {
-    ...body,
-    diary_date: date,
-    word_count: (body.content || '').length,
-    updated_at: new Date().toISOString(),
-  };
+  if (!payload.content) {
+    return NextResponse.json({ error: '日记内容不能为空' }, { status: 400 });
+  }
 
-  const { data, error } = await supabase
-    .from('diaries')
-    .upsert(payload, { onConflict: 'diary_date' })
-    .select()
-    .single();
+  const { data, error } = await saveDiaryByDate(payload);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ diary: data });

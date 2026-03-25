@@ -8,9 +8,11 @@ import {
   LayoutDashboard, PenLine, Settings, X,
 } from 'lucide-react';
 import { useAdmin } from './AdminProvider';
+import { useProfile } from './ProfileProvider';
 
 export default function AdminFloatButton() {
   const { isAdmin, showLoginModal } = useAdmin();
+  const { profile } = useProfile();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -72,6 +74,7 @@ export default function AdminFloatButton() {
 
       {/* 触发按钮 */}
       <motion.button
+        type="button"
         onClick={() => {
           if (!isAdmin) {
             showLoginModal();
@@ -81,18 +84,44 @@ export default function AdminFloatButton() {
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
-        className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg shadow-black/15 transition-colors"
+        className="relative w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-black/15 transition-colors overflow-hidden border border-white/30 dark:border-white/10"
         style={{
           background: isAdmin
             ? 'linear-gradient(135deg, #10b981, #059669)'
             : 'linear-gradient(135deg, #71717a, #52525b)',
         }}
         aria-label="管理员入口"
+        title={isAdmin ? '打开管理员菜单' : '管理员登录'}
       >
-        {isAdmin
-          ? <Unlock className="w-4.5 h-4.5 text-white" strokeWidth={2} />
-          : <Lock className="w-4 h-4 text-white" strokeWidth={2} />
-        }
+        {profile.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={profile.avatar}
+            alt={profile.nickname}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span
+            style={{
+              fontFamily: 'var(--font-mincho)',
+              fontSize: 18,
+              color: 'white',
+              fontWeight: 700,
+            }}
+          >
+            {(profile.nickname || 'L').charAt(0)}
+          </span>
+        )}
+
+        <span
+          className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-white/60 bg-black/70 backdrop-blur"
+          aria-hidden="true"
+        >
+          {isAdmin
+            ? <Unlock className="w-2.5 h-2.5 text-emerald-300" strokeWidth={2} />
+            : <Lock className="w-2.5 h-2.5 text-white" strokeWidth={2} />
+          }
+        </span>
       </motion.button>
     </div>
   );
