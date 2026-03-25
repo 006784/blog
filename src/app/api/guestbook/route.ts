@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { verifyAdminPassword } from '@/lib/env';
+import { requireAdminSession } from '@/lib/auth-server';
+import { parseBody, ok, err, z } from '@/lib/api';
+import { logger } from '@/lib/logger';
 import crypto from 'crypto';
+
+const guestbookSchema = z.object({
+  nickname: z.string().min(1, '昵称不能为空').max(50, '昵称最多50字'),
+  content: z.string().min(1, '内容不能为空').max(1000, '内容最多1000字'),
+  email: z.string().email('邮箱格式不正确').optional().or(z.literal('')),
+  website: z.string().url('网址格式不正确').optional().or(z.literal('')),
+});
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -55,49 +64,35 @@ export async function GET(request: NextRequest) {
 // POST - 发布留言
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { nickname, email, content, website } = body;
-    
-    if (!nickname || !content) {
-      return NextResponse.json({ success: false, error: '昵称和内容不能为空' }, { status: 400 });
-    }
-    
-    if (nickname.length > 50) {
-      return NextResponse.json({ success: false, error: '昵称过长' }, { status: 400 });
-    }
-    
-    if (content.length > 1000) {
-      return NextResponse.json({ success: false, error: '内容过长（最多1000字）' }, { status: 400 });
-    }
-    
-    // 简单的垃圾内容检测
-    const spamPatterns = [/http[s]?:\/\/[^\s]+/gi, /<[^>]+>/g];
+    const parsed = await parseBody(request, guestbookSchema);
+    if (parsed instanceof NextResponse) return parsed;
+    const { nickname, email, content, website } = parsed;
+
+    // 垃圾内容检测
+    const spamPatterns = [/https?:\/\/[^\s]+/gi, /<[^>]+>/g];
     for (const pattern of spamPatterns) {
-      if (pattern.test(content) && content.match(pattern)!.length > 2) {
-        return NextResponse.json({ success: false, error: '内容包含过多链接' }, { status: 400 });
-      }
+      const matches = content.match(pattern);
+      if (matches && matches.length > 2) return err('内容包含过多链接', 400);
     }
-    
+
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const ipHash = hashIP(ip);
-    
-    // 检查频率限制（同IP 1分钟内只能发1条）
+
+    // 频率限制（同 IP 1 分钟内只能发 1 条）
     const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
     const { data: recent } = await supabase
       .from('guestbook')
       .select('id')
       .eq('ip_hash', ipHash)
       .gte('created_at', oneMinuteAgo);
-    
-    if (recent && recent.length > 0) {
-      return NextResponse.json({ success: false, error: '请稍后再试' }, { status: 429 });
-    }
-    
-    // 生成头像URL（使用Gravatar或随机）
-    const avatarUrl = email 
+
+    if (recent && recent.length > 0) return err('请稍后再试', 429);
+
+    // 生成头像 URL
+    const avatarUrl = email
       ? `https://www.gravatar.com/avatar/${crypto.createHash('md5').update(email.toLowerCase().trim()).digest('hex')}?d=identicon`
       : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nickname)}`;
-    
+
     const { data, error } = await supabase
       .from('guestbook')
       .insert({
@@ -107,37 +102,37 @@ export async function POST(request: NextRequest) {
         website: website?.trim() || null,
         avatar_url: avatarUrl,
         ip_hash: ipHash,
-        is_approved: true, // 默认自动审核通过
+        is_approved: true,
       })
       .select()
       .single();
-    
+
     if (error) {
       console.error('Insert error:', error);
-      return NextResponse.json({ success: false, error: '发布失败' }, { status: 500 });
+      return err('发布失败', 500);
     }
-    
-    return NextResponse.json({ success: true, message: data });
+
+    return ok(data, 201);
   } catch (error) {
     console.error('POST error:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+    return err('服务器错误', 500);
   }
 }
 
 // PUT - 管理员回复/审核/置顶
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { adminPassword, id, reply, is_approved, is_pinned } = body;
-    
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
+      logger.warn('留言管理操作未授权', { module: 'guestbook', action: 'put_unauthorized' });
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
-    
+    const body = await request.json();
+    const { id, reply, is_approved, is_pinned } = body;
+
     if (!id) {
       return NextResponse.json({ success: false, error: '缺少留言ID' }, { status: 400 });
     }
-    
+
     const updateData: Record<string, unknown> = {};
     if (reply !== undefined) {
       updateData.reply = reply;
@@ -145,19 +140,20 @@ export async function PUT(request: NextRequest) {
     }
     if (is_approved !== undefined) updateData.is_approved = is_approved;
     if (is_pinned !== undefined) updateData.is_pinned = is_pinned;
-    
+
     const { data, error } = await supabase
       .from('guestbook')
       .update(updateData)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) {
       console.error('Update error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
-    
+
+    logger.info('留言管理操作成功', { module: 'guestbook', action: 'put', id, fields: Object.keys(updateData) });
     return NextResponse.json({ success: true, message: data });
   } catch (error) {
     console.error('PUT error:', error);
@@ -168,27 +164,28 @@ export async function PUT(request: NextRequest) {
 // DELETE - 管理员删除留言
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { adminPassword, id } = body;
-    
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
+      logger.warn('留言删除操作未授权', { module: 'guestbook', action: 'delete_unauthorized' });
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
-    
+    const body = await request.json();
+    const { id } = body;
+
     if (!id) {
       return NextResponse.json({ success: false, error: '缺少留言ID' }, { status: 400 });
     }
-    
+
     const { error } = await supabase
       .from('guestbook')
       .delete()
       .eq('id', id);
-    
+
     if (error) {
       console.error('Delete error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
-    
+
+    logger.info('留言删除成功', { module: 'guestbook', action: 'delete', id });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE error:', error);

@@ -21,12 +21,13 @@ interface RichEditorProps {
   placeholder?: string;
   onImageUpload?: (url: string) => void;
   onSave?: () => void;
+  initialShowPreview?: boolean;
 }
 
-export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave }: RichEditorProps) {
+export function RichEditor({ value, onChange, placeholder, onImageUpload, onSave, initialShowPreview }: RichEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showPreview, setShowPreview] = useState(true); // 默认开启预览
+  const [showPreview, setShowPreview] = useState(initialShowPreview ?? true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);

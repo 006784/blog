@@ -67,9 +67,9 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
       setShowTurnstile(false);
       
       setTimeout(() => setSuccess(false), 5000);
-    } catch (err: any) {
+    } catch (err) {
       console.error('订阅失败:', err);
-      setError(err.message || '订阅失败，请稍后重试');
+      setError(err instanceof Error ? err.message : '订阅失败，请稍后重试');
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
 
   if (variant === 'inline') {
     return (
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="editorial-inline-subscribe flex gap-2">
         <div className="relative flex-1">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -104,7 +104,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
             placeholder="输入邮箱订阅..."
             required
             disabled={loading || success}
-            className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:border-primary text-sm"
+            className="editorial-inline-input w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:border-primary text-sm"
           />
         </div>
         <motion.button
@@ -112,7 +112,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
           disabled={loading || success}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium disabled:opacity-50"
+          className="editorial-inline-submit px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : success ? <Check className="w-4 h-4" /> : '订阅'}
         </motion.button>
@@ -121,7 +121,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
   }
 
   return (
-    <div className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
+    <div className="editorial-subscribe-panel relative p-6 rounded-2xl border">
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-5 h-5 text-primary" />
         <h3 className="font-semibold">订阅更新</h3>
@@ -136,7 +136,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="flex items-center gap-3 p-4 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl"
+            className="editorial-subscribe-success flex items-center gap-3 p-4 rounded-xl"
           >
             <Check className="w-5 h-5" />
             <span className="text-sm font-medium">订阅成功！请查收确认邮件</span>
@@ -158,7 +158,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
                 placeholder="your@email.com"
                 required
                 disabled={loading}
-                className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
+                className="editorial-subscribe-input w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none transition-colors"
               />
             </div>
 
@@ -182,7 +182,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="py-3 px-4 bg-secondary/50 rounded-xl">
+                  <div className="editorial-turnstile-wrap py-3 px-4 rounded-xl">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                       <Shield className="w-4 h-4" />
                       <span>请完成安全验证</span>
@@ -202,7 +202,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
               disabled={loading || (showTurnstile && !turnstileToken)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+              className="editorial-subscribe-submit w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <>

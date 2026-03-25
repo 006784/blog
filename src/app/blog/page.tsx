@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertCircle,
+  ArrowRight,
   BellRing,
   CheckCircle2,
   FolderOpen,
@@ -21,6 +22,7 @@ import { BlogCard } from '@/components/BlogCard';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { APPLE_EASE, HOVER_BUTTON, HOVER_LIFT, TAP_BUTTON, APPLE_SPRING_GENTLE } from '@/components/Animations';
 import { useAdmin } from '@/components/AdminProvider';
+import { decodeAdminToken } from '@/lib/admin-token';
 import { Collection, deletePost, getCollections, getPublishedPosts, Post } from '@/lib/supabase';
 import { formatDate } from '@/lib/types';
 
@@ -111,7 +113,7 @@ function BlogPageContent() {
 
     try {
       const adminToken = localStorage.getItem('admin-token');
-      const password = adminToken ? atob(adminToken) : '';
+      const password = adminToken ? (decodeAdminToken(adminToken) || '') : '';
 
       const response = await fetch('/api/notify', {
         method: 'POST',
@@ -123,7 +125,7 @@ function BlogPageContent() {
           postSlug: post.slug,
           title: post.title,
           description: post.description,
-          author: post.author || '拾光',
+          author: post.author || 'Lumen',
         }),
       });
 
@@ -196,7 +198,7 @@ function BlogPageContent() {
   }, [notification]);
 
   return (
-    <div className="min-h-screen px-6 pb-20 pt-10 md:pt-14">
+    <div className="journal-page">
       <AnimatePresence>
         {notification && (
           <motion.div
@@ -205,7 +207,7 @@ function BlogPageContent() {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.35, ease: APPLE_EASE }}
             className={clsx(
-              'fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border px-4 py-2 text-sm shadow-lg backdrop-blur-xl',
+              'journal-toast fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border px-4 py-2 text-sm shadow-lg backdrop-blur-xl',
               notification.type === 'success'
                 ? 'border-emerald-400/35 bg-emerald-600/90 text-white'
                 : 'border-rose-400/35 bg-rose-600/90 text-white'
@@ -221,229 +223,285 @@ function BlogPageContent() {
         )}
       </AnimatePresence>
 
-      <div className="mx-auto max-w-6xl">
-        <section className="surface-hero relative overflow-hidden p-6 md:p-10">
-          <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 rounded-full bg-[radial-gradient(circle,_rgba(8,145,178,0.25)_0%,_rgba(8,145,178,0)_70%)]" />
-          <div className="pointer-events-none absolute -bottom-10 left-0 h-52 w-52 rounded-full bg-[radial-gradient(circle,_rgba(249,115,22,0.2)_0%,_rgba(249,115,22,0)_70%)]" />
+      <div className="journal-shell">
+        <section className="journal-hero surface-hero relative overflow-hidden p-6 md:p-10">
+          <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 rounded-full bg-[radial-gradient(circle,_rgba(56,189,248,0.22)_0%,_rgba(56,189,248,0)_70%)]" />
+          <div className="pointer-events-none absolute -bottom-10 left-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,_rgba(244,114,182,0.18)_0%,_rgba(244,114,182,0)_72%)]" />
 
-          <div className="relative flex flex-wrap items-start justify-between gap-6">
-            <div>
+          <div className="journal-hero-grid">
+            <div className="journal-hero-copy">
               <p className="section-kicker">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
-                Blog Index
+                Curated Archive
               </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">博客文章</h1>
+              <h1 className="journal-hero-title">写作档案馆</h1>
               <p className="text-soft mt-4 max-w-2xl text-base md:text-lg">
-                持续更新技术实践、设计思考和个人写作。欢迎从你关心的分类开始阅读。
+                把技术实践、设计观察和长期写作收进同一座内容展厅里。你可以像翻杂志一样浏览，也可以按专题、关键词和分类进入。
               </p>
             </div>
 
-            {isAdmin && (
-              <Link href="/write" className="btn-primary ios-button-press inline-flex items-center gap-2 px-5 py-3 text-sm">
-                <Plus className="h-4 w-4" />
-                写新文章
-              </Link>
-            )}
-          </div>
+            <div className="journal-hero-actions">
+              {isAdmin && (
+                <Link href="/write" className="btn-primary ios-button-press inline-flex items-center gap-2 px-5 py-3 text-sm">
+                  <Plus className="h-4 w-4" />
+                  写新文章
+                </Link>
+              )}
 
-          <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
-            <div className="metric-tile">
-              <p className="text-2xl font-semibold">{posts.length}</p>
-              <p className="text-soft text-xs">已发布文章</p>
-            </div>
-            <div className="metric-tile">
-              <p className="text-2xl font-semibold">{collections.length}</p>
-              <p className="text-soft text-xs">专题集合</p>
-            </div>
-            <div className="metric-tile">
-              <p className="text-2xl font-semibold">{categories.filter((item) => item.count > 0).length}</p>
-              <p className="text-soft text-xs">活跃分类</p>
+              <div className="journal-hero-stats">
+                <div className="metric-tile">
+                  <p className="text-2xl font-semibold">{posts.length}</p>
+                  <p className="text-soft text-xs">已发布文章</p>
+                </div>
+                <div className="metric-tile">
+                  <p className="text-2xl font-semibold">{collections.length}</p>
+                  <p className="text-soft text-xs">专题集合</p>
+                </div>
+                <div className="metric-tile">
+                  <p className="text-2xl font-semibold">{categories.filter((item) => item.count > 0).length}</p>
+                  <p className="text-soft text-xs">活跃分类</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="surface-card mt-8 p-5 md:p-6">
-          <div className="flex flex-col gap-4">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="搜索标题、摘要或标签..."
-                className="input-modern py-3 pl-11 pr-10 text-sm"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="ios-button-press absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-secondary"
-                  aria-label="清空搜索"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+        <div className="journal-layout">
+          <aside className="journal-sidebar">
+            <section className="journal-filter-panel surface-card">
+              <div>
+                <p className="journal-panel-kicker">Filters</p>
+                <h2 className="journal-panel-title">精准定位你想读的那一篇</h2>
+              </div>
 
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <motion.button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  whileHover={HOVER_BUTTON}
-                  whileTap={TAP_BUTTON}
-                  transition={APPLE_SPRING_GENTLE}
-                  className="chip-filter"
-                  data-active={selectedCategory === category.id}
-                >
-                  {category.name}
-                  <span className="ml-1 text-xs opacity-70">{category.count}</span>
-                </motion.button>
-              ))}
-            </div>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="搜索标题、摘要或标签..."
+                  className="input-modern py-3 pl-11 pr-10 text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="ios-button-press absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-secondary"
+                    aria-label="清空搜索"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
 
-            {collections.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <FolderOpen className="h-3.5 w-3.5" />
-                  专题
-                </span>
-
-                <motion.button
-                  onClick={() => setSelectedCollection(null)}
-                  whileHover={HOVER_BUTTON}
-                  whileTap={TAP_BUTTON}
-                  transition={APPLE_SPRING_GENTLE}
-                  className="chip-filter"
-                  data-active={!selectedCollection}
-                >
-                  全部
-                </motion.button>
-
-                {collections.map((collection) => {
-                  const count = posts.filter((post) => post.collection_id === collection.id).length;
-                  return (
+              <div className="journal-filter-group">
+                <p className="journal-filter-label">分类</p>
+                <div className="journal-chip-grid">
+                  {categories.map((category) => (
                     <motion.button
-                      key={collection.id}
-                      onClick={() => setSelectedCollection(collection.id)}
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
                       whileHover={HOVER_BUTTON}
                       whileTap={TAP_BUTTON}
                       transition={APPLE_SPRING_GENTLE}
                       className="chip-filter"
-                      data-active={selectedCollection === collection.id}
+                      data-active={selectedCategory === category.id}
                     >
-                      {collection.name}
-                      <span className="ml-1 opacity-70">{count}</span>
+                      {category.name}
+                      <span className="ml-1 text-xs opacity-70">{category.count}</span>
                     </motion.button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
-        </section>
 
-        {loading ? (
-          <section className="py-16">
-            <div className="surface-card flex items-center justify-center py-16 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-3">正在加载文章...</span>
-            </div>
-          </section>
-        ) : (
-          <section className="mt-8">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-background/70 px-3 py-1.5 text-sm text-muted-foreground">
-              共找到 <span className="font-medium text-foreground">{filteredPosts.length}</span> 篇文章
-            </div>
+              {collections.length > 0 && (
+                <div className="journal-filter-group">
+                  <p className="journal-filter-label inline-flex items-center gap-1">
+                    <FolderOpen className="h-3.5 w-3.5" />
+                    专题
+                  </p>
+                  <div className="journal-chip-grid">
+                    <motion.button
+                      onClick={() => setSelectedCollection(null)}
+                      whileHover={HOVER_BUTTON}
+                      whileTap={TAP_BUTTON}
+                      transition={APPLE_SPRING_GENTLE}
+                      className="chip-filter"
+                      data-active={!selectedCollection}
+                    >
+                      全部
+                    </motion.button>
 
-            {featuredPost && (
-              <motion.article
-                initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                whileHover={HOVER_LIFT}
-                transition={{ duration: 0.64, ease: APPLE_EASE }}
-                className="surface-card interactive-card ios-hover-surface overflow-hidden"
-              >
-                <Link href={`/blog/${featuredPost.slug}`} className="grid gap-0 md:grid-cols-2">
-                  <div className="relative min-h-[240px] bg-secondary/50">
-                    {featuredPost.cover_image || featuredPost.image ? (
-                      <Image
-                        src={featuredPost.cover_image || featuredPost.image}
-                        alt={featuredPost.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-secondary to-secondary/60" />
-                    )}
+                    {collections.map((collection) => {
+                      const count = posts.filter((post) => post.collection_id === collection.id).length;
+                      return (
+                        <motion.button
+                          key={collection.id}
+                          onClick={() => setSelectedCollection(collection.id)}
+                          whileHover={HOVER_BUTTON}
+                          whileTap={TAP_BUTTON}
+                          transition={APPLE_SPRING_GENTLE}
+                          className="chip-filter"
+                          data-active={selectedCollection === collection.id}
+                        >
+                          {collection.name}
+                          <span className="ml-1 opacity-70">{count}</span>
+                        </motion.button>
+                      );
+                    })}
                   </div>
+                </div>
+              )}
 
-                  <div className="p-6 md:p-8">
-                    <p className="section-kicker">Featured</p>
-                    <h2 className="mt-3 text-2xl font-semibold leading-tight">{featuredPost.title}</h2>
-                    <p className="mt-4 line-clamp-3 text-sm leading-7 text-muted-foreground">
-                      {featuredPost.description}
-                    </p>
-                    <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                      <span>{categoryLabel(featuredPost.category)}</span>
-                      <span>{formatDate(featuredPost.published_at || featuredPost.created_at)}</span>
-                      <span>{featuredPost.reading_time || '约 5 分钟'}</span>
+              <div className="journal-side-note">
+                <p className="journal-panel-kicker">Reading Tip</p>
+                <p className="text-soft text-sm leading-7">
+                  如果你是第一次来，建议先看本页第一篇精选文章，再根据标签和专题继续往下读，体验会更连贯。
+                </p>
+              </div>
+            </section>
+          </aside>
+
+          <section className="journal-results">
+            {loading ? (
+              <div className="space-y-4">
+                {/* 精选文章骨架 */}
+                <div className="surface-card overflow-hidden rounded-2xl animate-pulse">
+                  <div className="grid sm:grid-cols-2 gap-0">
+                    <div className="min-h-[260px] bg-muted" />
+                    <div className="p-8 space-y-4">
+                      <div className="h-4 w-20 bg-muted rounded-full" />
+                      <div className="h-6 w-3/4 bg-muted rounded-lg" />
+                      <div className="h-4 w-full bg-muted rounded-lg" />
+                      <div className="h-4 w-2/3 bg-muted rounded-lg" />
                     </div>
-                    <span className="btn-secondary ios-button-press mt-5 inline-flex px-4 py-2 text-sm">
-                      阅读全文
-                    </span>
                   </div>
-                </Link>
-              </motion.article>
-            )}
-
-            {formattedPosts.length > 0 ? (
-              <div className="mt-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-                {formattedPosts.map((post, index) => (
-                  <BlogCard
-                    key={post.slug}
-                    post={post}
-                    index={index}
-                    onDelete={isAdmin ? handleDeletePost : undefined}
-                    onNotify={
-                      isAdmin
-                        ? (postData) => {
-                            const target = posts.find((item) => item.slug === postData.slug);
-                            if (target) {
-                              void handleNotifyPost(target);
-                            }
-                          }
-                        : undefined
-                    }
-                  />
+                </div>
+                {/* 文章列表骨架 */}
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="surface-card p-5 rounded-2xl animate-pulse flex gap-4">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-muted rounded-xl" />
+                    <div className="flex-1 space-y-3 py-1">
+                      <div className="h-3 w-16 bg-muted rounded-full" />
+                      <div className="h-5 w-3/4 bg-muted rounded-lg" />
+                      <div className="h-3 w-full bg-muted rounded-lg" />
+                      <div className="h-3 w-1/2 bg-muted rounded-lg" />
+                    </div>
+                  </div>
                 ))}
               </div>
-            ) : !featuredPost ? (
-              <div className="surface-card py-20 text-center">
-                <h3 className="text-xl font-semibold">没有匹配的文章</h3>
-                <p className="mt-3 text-muted-foreground">试试清空筛选条件或更换关键词。</p>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                    setSelectedCollection(null);
-                  }}
-                  className="btn-secondary ios-button-press mt-6 px-5 py-2.5 text-sm"
-                >
-                  重置筛选
-                </button>
-              </div>
-            ) : null}
+            ) : (
+              <>
+                <div className="journal-results-head">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-background/70 px-3 py-1.5 text-sm text-muted-foreground">
+                    共找到 <span className="font-medium text-foreground">{filteredPosts.length}</span> 篇文章
+                  </div>
 
-            {notifyingSlug && (
-              <p className="mt-5 inline-flex items-center gap-2 text-xs text-muted-foreground">
-                <BellRing className="h-3.5 w-3.5 animate-pulse" />
-                正在推送《{posts.find((item) => item.slug === notifyingSlug)?.title || notifyingSlug}》...
-              </p>
+                  {notifyingSlug && (
+                    <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                      <BellRing className="h-3.5 w-3.5 animate-pulse" />
+                      正在推送《{posts.find((item) => item.slug === notifyingSlug)?.title || notifyingSlug}》...
+                    </p>
+                  )}
+                </div>
+
+                {featuredPost && (
+                  <motion.article
+                    initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    whileHover={HOVER_LIFT}
+                    transition={{ duration: 0.64, ease: APPLE_EASE }}
+                    className="journal-spotlight surface-card interactive-card ios-hover-surface overflow-hidden"
+                  >
+                    <Link href={`/blog/${featuredPost.slug}`} className="journal-spotlight-grid">
+                      <div className="journal-spotlight-media relative min-h-[260px] bg-secondary/50">
+                        {featuredPost.cover_image || featuredPost.image ? (
+                          <Image
+                            src={featuredPost.cover_image || featuredPost.image}
+                            alt={featuredPost.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-gradient-to-br from-secondary to-secondary/60" />
+                        )}
+                        <div className="journal-spotlight-overlay" />
+                      </div>
+
+                      <div className="journal-spotlight-copy">
+                        <p className="section-kicker">Featured Story</p>
+                        <h2>{featuredPost.title}</h2>
+                        <p>{featuredPost.description}</p>
+
+                        <div className="journal-spotlight-meta">
+                          <span>{categoryLabel(featuredPost.category)}</span>
+                          <span>{formatDate(featuredPost.published_at || featuredPost.created_at)}</span>
+                          <span>{featuredPost.reading_time || '约 5 分钟'}</span>
+                        </div>
+
+                        {featuredPost.tags && featuredPost.tags.length > 0 && (
+                          <div className="journal-spotlight-tags">
+                            {featuredPost.tags.slice(0, 4).map((tag) => (
+                              <span key={tag}>{tag}</span>
+                            ))}
+                          </div>
+                        )}
+
+                        <span className="journal-link-pill">
+                          阅读全文
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
+                      </div>
+                    </Link>
+                  </motion.article>
+                )}
+
+                {formattedPosts.length > 0 ? (
+                  <div className="journal-card-grid">
+                    {formattedPosts.map((post, index) => (
+                      <BlogCard
+                        key={post.slug}
+                        post={post}
+                        index={index}
+                        onDelete={isAdmin ? handleDeletePost : undefined}
+                        onNotify={
+                          isAdmin
+                            ? (postData) => {
+                                const target = posts.find((item) => item.slug === postData.slug);
+                                if (target) {
+                                  void handleNotifyPost(target);
+                                }
+                              }
+                            : undefined
+                        }
+                      />
+                    ))}
+                  </div>
+                ) : !featuredPost ? (
+                  <div className="surface-card py-20 text-center">
+                    <h3 className="text-xl font-semibold">没有匹配的文章</h3>
+                    <p className="mt-3 text-muted-foreground">试试清空筛选条件或更换关键词。</p>
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSelectedCategory('all');
+                        setSelectedCollection(null);
+                      }}
+                      className="btn-secondary ios-button-press mt-6 px-5 py-2.5 text-sm"
+                    >
+                      重置筛选
+                    </button>
+                  </div>
+                ) : null}
+              </>
             )}
           </section>
-        )}
+        </div>
 
-        <section className="mt-14 max-w-2xl">
-          <SubscribeForm />
+        <section className="journal-newsletter">
+          <div className="journal-newsletter-shell">
+            <SubscribeForm />
+          </div>
         </section>
       </div>
     </div>

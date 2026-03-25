@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Camera, Image as ImageIcon, Plus, X, Heart, MapPin, 
@@ -91,8 +92,8 @@ export default function GalleryPage() {
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-blue-500/25">
-              <Camera className="w-8 h-8 text-white" />
+            <div className="p-3 border border-[var(--line,#ddd9d0)]" style={{ background: 'var(--paper-deep,#ede9e0)' }}>
+              <Camera className="w-8 h-8" style={{ color: 'var(--gold,#c4a96d)' }} />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold gradient-text">
               相册
@@ -112,24 +113,24 @@ export default function GalleryPage() {
         >
           <button
             onClick={() => setSelectedAlbum(null)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 text-sm font-medium transition-all border ${
               !selectedAlbum
-                ? 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white shadow-lg'
-                : 'bg-card hover:bg-card/80 text-foreground'
+                ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
+                : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
             }`}
           >
             <Grid3X3 className="w-4 h-4 inline mr-2" />
             全部照片
           </button>
-          
+
           {albums.map(album => (
             <button
               key={album.id}
               onClick={() => setSelectedAlbum(album.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all border ${
                 selectedAlbum === album.id
-                  ? 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white shadow-lg'
-                  : 'bg-card hover:bg-card/80 text-foreground'
+                  ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
+                  : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
               }`}
             >
               <Folder className="w-4 h-4 inline mr-2" />
@@ -146,19 +147,23 @@ export default function GalleryPage() {
           transition={{ delay: 0.2 }}
           className="flex items-center justify-between mb-8"
         >
-          <div className="flex items-center gap-2 bg-card rounded-xl p-1">
+          <div className="flex items-center gap-0 border border-[var(--line)]">
             <button
               onClick={() => setViewMode('masonry')}
-              className={`p-2 rounded-lg transition-all ${
-                viewMode === 'masonry' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
+              className={`p-2 transition-all ${
+                viewMode === 'masonry'
+                  ? 'bg-[var(--ink)] text-[var(--paper)]'
+                  : 'text-[var(--ink-muted)] hover:text-[var(--gold)]'
               }`}
             >
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${
-                viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
+              className={`p-2 transition-all border-l border-[var(--line)] ${
+                viewMode === 'grid'
+                  ? 'bg-[var(--ink)] text-[var(--paper)]'
+                  : 'text-[var(--ink-muted)] hover:text-[var(--gold)]'
               }`}
             >
               <Grid3X3 className="w-5 h-5" />
@@ -182,8 +187,14 @@ export default function GalleryPage() {
 
         {/* Photos Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Camera className="w-12 h-12 text-primary animate-pulse" />
+          <div className="columns-2 sm:columns-3 lg:columns-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div
+                key={i}
+                className="mb-4 rounded-2xl bg-muted animate-pulse"
+                style={{ height: `${160 + (i % 3) * 60}px` }}
+              />
+            ))}
           </div>
         ) : photos.length === 0 ? (
           <motion.div
@@ -311,11 +322,15 @@ function PhotoCard({
       }`}
       onClick={onClick}
     >
-      <img
+      <Image
         src={photo.url}
         alt={photo.title || '照片'}
-        className={`w-full object-cover group-hover:scale-105 transition-transform duration-500 ${
-          square ? 'h-full' : 'h-auto'
+        fill={square}
+        width={square ? undefined : 800}
+        height={square ? undefined : 600}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className={`object-cover group-hover:scale-105 transition-transform duration-500 ${
+          square ? '' : 'w-full h-auto'
         }`}
       />
       
@@ -448,8 +463,8 @@ function EditPhotoModal({
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {/* Preview */}
-          <div className="aspect-video rounded-xl overflow-hidden bg-muted">
-            <img src={photo.url} alt="" className="w-full h-full object-cover" />
+          <div className="aspect-video rounded-xl overflow-hidden bg-muted relative">
+            <Image src={photo.url} alt={photo.title || ''} fill className="object-cover" sizes="(max-width: 768px) 100vw, 600px" />
           </div>
 
           <div>

@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, FileText, Camera, BookOpen, Folder, 
+import {
+  Shield, FileText, Camera, BookOpen, Folder,
   Plus, Edit2, Trash2, X, Loader2, Save,
   Eye, EyeOff, Calendar, Users, TrendingUp,
-  Settings, ArrowLeft
+  Settings, ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles
 } from 'lucide-react';
+import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAdmin } from '@/components/AdminProvider';
 import { 
@@ -19,7 +21,7 @@ import {
   formatDate
 } from '@/lib/supabase';
 
-type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums';
+type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums' | 'analytics';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -30,16 +32,18 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [showAlbumModal, setShowAlbumModal] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
-  const { isAdmin, showLoginModal } = useAdmin();
+  const { isAdmin, loading: authLoading } = useAdmin();
   const router = useRouter();
 
   useEffect(() => {
+    // 等 auth 检查完成再操作，避免 loading 阶段误跳转
+    if (authLoading) return;
     if (!isAdmin) {
-      showLoginModal();
+      router.replace('/admin/login?redirect=/admin');
     } else {
       loadAllData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, authLoading]);
 
   async function loadAllData() {
     try {
@@ -101,27 +105,24 @@ export default function AdminPage() {
     }
   }
 
-  if (!isAdmin) {
+  if (authLoading || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">需要管理员权限</p>
-          <button onClick={() => showLoginModal()} className="btn-primary">
-            <Shield className="w-5 h-5" />
-            管理员登录
-          </button>
+          <p className="text-muted-foreground">{authLoading ? '验证中...' : '正在跳转到登录页...'}</p>
         </div>
       </div>
     );
   }
 
   const tabs = [
-    { id: 'overview' as TabType, label: '总览', icon: TrendingUp },
-    { id: 'posts' as TabType, label: '文章', icon: FileText, count: posts.length },
-    { id: 'photos' as TabType, label: '照片', icon: Camera, count: photos.length },
-    { id: 'diary' as TabType, label: '日记', icon: BookOpen, count: diaries.length },
-    { id: 'albums' as TabType, label: '相册', icon: Folder, count: albums.length },
+    { id: 'overview' as TabType,   label: '总览', icon: TrendingUp },
+    { id: 'posts' as TabType,      label: '文章', icon: FileText,  count: posts.length },
+    { id: 'photos' as TabType,     label: '照片', icon: Camera,    count: photos.length },
+    { id: 'diary' as TabType,      label: '日记', icon: BookOpen,  count: diaries.length },
+    { id: 'albums' as TabType,     label: '相册', icon: Folder,    count: albums.length },
+    { id: 'analytics' as TabType,  label: '统计', icon: BarChart2 },
   ];
 
   return (
@@ -211,12 +212,22 @@ export default function AdminPage() {
               />
             )}
             {activeTab === 'albums' && (
-              <AlbumsTab 
-                albums={albums} 
+              <AlbumsTab
+                albums={albums}
                 onDelete={handleDeleteAlbum}
                 onEdit={(album) => { setEditingAlbum(album); setShowAlbumModal(true); }}
                 onAdd={() => { setEditingAlbum(null); setShowAlbumModal(true); }}
               />
+            )}
+            {activeTab === 'analytics' && (
+              <motion.div
+                key="analytics"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <AnalyticsDashboard />
+              </motion.div>
             )}
           </AnimatePresence>
         )}
@@ -312,13 +323,63 @@ function OverviewTab({ posts, photos, diaries, albums }: {
           </motion.div>
         </Link>
         <Link href="/diary" className="group">
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.02 }}
             className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
           >
             <BookOpen className="w-8 h-8 text-primary mb-3" />
             <h3 className="font-semibold mb-1">写日记</h3>
             <p className="text-sm text-muted-foreground">记录今天的心情</p>
+          </motion.div>
+        </Link>
+        <Link href="/admin/now" className="group">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+          >
+            <Sparkles className="w-8 h-8 text-primary mb-3" />
+            <h3 className="font-semibold mb-1">此刻</h3>
+            <p className="text-sm text-muted-foreground">更新当下的状态与关注</p>
+          </motion.div>
+        </Link>
+        <Link href="/admin/collections" className="group">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+          >
+            <BookMarked className="w-8 h-8 text-primary mb-3" />
+            <h3 className="font-semibold mb-1">精选合集</h3>
+            <p className="text-sm text-muted-foreground">创建文章主题合集</p>
+          </motion.div>
+        </Link>
+        <Link href="/admin/media" className="group">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+          >
+            <Film className="w-8 h-8 text-primary mb-3" />
+            <h3 className="font-semibold mb-1">书影音</h3>
+            <p className="text-sm text-muted-foreground">管理观影读书记录</p>
+          </motion.div>
+        </Link>
+        <Link href="/admin/timeline" className="group">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+          >
+            <Clock className="w-8 h-8 text-primary mb-3" />
+            <h3 className="font-semibold mb-1">时间线</h3>
+            <p className="text-sm text-muted-foreground">管理重要人生节点</p>
+          </motion.div>
+        </Link>
+        <Link href="/admin/uses" className="group">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+          >
+            <Wrench className="w-8 h-8 text-primary mb-3" />
+            <h3 className="font-semibold mb-1">工具箱</h3>
+            <p className="text-sm text-muted-foreground">管理硬件与软件配置</p>
           </motion.div>
         </Link>
       </div>
@@ -407,7 +468,7 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
             {posts.map(post => (
               <div key={post.id} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
                 {post.cover_image && (
-                  <img src={post.cover_image} alt="" className="w-16 h-12 rounded-lg object-cover" />
+                  <Image src={post.cover_image} alt="" width={64} height={48} className="rounded-lg object-cover" />
                 )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium truncate">{post.title}</h3>
@@ -473,7 +534,7 @@ function PhotosTab({ photos, onDelete }: { photos: Photo[]; onDelete: (id: strin
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {photos.map(photo => (
             <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden bg-muted">
-              <img src={photo.url} alt={photo.title || ''} className="w-full h-full object-cover" />
+              <Image src={photo.url} alt={photo.title || ''} fill sizes="(max-width: 768px) 50vw, 16vw" className="object-cover" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button 
                   onClick={() => onDelete(photo.id)}
@@ -585,7 +646,7 @@ function AlbumsTab({ albums, onDelete, onEdit, onAdd }: {
           {albums.map(album => (
             <div key={album.id} className="group relative overflow-hidden rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all">
               {album.cover_image ? (
-                <img src={album.cover_image} alt="" className="w-full aspect-video object-cover" />
+                <Image src={album.cover_image} alt="" width={400} height={225} className="w-full aspect-video object-cover" />
               ) : (
                 <div className="w-full aspect-video bg-muted flex items-center justify-center">
                   <Folder className="w-12 h-12 text-muted-foreground/30" />

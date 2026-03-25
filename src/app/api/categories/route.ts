@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { verifyAdminPassword } from '@/lib/env';
+import { requireAdminSession } from '@/lib/auth-server';
 
 
 // 配置静态导出
@@ -26,7 +26,10 @@ export async function GET() {
       return NextResponse.json({ categories: [], error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ categories: data || [] });
+    return NextResponse.json(
+      { categories: data || [] },
+      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
+    );
   } catch (error) {
     console.error('GET error:', error);
     return NextResponse.json({ categories: [], error: '服务器错误' }, { status: 500 });
@@ -36,13 +39,11 @@ export async function GET() {
 // POST - 创建新分类
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { adminPassword, name, slug, description, icon, color, sort_order } = body;
-
-    // 验证管理员权限
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
+    const body = await request.json();
+    const { name, slug, description, icon, color, sort_order } = body;
 
     if (!name || !slug) {
       return NextResponse.json({ success: false, error: '名称和标识符不能为空' }, { status: 400 });
@@ -91,13 +92,11 @@ export async function POST(request: NextRequest) {
 // PUT - 更新分类
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { adminPassword, id, name, description, icon, color, sort_order } = body;
-
-    // 验证管理员权限
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
+    const body = await request.json();
+    const { id, name, description, icon, color, sort_order } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: '缺少分类ID' }, { status: 400 });
@@ -138,13 +137,11 @@ export async function PUT(request: NextRequest) {
 // DELETE - 删除分类
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { adminPassword, id } = body;
-
-    // 验证管理员权限
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
+    const body = await request.json();
+    const { id } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: '缺少分类ID' }, { status: 400 });

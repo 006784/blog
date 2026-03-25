@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { verifyAdminPassword } from '@/lib/env';
+import { requireAdminSession } from '@/lib/auth-server';
 import crypto from 'crypto';
 
 // 配置静态导出
@@ -89,8 +89,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     
     // 验证管理员权限
-    const adminPassword = formData.get('adminPassword') as string;
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
     
@@ -227,11 +226,10 @@ export async function GET(request: NextRequest) {
 // DELETE - 删除资源
 export async function DELETE(request: NextRequest) {
   try {
-    const { id, adminPassword } = await request.json();
-    
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
+    const { id } = await request.json();
 
     if (!id) {
       return NextResponse.json({ success: false, error: '资源ID不能为空' }, { status: 400 });

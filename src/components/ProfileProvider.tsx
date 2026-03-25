@@ -19,7 +19,7 @@ export interface Profile {
 }
 
 const defaultProfile: Profile = {
-  nickname: '拾光博主',
+  nickname: 'Lumen博主',
   avatar: '',
   signature: '探索 · 记录 · 分享',
   motto: '用代码编织梦想，用文字记录时光',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
@@ -230,7 +231,7 @@ export function MusicPlayer({ songs, currentSong, onSongChange, onClose }: Music
           {/* 封面 */}
           <div className="relative w-12 h-12 rounded-xl overflow-hidden">
             {currentSong.cover_image ? (
-              <img src={currentSong.cover_image} alt={currentSong.title} className="w-full h-full object-cover" />
+              <Image src={currentSong.cover_image} alt={currentSong.title} fill sizes="48px" className="object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
                 <Music2 className="w-6 h-6 text-primary" />
@@ -315,10 +316,12 @@ export function MusicPlayer({ songs, currentSong, onSongChange, onClose }: Music
               className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden shadow-2xl shadow-primary/20"
             >
               {currentSong.cover_image ? (
-                <img 
-                  src={currentSong.cover_image} 
+                <Image
+                  src={currentSong.cover_image}
                   alt={currentSong.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 256px, 320px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 flex items-center justify-center">

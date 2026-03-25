@@ -84,7 +84,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 }
 
 // 输入验证和清理
-export function sanitizeInput(input: any): any {
+export function sanitizeInput(input: unknown): unknown {
   if (typeof input === 'string') {
     // 移除潜在危险字符
     let sanitized = input
@@ -93,30 +93,30 @@ export function sanitizeInput(input: any): any {
       .replace(/data:/gi, '') // 移除data协议
       .replace(/vbscript:/gi, '') // 移除vbscript协议
       .trim();
-    
+
     // 限制长度
     if (sanitized.length > SECURITY_CONFIG.inputValidation.maxStringLength) {
       sanitized = sanitized.substring(0, SECURITY_CONFIG.inputValidation.maxStringLength);
     }
-    
+
     return sanitized;
   }
-  
+
   if (Array.isArray(input)) {
-    if (input.length > SECURITY_CONFIG.inputValidation.maxArrayLength) {
-      input = input.slice(0, SECURITY_CONFIG.inputValidation.maxArrayLength);
-    }
-    return input.map(sanitizeInput);
+    const arr = input.length > SECURITY_CONFIG.inputValidation.maxArrayLength
+      ? input.slice(0, SECURITY_CONFIG.inputValidation.maxArrayLength)
+      : input;
+    return arr.map(sanitizeInput);
   }
-  
+
   if (typeof input === 'object' && input !== null) {
-    const sanitized: Record<string, any> = {};
-    Object.keys(input).forEach(key => {
-      sanitized[key] = sanitizeInput(input[key]);
+    const sanitized: Record<string, unknown> = {};
+    Object.keys(input as Record<string, unknown>).forEach((key) => {
+      sanitized[key] = sanitizeInput((input as Record<string, unknown>)[key]);
     });
     return sanitized;
   }
-  
+
   return input;
 }
 

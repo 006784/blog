@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Diary } from '@/lib/supabase';
-import { getAdminPassword } from '@/lib/env';
+import { logger } from '@/lib/logger';
+import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,18 +29,7 @@ export async function GET(
     const { id } = await params;
 
     // 检查是否为管理员请求
-    const authHeader = request.headers.get('authorization');
-    let isAdminRequest = false;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const token = authHeader.substring(7);
-        const adminPassword = getAdminPassword();
-        const expectedHash = btoa(adminPassword);
-        isAdminRequest = token === expectedHash;
-      } catch {
-        // 忽略
-      }
-    }
+    const isAdminRequest = !!(await requireAdminSession(request));
 
     let query = supabase
       .from('diaries')
@@ -83,26 +73,8 @@ export async function PUT(
   try {
     const { id } = await params;
     
-    // 验证管理员身份 - 使用自定义的admin-token
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return Response.json(
-        { success: false, error: '缺少认证信息' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-    
-    // 验证token是否与预期的admin token匹配
-    const adminPassword = getAdminPassword();
-    const expectedHash = btoa(adminPassword);
-    
-    if (token !== expectedHash) {
-      return Response.json(
-        { success: false, error: '认证失败' },
-        { status: 401 }
-      );
+    if (!await requireAdminSession(request)) {
+      return Response.json({ success: false, error: '未授权' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -185,6 +157,7 @@ export async function PUT(
       throw error;
     }
 
+    logger.info('日记更新成功', { module: 'diaries', action: 'update', id });
     return Response.json({
       success: true,
       data: data as Diary,
@@ -205,26 +178,8 @@ export async function DELETE(
   try {
     const { id } = await params;
     
-    // 验证管理员身份 - 使用自定义的admin-token
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return Response.json(
-        { success: false, error: '缺少认证信息' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-    
-    // 验证token是否与预期的admin token匹配
-    const adminPassword = getAdminPassword();
-    const expectedHash = btoa(adminPassword);
-    
-    if (token !== expectedHash) {
-      return Response.json(
-        { success: false, error: '认证失败' },
-        { status: 401 }
-      );
+    if (!await requireAdminSession(request)) {
+      return Response.json({ success: false, error: '未授权' }, { status: 401 });
     }
 
     const { error } = await supabase
@@ -242,6 +197,7 @@ export async function DELETE(
       throw error;
     }
 
+    logger.info('日记删除成功', { module: 'diaries', action: 'delete', id });
     return Response.json({
       success: true,
       message: '日记删除成功',

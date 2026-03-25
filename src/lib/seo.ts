@@ -1,44 +1,68 @@
-import { getPublishedPosts } from '@/lib/supabase';
+import type { Post } from '@/lib/supabase';
 
-// 生成结构化数据的工具函数
-export function generateArticleSchema(post: any) {
+const SITE_URL =
+  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL) ||
+  'https://your-domain.com';
+
+// ——— 类型定义 ———
+
+interface ArticleSchemaInput {
+  title: string;
+  excerpt?: string;
+  content?: string;
+  created_at: string;
+  updated_at?: string;
+  cover_image?: string;
+  image?: string;
+  category?: { label?: string } | string;
+  author?: { name?: string } | string;
+}
+
+// ——— 结构化数据生成 ———
+
+export function generateArticleSchema(post: ArticleSchemaInput) {
+  const authorName =
+    typeof post.author === 'string' ? post.author : post.author?.name || '博主';
+  const section =
+    typeof post.category === 'string' ? post.category : post.category?.label || '技术分享';
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    'headline': post.title,
-    'description': post.excerpt || post.title,
-    'author': {
+    headline: post.title,
+    description: post.excerpt || post.title,
+    author: {
       '@type': 'Person',
-      'name': post.author?.name || '博主',
-      'url': 'https://your-domain.com/about'
+      name: authorName,
+      url: `${SITE_URL}/about`,
     },
-    'publisher': {
+    publisher: {
       '@type': 'Organization',
-      'name': '拾光博客',
-      'logo': {
+      name: 'Lumen',
+      logo: {
         '@type': 'ImageObject',
-        'url': 'https://your-domain.com/logo.png'
-      }
+        url: `${SITE_URL}/logo.svg`,
+      },
     },
-    'datePublished': post.created_at,
-    'dateModified': post.updated_at || post.created_at,
-    'image': post.cover_image || 'https://your-domain.com/default-cover.jpg',
-    'articleBody': post.content?.substring(0, 200) + '...',
-    'wordCount': post.content?.split(' ').length || 0,
-    'articleSection': post.category?.label || '技术分享'
+    datePublished: post.created_at,
+    dateModified: post.updated_at || post.created_at,
+    image: post.cover_image || post.image || `${SITE_URL}/og-image.jpg`,
+    articleBody: post.content ? post.content.substring(0, 300) + '…' : undefined,
+    wordCount: post.content ? post.content.split(/\s+/).length : undefined,
+    articleSection: section,
   };
 }
 
-export function generateBreadcrumbSchema(paths: Array<{name: string, url: string}>) {
+export function generateBreadcrumbSchema(paths: Array<{ name: string; url: string }>) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    'itemListElement': paths.map((path, index) => ({
+    itemListElement: paths.map((path, index) => ({
       '@type': 'ListItem',
-      'position': index + 1,
-      'name': path.name,
-      'item': `https://your-domain.com${path.url}`
-    }))
+      position: index + 1,
+      name: path.name,
+      item: `${SITE_URL}${path.url}`,
+    })),
   };
 }
 
@@ -46,30 +70,44 @@ export function generateWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    'name': '拾光博客',
-    'url': 'https://your-domain.com',
-    'description': '分享技术与生活的个人博客',
-    'publisher': {
+    name: 'Lumen',
+    url: SITE_URL,
+    description: '分享技术与生活的个人博客',
+    publisher: {
       '@type': 'Organization',
-      'name': '拾光博客'
+      name: 'Lumen',
     },
-    'potentialAction': {
+    potentialAction: {
       '@type': 'SearchAction',
-      'target': 'https://your-domain.com/search?q={search_term_string}',
-      'query-input': 'required name=search_term_string'
-    }
+      target: `${SITE_URL}/blog?search=1&q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
   };
 }
 
-// 为不同页面类型生成合适的结构化数据
-export function getPageStructuredData(pageType: string, data?: any) {
+export function generatePersonSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: '博主',
+    url: `${SITE_URL}/about`,
+    sameAs: [],
+  };
+}
+
+// ——— 路由分发 ———
+
+export function getPageStructuredData(
+  pageType: 'homepage' | 'article' | 'breadcrumb' | string,
+  data?: ArticleSchemaInput | Array<{ name: string; url: string }>
+) {
   switch (pageType) {
     case 'homepage':
       return generateWebsiteSchema();
     case 'article':
-      return generateArticleSchema(data);
+      return data ? generateArticleSchema(data as ArticleSchemaInput) : null;
     case 'breadcrumb':
-      return generateBreadcrumbSchema(data);
+      return data ? generateBreadcrumbSchema(data as Array<{ name: string; url: string }>) : null;
     default:
       return null;
   }

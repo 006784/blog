@@ -1,110 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
 
-// 配置静态导出
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export type SearchResultType = 'post' | 'diary' | 'music' | 'gallery' | 'page';
+
+export interface SearchResult {
+  id: string;
+  title: string;
+  excerpt: string;
+  type: SearchResultType;
+  url: string;
+  category?: string;
+  date?: string;
+}
+
+// 静态页面本地搜索
+const STATIC_PAGES: SearchResult[] = [
+  { id: 'about',     title: '关于我',   excerpt: '了解博主的故事与理念',   type: 'page', url: '/about' },
+  { id: 'archive',   title: '归档',     excerpt: '按时间浏览所有文章',     type: 'page', url: '/archive' },
+  { id: 'gallery',   title: '相册',     excerpt: '照片与记忆',             type: 'page', url: '/gallery' },
+  { id: 'music',     title: '歌单',     excerpt: '音乐与心情',             type: 'page', url: '/music' },
+  { id: 'links',     title: '友链',     excerpt: '友情链接',               type: 'page', url: '/links' },
+  { id: 'guestbook', title: '留言板',   excerpt: '留下你的足迹',           type: 'page', url: '/guestbook' },
+  { id: 'resources', title: '资源',     excerpt: '资源下载与分享',         type: 'page', url: '/resources' },
+  { id: 'contact',   title: '联系',     excerpt: '与我联系',               type: 'page', url: '/contact' },
+];
+
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const query = searchParams.get('q');
+  const { searchParams } = new URL(request.url);
+  const q = searchParams.get('q')?.trim() || '';
+  const type = searchParams.get('type') || 'all';
 
-  if (!query || query.trim().length === 0) {
-    return NextResponse.json({ results: [] });
+  // 空查询返回静态页面供首屏展示
+  if (!q) {
+    return NextResponse.json({ results: STATIC_PAGES, query: '' });
   }
 
-  const searchTerm = `%${query}%`;
-  const results: Array<{
-    type: 'blog' | 'music' | 'diary' | 'gallery';
-    id: string;
-    title: string;
-    description?: string;
-    url: string;
-    date?: string;
-  }> = [];
+  const results: SearchResult[] = [];
+  const kw = `%${q}%`;
 
   try {
-    // 搜索博客文章
-    const { data: posts } = await supabase
-      .from('posts')
-      .select('id, title, excerpt, slug, created_at')
-      .or(`title.ilike.${searchTerm},content.ilike.${searchTerm},excerpt.ilike.${searchTerm}`)
-      .limit(5);
+    // 搜索已发布文章
+    if (type === 'all' || type === 'post') {
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id, title, slug, description, category, published_at')
+        .eq('status', 'published')
+        .or(`title.ilike.${kw},description.ilike.${kw}`)
+        .limit(8);
 
-    if (posts) {
-      posts.forEach((post) => {
+      (posts || []).forEach((post) => {
         results.push({
-          type: 'blog',
           id: post.id,
           title: post.title,
-          description: post.excerpt || undefined,
+          excerpt: post.description || '',
+          type: 'post',
           url: `/blog/${post.slug}`,
-          date: post.created_at,
+          category: post.category,
+          date: post.published_at,
         });
       });
     }
 
-    // 搜索音乐
-    const { data: songs } = await supabase
-      .from('songs')
-      .select('id, title, artist, album')
-      .or(`title.ilike.${searchTerm},artist.ilike.${searchTerm},album.ilike.${searchTerm}`)
-      .limit(5);
+    // 搜索公开日记
+    if (type === 'all' || type === 'diary') {
+      const { data: diaries } = await supabase
+        .from('diaries')
+        .select('id, title, content, diary_date')
+        .eq('is_public', true)
+        .or(`title.ilike.${kw},content.ilike.${kw}`)
+        .limit(4);
 
-    if (songs) {
-      songs.forEach((song) => {
+      (diaries || []).forEach((diary) => {
         results.push({
-          type: 'music',
+          id: diary.id,
+          title: diary.title || `日记 · ${diary.diary_date}`,
+          excerpt: diary.content ? diary.content.slice(0, 80) + '…' : '',
+          type: 'diary',
+          url: `/diary`,
+          date: diary.diary_date,
+        });
+      });
+    }
+
+    // 搜索歌曲
+    if (type === 'all' || type === 'music') {
+      const { data: songs } = await supabase
+        .from('songs')
+        .select('id, title, artist, album')
+        .or(`title.ilike.${kw},artist.ilike.${kw}`)
+        .limit(4);
+
+      (songs || []).forEach((song) => {
+        results.push({
           id: song.id,
           title: song.title,
-          description: `${song.artist}${song.album ? ` - ${song.album}` : ''}`,
+          excerpt: `${song.artist}${song.album ? ` · ${song.album}` : ''}`,
+          type: 'music',
           url: '/music',
         });
       });
     }
 
-    // 搜索日记
-    const { data: diaries } = await supabase
-      .from('diaries')
-      .select('id, title, content, created_at')
-      .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
-      .limit(5);
-
-    if (diaries) {
-      diaries.forEach((diary) => {
-        results.push({
-          type: 'diary',
-          id: diary.id,
-          title: diary.title || '无标题日记',
-          description: diary.content?.substring(0, 100) || undefined,
-          url: '/diary',
-          date: diary.created_at,
-        });
-      });
+    // 静态页面本地匹配
+    if (type === 'all' || type === 'page') {
+      const matched = STATIC_PAGES.filter(
+        (p) => p.title.includes(q) || p.excerpt.includes(q)
+      );
+      results.push(...matched);
     }
 
-    // 搜索相册
-    const { data: albums } = await supabase
-      .from('albums')
-      .select('id, name, description')
-      .or(`name.ilike.${searchTerm},description.ilike.${searchTerm}`)
-      .limit(5);
-
-    if (albums) {
-      albums.forEach((album) => {
-        results.push({
-          type: 'gallery',
-          id: album.id,
-          title: album.name,
-          description: album.description || undefined,
-          url: '/gallery',
-        });
-      });
-    }
-
-    return NextResponse.json({ results });
+    return NextResponse.json({ results, query: q });
   } catch (error) {
     console.error('Search error:', error);
-    return NextResponse.json({ results: [], error: 'Search failed' }, { status: 500 });
+    return NextResponse.json({ results: [], query: q }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { verifyAdminPassword } from '@/lib/env';
+import { requireAdminSession } from '@/lib/auth-server';
 import crypto from 'crypto';
 
 // 配置静态导出
@@ -49,12 +49,11 @@ const ALLOWED_TYPES: Record<string, { ext: string; category: string }> = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fileName, fileType, fileSize, adminPassword } = body;
-
-    // 验证管理员权限
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
+
+    const { fileName, fileType, fileSize } = body;
 
     if (!fileName || !fileType) {
       return NextResponse.json({ success: false, error: '缺少文件信息' }, { status: 400 });

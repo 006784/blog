@@ -1,6 +1,7 @@
 'use client';
 
 import { Post } from './types';
+import type { Post as SupabasePost } from './supabase';
 
 // 检查是否配置了 Supabase
 const hasSupabase = !!(typeof window !== 'undefined' && 
@@ -74,7 +75,7 @@ function savePostLocal(post: Partial<BlogPost>): BlogPost {
     category: post.category || 'tech',
     tags: post.tags || [],
     image: post.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop',
-    author: '拾光',
+    author: 'Lumen',
     readingTime: calculateReadingTime(post.content || ''),
     status: post.status || 'draft',
     createdAt: now,
@@ -177,7 +178,7 @@ async function savePostSupabase(post: Partial<BlogPost>): Promise<BlogPost> {
       tags: post.tags || [],
       image: post.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop',
       cover_image: post.coverImage,
-      author: '拾光',
+      author: 'Lumen',
       reading_time: calculateReadingTime(post.content || ''),
       status: post.status || 'draft',
       meta_title: post.metaTitle,
@@ -205,7 +206,7 @@ async function deletePostSupabase(id: string): Promise<boolean> {
 }
 
 // 转换 Supabase 数据格式到 BlogPost 格式
-function transformSupabasePost(data: any): BlogPost {
+function transformSupabasePost(data: SupabasePost): BlogPost {
   return {
     id: data.id,
     slug: data.slug,
@@ -216,7 +217,7 @@ function transformSupabasePost(data: any): BlogPost {
     category: data.category || 'tech',
     tags: data.tags || [],
     image: data.image || '',
-    author: data.author || '拾光',
+    author: data.author || 'Lumen',
     readingTime: data.reading_time || '5 min read',
     status: data.status || 'draft',
     createdAt: data.created_at,

@@ -1,19 +1,28 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Music, Heart, Play, Plus, X, Disc3, ListMusic, 
   Sparkles, ExternalLink, Trash2, Upload, FileAudio, Image as ImageIcon,
   FileText, Check, Loader2, Pause
 } from 'lucide-react';
-import { 
-  Song, Playlist, 
+import {
+  Song, Playlist,
   getAllSongs, getFavoriteSongs, getPlaylists,
   createSong, updateSong, deleteSong, toggleSongFavorite,
   createPlaylist, platformIcons
 } from '@/lib/supabase';
-import MusicPlayer from '@/components/MusicPlayer';
+import { useAdmin } from '@/components/AdminProvider';
+import dynamic from 'next/dynamic';
+
+const MusicPlayer = dynamic(() => import('@/components/MusicPlayer'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-24 rounded-2xl bg-muted animate-pulse" aria-label="播放器加载中" />
+  ),
+});
 
 const moods = [
   { value: 'chill', label: '放松', emoji: '😎' },
@@ -25,6 +34,7 @@ const moods = [
 ];
 
 export default function MusicPage() {
+  const { isAdmin } = useAdmin();
   const [songs, setSongs] = useState<Song[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,8 +115,8 @@ export default function MusicPage() {
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg shadow-purple-500/25">
-              <Music className="w-8 h-8 text-white" />
+            <div className="p-3 border border-[var(--line,#ddd9d0)]" style={{ background: 'var(--paper-deep,#ede9e0)' }}>
+              <Music className="w-8 h-8" style={{ color: 'var(--gold,#c4a96d)' }} />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold gradient-text">
               我的歌单
@@ -126,10 +136,10 @@ export default function MusicPage() {
         >
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 text-sm font-medium transition-all border ${
               filter === 'all'
-                ? 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white shadow-lg'
-                : 'bg-card hover:bg-card/80 text-foreground'
+                ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
+                : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
             }`}
           >
             <ListMusic className="w-4 h-4 inline mr-2" />
@@ -137,10 +147,10 @@ export default function MusicPage() {
           </button>
           <button
             onClick={() => setFilter('favorites')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 text-sm font-medium transition-all border ${
               filter === 'favorites'
-                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
-                : 'bg-card hover:bg-card/80 text-foreground'
+                ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
+                : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
             }`}
           >
             <Heart className="w-4 h-4 inline mr-2" />
@@ -153,10 +163,10 @@ export default function MusicPage() {
             <button
               key={mood.value}
               onClick={() => setMoodFilter(moodFilter === mood.value ? null : mood.value)}
-              className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+              className={`px-3 py-1.5 text-sm transition-all border ${
                 moodFilter === mood.value
-                  ? 'bg-primary/20 text-primary ring-2 ring-primary/30'
-                  : 'bg-card/50 hover:bg-card text-muted-foreground'
+                  ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
+                  : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
               }`}
             >
               {mood.emoji} {mood.label}
@@ -164,21 +174,23 @@ export default function MusicPage() {
           ))}
         </motion.div>
 
-        {/* Add Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mb-8"
-        >
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="btn-primary"
+        {/* Add Button - admin only */}
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex justify-center mb-8"
           >
-            <Plus className="w-5 h-5" />
-            上传歌曲
-          </button>
-        </motion.div>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="btn-primary"
+            >
+              <Plus className="w-5 h-5" />
+              上传歌曲
+            </button>
+          </motion.div>
+        )}
 
         {/* Songs Grid */}
         {loading ? (
@@ -195,12 +207,14 @@ export default function MusicPage() {
             <p className="text-muted-foreground">
               {filter === 'favorites' ? '还没有收藏的歌曲' : '还没有添加歌曲'}
             </p>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="mt-4 text-primary hover:underline"
-            >
-              上传第一首歌曲
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="mt-4 text-primary hover:underline"
+              >
+                上传第一首歌曲
+              </button>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -218,6 +232,7 @@ export default function MusicPage() {
                   onPlay={handlePlaySong}
                   onToggleFavorite={handleToggleFavorite}
                   onDelete={handleDeleteSong}
+                  isAdmin={isAdmin}
                 />
               ))}
             </AnimatePresence>
@@ -255,20 +270,22 @@ export default function MusicPage() {
 }
 
 // Song Card Component
-function SongCard({ 
-  song, 
+function SongCard({
+  song,
   index,
   isPlaying,
   onPlay,
-  onToggleFavorite, 
-  onDelete 
-}: { 
-  song: Song; 
+  onToggleFavorite,
+  onDelete,
+  isAdmin,
+}: {
+  song: Song;
   index: number;
   isPlaying: boolean;
   onPlay: (song: Song) => void;
   onToggleFavorite: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
+  isAdmin?: boolean;
 }) {
   const platform = platformIcons[song.platform] || platformIcons.other;
   const mood = song.mood ? moods.find(m => m.value === song.mood) : null;
@@ -288,10 +305,12 @@ function SongCard({
       {/* Cover */}
       <div className="relative aspect-square overflow-hidden">
         {song.cover_image ? (
-          <img
+          <Image
             src={song.cover_image}
             alt={song.title}
-            className={`w-full h-full object-cover transition-transform duration-500 ${
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className={`object-cover transition-transform duration-500 ${
               isPlaying ? 'scale-105' : 'group-hover:scale-105'
             }`}
           />
@@ -346,7 +365,7 @@ function SongCard({
         >
           <Heart 
             className={`w-5 h-5 transition-colors ${
-              song.is_favorite ? 'text-pink-500 fill-pink-500' : 'text-white'
+              song.is_favorite ? 'text-[var(--gold)] fill-[var(--gold)]' : 'text-white'
             }`} 
           />
         </button>
@@ -360,7 +379,7 @@ function SongCard({
 
         {/* Local badge */}
         {hasAudio && (
-          <div className="absolute bottom-3 right-3 px-2 py-1 rounded-full bg-green-500/80 text-white text-xs flex items-center gap-1">
+          <div className="absolute bottom-3 right-3 px-2 py-1 bg-[var(--paper-deep)] border border-[var(--gold)] text-[var(--gold)] text-xs flex items-center gap-1" style={{ fontFamily: 'var(--font-garamond)', letterSpacing: '0.08em' }}>
             <FileAudio className="w-3 h-3" />
             本地
           </div>
@@ -411,15 +430,17 @@ function SongCard({
                 <ExternalLink className="w-4 h-4" />
               </a>
             )}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(song.id);
-              }}
-              className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {isAdmin && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(song.id);
+                }}
+                className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -577,7 +598,7 @@ function AddSongModal({
               onClick={() => audioInputRef.current?.click()}
               className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
                 formData.audio_url 
-                  ? 'border-green-500/50 bg-green-500/5' 
+                  ? 'border-[var(--gold)] bg-[var(--paper-deep)]'
                   : 'border-border hover:border-primary/50 hover:bg-primary/5'
               }`}
             >
@@ -585,9 +606,9 @@ function AddSongModal({
                 <Loader2 className="w-10 h-10 text-primary mx-auto animate-spin" />
               ) : formData.audio_url ? (
                 <div className="flex items-center justify-center gap-3">
-                  <FileAudio className="w-10 h-10 text-green-500" />
+                  <FileAudio className="w-10 h-10 text-[var(--gold)]" />
                   <div className="text-left">
-                    <p className="font-medium text-green-600">音频已上传</p>
+                    <p className="font-medium text-[var(--gold)]">音频已上传</p>
                     <p className="text-xs text-muted-foreground truncate max-w-xs">
                       {formData.audio_url.split('/').pop()}
                     </p>
@@ -657,14 +678,14 @@ function AddSongModal({
                 onClick={() => lyricsInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all aspect-square flex items-center justify-center ${
                   formData.lyrics 
-                    ? 'border-green-500/50 bg-green-500/5' 
+                    ? 'border-[var(--gold)] bg-[var(--paper-deep)]'
                     : 'border-border hover:border-primary/50'
                 }`}
               >
                 {formData.lyrics ? (
                   <div>
-                    <FileText className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                    <p className="text-xs text-green-600">歌词已导入</p>
+                    <FileText className="w-8 h-8 text-[var(--gold)] mx-auto mb-2" />
+                    <p className="text-xs text-[var(--gold)]">歌词已导入</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {formData.lyrics.split('\n').length} 行
                     </p>

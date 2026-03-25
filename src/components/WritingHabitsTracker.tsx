@@ -4,9 +4,10 @@
 import { useState, useEffect } from 'react';
 import { Calendar, TrendingUp, Target, Trophy, Clock, BarChart3, Star } from 'lucide-react';
 import { WritingHabitsService, type WritingHabit, type WritingStatistics, type TimeAnalysis, type GoalSetting } from '@/lib/diary/writing-habits-service';
+import type { Diary } from '@/lib/supabase';
 
 interface WritingHabitsTrackerProps {
-  diaries: any[];
+  diaries: Diary[];
   className?: string;
 }
 

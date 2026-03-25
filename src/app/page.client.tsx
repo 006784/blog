@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Script from 'next/script';
 import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, Clock3, Search } from 'lucide-react';
 import clsx from 'clsx';
+import { SubscribeForm } from '@/components/SubscribeForm';
 import { getPageStructuredData } from '@/lib/seo';
 import { defaultPosts, formatDate, type Post as LocalPost } from '@/lib/types';
 import { getPublishedPosts, type Post as SupabasePost } from '@/lib/supabase';
@@ -27,6 +29,7 @@ const navItems = [
   { name: '首页', href: '/' },
   { name: '文章', href: '/blog' },
   { name: '关于', href: '/about' },
+  { name: '联系', href: '/contact' },
 ];
 
 const categoryLabels: Record<string, string> = {
@@ -100,58 +103,136 @@ function ProgressiveImage({
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className={clsx('frost-image-shell', className, loaded && 'is-loaded')}>
-      <span className="frost-image-placeholder" />
+    <div className={clsx('atelier-image-shell', className, loaded && 'is-loaded')}>
+      <span className="atelier-image-placeholder" />
       <Image
         src={src}
         alt={alt}
         fill
         sizes={sizes}
         priority={priority}
-        className="frost-image"
+        className="atelier-image"
         onLoad={() => setLoaded(true)}
       />
     </div>
   );
 }
 
-function FrostFeedCard({ post, index }: { post: HomePost; index: number }) {
+function EditorialFeatureCard({
+  post,
+  pinned,
+}: {
+  post: HomePost;
+  pinned: boolean;
+}) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="atelier-feature-card">
+      <div className="atelier-feature-media">
+        <ProgressiveImage
+          src={post.image}
+          alt={post.title}
+          className="atelier-feature-image"
+          sizes="(max-width: 1024px) 100vw, 48vw"
+          priority
+        />
+        <div className="atelier-feature-overlay" />
+        {pinned && <span className="atelier-pill is-spotlight">置顶文章</span>}
+      </div>
+
+      <div className="atelier-feature-body">
+        <p className="atelier-meta-line">
+          <span>
+            <CalendarDays strokeWidth={1.5} className="h-3.5 w-3.5" />
+            {formatDate(post.date)}
+          </span>
+          <span>
+            <Clock3 strokeWidth={1.5} className="h-3.5 w-3.5" />
+            {post.readingTime}
+          </span>
+          <span>{post.category}</span>
+        </p>
+
+        <h2>{post.title}</h2>
+        <p>{post.description}</p>
+
+        <div className="atelier-tag-row">
+          {post.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="atelier-tag">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function EditorialStoryCard({ post, index }: { post: HomePost; index: number }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.45, delay: index * 0.06 }}
-      className="frost-glass-card frost-feed-card"
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.45, delay: index * 0.05 }}
+      className="atelier-story-card"
     >
-      <Link href={`/blog/${post.slug}`} className="frost-card-link">
+      <Link href={`/blog/${post.slug}`} className="atelier-story-link">
+        <div className="atelier-story-copy">
+          <p className="atelier-story-category">{post.category}</p>
+          <h3>{post.title}</h3>
+          <p>{post.description}</p>
+          <div className="atelier-story-meta">
+            <span>{formatDate(post.date)}</span>
+            <span>{post.readingTime}</span>
+          </div>
+        </div>
+        <span className="atelier-story-arrow">
+          <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+        </span>
+      </Link>
+    </motion.article>
+  );
+}
+
+function EditorialFeedCard({
+  post,
+  index,
+  emphasized = false,
+}: {
+  post: HomePost;
+  index: number;
+  emphasized?: boolean;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+      className={clsx('atelier-feed-card', emphasized && 'is-emphasized')}
+    >
+      <Link href={`/blog/${post.slug}`} className="atelier-feed-link">
         <ProgressiveImage
           src={post.image}
           alt={post.title}
-          className="frost-feed-thumb"
-          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="atelier-feed-thumb"
+          sizes="(max-width: 768px) 100vw, (max-width: 1100px) 50vw, 33vw"
         />
 
-        <div className="frost-feed-content">
-          <h3 className="frost-feed-title">{post.title}</h3>
-          <p className="frost-feed-desc">{post.description}</p>
-
-          <div className="frost-tag-row">
-            {post.tags.slice(0, 3).map((tag, tagIndex) => (
-              <span key={`${post.slug}-${tag}`} className={clsx('frost-tag', tagIndex % 2 === 0 ? 'is-blue' : 'is-sage')}>
-                {tag}
-              </span>
-            ))}
+        <div className="atelier-feed-body">
+          <div className="atelier-feed-topline">
+            <span className="atelier-pill">{post.category}</span>
+            <span className="atelier-feed-reading">{post.readingTime}</span>
           </div>
 
-          <div className="frost-meta-line frost-meta-line-card">
-            <span>
-              <CalendarDays strokeWidth={1.5} className="h-3.5 w-3.5" />
-              {formatDate(post.date)}
-            </span>
-            <span>
-              <Clock3 strokeWidth={1.5} className="h-3.5 w-3.5" />
-              {post.readingTime}
+          <h3>{post.title}</h3>
+          <p>{post.description}</p>
+
+          <div className="atelier-feed-footer">
+            <span>{formatDate(post.date)}</span>
+            <span className="atelier-feed-cta">
+              阅读全文
+              <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
             </span>
           </div>
         </div>
@@ -160,20 +241,31 @@ function FrostFeedCard({ post, index }: { post: HomePost; index: number }) {
   );
 }
 
-export default function HomePageClient() {
-  const [posts, setPosts] = useState<HomePost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [visibleCount, setVisibleCount] = useState(4);
+export default function HomePageClient({
+  initialPosts = [],
+}: {
+  initialPosts?: import('@/lib/supabase').Post[];
+}) {
+  const [posts, setPosts] = useState<HomePost[]>(() =>
+    initialPosts.length > 0
+      ? initialPosts.map((post, index) => normalizePost(post, index))
+      : []
+  );
+  const [loading, setLoading] = useState(initialPosts.length === 0);
+  const [visibleCount, setVisibleCount] = useState(6);
   const [scrollRatio, setScrollRatio] = useState(0);
 
   useEffect(() => {
-    document.body.classList.add('frost-home-route');
+    document.body.classList.add('atelier-home-route');
     return () => {
-      document.body.classList.remove('frost-home-route');
+      document.body.classList.remove('atelier-home-route');
     };
   }, []);
 
   useEffect(() => {
+    // 服务端已预取数据，跳过客户端请求
+    if (initialPosts.length > 0) return;
+
     let mounted = true;
 
     const loadPosts = async () => {
@@ -218,7 +310,7 @@ export default function HomePageClient() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [initialPosts.length]);
 
   useEffect(() => {
     let frameId = 0;
@@ -243,9 +335,7 @@ export default function HomePageClient() {
   }, []);
 
   const websiteSchema = getPageStructuredData('homepage');
-
   const activePosts = posts.length > 0 ? posts : fallbackHomePosts;
-  const heroPost = activePosts[0];
   const heroPinnedPost = useMemo(
     () =>
       activePosts
@@ -257,139 +347,223 @@ export default function HomePageClient() {
         })[0] || null,
     [activePosts]
   );
-  const heroMediaPost = heroPinnedPost || heroPost;
-  const feedPosts = useMemo(() => activePosts.slice(1), [activePosts]);
-  const visiblePosts = useMemo(() => feedPosts.slice(0, visibleCount), [feedPosts, visibleCount]);
-  const canLoadMore = visibleCount < feedPosts.length;
+  const heroPost = heroPinnedPost || activePosts[0];
+  const remainingStories = useMemo(
+    () => activePosts.filter((post) => post.slug !== heroPost.slug),
+    [activePosts, heroPost.slug]
+  );
+
+  const curatedCount =
+    remainingStories.length >= 7 ? 3 : remainingStories.length >= 5 ? 2 : remainingStories.length >= 3 ? 1 : 0;
+  const curatedPosts = remainingStories.slice(0, curatedCount);
+  const feedSource = remainingStories.slice(curatedCount);
+  const visiblePosts = feedSource.slice(0, visibleCount);
+  const canLoadMore = visibleCount < feedSource.length;
+
+  const topCategories = useMemo(() => {
+    const counts = activePosts.reduce<Record<string, number>>((acc, post) => {
+      acc[post.category] = (acc[post.category] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+  }, [activePosts]);
+
+  const totalTags = useMemo(() => {
+    return new Set(activePosts.flatMap((post) => post.tags)).size;
+  }, [activePosts]);
 
   const navStyle = useMemo(
     () =>
       ({
-        '--frost-nav-blur': `${5 + scrollRatio * 10}px`,
-        '--frost-nav-bg': `rgba(255, 255, 255, ${0.4 + scrollRatio * 0.25})`,
+        '--atelier-nav-blur': `${12 + scrollRatio * 10}px`,
+        '--atelier-nav-alpha': `${0.68 + scrollRatio * 0.18}`,
       }) as CSSProperties,
     [scrollRatio]
   );
 
   return (
-    <div className="frost-home">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+    <div className="atelier-home">
+      <Script id="homepage-structured-data" type="application/ld+json">
+        {JSON.stringify(websiteSchema)}
+      </Script>
 
-      <div className="frost-home-decor" aria-hidden>
-        <span className="frost-geo frost-geo-one" />
-        <span className="frost-geo frost-geo-two" />
-        <span className="frost-bokeh frost-bokeh-one" />
-        <span className="frost-bokeh frost-bokeh-two" />
-      </div>
+      <header className="atelier-nav" style={navStyle}>
+        <div className="atelier-shell atelier-nav-row">
+          <Link href="/" className="atelier-brand">
+            <span className="atelier-brand-mark">拾</span>
+            <span className="atelier-brand-copy">
+              <strong>Lumen</strong>
+              <em>Slow digital magazine</em>
+            </span>
+          </Link>
 
-      <header className="frost-nav" style={navStyle}>
-        <div className="frost-shell">
-          <div className="frost-nav-grid">
-            <Link href="/" className="frost-brand">
-              拾光博客
-            </Link>
-
-            <nav className="frost-nav-links" aria-label="主导航">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href} className="frost-link">
-                  {item.name}
-                </Link>
-              ))}
-
-              <Link href="/blog?search=1" className="frost-search-link" aria-label="搜索文章">
-                <Search strokeWidth={1.5} className="h-4 w-4" />
+          <nav className="atelier-nav-links" aria-label="主导航">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} className="atelier-nav-link">
+                {item.name}
               </Link>
-            </nav>
+            ))}
+          </nav>
+
+          <div className="atelier-nav-actions">
+            <Link href="/blog?search=1" className="atelier-icon-button" aria-label="搜索文章">
+              <Search strokeWidth={1.5} className="h-4 w-4" />
+            </Link>
+            <Link href="/blog" className="atelier-ghost-button">
+              浏览文章
+            </Link>
           </div>
         </div>
       </header>
 
-      <main className="frost-main">
-        <section className="frost-hero-section">
-          <div className="frost-shell">
-            <div className="frost-grid frost-hero-grid">
-              <motion.article
-                initial={{ opacity: 0, y: 18 }}
+      <main className="atelier-main">
+        <section className="atelier-hero">
+          <div className="atelier-shell">
+            <div className="atelier-hero-grid">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="frost-hero-copy"
+                transition={{ duration: 0.55 }}
+                className="atelier-hero-copy"
               >
-                <p className="frost-meta-line frost-meta-line-hero">
-                  <span>
-                    <CalendarDays strokeWidth={1.5} className="h-3.5 w-3.5" />
-                    {formatDate(heroPost.date)}
-                  </span>
-                  <span>
-                    <Clock3 strokeWidth={1.5} className="h-3.5 w-3.5" />
-                    {heroPost.readingTime}
-                  </span>
-                  <span>{heroPost.category}</span>
+                <p className="atelier-kicker">独立写作空间&ensp;·&ensp;ESSAY</p>
+                <h1>把技术、设计和日常写成一份值得反复翻阅的私人杂志。</h1>
+                <p className="atelier-intro">
+                  这里不是匆忙的信息流，而是经过挑选、归档与长期更新的内容花园。每一篇文章都希望既有结构感，也保留一点温度。
                 </p>
 
-                <h1 className="frost-hero-title">{heroPost.title}</h1>
-                <p className="frost-hero-desc">{heroPost.description}</p>
+                <div className="atelier-action-row">
+                  <Link href={`/blog/${heroPost.slug}`} className="atelier-primary-button">
+                    阅读最新文章
+                    <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+                  </Link>
+                  <Link href="/about" className="atelier-secondary-button">
+                    认识作者
+                  </Link>
+                </div>
 
-                <Link href={`/blog/${heroPost.slug}`} className="frost-outline-btn frost-link-inline">
-                  阅读更多
-                  <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
-                </Link>
-              </motion.article>
+                <div className="atelier-metrics">
+                  <div className="atelier-metric-card">
+                    <span>文章存档</span>
+                    <strong>{activePosts.length}</strong>
+                    <small>持续整理与更新</small>
+                  </div>
+                  <div className="atelier-metric-card">
+                    <span>主题章节</span>
+                    <strong>{topCategories.length}</strong>
+                    <small>技术、设计、生活与思考</small>
+                  </div>
+                  <div className="atelier-metric-card">
+                    <span>标签索引</span>
+                    <strong>{totalTags}</strong>
+                    <small>便于持续回看与关联阅读</small>
+                  </div>
+                </div>
+              </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, x: 18 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.08 }}
-                className="frost-hero-media-wrap"
+                initial={{ opacity: 0, y: 28 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.08 }}
+                className="atelier-feature-wrap"
               >
-                <Link href={`/blog/${heroMediaPost.slug}`} className="frost-glass-card frost-hero-media">
-                  {heroPinnedPost && <span className="frost-pinned-badge">置顶封面</span>}
-                  <ProgressiveImage
-                    src={heroMediaPost.image}
-                    alt={heroMediaPost.title}
-                    className="frost-hero-image"
-                    sizes="(max-width: 1024px) 100vw, 40vw"
-                    priority
-                  />
-                </Link>
+                <EditorialFeatureCard post={heroPost} pinned={Boolean(heroPinnedPost)} />
               </motion.div>
             </div>
           </div>
         </section>
 
-        <section className="frost-feed-section">
-          <div className="frost-shell">
-            <div className="frost-feed-head">
-              <h2>最新文章</h2>
-              <p>低饱和度影像与毛玻璃卡片，适合长期阅读。</p>
+        <section className="atelier-curation">
+          <div className="atelier-shell">
+            <div className="atelier-section-head">
+              <div>
+                <p className="atelier-section-kicker">CURATED&ensp;·&ensp;CHAPTERS</p>
+                <h2>精选章节</h2>
+              </div>
+              <p>
+                先从几篇最能代表站点气质的文章开始，再一路顺着分类和标签深入下去。
+              </p>
+            </div>
+
+            <div className="atelier-curation-grid">
+              <div className="atelier-category-panel">
+                <p className="atelier-panel-kicker">TOP&ensp;·&ensp;CATEGORIES</p>
+                <h3>这个博客最近在写什么</h3>
+                <div className="atelier-category-list">
+                  {topCategories.map(([name, count]) => (
+                    <div key={name} className="atelier-category-row">
+                      <span>{name}</span>
+                      <strong>{count}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {curatedPosts.map((post, index) => (
+                <EditorialStoryCard key={post.slug} post={post} index={index} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="atelier-feed-section">
+          <div className="atelier-shell">
+            <div className="atelier-section-head is-feed">
+              <div>
+                <p className="atelier-section-kicker">LATEST&ensp;·&ensp;DISPATCHES</p>
+                <h2>最近更新</h2>
+              </div>
+              <p>延续同一种审美和秩序感，把最新的文章排成一张更适合慢慢浏览的内容墙。</p>
             </div>
 
             {loading ? (
-              <div className="frost-grid frost-feed-grid" aria-label="加载中">
+              <div className="atelier-feed-grid" aria-label="加载中">
                 {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className="frost-glass-card frost-feed-card frost-skeleton" />
+                  <div key={item} className={clsx('atelier-feed-card atelier-feed-skeleton', item === 1 && 'is-emphasized')} />
                 ))}
               </div>
             ) : (
               <>
-                <div className="frost-grid frost-feed-grid">
+                <div className="atelier-feed-grid">
                   {visiblePosts.map((post, index) => (
-                    <FrostFeedCard key={post.slug} post={post} index={index} />
+                    <EditorialFeedCard key={post.slug} post={post} index={index} emphasized={index === 0} />
                   ))}
                 </div>
 
                 {canLoadMore && (
-                  <div className="frost-load-wrap">
+                  <div className="atelier-load-wrap">
                     <button
                       type="button"
-                      onClick={() => setVisibleCount((count) => count + 4)}
-                      className="frost-load-more"
+                      onClick={() => setVisibleCount((count) => count + 3)}
+                      className="atelier-secondary-button"
                     >
-                      加载更多
+                      加载更多文章
                     </button>
                   </div>
                 )}
               </>
             )}
+          </div>
+        </section>
+
+        <section className="atelier-subscribe-section">
+          <div className="atelier-shell">
+            <div className="atelier-subscribe-card">
+              <div className="atelier-subscribe-copy">
+                <p className="atelier-section-kicker">NEWSLETTER&ensp;·&ensp;邮件订阅</p>
+                <h2>想第一时间看到新文章，就把这份杂志订到邮箱里。</h2>
+                <p>
+                  不追求高频打扰，只在真正有新内容、新专题或值得收藏的更新时再发给你。
+                </p>
+              </div>
+
+              <div className="atelier-subscribe-form">
+                <SubscribeForm />
+              </div>
+            </div>
           </div>
         </section>
       </main>

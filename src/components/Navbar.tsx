@@ -135,7 +135,7 @@ export function Navbar() {
               whileHover={{ x: 1.5 }}
               transition={APPLE_SPRING_GENTLE}
             >
-              拾光
+              Lumen
             </motion.span>
           </Link>
 

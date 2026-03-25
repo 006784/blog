@@ -12,19 +12,32 @@ export async function GET() {
     const { data: posts } = await supabase
       .from('posts')
       .select('slug, updated_at')
-      .eq('published', true);
+      .eq('status', 'published');
+
+    // 获取所有公开合集
+    const { data: collections } = await supabase
+      .from('collections')
+      .select('id, updated_at')
+      .eq('is_public', true);
 
     // 静态页面
     const staticPages = [
-      { url: '', priority: 1.0, changefreq: 'daily' },
-      { url: '/blog', priority: 0.9, changefreq: 'daily' },
-      { url: '/about', priority: 0.8, changefreq: 'monthly' },
-      { url: '/contact', priority: 0.7, changefreq: 'monthly' },
-      { url: '/archive', priority: 0.7, changefreq: 'weekly' },
-      { url: '/links', priority: 0.6, changefreq: 'weekly' },
-      { url: '/music', priority: 0.6, changefreq: 'weekly' },
-      { url: '/gallery', priority: 0.6, changefreq: 'weekly' },
-      { url: '/diary', priority: 0.5, changefreq: 'weekly' },
+      { url: '',             priority: 1.0, changefreq: 'daily'   },
+      { url: '/blog',        priority: 0.9, changefreq: 'daily'   },
+      { url: '/about',       priority: 0.8, changefreq: 'monthly' },
+      { url: '/contact',     priority: 0.7, changefreq: 'monthly' },
+      { url: '/archive',     priority: 0.7, changefreq: 'weekly'  },
+      { url: '/collections', priority: 0.7, changefreq: 'weekly'  },
+      { url: '/links',       priority: 0.6, changefreq: 'weekly'  },
+      { url: '/music',       priority: 0.6, changefreq: 'weekly'  },
+      { url: '/gallery',     priority: 0.6, changefreq: 'weekly'  },
+      { url: '/media',       priority: 0.6, changefreq: 'weekly'  },
+      { url: '/timeline',    priority: 0.6, changefreq: 'monthly' },
+      { url: '/uses',        priority: 0.5, changefreq: 'monthly' },
+      { url: '/resources',   priority: 0.5, changefreq: 'weekly'  },
+      { url: '/diary',       priority: 0.5, changefreq: 'weekly'  },
+      { url: '/guestbook',   priority: 0.5, changefreq: 'weekly'  },
+      { url: '/now',         priority: 0.6, changefreq: 'weekly'  },
     ];
 
     const staticUrls = staticPages.map(
@@ -46,10 +59,21 @@ export async function GET() {
   </url>`
     ).join('');
 
+    const collectionUrls = (collections || []).map(
+      (col) => `
+  <url>
+    <loc>${baseUrl}/collections/${col.id}</loc>
+    <lastmod>${new Date(col.updated_at || Date.now()).toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>`
+    ).join('');
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticUrls}
 ${postUrls}
+${collectionUrls}
 </urlset>`;
 
     return new Response(sitemap, {

@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Archive,
+  BookMarked,
   BookOpen,
   Camera,
-  ChevronLeft,
+  Clock,
   Compass,
   FileText,
+  Film,
   FolderOpen,
   Home,
   Link as LinkIcon,
@@ -21,291 +23,565 @@ import {
   Moon,
   Music,
   PenLine,
-  Settings,
+  Search,
   Shield,
   Sparkles,
   Sun,
   User,
+  Wrench,
   X,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import clsx from 'clsx';
 import { useAdmin } from './AdminProvider';
 import { useProfile } from './ProfileProvider';
-import { EnhancedSearch } from './EnhancedSearch';
-import {
-  APPLE_EASE_SOFT,
-  APPLE_SPRING_GENTLE,
-  bottomSheetVariants,
-  modalBackdropVariants,
-} from './Animations';
+import { bottomSheetVariants, modalBackdropVariants } from './Animations';
 
+// ── Nav data ──────────────────────────────────────────────
 interface NavItem {
-  name: string;
+  key: string;
   href: string;
   icon: React.ElementType;
+  label: string;
+  kana: string;
 }
 
-const contentItems: NavItem[] = [
-  { name: '首页', href: '/', icon: Home },
-  { name: '博客', href: '/blog', icon: FileText },
-  { name: '归档', href: '/archive', icon: Archive },
+const group1: NavItem[] = [
+  { key: 'home',    href: '/',        icon: Home,          label: '首页', kana: '光' },
+  { key: 'blog',    href: '/blog',    icon: FileText,      label: '博客', kana: '文' },
+  { key: 'archive', href: '/archive', icon: Archive,       label: '归档', kana: '集' },
 ];
 
-const exploreItems: NavItem[] = [
-  { name: '日记', href: '/diary', icon: BookOpen },
-  { name: '相册', href: '/gallery', icon: Camera },
-  { name: '歌单', href: '/music', icon: Music },
-  { name: '资源', href: '/resources', icon: FolderOpen },
-  { name: '友链', href: '/links', icon: LinkIcon },
-  { name: '留言', href: '/guestbook', icon: MessageCircle },
+const group2: NavItem[] = [
+  { key: 'diary',       href: '/diary',       icon: BookOpen,      label: '日记',  kana: '記' },
+  { key: 'gallery',     href: '/gallery',     icon: Camera,        label: '相册',  kana: '影' },
+  { key: 'music',       href: '/music',       icon: Music,         label: '歌单',  kana: '音' },
+  { key: 'collections', href: '/collections', icon: BookMarked,    label: '合集',  kana: '選' },
+  { key: 'media',       href: '/media',       icon: Film,          label: '书影音', kana: '覧' },
+  { key: 'timeline',    href: '/timeline',    icon: Clock,         label: '时间线', kana: '史' },
+  { key: 'uses',        href: '/uses',        icon: Wrench,        label: '工具箱', kana: '具' },
+  { key: 'resources',   href: '/resources',   icon: FolderOpen,    label: '资源',  kana: '庫' },
+  { key: 'links',       href: '/links',       icon: LinkIcon,      label: '友链',  kana: '縁' },
+  { key: 'message',     href: '/guestbook',   icon: MessageCircle, label: '留言',  kana: '声' },
 ];
 
-const aboutItems: NavItem[] = [
-  { name: '关于', href: '/about', icon: User },
-  { name: '联系', href: '/contact', icon: Mail },
+const group3: NavItem[] = [
+  { key: 'now',     href: '/now',     icon: Sparkles, label: '此刻', kana: '今' },
+  { key: 'about',   href: '/about',   icon: User,     label: '关于', kana: '我' },
+  { key: 'contact', href: '/contact', icon: Mail,     label: '联系', kana: '信' },
 ];
+
+const allItems = [...group1, ...group2, ...group3];
+
+const groupMeta: Record<string, { title: string; items: NavItem[] }> = {
+  content: { title: '内容', items: group1 },
+  explore: { title: '探索', items: group2 },
+  site:    { title: '站点', items: group3 },
+};
+
+function getGroupKey(iconKey: string): string {
+  if (group1.some(i => i.key === iconKey)) return 'content';
+  if (group2.some(i => i.key === iconKey)) return 'explore';
+  return 'site';
+}
+
+function getActiveIconKey(pathname: string): string | null {
+  const match = allItems.find(item =>
+    item.href === '/'
+      ? pathname === '/'
+      : pathname === item.href || pathname.startsWith(item.href + '/')
+  );
+  return match?.key ?? null;
+}
 
 function itemActive(pathname: string, href: string): boolean {
   if (href === '/') return pathname === '/';
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === href || pathname.startsWith(href + '/');
 }
 
-function renderSection(
-  title: string,
-  items: NavItem[],
-  pathname: string,
-  collapsed: boolean,
-  closeMenu?: () => void
-) {
+// ── Rail icon button ──────────────────────────────────────
+function RailBtn({
+  item,
+  isCurrentPage,
+  isPanelOpen,
+  onClick,
+}: {
+  item: NavItem;
+  isCurrentPage: boolean;
+  isPanelOpen: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div>
-      {!collapsed && <p className="mb-2 px-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>}
-      <div className="space-y-1">
-        {items.map((item) => {
-          const active = itemActive(pathname, item.href);
-          return (
-            <Link key={item.href} href={item.href} onClick={closeMenu}>
-              <motion.div
-                whileHover={{ x: 2, scale: 1.008 }}
-                whileTap={{ scale: 0.992, x: 1 }}
-                transition={APPLE_SPRING_GENTLE}
-                className={clsx(
-                  'nav-chip premium-nav-chip group flex items-center gap-3 px-3 py-2.5 text-sm',
-                  collapsed && 'justify-center',
-                  active
-                    ? 'nav-chip-active premium-nav-chip-active text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {!collapsed && <span className="font-medium">{item.name}</span>}
-              </motion.div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+    <button
+      onClick={onClick}
+      className={clsx(
+        'rail-btn',
+        isCurrentPage && !isPanelOpen && 'active',
+        isPanelOpen && 'panel-open'
+      )}
+      title={item.label}
+      aria-label={item.label}
+    >
+      <item.icon style={{ width: 15, height: 15 }} strokeWidth={1.5} />
+    </button>
   );
 }
 
+// ── Rail divider ──────────────────────────────────────────
+function RailDivider() {
+  return (
+    <div
+      style={{
+        width: 20,
+        height: 1,
+        background: 'var(--line)',
+        margin: '8px 0',
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
+// ── Main Sidebar ──────────────────────────────────────────
 export function Sidebar() {
-  const pathname = usePathname();
-  const isHome = pathname === '/';
+  const pathname  = usePathname();
+  const isHome    = pathname === '/';
   const { resolvedTheme, setTheme } = useTheme();
   const { isAdmin, showLoginModal, logout } = useAdmin();
   const { profile } = useProfile();
+  const routeActiveIcon = getActiveIconKey(pathname);
 
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    const savedState = window.localStorage.getItem('sidebar-collapsed');
-    return savedState ? JSON.parse(savedState) : false;
-  });
+  const [panelOpen,  setPanelOpen]  = useState(false);
+  const [panelIcon, setPanelIcon] = useState<string | null>(routeActiveIcon);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const themeReady = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const activeIcon = panelOpen ? (panelIcon ?? routeActiveIcon) : routeActiveIcon;
 
+  // Sync sidebar-width CSS var with panel state
   useEffect(() => {
-    document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '88px' : '260px');
-  }, [isCollapsed]);
+    document.documentElement.style.setProperty(
+      '--sidebar-width',
+      panelOpen ? '232px' : '52px'
+    );
+  }, [panelOpen]);
 
-  const toggleCollapse = () => {
-    const next = !isCollapsed;
-    setIsCollapsed(next);
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(next));
+  const handleIconClick = (key: string) => {
+    if (activeIcon === key && panelOpen) {
+      setPanelOpen(false);
+    } else {
+      setPanelIcon(key);
+      setPanelOpen(true);
+    }
   };
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
+  const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+  const visibleTheme = themeReady ? resolvedTheme : null;
 
-  const themeText = resolvedTheme === 'dark' ? '切换浅色' : '切换深色';
+  // Panel content derived from active icon
+  const groupKey   = activeIcon ? getGroupKey(activeIcon) : 'content';
+  const panelGroup = groupMeta[groupKey];
+  const kana       = activeIcon
+    ? (allItems.find(i => i.key === activeIcon)?.kana ?? '光')
+    : '光';
 
-  if (isHome) {
-    return null;
-  }
+  if (isHome) return null;
 
   return (
     <>
-      <motion.aside
-        initial={{ x: -34, opacity: 0, filter: 'blur(8px)' }}
-        animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
-        transition={{ duration: 0.56, ease: APPLE_EASE_SOFT }}
-        className={clsx(
-          'premium-sidebar fixed left-0 top-0 z-40 hidden h-screen md:flex md:flex-col',
-          isCollapsed ? 'w-[88px]' : 'w-[260px]'
-        )}
+      {/* ══ Desktop: Rail + Panel ══════════════════════════ */}
+      <div
+        className="hidden md:flex"
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          height: '100vh',
+          zIndex: 40,
+        }}
       >
-        <div className="flex h-full flex-col">
-          <div className={clsx('premium-sidebar-header px-4 py-4', isCollapsed && 'px-3')}>
-            <Link href="/" className={clsx('flex items-center gap-3', isCollapsed && 'justify-center')}>
-              <div className="premium-sidebar-logo flex h-10 w-10 items-center justify-center rounded-2xl text-white">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              {!isCollapsed && (
-                <div>
-                  <p className="text-lg font-semibold tracking-tight">拾光博客</p>
-                  <p className="text-xs text-soft">Design. Code. Journal.</p>
-                </div>
-              )}
+        {/* ── Rail (52px) ─────────────────────────────── */}
+        <div
+          style={{
+            width: 52,
+            minWidth: 52,
+            background: 'var(--paper)',
+            borderRight: '1px solid var(--line)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          {/* Logo */}
+          <div
+            style={{
+              width: '100%',
+              borderBottom: '1px solid var(--line)',
+              padding: '18px 0 16px',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            <Link href="/" style={{ display: 'block' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mincho)',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  writingMode: 'vertical-rl',
+                  letterSpacing: '0.15em',
+                  lineHeight: 1,
+                }}
+              >
+                Lumen
+              </span>
             </Link>
           </div>
 
-          {!isCollapsed && (
-            <>
-              <div className="surface-card premium-sidebar-profile mx-3.5 mt-4 p-3">
-                <p className="text-sm font-medium">{profile.nickname || '拾光'}</p>
-                <p className="mt-1 line-clamp-2 text-xs text-soft">
-                  {profile.signature || '记录技术与生活的长期写作。'}
-                </p>
-              </div>
-              <div className="mx-3.5 mt-3">
-                <EnhancedSearch />
-              </div>
-            </>
-          )}
+          {/* Nav icons */}
+          <div
+            className="custom-scrollbar"
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              paddingTop: 10,
+              paddingBottom: 8,
+              gap: 2,
+            }}
+          >
+            {group1.map(item => (
+              <RailBtn
+                key={item.key}
+                item={item}
+                isCurrentPage={itemActive(pathname, item.href)}
+                isPanelOpen={activeIcon === item.key && panelOpen}
+                onClick={() => handleIconClick(item.key)}
+              />
+            ))}
 
-          <div className="custom-scrollbar mt-4 flex-1 space-y-5 overflow-y-auto px-3 pb-4">
-            {renderSection('内容', contentItems, pathname, isCollapsed)}
-            {renderSection('探索', exploreItems, pathname, isCollapsed)}
-            {renderSection('站点', aboutItems, pathname, isCollapsed)}
+            <RailDivider />
+
+            {group2.map(item => (
+              <RailBtn
+                key={item.key}
+                item={item}
+                isCurrentPage={itemActive(pathname, item.href)}
+                isPanelOpen={activeIcon === item.key && panelOpen}
+                onClick={() => handleIconClick(item.key)}
+              />
+            ))}
+
+            <RailDivider />
+
+            {group3.map(item => (
+              <RailBtn
+                key={item.key}
+                item={item}
+                isCurrentPage={itemActive(pathname, item.href)}
+                isPanelOpen={activeIcon === item.key && panelOpen}
+                onClick={() => handleIconClick(item.key)}
+              />
+            ))}
           </div>
 
-          <div className="space-y-2 border-t border-border/60 p-3">
-            {isAdmin ? (
-              <Link href="/write" className="block">
-                <button
-                  className={clsx(
-                    'btn-primary ios-button-press w-full px-3 py-2.5 text-sm',
-                    isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
-                  )}
+          {/* Rail bottom: avatar + theme */}
+          <div
+            style={{
+              width: '100%',
+              borderTop: '1px solid var(--line)',
+              padding: '12px 0',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            {/* Avatar */}
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                background: 'var(--paper-deep)',
+                border: '1px solid var(--line)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                flexShrink: 0,
+              }}
+            >
+              {profile.avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar}
+                  alt={profile.nickname}
+                  width={24}
+                  height={24}
+                  style={{ width: 24, height: 24, objectFit: 'cover' }}
+                />
+              ) : (
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mincho)',
+                    fontSize: 9,
+                    color: 'var(--ink-secondary)',
+                  }}
                 >
-                  <PenLine className="h-4 w-4" />
-                  {!isCollapsed && <span>写文章</span>}
-                </button>
-              </Link>
-            ) : (
-              <button
-                onClick={() => showLoginModal()}
-                className={clsx(
-                  'btn-primary ios-button-press w-full px-3 py-2.5 text-sm',
-                  isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
-                )}
-              >
-                <Shield className="h-4 w-4" />
-                {!isCollapsed && <span>管理员登录</span>}
-              </button>
-            )}
+                  {(profile.nickname || '拾').charAt(0)}
+                </span>
+              )}
+            </div>
 
-            {isAdmin && !isCollapsed && (
-              <Link href="/admin" className="block">
-                <button className="btn-secondary ios-button-press inline-flex w-full items-center gap-2 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
-                  <Settings className="h-4 w-4" />
-                  管理后台
-                </button>
-              </Link>
-            )}
+            {/* 搜索按钮 — 触发 Cmd+K */}
+            <button
+              onClick={() =>
+                window.dispatchEvent(
+                  new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+                )
+              }
+              className="rail-btn"
+              style={{ width: 30, height: 30 }}
+              title="搜索 (⌘K)"
+              aria-label="搜索"
+            >
+              <Search style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+            </button>
 
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className={clsx(
-                'btn-secondary ios-button-press w-full px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground',
-                isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
-              )}
+              className="rail-btn"
+              style={{ width: 30, height: 30 }}
+              title={
+                visibleTheme === 'dark'
+                  ? '浅色模式'
+                  : visibleTheme === 'light'
+                    ? '深色模式'
+                    : '切换主题'
+              }
             >
-              {resolvedTheme === 'dark' ? (
-                <Sun className="h-4 w-4" />
+              {visibleTheme === 'dark' ? (
+                <Sun style={{ width: 13, height: 13 }} strokeWidth={1.5} />
               ) : (
-                <Moon className="h-4 w-4" />
+                <Moon style={{ width: 13, height: 13 }} strokeWidth={1.5} />
               )}
-              {!isCollapsed && <span>{themeText}</span>}
             </button>
-
-            <button
-              onClick={toggleCollapse}
-              className={clsx(
-                'btn-secondary ios-button-press w-full px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground',
-                isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
-              )}
-            >
-              <motion.div animate={{ rotate: isCollapsed ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                <ChevronLeft className="h-4 w-4" />
-              </motion.div>
-              {!isCollapsed && <span>{isCollapsed ? '展开侧栏' : '收起侧栏'}</span>}
-            </button>
-
-            {isAdmin && (
-              <button
-                onClick={logout}
-              className={clsx(
-                  'ios-button-press w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-500/15',
-                  isCollapsed ? 'flex items-center justify-center' : 'inline-flex items-center gap-2'
-                )}
-              >
-                <LogOut className="h-4 w-4" />
-                {!isCollapsed && <span>退出管理</span>}
-              </button>
-            )}
           </div>
         </div>
-      </motion.aside>
 
-      <nav className="premium-mobile-nav fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-2.5">
-          <Link href="/" className={clsx('rounded-xl p-2.5 transition', itemActive(pathname, '/') ? 'bg-primary/12 text-primary' : 'text-muted-foreground')}>
-            <Home className="h-5 w-5" />
-          </Link>
+        {/* ── Expand Panel (0 → 180px) ─────────────────── */}
+        <div className={clsx('expand-panel', panelOpen && 'open')}>
+          <div className="expand-panel-inner">
+            {/* Group label */}
+            <span
+              style={{
+                fontSize: 9,
+                letterSpacing: '0.35em',
+                textTransform: 'uppercase',
+                color: 'var(--ink-ghost)',
+                fontFamily: 'var(--font-jp-serif)',
+                fontWeight: 300,
+                display: 'block',
+                marginBottom: 12,
+              }}
+            >
+              {panelGroup.title}
+            </span>
 
-          <Link href="/blog" className={clsx('rounded-xl p-2.5 transition', itemActive(pathname, '/blog') ? 'bg-primary/12 text-primary' : 'text-muted-foreground')}>
-            <FileText className="h-5 w-5" />
-          </Link>
+            {/* Nav links */}
+            <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
+              {panelGroup.items.map(item => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={clsx('panel-link', itemActive(pathname, item.href) && 'active')}
+                >
+                  <span className="panel-link-dot" />
+                  <span className="panel-link-text">{item.label}</span>
+                </Link>
+              ))}
+            </div>
 
+            {/* Admin actions */}
+            <div
+              style={{
+                marginTop: 'auto',
+                paddingTop: 20,
+                borderTop: '1px solid var(--line)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              {isAdmin ? (
+                <>
+                  <Link href="/write">
+                    <span className="sidebar-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      <PenLine style={{ width: 11, height: 11 }} strokeWidth={1.5} />
+                      <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                        Write
+                      </span>
+                    </span>
+                  </Link>
+                  <Link href="/admin">
+                    <span className="sidebar-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                        Dashboard
+                      </span>
+                    </span>
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="sidebar-text-ghost"
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                  >
+                    <LogOut style={{ width: 11, height: 11 }} strokeWidth={1.5} />
+                    <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                      Logout
+                    </span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => showLoginModal()}
+                  className="sidebar-text-link"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                >
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                    Admin
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* Kana decoration */}
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                bottom: 20,
+                right: -4,
+                writingMode: 'vertical-rl',
+                fontFamily: 'var(--font-mincho)',
+                fontSize: 72,
+                fontWeight: 300,
+                color: 'var(--kana-ghost)',
+                letterSpacing: '0.1em',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                zIndex: 0,
+                lineHeight: 1,
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {kana}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ══ Mobile Bottom Nav ══════════════════════════════ */}
+      <nav
+        className="md:hidden"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          background: 'var(--paper)',
+          borderTop: '1px solid var(--line)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 28px',
+          }}
+        >
+          {([
+            { href: '/',        icon: Home     },
+            { href: '/blog',    icon: FileText  },
+            { href: '/archive', icon: Archive   },
+          ] as { href: string; icon: React.ElementType }[]).map(({ href, icon: Icon }) => {
+            const active = itemActive(pathname, href);
+            return (
+              <Link key={href} href={href}>
+                <Icon
+                  style={{
+                    width: 20,
+                    height: 20,
+                    color: active ? 'var(--gold)' : 'var(--ink)',
+                    opacity: active ? 1 : 0.4,
+                  }}
+                  strokeWidth={1.5}
+                />
+              </Link>
+            );
+          })}
+
+          {/* FAB */}
           {isAdmin ? (
-            <Link href="/write" className="premium-fab -mt-8 rounded-full p-4 text-white shadow-lg ios-button-press">
-              <PenLine className="h-5 w-5" />
+            <Link href="/write">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ink)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: -20,
+                  border: '2px solid var(--paper)',
+                }}
+              >
+                <PenLine style={{ width: 18, height: 18, color: 'var(--paper)' }} strokeWidth={1.5} />
+              </div>
             </Link>
           ) : (
             <button
               onClick={() => showLoginModal()}
-              className="premium-fab -mt-8 rounded-full p-4 text-white shadow-lg ios-button-press"
+              style={{
+                width: 40,
+                height: 40,
+                background: 'var(--ink)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: -20,
+                border: '2px solid var(--paper)',
+                cursor: 'pointer',
+              }}
             >
-              <Shield className="h-5 w-5" />
+              <Shield style={{ width: 18, height: 18, color: 'var(--paper)' }} strokeWidth={1.5} />
             </button>
           )}
 
-          <Link
-            href="/archive"
-            className={clsx('rounded-xl p-2.5 transition', itemActive(pathname, '/archive') ? 'bg-primary/12 text-primary' : 'text-muted-foreground')}
+          <button
+            onClick={() => setMobileOpen(true)}
+            style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer' }}
           >
-            <Archive className="h-5 w-5" />
-          </Link>
-
-          <button onClick={() => setMobileOpen(true)} className="ios-button-press rounded-xl p-2.5 text-muted-foreground">
-            <Menu className="h-5 w-5" />
+            <Menu style={{ width: 20, height: 20, color: 'var(--ink)', opacity: 0.4 }} strokeWidth={1.5} />
           </button>
         </div>
       </nav>
 
+      {/* ══ Mobile Sheet ═══════════════════════════════════ */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -314,7 +590,8 @@ export function Sidebar() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="ios-modal-overlay fixed inset-0 z-50 md:hidden"
+              className="md:hidden"
+              style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(26,26,24,0.45)' }}
               onClick={() => setMobileOpen(false)}
             />
 
@@ -323,76 +600,115 @@ export function Sidebar() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="ios-sheet-card fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl border-t border-border bg-background/92 p-5 backdrop-blur-2xl md:hidden"
+              className="md:hidden"
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 50,
+                maxHeight: '82vh',
+                overflowY: 'auto',
+                background: 'var(--paper)',
+                borderTop: '1px solid var(--line)',
+                padding: '24px 0 40px',
+              }}
             >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-base font-semibold">站点导航</h3>
-                <button onClick={() => setMobileOpen(false)} className="ios-button-press rounded-lg p-2 text-muted-foreground hover:bg-secondary">
-                  <X className="h-5 w-5" />
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px 20px' }}>
+                <span style={{ fontFamily: 'var(--font-mincho)', fontSize: 13, letterSpacing: '0.12em', color: 'var(--ink)' }}>
+                  站点导航
+                </span>
+                <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer' }}>
+                  <X style={{ width: 18, height: 18, color: 'var(--ink-muted)' }} strokeWidth={1.5} />
                 </button>
               </div>
 
-              <div className="space-y-5 pb-6">
-                {renderSection('内容', contentItems, pathname, false, () => setMobileOpen(false))}
-                {renderSection('探索', exploreItems, pathname, false, () => setMobileOpen(false))}
-                {renderSection('站点', aboutItems, pathname, false, () => setMobileOpen(false))}
-
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <button
-                    onClick={() => {
-                      toggleTheme();
-                    }}
-                    className="btn-secondary ios-button-press inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm"
-                  >
-                    {resolvedTheme === 'dark' ? (
-                      <Sun className="h-4 w-4" />
-                    ) : (
-                      <Moon className="h-4 w-4" />
-                    )}
-                    {themeText}
-                  </button>
-
-                  {isAdmin ? (
-                    <button
-                      onClick={() => {
-                        logout();
-                        setMobileOpen(false);
-                      }}
-                      className="ios-button-press inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-500/20"
+              {/* All groups */}
+              {[
+                { title: '内容', items: group1 },
+                { title: '探索', items: group2 },
+                { title: '站点', items: group3 },
+              ].map((g, gi) => (
+                <div key={g.title}>
+                  {gi > 0 && <div style={{ height: 1, background: 'var(--line)', margin: '8px 28px' }} />}
+                  <span style={{ display: 'block', padding: '12px 28px 8px', fontSize: 9, letterSpacing: '0.35em', textTransform: 'uppercase', color: 'var(--ink-ghost)', fontFamily: 'var(--font-jp-serif)', fontWeight: 300 }}>
+                    {g.title}
+                  </span>
+                  {g.items.map(item => (
+                    <Link
+                      key={item.key}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 28px', textDecoration: 'none' }}
                     >
-                      <LogOut className="h-4 w-4" />
-                      退出管理
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        showLoginModal();
-                        setMobileOpen(false);
-                      }}
-                      className="btn-secondary ios-button-press inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm"
-                    >
-                      <Shield className="h-4 w-4" />
-                      管理员登录
-                    </button>
-                  )}
+                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: itemActive(pathname, item.href) ? 'var(--gold)' : 'var(--line)', flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'var(--font-jp-serif)', fontSize: 13, fontWeight: itemActive(pathname, item.href) ? 400 : 300, color: itemActive(pathname, item.href) ? 'var(--ink)' : 'var(--ink-secondary)', letterSpacing: '0.05em' }}>
+                        {item.label}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
+              ))}
+
+              {/* Sheet actions */}
+              <div style={{ padding: '20px 28px 0', display: 'flex', flexWrap: 'wrap', gap: 16, borderTop: '1px solid var(--line)', marginTop: 16 }}>
+                <button
+                  onClick={toggleTheme}
+                  className="sidebar-text-link"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                >
+                  {resolvedTheme === 'dark'
+                    ? <Sun style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                    : <Moon style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                  }
+                  <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                    {resolvedTheme === 'dark' ? 'Light' : 'Dark'}
+                  </span>
+                </button>
 
                 {isAdmin && (
-                  <Link href="/admin" onClick={() => setMobileOpen(false)}>
-                    <div className="btn-secondary ios-button-press inline-flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm">
-                      <Settings className="h-4 w-4" />
-                      打开管理后台
-                    </div>
-                  </Link>
+                  <>
+                    <Link href="/admin" onClick={() => setMobileOpen(false)}>
+                      <span className="sidebar-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)' }} />
+                        <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Dashboard</span>
+                      </span>
+                    </Link>
+                    <button
+                      onClick={() => { logout(); setMobileOpen(false); }}
+                      className="sidebar-text-ghost"
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                    >
+                      <LogOut style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                      <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Logout</span>
+                    </button>
+                  </>
                 )}
 
-                <div className="rounded-xl border border-border/60 bg-background/70 p-3 text-xs text-muted-foreground">
-                  <div className="inline-flex items-center gap-1.5">
-                    <Compass className="h-3.5 w-3.5" />
-                    <span>{profile.nickname || '拾光'}</span>
-                  </div>
-                  <p className="mt-1">{profile.signature || '持续写作，持续迭代。'}</p>
+                {!isAdmin && (
+                  <button
+                    onClick={() => { showLoginModal(); setMobileOpen(false); }}
+                    className="sidebar-text-link"
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                  >
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
+                    <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Admin</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Profile note */}
+              <div style={{ padding: '16px 28px 0' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <Compass style={{ width: 11, height: 11, color: 'var(--ink-muted)', opacity: 0.6 }} strokeWidth={1.5} />
+                  <span style={{ fontFamily: 'var(--font-mincho)', fontSize: 11, color: 'var(--ink-muted)', letterSpacing: '0.08em' }}>
+                    {profile.nickname || 'Lumen'}
+                  </span>
                 </div>
+                <p style={{ fontFamily: 'var(--font-jp-serif)', fontWeight: 300, fontSize: 11, color: 'var(--ink-muted)', marginTop: 4, lineHeight: 1.8, letterSpacing: '0.04em' }}>
+                  {profile.signature || '持续写作，持续迭代。'}
+                </p>
               </div>
             </motion.div>
           </>

@@ -4,9 +4,10 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, Calendar, BarChart3, PieChart, AlertTriangle, Star, Clock } from 'lucide-react';
 import { EmotionAnalyticsService, type EmotionReport, type MoodAnalysis } from '@/lib/diary/emotion-analytics-service';
+import type { Diary } from '@/lib/supabase';
 
 interface EmotionAnalyticsProps {
-  diaries: any[];
+  diaries: Diary[];
   className?: string;
 }
 

@@ -4,9 +4,12 @@
 import { useState, useEffect } from 'react';
 import { Share2, Heart, MessageCircle, ExternalLink, Copy, Check, Globe, Users, TrendingUp } from 'lucide-react';
 import { SocialShareService, type ShareOptions } from '@/lib/diary/social-share-service';
+import type { Diary } from '@/lib/supabase';
+
+type DiaryWithInteractions = Diary & { likes?: number; comments?: number };
 
 interface SocialShareProps {
-  diary: any;
+  diary: DiaryWithInteractions;
   className?: string;
 }
 
@@ -173,7 +176,7 @@ export function SocialShare({ diary, className = '' }: SocialShareProps) {
 
 // 朋友圈时间线组件
 interface TimelineProps {
-  diaries: any[];
+  diaries: DiaryWithInteractions[];
   className?: string;
 }
 

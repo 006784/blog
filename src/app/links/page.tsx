@@ -188,7 +188,7 @@ export default function LinksPage() {
             className="mb-12"
           >
             <h2 className="flex items-center gap-2 text-xl font-semibold mb-6">
-              <Star className="w-5 h-5 text-yellow-500" />
+              <Star className="w-5 h-5 text-[var(--gold)]" />
               精选推荐
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -205,7 +205,7 @@ export default function LinksPage() {
                   className="group relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-all"
                 >
                   <div className="absolute top-3 right-3">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    <Star className="w-4 h-4 text-[var(--gold)] fill-[var(--gold)]" />
                   </div>
                   <div className="flex items-center gap-4 mb-3">
                     {link.avatar ? (
@@ -241,7 +241,7 @@ export default function LinksPage() {
                           e.preventDefault();
                           openEditModal(link);
                         }}
-                        className="p-1.5 rounded-lg bg-white/80 hover:bg-white text-blue-500"
+                        className="p-1.5 rounded-lg bg-[var(--paper-deep)] hover:bg-[var(--paper)] text-[var(--ink)]"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -250,7 +250,7 @@ export default function LinksPage() {
                           e.preventDefault();
                           handleDelete(link.id);
                         }}
-                        className="p-1.5 rounded-lg bg-white/80 hover:bg-white text-red-500"
+                        className="p-1.5 rounded-lg bg-[var(--paper-deep)] hover:bg-[var(--paper)] text-[var(--ink-secondary)]"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -316,7 +316,7 @@ export default function LinksPage() {
                           e.preventDefault();
                           openEditModal(link);
                         }}
-                        className="p-1 rounded bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                        className="p-1 rounded bg-[var(--paper-deep)] text-[var(--ink-muted)] hover:bg-[var(--paper)]"
                       >
                         <Edit2 className="w-3 h-3" />
                       </button>
@@ -325,7 +325,7 @@ export default function LinksPage() {
                           e.preventDefault();
                           handleDelete(link.id);
                         }}
-                        className="p-1 rounded bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                        className="p-1 rounded bg-[var(--paper-deep)] text-[var(--ink-muted)] hover:bg-[var(--paper)]"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>

@@ -95,33 +95,44 @@ if (process.env.NODE_ENV !== 'production') {
   );
 }
 
-// 创建HTTP请求日志中间件
-export const httpLogger = (req: any, res: any, next: any) => {
+interface HttpReq {
+  method?: string;
+  url?: string;
+  get?: (h: string) => string | undefined;
+  ip?: string;
+  connection?: { remoteAddress?: string };
+}
+interface HttpRes {
+  statusCode?: number;
+  on: (event: string, cb: () => void) => void;
+}
+
+// 创建HTTP请求日志中间件（Express 兼容）
+export const httpLogger = (req: HttpReq, res: HttpRes, next: () => void) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
-    const statusCode = res.statusCode;
-    
-    logger.http(`${req.method} ${req.url} ${statusCode} ${duration}ms`, {
+    logger.http(`${req.method} ${req.url} ${res.statusCode} ${duration}ms`, {
+      module: 'http',
       method: req.method,
       url: req.url,
-      statusCode,
+      statusCode: res.statusCode,
       duration,
-      userAgent: req.get('User-Agent'),
-      ip: req.ip || req.connection.remoteAddress,
+      userAgent: req.get?.('User-Agent'),
+      ip: req.ip || req.connection?.remoteAddress,
     });
   });
-  
+
   next();
 };
 
 // 创建API日志装饰器
 export const logApiCall = (apiName: string) => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value;
-    
-    descriptor.value = async function (...args: any[]) {
+  return (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value as (...args: unknown[]) => Promise<unknown>;
+
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now();
       
       try {

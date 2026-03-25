@@ -3,6 +3,7 @@
 import { isValidElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Script from 'next/script';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Calendar, Clock, ChevronLeft, Loader2, FileText, ArrowUpRight } from 'lucide-react';
@@ -14,6 +15,7 @@ import { ShareButtons } from '@/components/ShareButtons';
 import PostInteractions from '@/components/PostInteractions';
 import { Comments } from '@/components/GiscusComments';
 import { getPageStructuredData } from '@/lib/seo';
+import { PostReadingMemory } from '@/components/post/PostReadingMemory';
 
 interface BlogPostPageClientProps {
   slug: string;
@@ -247,11 +249,13 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
   return (
     <div className="px-6 py-10 md:py-14">
+      {/* 阅读位置记忆 */}
+      <PostReadingMemory slug={slug} />
+
       {schemaData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-        />
+        <Script id={`article-structured-data-${slug}`} type="application/ld+json">
+          {JSON.stringify(schemaData)}
+        </Script>
       )}
 
       <div className="mx-auto max-w-6xl">
@@ -280,7 +284,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           )}
 
           <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span>{post.author || '拾光'}</span>
+            <span>{post.author || 'Lumen'}</span>
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
               {formatDate(articleDate)}

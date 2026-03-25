@@ -29,6 +29,14 @@ export const supabase = createClient(
   supabaseAnonKey || 'placeholder-key'
 );
 
+// 服务端专用客户端（使用 service_role key，绕过 RLS），仅在服务端代码中使用
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+export const supabaseAdmin = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  serviceRoleKey || supabaseAnonKey || 'placeholder-key',
+  { auth: { persistSession: false, autoRefreshToken: false } }
+);
+
 // ============ 类型定义 ============
 
 export interface Post {
@@ -36,7 +44,8 @@ export interface Post {
   title: string;
   slug: string;
   description: string;
-  content: string;
+  /** 仅在详情页加载，列表查询中可能为 undefined */
+  content?: string;
   category: string;
   tags: string[];
   image: string;
@@ -164,25 +173,75 @@ export interface Diary {
   } | null;
 }
 
+// ============ 查询字段常量 ============
+
+/**
+ * 列表视图所需字段（排除 content 大字段，减少传输量）
+ * 详情页使用 select('*') 获取全部字段
+ */
+const POST_LIST_FIELDS_BASE = 'id,title,slug,description,category,tags,image,cover_image,author,reading_time,status,meta_title,meta_description,views,likes,collection_id,created_at,updated_at,published_at' as const;
+const POST_LIST_FIELDS = `${POST_LIST_FIELDS_BASE},is_pinned,pinned_at` as const;
+
+/** 列表最大条数，防止全表扫描 */
+const LIST_LIMIT = 100;
+
+function isMissingPostPinColumnsError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: string; message?: string };
+  return (
+    err.code === '42703' &&
+    typeof err.message === 'string' &&
+    (err.message.includes('posts.is_pinned') || err.message.includes('posts.pinned_at'))
+  );
+}
+
+type PostListQueryResult = {
+  data: unknown;
+  error: unknown;
+};
+
+async function fetchPostList(
+  buildQuery: (fields: string) => PromiseLike<PostListQueryResult>
+): Promise<Post[]> {
+  const result = await buildQuery(POST_LIST_FIELDS);
+  if (!isMissingPostPinColumnsError(result.error)) {
+    if (result.error) throw result.error;
+    return (result.data as Post[]) || [];
+  }
+
+  const fallbackResult = await buildQuery(POST_LIST_FIELDS_BASE);
+  if (fallbackResult.error) throw fallbackResult.error;
+
+  return ((fallbackResult.data as Array<Omit<Post, 'is_pinned' | 'pinned_at'>> | null) || []).map(
+    (post) => ({
+      ...post,
+      is_pinned: false,
+      pinned_at: null,
+    })
+  ) as Post[];
+}
+
 // ============ 文章操作 ============
 
 export async function getPublishedPosts() {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('status', 'published')
-    .order('published_at', { ascending: false });
-  if (error) throw error;
-  return data as Post[];
+  return fetchPostList((fields) =>
+    supabase
+      .from('posts')
+      .select(fields)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(LIST_LIMIT)
+  );
 }
 
 export async function getAllPosts() {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .order('updated_at', { ascending: false });
-  if (error) throw error;
-  return data as Post[];
+  return fetchPostList((fields) =>
+    supabase
+      .from('posts')
+      .select(fields)
+      .order('updated_at', { ascending: false })
+      .limit(LIST_LIMIT)
+  );
 }
 
 export async function getPostBySlug(slug: string) {
@@ -291,36 +350,39 @@ export async function likePost(id: string) {
 }
 
 export async function searchPosts(query: string) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('status', 'published')
-    .or(`title.ilike.%${query}%,description.ilike.%${query}%,content.ilike.%${query}%`)
-    .order('published_at', { ascending: false });
-  if (error) throw error;
-  return data as Post[];
+  return fetchPostList((fields) =>
+    supabase
+      .from('posts')
+      .select(fields)
+      .eq('status', 'published')
+      .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+      .order('published_at', { ascending: false })
+      .limit(50)
+  );
 }
 
 export async function getPostsByCategory(category: string) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('status', 'published')
-    .eq('category', category)
-    .order('published_at', { ascending: false });
-  if (error) throw error;
-  return data as Post[];
+  return fetchPostList((fields) =>
+    supabase
+      .from('posts')
+      .select(fields)
+      .eq('status', 'published')
+      .eq('category', category)
+      .order('published_at', { ascending: false })
+      .limit(LIST_LIMIT)
+  );
 }
 
 export async function getPostsByTag(tag: string) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('status', 'published')
-    .contains('tags', [tag])
-    .order('published_at', { ascending: false });
-  if (error) throw error;
-  return data as Post[];
+  return fetchPostList((fields) =>
+    supabase
+      .from('posts')
+      .select(fields)
+      .eq('status', 'published')
+      .contains('tags', [tag])
+      .order('published_at', { ascending: false })
+      .limit(LIST_LIMIT)
+  );
 }
 
 // ============ 文章集合操作 ============
@@ -381,14 +443,15 @@ export async function deleteCollection(id: string) {
 }
 
 export async function getPostsByCollection(collectionId: string) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('collection_id', collectionId)
-    .eq('status', 'published')
-    .order('published_at', { ascending: false });
-  if (error) throw error;
-  return data as Post[];
+  return fetchPostList((fields) =>
+    supabase
+      .from('posts')
+      .select(fields)
+      .eq('collection_id', collectionId)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(LIST_LIMIT)
+  );
 }
 
 export async function updateCollectionPostCount(collectionId: string) {
@@ -401,6 +464,220 @@ export async function updateCollectionPostCount(collectionId: string) {
     .from('collections')
     .update({ post_count: count || 0 })
     .eq('id', collectionId);
+}
+
+// ============ 此刻 now_entries ============
+
+export interface NowEntry {
+  id: string;
+  category: string;
+  content: string;
+  emoji?: string;
+  link?: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getNowEntries() {
+  const { data, error } = await supabase
+    .from('now_entries')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  if (error) { console.error('获取此刻失败:', error); return []; }
+  return data as NowEntry[];
+}
+
+export async function getAllNowEntries() {
+  const { data, error } = await supabase
+    .from('now_entries')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) { console.error('获取此刻失败:', error); return []; }
+  return data as NowEntry[];
+}
+
+export async function createNowEntry(entry: Partial<NowEntry>) {
+  const { data, error } = await supabase
+    .from('now_entries')
+    .insert([{ is_active: true, sort_order: 0, ...entry }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data as NowEntry;
+}
+
+export async function updateNowEntry(id: string, updates: Partial<NowEntry>) {
+  const { data, error } = await supabase
+    .from('now_entries')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as NowEntry;
+}
+
+export async function deleteNowEntry(id: string) {
+  const { error } = await supabase.from('now_entries').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============ 书影音 media_items ============
+
+export interface MediaItem {
+  id: string;
+  type: 'book' | 'movie' | 'tv' | 'music' | 'podcast' | 'game';
+  title: string;
+  author?: string;
+  cover_image?: string;
+  rating?: number;
+  status: 'want' | 'doing' | 'done';
+  review?: string;
+  finish_date?: string;
+  external_link?: string;
+  tags?: string[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getMediaItems() {
+  const { data, error } = await supabase
+    .from('media_items')
+    .select('*')
+    .order('finish_date', { ascending: false, nullsFirst: false });
+  if (error) { console.error('获取书影音失败:', error); return []; }
+  return data as MediaItem[];
+}
+
+export async function createMediaItem(item: Partial<MediaItem>) {
+  const { data, error } = await supabase
+    .from('media_items')
+    .insert([item])
+    .select()
+    .single();
+  if (error) throw error;
+  return data as MediaItem;
+}
+
+export async function updateMediaItem(id: string, updates: Partial<MediaItem>) {
+  const { data, error } = await supabase
+    .from('media_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as MediaItem;
+}
+
+export async function deleteMediaItem(id: string) {
+  const { error } = await supabase.from('media_items').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============ 时间线 timeline_events ============
+
+export interface TimelineEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string;
+  category: 'work' | 'education' | 'life' | 'achievement' | 'travel';
+  icon?: string;
+  image?: string;
+  link?: string;
+  is_milestone: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getTimelineEvents() {
+  const { data, error } = await supabase
+    .from('timeline_events')
+    .select('*')
+    .order('date', { ascending: false });
+  if (error) { console.error('获取时间线失败:', error); return []; }
+  return data as TimelineEvent[];
+}
+
+export async function createTimelineEvent(event: Partial<TimelineEvent>) {
+  const { data, error } = await supabase
+    .from('timeline_events')
+    .insert([event])
+    .select()
+    .single();
+  if (error) throw error;
+  return data as TimelineEvent;
+}
+
+export async function updateTimelineEvent(id: string, updates: Partial<TimelineEvent>) {
+  const { data, error } = await supabase
+    .from('timeline_events')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as TimelineEvent;
+}
+
+export async function deleteTimelineEvent(id: string) {
+  const { error } = await supabase.from('timeline_events').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ============ 工具箱 uses_items ============
+
+export interface UsesItem {
+  id: string;
+  category: string;
+  name: string;
+  description?: string;
+  icon_url?: string;
+  link?: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getUsesItems() {
+  const { data, error } = await supabase
+    .from('uses_items')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) { console.error('获取工具箱失败:', error); return []; }
+  return data as UsesItem[];
+}
+
+export async function createUsesItem(item: Partial<UsesItem>) {
+  const { data, error } = await supabase
+    .from('uses_items')
+    .insert([item])
+    .select()
+    .single();
+  if (error) throw error;
+  return data as UsesItem;
+}
+
+export async function updateUsesItem(id: string, updates: Partial<UsesItem>) {
+  const { data, error } = await supabase
+    .from('uses_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as UsesItem;
+}
+
+export async function deleteUsesItem(id: string) {
+  const { error } = await supabase.from('uses_items').delete().eq('id', id);
+  if (error) throw error;
 }
 
 export function subscribeRealtime(table: string, callback: (payload: unknown) => void) {

@@ -62,12 +62,12 @@ const validationRules = {
 };
 
 // 验证函数
-function validateContactForm(data: any): string[] {
+function validateContactForm(data: ContactFormData): string[] {
   const errors: string[] = [];
   
   // 验证每个字段
   Object.entries(validationRules).forEach(([field, validator]) => {
-    const value = data[field];
+    const value = (data as unknown as Record<string, string>)[field] ?? '';
     const result = validator(value);
     
     if (result !== true) {

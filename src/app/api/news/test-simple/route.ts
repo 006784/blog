@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       
       await resend.emails.send({
-        from: '拾光博客新闻 <news@artchain.icu>',
+        from: 'Lumen新闻 <news@artchain.icu>',
         to: recipientEmail,
         subject: mockResult.title,
         text: textContent,

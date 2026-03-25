@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { 
@@ -264,11 +265,13 @@ export default function DashboardPage() {
                     <div className="flex flex-col sm:flex-row">
                       {/* Cover Image */}
                       {post.image && (
-                        <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
-                          <img
+                        <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0 relative">
+                          <Image
                             src={post.image}
                             alt={post.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="192px"
+                            className="object-cover"
                           />
                         </div>
                       )}

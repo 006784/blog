@@ -232,7 +232,8 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
               initial={{ scaleX: 0.15, opacity: 0.45 }}
               whileHover={{ scaleX: 1, opacity: 1 }}
               transition={{ duration: 0.45, ease: APPLE_EASE_SOFT }}
-              className="h-[2px] w-28 origin-left rounded-full bg-gradient-to-r from-sky-500/65 to-blue-600/65"
+              className="h-[1px] w-28 origin-left"
+              style={{ background: 'var(--gold, #c4a96d)' }}
             />
           </div>
         </div>

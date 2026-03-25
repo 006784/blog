@@ -10,6 +10,7 @@ import {
   Folder, Archive, Code, Database, Book, Link, Star
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
+import { decodeAdminToken } from '@/lib/admin-token';
 import { Turnstile } from '@/components/Turnstile';
 import {
   APPLE_EASE_SOFT,
@@ -60,17 +61,17 @@ const iconMap: Record<string, typeof File> = {
   code: Code, database: Database, book: Book, link: Link, star: Star,
 };
 
-// 颜色映射
+// 颜色映射 — 杂志金墨配色
 const colorMap: Record<string, { color: string; bg: string }> = {
-  blue: { color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  purple: { color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  green: { color: 'text-green-500', bg: 'bg-green-500/10' },
-  orange: { color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  pink: { color: 'text-pink-500', bg: 'bg-pink-500/10' },
-  red: { color: 'text-red-500', bg: 'bg-red-500/10' },
-  yellow: { color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-  cyan: { color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-  gray: { color: 'text-gray-500', bg: 'bg-gray-500/10' },
+  blue:   { color: 'text-[var(--ink)]',           bg: 'bg-[var(--paper-deep)]' },
+  purple: { color: 'text-[var(--ink-secondary)]',  bg: 'bg-[var(--paper-deep)]' },
+  green:  { color: 'text-[var(--gold)]',           bg: 'bg-[var(--paper-deep)]' },
+  orange: { color: 'text-[var(--gold)]',           bg: 'bg-[var(--paper-deep)]' },
+  pink:   { color: 'text-[var(--ink-secondary)]',  bg: 'bg-[var(--paper-deep)]' },
+  red:    { color: 'text-[var(--ink)]',            bg: 'bg-[var(--paper-deep)]' },
+  yellow: { color: 'text-[var(--gold)]',           bg: 'bg-[var(--paper-deep)]' },
+  cyan:   { color: 'text-[var(--ink-secondary)]',  bg: 'bg-[var(--paper-deep)]' },
+  gray:   { color: 'text-[var(--ink-muted)]',      bg: 'bg-[var(--paper-deep)]' },
 };
 
 // 获取分类配置
@@ -96,16 +97,12 @@ function formatDate(dateStr: string): string {
   });
 }
 
-// 获取管理员密码（从localStorage中的token解码）
+// 获取管理员密码（从 localStorage 中的 token 解码）
 function getAdminPassword(): string {
   if (typeof window === 'undefined') return '';
   const token = localStorage.getItem('admin-token');
   if (!token) return '';
-  try {
-    return atob(token);
-  } catch {
-    return '';
-  }
+  return decodeAdminToken(token) || '';
 }
 
 export default function ResourcesPage() {
@@ -545,12 +542,12 @@ export default function ResourcesPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.32, ease: APPLE_EASE_SOFT }}
-            className={`fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border px-4 py-2 text-sm shadow-lg backdrop-blur-xl ${
+            className={`fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 border px-4 py-2 text-sm backdrop-blur-xl ${
               notice.type === 'success'
-                ? 'border-emerald-400/35 bg-emerald-600/92 text-white'
+                ? 'border-[var(--gold)] bg-[var(--ink)] text-[var(--paper)]'
                 : notice.type === 'error'
-                  ? 'border-rose-400/35 bg-rose-600/92 text-white'
-                  : 'border-sky-400/35 bg-sky-600/92 text-white'
+                  ? 'border-[var(--line)] bg-[var(--paper-warm)] text-[var(--ink-secondary)]'
+                  : 'border-[var(--line)] bg-[var(--paper-warm)] text-[var(--ink)]'
             }`}
           >
             {notice.type === 'success' ? (
@@ -598,8 +595,8 @@ export default function ResourcesPage() {
           </div>
           <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Eye className="w-5 h-5 text-green-500" />
+              <div className="p-2 bg-[var(--paper-deep)] border border-[var(--line)]">
+                <Eye className="w-5 h-5 text-[var(--gold)]" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.public}</p>
@@ -609,8 +606,8 @@ export default function ResourcesPage() {
           </div>
           <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <HardDrive className="w-5 h-5 text-blue-500" />
+              <div className="p-2 bg-[var(--paper-deep)] border border-[var(--line)]">
+                <HardDrive className="w-5 h-5 text-[var(--ink)]" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{formatFileSize(stats.totalSize)}</p>
@@ -620,8 +617,8 @@ export default function ResourcesPage() {
           </div>
           <div className="surface-card interactive-card p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <Download className="w-5 h-5 text-purple-500" />
+              <div className="p-2 bg-[var(--paper-deep)] border border-[var(--line)]">
+                <Download className="w-5 h-5 text-[var(--ink-secondary)]" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.totalDownloads}</p>
@@ -749,7 +746,7 @@ export default function ResourcesPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       {resource.is_public ? (
-                        <Eye className="w-4 h-4 text-green-500" />
+                        <Eye className="w-4 h-4 text-[var(--gold)]" />
                       ) : (
                         <EyeOff className="w-4 h-4 text-muted-foreground" />
                       )}
@@ -779,7 +776,7 @@ export default function ResourcesPage() {
                     </button>
                     {/* 高频资源预加载提示 */}
                     {resource.download_count > 10 && (
-                      <div className="text-xs text-green-500 flex items-center gap-1" title="高频资源，已优化加载">
+                      <div className="text-xs text-[var(--gold)] flex items-center gap-1" title="高频资源，已优化加载">
                         <Star className="w-3 h-3" />
                       </div>
                     )}
@@ -788,7 +785,7 @@ export default function ResourcesPage() {
                       className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
                     >
                       {copiedId === resource.id ? (
-                        <Check className="w-4 h-4 text-green-500" />
+                        <Check className="w-4 h-4 text-[var(--gold)]" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
@@ -830,7 +827,7 @@ export default function ResourcesPage() {
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium truncate">{resource.name}</h3>
                       {resource.is_public ? (
-                        <Eye className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                        <Eye className="w-3.5 h-3.5 text-[var(--gold)] flex-shrink-0" />
                       ) : (
                         <EyeOff className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                       )}
@@ -852,7 +849,7 @@ export default function ResourcesPage() {
                     </button>
                     {/* 高频资源预加载提示 */}
                     {resource.download_count > 10 && (
-                      <div className="text-xs text-green-500 flex items-center gap-1" title="高频资源，已优化加载">
+                      <div className="text-xs text-[var(--gold)] flex items-center gap-1" title="高频资源，已优化加载">
                         <Star className="w-3 h-3" />
                       </div>
                     )}
@@ -861,7 +858,7 @@ export default function ResourcesPage() {
                       className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
                     >
                       {copiedId === resource.id ? (
-                        <Check className="w-4 h-4 text-green-500" />
+                        <Check className="w-4 h-4 text-[var(--gold)]" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
@@ -1116,7 +1113,7 @@ export default function ResourcesPage() {
                   </label>
 
                   {/* 安全提示 */}
-                  <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 text-amber-600 text-sm">
+                  <div className="flex items-start gap-2 p-3 border border-[var(--line)] bg-[var(--paper-deep)] text-[var(--ink-muted)] text-sm">
                     <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <p>文件将经过安全检测，禁止上传可执行文件、脚本等危险文件</p>
                   </div>

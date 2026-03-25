@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Send, User, Mail, Globe, Pin, Reply,
   Trash2, Check, X, Loader2, Heart
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
+import { decodeAdminToken } from '@/lib/admin-token';
 
 interface Message {
   id: string;
@@ -39,7 +41,7 @@ function getAdminPassword(): string {
   if (typeof window === 'undefined') return '';
   const token = localStorage.getItem('admin-token');
   if (!token) return '';
-  try { return atob(token); } catch { return ''; }
+  return decodeAdminToken(token) || '';
 }
 
 export default function GuestbookPage() {
@@ -259,8 +261,19 @@ export default function GuestbookPage() {
         {/* 留言列表 */}
         <div className="space-y-4">
           {loading ? (
-            <div className="surface-card text-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="surface-card p-5 rounded-2xl animate-pulse">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 w-32 bg-muted rounded-full" />
+                      <div className="h-3 w-full bg-muted rounded-lg" />
+                      <div className="h-3 w-2/3 bg-muted rounded-lg" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : messages.length === 0 ? (
             <div className="surface-card text-center py-12 text-muted-foreground">
@@ -280,10 +293,12 @@ export default function GuestbookPage() {
                 >
                   <div className="flex gap-4">
                     {/* 头像 */}
-                    <img
+                    <Image
                       src={msg.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.nickname}`}
                       alt={msg.nickname}
-                      className="w-12 h-12 rounded-full bg-secondary"
+                      width={48}
+                      height={48}
+                      className="rounded-full bg-secondary"
                     />
                     
                     <div className="flex-1 min-w-0">

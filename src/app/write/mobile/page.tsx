@@ -46,7 +46,7 @@ function MobileWriteContent() {
       const post = await getPostById(id);
       if (post) {
         setTitle(post.title);
-        setContent(post.content);
+        setContent(post.content ?? '');
         setCategory(post.category);
         setCurrentPostId(post.id);
       }
@@ -91,7 +91,7 @@ function MobileWriteContent() {
         content,
         category,
         tags: [],
-        author: '拾光',
+        author: 'Lumen',
         reading_time: estimateReadingTime(content),
         status: 'draft' as const,
       };
@@ -129,7 +129,7 @@ function MobileWriteContent() {
         content,
         category,
         tags: [],
-        author: '拾光',
+        author: 'Lumen',
         reading_time: estimateReadingTime(content),
         status: 'published' as const,
         published_at: new Date().toISOString(),

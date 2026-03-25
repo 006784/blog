@@ -104,9 +104,9 @@ export default function ArchivePage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 border border-[var(--line)] text-[var(--ink-muted)]" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.15em', fontSize: '0.72rem', textTransform: 'uppercase' }}>
             <Calendar className="w-4 h-4" />
-            <span className="text-sm font-medium">文章归档</span>
+            <span>文章归档</span>
           </div>
           <h1 className="text-4xl font-bold mb-4">时光机</h1>
           <p className="text-muted-foreground">
@@ -117,7 +117,7 @@ export default function ArchivePage() {
         {/* 时间线 */}
         <div className="relative">
           {/* 时间线轴 */}
-          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-transparent" />
+          <div className="absolute left-6 top-0 bottom-0 w-px" style={{ background: 'var(--line)' }} />
 
           {archives.map((yearData, yearIndex) => (
             <motion.div
@@ -132,7 +132,7 @@ export default function ArchivePage() {
                 onClick={() => toggleYear(yearData.year)}
                 className="flex items-center gap-4 mb-4 group"
               >
-                <div className="relative z-10 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-lg shadow-primary/25">
+                <div className="relative z-10 w-12 h-12 flex items-center justify-center font-bold border border-[var(--line)]" style={{ background: 'var(--paper-deep)', color: 'var(--gold)' }}>
                   {expandedYears.includes(yearData.year) ? (
                     <ChevronDown className="w-6 h-6" />
                   ) : (
@@ -140,7 +140,7 @@ export default function ArchivePage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold group-hover:text-primary transition-colors">
+                  <h2 className="text-2xl font-bold group-hover:text-[var(--gold)] transition-colors">
                     {yearData.year}
                   </h2>
                   <p className="text-sm text-muted-foreground">
@@ -159,7 +159,7 @@ export default function ArchivePage() {
                 >
                   {yearData.months.map((monthData) => (
                     <div key={monthData.month} className="mb-6">
-                      <h3 className="text-lg font-semibold mb-3 text-primary/80">
+                      <h3 className="text-lg font-semibold mb-3 text-[var(--gold)]" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.1em' }}>
                         {monthNames[monthData.month - 1]}
                       </h3>
                       <div className="space-y-3">
@@ -171,11 +171,11 @@ export default function ArchivePage() {
                           >
                             <Link
                               href={`/blog/${post.slug}`}
-                              className="flex items-start gap-3 p-3 rounded-xl bg-card/50 hover:bg-card border border-transparent hover:border-border transition-all"
+                              className="flex items-start gap-3 p-3 border border-transparent hover:border-[var(--line)] hover:bg-[var(--paper-warm)] transition-all"
                             >
                               <FileText className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-medium group-hover:text-primary transition-colors line-clamp-1">
+                                <h4 className="font-medium group-hover:text-[var(--gold)] transition-colors line-clamp-1">
                                   {post.title}
                                 </h4>
                                 {post.description && (

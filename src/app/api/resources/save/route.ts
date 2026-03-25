@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { verifyAdminPassword } from '@/lib/env';
+import { requireAdminSession } from '@/lib/auth-server';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -12,23 +12,21 @@ export async function POST(request: NextRequest) {
     const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const body = await request.json();
     
-    const { 
-      adminPassword, 
-      name, 
-      originalName, 
-      description, 
-      fileUrl, 
-      fileSize, 
-      fileType, 
-      category, 
-      isPublic, 
-      tags 
-    } = body;
-
-    // 验证管理员权限
-    if (!verifyAdminPassword(adminPassword)) {
+    if (!await requireAdminSession(request)) {
       return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
     }
+
+    const {
+      name,
+      originalName,
+      description,
+      fileUrl,
+      fileSize,
+      fileType,
+      category,
+      isPublic,
+      tags
+    } = body;
 
     if (!name || !fileUrl || !fileSize) {
       return NextResponse.json({ success: false, error: '缺少必要信息' }, { status: 400 });

@@ -12,28 +12,28 @@ const footerGroups = [
   {
     title: '内容',
     links: [
-      { name: '首页', href: '/' },
-      { name: '博客', href: '/blog' },
-      { name: '归档', href: '/archive' },
-      { name: '关于', href: '/about' },
+      { name: '首页',   href: '/' },
+      { name: '博客',   href: '/blog' },
+      { name: '归档',   href: '/archive' },
+      { name: '精选合集', href: '/collections' },
     ],
   },
   {
-    title: '分类',
+    title: '探索',
     links: [
-      { name: '技术', href: '/blog?category=tech' },
-      { name: '设计', href: '/blog?category=design' },
-      { name: '生活', href: '/blog?category=life' },
-      { name: '思考', href: '/blog?category=thoughts' },
+      { name: '书影音', href: '/media' },
+      { name: '时间线', href: '/timeline' },
+      { name: '工具箱', href: '/uses' },
+      { name: '相册',   href: '/gallery' },
     ],
   },
   {
-    title: '扩展',
+    title: '站点',
     links: [
-      { name: '资源', href: '/resources' },
-      { name: '友链', href: '/links' },
-      { name: '留言', href: '/guestbook' },
-      { name: 'RSS', href: '/api/rss' },
+      { name: '关于',   href: '/about' },
+      { name: '友链',   href: '/links' },
+      { name: '留言',   href: '/guestbook' },
+      { name: 'RSS',    href: '/feed.xml' },
     ],
   },
 ];
@@ -50,7 +50,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative mt-20 px-6 pb-10">
+    <footer className="editorial-footer relative mt-20 px-6 pb-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(56,189,248,0.1),transparent_45%),radial-gradient(circle_at_90%_20%,rgba(249,115,22,0.08),transparent_40%)]" />
       <motion.button
         whileHover={{ y: -4 }}
@@ -62,10 +62,11 @@ export function Footer() {
         <ArrowUp className="h-4 w-4" />
       </motion.button>
 
-      <div className="surface-card relative mx-auto max-w-6xl px-6 py-12">
+      <div className="surface-card editorial-footer-card relative mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))]">
-          <div>
-            <h3 className="text-xl font-semibold tracking-tight">拾光博客</h3>
+          <div className="editorial-footer-intro">
+            <p className="editorial-footer-kicker">Slow Publishing Studio</p>
+            <h3 className="text-xl font-semibold tracking-tight">Lumen</h3>
             <p className="text-soft mt-3 max-w-sm text-sm leading-7">
               一个持续更新的内容站，记录技术实践、设计思考和长期写作。
             </p>
@@ -107,7 +108,7 @@ export function Footer() {
         </div>
 
         <div className="text-soft mt-10 flex flex-col gap-2 border-t border-border/60 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} 拾光博客。All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Lumen。All rights reserved.</p>
           <p>Built with Next.js and Tailwind CSS</p>
         </div>
       </div>

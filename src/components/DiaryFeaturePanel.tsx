@@ -6,15 +6,35 @@ import {
   BarChart3, PenTool, Bell, Download, Search, 
   ChevronDown, ChevronUp, Layers
 } from 'lucide-react';
-import { EmotionAnalytics } from '@/components/EmotionAnalytics';
-import { WritingHabitsTracker } from '@/components/WritingHabitsTracker';
-import { SmartReminder } from '@/components/SmartReminder';
-import { DataExport } from '@/components/DataExport';
-import { DiarySearch } from '@/components/DiarySearch';
+import dynamic from 'next/dynamic';
+import type { Diary } from '@/lib/supabase';
+
+const LoadingPlaceholder = () => <div className="h-64 rounded-2xl bg-muted animate-pulse" />;
+
+const EmotionAnalytics = dynamic(
+  () => import('@/components/EmotionAnalytics').then((m) => m.EmotionAnalytics),
+  { ssr: false, loading: LoadingPlaceholder }
+);
+const WritingHabitsTracker = dynamic(
+  () => import('@/components/WritingHabitsTracker').then((m) => m.WritingHabitsTracker),
+  { ssr: false, loading: LoadingPlaceholder }
+);
+const SmartReminder = dynamic(
+  () => import('@/components/SmartReminder').then((m) => m.SmartReminder),
+  { ssr: false, loading: LoadingPlaceholder }
+);
+const DataExport = dynamic(
+  () => import('@/components/DataExport').then((m) => m.DataExport),
+  { ssr: false, loading: LoadingPlaceholder }
+);
+const DiarySearch = dynamic(
+  () => import('@/components/DiarySearch').then((m) => m.DiarySearch),
+  { ssr: false, loading: LoadingPlaceholder }
+);
 import type { SearchResult } from '@/lib/diary/search-service';
 
 interface DiaryFeaturePanelProps {
-  diaries: any[];
+  diaries: Diary[];
   isAdmin: boolean;
   onSearchResults?: (results: SearchResult[]) => void;
   onClearSearch?: () => void;

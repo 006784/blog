@@ -4,9 +4,10 @@
 import { useState, useEffect } from 'react';
 import { Download, Upload, HardDrive, Cloud, Settings, History, Eye, Lock, FileText, Archive } from 'lucide-react';
 import { DataExportService, type ExportFormat, type BackupConfig, type VersionHistory } from '@/lib/diary/data-export-service';
+import type { Diary } from '@/lib/supabase';
 
 interface DataExportProps {
-  diaries: any[];
+  diaries: Diary[];
   className?: string;
 }
 

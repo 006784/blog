@@ -4,9 +4,10 @@
 import { useState, useEffect } from 'react';
 import { Search, X, Filter, Calendar, Heart, Cloud, Hash } from 'lucide-react';
 import { DiarySearchService, type SearchOptions, type SearchResult } from '@/lib/diary/search-service';
+import type { Diary } from '@/lib/supabase';
 
 interface DiarySearchProps {
-  diaries: any[];
+  diaries: Diary[];
   onSearchResults: (results: SearchResult[]) => void;
   onClearSearch: () => void;
 }
@@ -144,7 +145,7 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
               <div className="space-y-2">
                 <select
                   value={searchOptions.sortBy || 'date'}
-                  onChange={(e) => updateSearchOptions({ sortBy: e.target.value as any })}
+                  onChange={(e) => updateSearchOptions({ sortBy: e.target.value as SearchOptions['sortBy'] })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   <option value="date">按日期</option>
@@ -154,7 +155,7 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
                 
                 <select
                   value={searchOptions.sortOrder || 'desc'}
-                  onChange={(e) => updateSearchOptions({ sortOrder: e.target.value as any })}
+                  onChange={(e) => updateSearchOptions({ sortOrder: e.target.value as SearchOptions['sortOrder'] })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   <option value="desc">降序</option>

@@ -13,29 +13,29 @@ const contactInfo = [
     label: '邮箱',
     value: 'zyi408480@gmail.com',
     href: 'mailto:zyi408480@gmail.com',
-    color: 'bg-blue-500',
+    color: 'bg-[var(--ink)]',
   },
   {
     icon: MapPin,
     label: '地点',
     value: '上海，中国',
     href: '#',
-    color: 'bg-green-500',
+    color: 'bg-[var(--ink-secondary)]',
   },
   {
     icon: Phone,
     label: '电话',
     value: '+86 123 4567 8900',
     href: 'tel:+8612345678900',
-    color: 'bg-purple-500',
+    color: 'bg-[var(--gold)]',
   },
 ];
 
 const socialLinks = [
-  { name: 'GitHub', href: 'https://github.com', icon: Github, color: 'hover:bg-gray-800 hover:text-white' },
-  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter, color: 'hover:bg-blue-500 hover:text-white' },
-  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin, color: 'hover:bg-blue-600 hover:text-white' },
-  { name: 'WeChat', href: '#', icon: MessageCircle, color: 'hover:bg-green-500 hover:text-white' },
+  { name: 'GitHub', href: 'https://github.com', icon: Github, color: 'hover:bg-[var(--ink)] hover:text-[var(--paper)]' },
+  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter, color: 'hover:bg-[var(--ink)] hover:text-[var(--paper)]' },
+  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin, color: 'hover:bg-[var(--ink)] hover:text-[var(--paper)]' },
+  { name: 'WeChat', href: '#', icon: MessageCircle, color: 'hover:bg-[var(--gold)] hover:text-[var(--paper)]' },
 ];
 
 export default function ContactPage() {
@@ -70,9 +70,9 @@ export default function ContactPage() {
         setIsSubmitted(false);
         setFormState({ name: '', email: '', subject: '', message: '' });
       }, 3000);
-    } catch (err: any) {
+    } catch (err) {
       console.error('发送失败:', err);
-      setError(err.message || '发送失败，请稍后重试');
+      setError(err instanceof Error ? err.message : '发送失败，请稍后重试');
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +226,7 @@ export default function ContactPage() {
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                          className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6"
+                          className="w-20 h-20 flex items-center justify-center mx-auto mb-6 border border-[var(--line)]" style={{ background: 'var(--ink)' }}
                         >
                           <Check className="w-10 h-10 text-white" />
                         </motion.div>
@@ -355,7 +355,7 @@ export default function ContactPage() {
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2 p-4 bg-red-500/10 text-red-500 rounded-xl"
+                            className="flex items-center gap-2 p-4 border border-[var(--line)] text-[var(--ink-secondary)]"
                           >
                             <AlertCircle className="w-5 h-5 flex-shrink-0" />
                             <p className="text-sm">{error}</p>

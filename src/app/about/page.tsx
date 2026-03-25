@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Github, Twitter, Mail, MapPin, Briefcase, GraduationCap, Heart, Code2, Palette, Coffee, Music } from 'lucide-react';
 import { AnimatedSection, Floating } from '@/components/Animations';
@@ -37,10 +38,10 @@ const experiences = [
 ];
 
 const interests = [
-  { icon: Code2, label: '编程', color: 'bg-blue-500' },
-  { icon: Palette, label: '设计', color: 'bg-purple-500' },
-  { icon: Coffee, label: '咖啡', color: 'bg-amber-500' },
-  { icon: Music, label: '音乐', color: 'bg-green-500' },
+  { icon: Code2, label: '编程', color: 'bg-[var(--ink)]' },
+  { icon: Palette, label: '设计', color: 'bg-[var(--ink-secondary)]' },
+  { icon: Coffee, label: '咖啡', color: 'bg-[var(--gold)]' },
+  { icon: Music, label: '音乐', color: 'bg-[var(--ink)]' },
 ];
 
 export default function AboutPage() {
@@ -80,17 +81,20 @@ export default function AboutPage() {
                 transition={{ duration: 0.3 }}
                 className="relative aspect-square max-w-md mx-auto lg:max-w-none"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] rounded-3xl rotate-6 opacity-20" />
-                <div className="relative aspect-square rounded-3xl overflow-hidden border border-[var(--ui-line)] shadow-[var(--ui-shadow-soft)]">
+                <div className="absolute inset-0 border border-[var(--line)] rotate-3 opacity-40" style={{ background: 'var(--paper-deep)' }} />
+                <div className="about-avatar-frame relative aspect-square overflow-hidden border border-[var(--line)]">
                   {profile.avatar ? (
-                    <img 
+                    <Image
                       src={profile.avatar}
                       alt="个人头像"
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 1024px) 80vw, 40vw"
+                      className="object-cover"
+                      priority
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center">
-                      <span className="text-6xl font-bold text-white">{profile.nickname.charAt(0)}</span>
+                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--paper-deep)' }}>
+                      <span className="text-6xl font-bold" style={{ fontFamily: 'var(--font-mincho)', color: 'var(--gold)' }}>{profile.nickname.charAt(0)}</span>
                     </div>
                   )}
                 </div>
@@ -120,7 +124,7 @@ export default function AboutPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="section-kicker mb-6"
                 >
-                  <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="w-2 h-2 animate-pulse" style={{ background: 'var(--gold)' }} />
                   开放合作机会
                 </motion.div>
 
@@ -198,13 +202,14 @@ export default function AboutPage() {
                   <span className="font-medium">{skill.name}</span>
                   <span className="text-soft">{skill.level}%</span>
                 </div>
-                <div className="h-3 bg-secondary/45 rounded-full overflow-hidden">
+                <div className="h-1 overflow-hidden" style={{ background: 'var(--line)' }}>
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${skill.level}%` }}
                     viewport={{ once: true }}
                     transition={{ duration: 1, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="h-full bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] rounded-full"
+                    className="h-full"
+                    style={{ background: 'var(--gold)' }}
                   />
                 </div>
               </motion.div>
@@ -240,7 +245,7 @@ export default function AboutPage() {
                 }`}
               >
                 {/* Dot */}
-                <div className="absolute left-0 md:left-1/2 w-4 h-4 bg-primary rounded-full md:-translate-x-1/2 -translate-y-0.5" />
+                <div className="absolute left-0 md:left-1/2 w-3 h-3 md:-translate-x-1/2 -translate-y-0.5 border border-[var(--gold)]" style={{ background: 'var(--paper-deep)' }} />
 
                 {/* Content */}
                 <div className={`flex-1 ${index % 2 === 0 ? 'md:text-right md:pr-12' : 'md:pl-12'} pl-8 md:pl-0`}>
@@ -248,7 +253,7 @@ export default function AboutPage() {
                     whileHover={{ scale: 1.02 }}
                     className="surface-card interactive-card p-6"
                   >
-                    <span className="text-sm text-primary font-medium">
+                    <span className="text-sm font-medium" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', color: 'var(--gold)', letterSpacing: '0.05em' }}>
                       {exp.period}
                     </span>
                     <h3 className="text-xl font-semibold mt-1 mb-2">
@@ -295,9 +300,9 @@ export default function AboutPage() {
               >
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 10 }}
-                  className={`w-16 h-16 ${interest.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}
+                  className={`w-16 h-16 ${interest.color} flex items-center justify-center mx-auto mb-4`}
                 >
-                  <interest.icon className="w-8 h-8 text-white" />
+                  <interest.icon className="w-8 h-8 text-[var(--paper)]" />
                 </motion.div>
                 <h3 className="font-semibold">{interest.label}</h3>
               </motion.div>

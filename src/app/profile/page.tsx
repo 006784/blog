@@ -86,9 +86,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-6">
                 <div className="relative">
                   {avatarPreview ? (
-                    <img 
-                      src={avatarPreview} 
-                      alt="头像预览" 
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatarPreview}
+                      alt="头像预览"
+                      width={96}
+                      height={96}
                       className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
                     />
                   ) : (

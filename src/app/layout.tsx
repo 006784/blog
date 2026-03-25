@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FontProvider } from "@/components/FontProvider";
@@ -9,16 +10,45 @@ import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 import { ReadingProgress } from "@/components/ReadingProgress";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CommandPalette } from "@/components/search/CommandPalette";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { generateWebsiteSchema } from "@/lib/seo";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com';
+const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'Lumen';
+const SITE_DESC = process.env.NEXT_PUBLIC_SITE_DESCRIPTION || '在文字中拾起生活的微光';
 
 export const metadata: Metadata = {
-  title: "拾光 - 记录生活，收藏时光",
-  description: "一个现代化的个人博客，在文字中拾起生活的微光",
-  keywords: ["博客", "拾光", "技术", "设计", "生活"],
-  authors: [{ name: "拾光" }],
+  title: {
+    default: `${SITE_NAME} - 记录生活，收藏时光`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESC,
+  keywords: ["博客", SITE_NAME, "技术", "设计", "生活"],
+  authors: [{ name: SITE_NAME }],
+  metadataBase: new URL(SITE_URL),
   openGraph: {
-    title: "拾光",
-    description: "在文字中拾起生活的微光",
+    title: `${SITE_NAME} - 记录生活，收藏时光`,
+    description: SITE_DESC,
     type: "website",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "zh_CN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} - 记录生活，收藏时光`,
+    description: SITE_DESC,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    types: {
+      'application/rss+xml': `${SITE_URL}/feed.xml`,
+    },
   },
 };
 
@@ -28,54 +58,58 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        {/* WebSite JSON-LD 结构化数据 */}
+        <JsonLd data={generateWebsiteSchema()} />
         {/* PWA manifest */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0f766e" />
+        <meta name="theme-color" content="#c4a96d" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="拾光" />
+        <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <link rel="apple-touch-icon" href="/favicon.ico" />
         
         {/* RSS */}
-        <link rel="alternate" type="application/rss+xml" title="拾光博客 RSS" href="/api/rss" />
+        <link rel="alternate" type="application/rss+xml" title="Lumen RSS" href="/feed.xml" />
         
         {/* 加载优质中文字体 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* 英文主字体（接近 Apple 风格） */}
+        {/* Cormorant Garamond — 杂志英文衬线（含斜体） */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap"
           rel="stylesheet"
         />
-        {/* 首页排版字体 */}
+        {/* Shippori Mincho — 日系明朝体标题 */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
-        {/* 思源黑体 */}
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" 
-          rel="stylesheet" 
+        {/* Noto Serif JP — 日系衬线正文 */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
         />
-        {/* 思源宋体 */}
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" 
-          rel="stylesheet" 
+        {/* Noto Serif SC — 中文宋体回退 */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
         />
-        {/* 霞鹜文楷 */}
-        <link 
-          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" 
-          rel="stylesheet" 
-        />
-        {/* 站酷快乐体 */}
-        <link 
-          href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" 
-          rel="stylesheet" 
+        {/* Inter — UI 数字 / 英文辅助 */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap"
+          rel="stylesheet"
         />
       </head>
       <body className="app-body antialiased min-h-screen" suppressHydrationWarning>
+        <Script
+          id="sw-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`,
+          }}
+        />
         <ThemeProvider>
           <FontProvider>
           <AdminProvider>
@@ -89,6 +123,9 @@ export default function RootLayout({
           {/* 渐变覆盖层 */}
           <div className="premium-global-backdrop fixed inset-0 -z-10 pointer-events-none" />
 
+          {/* 全局搜索 Cmd+K */}
+          <CommandPalette />
+
           {/* 性能优化 */}
           <PerformanceOptimizer />
           
@@ -99,42 +136,40 @@ export default function RootLayout({
           <Sidebar />
           
           {/* 主内容区 */}
-          <main className="site-main md:ml-[var(--sidebar-width,260px)] min-h-screen transition-all duration-500 pb-24 md:pb-0">
-            {children}
+          <main className="site-main md:ml-[var(--sidebar-width,52px)] min-h-screen pb-24 md:pb-0">
+            <ErrorBoundary>{children}</ErrorBoundary>
             <Footer />
           </main>
           
           {/* Service Worker 注册 */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                if ('serviceWorker' in navigator) {
-                  window.addEventListener('load', function() {
-                    var isLocalDev =
-                      location.hostname === 'localhost' ||
-                      location.hostname === '127.0.0.1' ||
-                      location.hostname === '0.0.0.0';
+          <Script id="sw-register" strategy="afterInteractive">
+            {`
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  var isLocalDev =
+                    location.hostname === 'localhost' ||
+                    location.hostname === '127.0.0.1' ||
+                    location.hostname === '0.0.0.0';
 
-                    if (isLocalDev) {
-                      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                        registrations.forEach(function(registration) {
-                          registration.unregister();
-                        });
-                        console.log('SW unregistered in local dev');
+                  if (isLocalDev) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                      registrations.forEach(function(registration) {
+                        registration.unregister();
                       });
-                      return;
-                    }
-
-                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                      console.log('SW registered: ', registration);
-                    }).catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
+                      console.log('SW unregistered in local dev');
                     });
+                    return;
+                  }
+
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered: ', registration);
+                  }).catch(function(registrationError) {
+                    console.log('SW registration failed: ', registrationError);
                   });
-                }
-              `,
-            }}
-          />
+                });
+              }
+            `}
+          </Script>
           </ProfileProvider>
           </AdminProvider>
           </FontProvider>
