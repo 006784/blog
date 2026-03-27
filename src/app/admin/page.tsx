@@ -5,11 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, FileText, Camera, BookOpen, Folder,
   Plus, Edit2, Trash2, X, Loader2, Save,
-  Eye, EyeOff, Calendar, Users, TrendingUp,
-  Settings, ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2
+  Eye, EyeOff, TrendingUp,
+  ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2
 } from 'lucide-react';
 import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
 import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -42,7 +48,7 @@ export default function AdminPage() {
     } else {
       loadAllData();
     }
-  }, [isAdmin, authLoading]);
+  }, [isAdmin, authLoading, router]);
 
   async function loadAllData() {
     try {
@@ -110,10 +116,14 @@ export default function AdminPage() {
 
   if (authLoading || !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Shield className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground">{authLoading ? '验证中...' : '正在跳转到登录页...'}</p>
+      <div className="min-h-screen px-6 py-20">
+        <div className="mx-auto max-w-2xl">
+          <StatePanel
+            tone="loading"
+            title={authLoading ? '正在验证管理员身份' : '正在跳转登录页'}
+            description="请稍等，后台会在身份检查完成后自动恢复。"
+            icon={<Shield className="h-6 w-6" />}
+          />
         </div>
       </div>
     );
@@ -130,24 +140,30 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen px-4 py-8">
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
-          <div className="flex items-center gap-4">
-            <Link href="/" className="p-2 rounded-xl hover:bg-muted transition-colors">
-              <ArrowLeft className="w-5 h-5" />
+          <div className="flex items-start gap-3">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Shield className="w-6 h-6 text-primary" />
-                管理后台
-              </h1>
-              <p className="text-sm text-muted-foreground">管理你的所有内容</p>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                  <Shield className="h-5 w-5 text-primary" />
+                </span>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">管理后台</h1>
+                  <p className="text-sm text-muted-foreground">集中维护你的内容、统计和专题资产。</p>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -157,36 +173,42 @@ export default function AdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-wrap gap-2 mb-8 bg-card/50 p-2 rounded-2xl"
+          className="mb-8"
         >
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'hover:bg-muted text-muted-foreground'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-              {tab.count !== undefined && (
-                <span className={`px-2 py-0.5 rounded-full text-xs ${
-                  activeTab === tab.id ? 'bg-white/20' : 'bg-muted'
-                }`}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
+          <Card variant="default" padding="sm" className="flex flex-wrap gap-2 rounded-[var(--radius-2xl)]">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
+                    : 'border border-transparent text-muted-foreground hover:border-[color:var(--border-default)] hover:bg-[var(--surface-overlay)] hover:text-foreground'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+                {tab.count !== undefined && (
+                  <Badge
+                    variant={activeTab === tab.id ? 'soft' : 'outline'}
+                    className={activeTab === tab.id ? 'border-white/20 bg-white/15 text-white' : ''}
+                  >
+                    {tab.count}
+                  </Badge>
+                )}
+              </button>
+            ))}
+          </Card>
         </motion.div>
 
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <StatePanel
+            tone="loading"
+            title="正在加载后台数据"
+            description="正在整理文章、照片、日记和相册统计。"
+            icon={<Loader2 className="h-6 w-6 animate-spin" />}
+          />
         ) : (
           <AnimatePresence mode="wait">
             {activeTab === 'overview' && (
@@ -283,6 +305,16 @@ export default function AdminPage() {
   );
 }
 
+const adminLinkButtonCls =
+  'inline-flex items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-transparent bg-[var(--color-primary-500)] px-4 py-2.5 text-sm font-medium text-white shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:bg-[var(--color-primary-600)]';
+
+const adminIconButtonCls =
+  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+
+function postStatusTone(status: string): 'success' | 'warning' {
+  return status === 'published' ? 'success' : 'warning';
+}
+
 // Overview Tab
 function OverviewTab({ posts, photos, diaries, albums }: {
   posts: Post[];
@@ -300,6 +332,16 @@ function OverviewTab({ posts, photos, diaries, albums }: {
   const recentPosts = posts.slice(0, 5);
   const publicDiaries = diaries.filter(d => d.is_public).length;
   const privateDiaries = diaries.filter(d => !d.is_public).length;
+  const quickLinks = [
+    { href: '/write', icon: FileText, title: '写文章', description: '创建新的博客文章' },
+    { href: '/gallery', icon: Camera, title: '上传照片', description: '添加新照片到相册' },
+    { href: '/diary', icon: BookOpen, title: '写日记', description: '记录今天的心情' },
+    { href: '/admin/now', icon: Sparkles, title: '此刻', description: '更新当下的状态与关注' },
+    { href: '/admin/collections', icon: BookMarked, title: '精选合集', description: '创建文章主题合集' },
+    { href: '/admin/media', icon: Film, title: '书影音', description: '管理观影读书记录' },
+    { href: '/admin/timeline', icon: Clock, title: '时间线', description: '管理重要人生节点' },
+    { href: '/admin/uses', icon: Wrench, title: '工具箱', description: '管理硬件与软件配置' },
+  ];
 
   return (
     <motion.div
@@ -308,7 +350,6 @@ function OverviewTab({ posts, photos, diaries, albums }: {
       exit={{ opacity: 0, y: -20 }}
       className="space-y-8"
     >
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
           <motion.div
@@ -316,152 +357,98 @@ function OverviewTab({ posts, photos, diaries, albums }: {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            className="relative overflow-hidden rounded-2xl bg-card p-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-10`} />
-            <stat.icon className="w-8 h-8 text-primary mb-3" />
-            <div className="text-3xl font-bold">{stat.value}</div>
-            <div className="text-sm text-muted-foreground">{stat.label}</div>
+            <Card variant="default" className="relative overflow-hidden rounded-[var(--radius-2xl)]">
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-10`} />
+              <stat.icon className="mb-3 h-8 w-8 text-primary" />
+              <div className="text-3xl font-semibold">{stat.value}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+            </Card>
           </motion.div>
         ))}
       </div>
 
-      {/* Quick Actions */}
       <div className="grid md:grid-cols-3 gap-4">
-        <Link href="/write" className="group">
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <FileText className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">写文章</h3>
-            <p className="text-sm text-muted-foreground">创建新的博客文章</p>
-          </motion.div>
-        </Link>
-        <Link href="/gallery" className="group">
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <Camera className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">上传照片</h3>
-            <p className="text-sm text-muted-foreground">添加新照片到相册</p>
-          </motion.div>
-        </Link>
-        <Link href="/diary" className="group">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <BookOpen className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">写日记</h3>
-            <p className="text-sm text-muted-foreground">记录今天的心情</p>
-          </motion.div>
-        </Link>
-        <Link href="/admin/now" className="group">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <Sparkles className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">此刻</h3>
-            <p className="text-sm text-muted-foreground">更新当下的状态与关注</p>
-          </motion.div>
-        </Link>
-        <Link href="/admin/collections" className="group">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <BookMarked className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">精选合集</h3>
-            <p className="text-sm text-muted-foreground">创建文章主题合集</p>
-          </motion.div>
-        </Link>
-        <Link href="/admin/media" className="group">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <Film className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">书影音</h3>
-            <p className="text-sm text-muted-foreground">管理观影读书记录</p>
-          </motion.div>
-        </Link>
-        <Link href="/admin/timeline" className="group">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <Clock className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">时间线</h3>
-            <p className="text-sm text-muted-foreground">管理重要人生节点</p>
-          </motion.div>
-        </Link>
-        <Link href="/admin/uses" className="group">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-          >
-            <Wrench className="w-8 h-8 text-primary mb-3" />
-            <h3 className="font-semibold mb-1">工具箱</h3>
-            <p className="text-sm text-muted-foreground">管理硬件与软件配置</p>
-          </motion.div>
-        </Link>
+        {quickLinks.map((item) => (
+          <Link key={item.href} href={item.href} className="group">
+            <motion.div whileHover={{ scale: 1.01 }}>
+              <Card
+                variant="default"
+                className="rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+              >
+                <item.icon className="mb-3 h-8 w-8 text-primary" />
+                <h3 className="mb-1 font-semibold">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+              </Card>
+            </motion.div>
+          </Link>
+        ))}
       </div>
 
-      {/* Recent Posts */}
-      <div className="bg-card rounded-2xl p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-primary" />
-          最近文章
-        </h3>
-        <div className="space-y-3">
-          {recentPosts.map(post => (
-            <div key={post.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors">
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium truncate">{post.title}</h4>
-                <p className="text-sm text-muted-foreground">{formatDate(post.created_at)}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  post.status === 'published' ? 'bg-green-500/20 text-green-600' : 'bg-amber-500/20 text-amber-600'
-                }`}>
-                  {post.status === 'published' ? '已发布' : '草稿'}
-                </span>
-                <Link href={`/write?edit=${post.id}`}>
-                  <button className="p-2 rounded-lg hover:bg-muted transition-colors">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                </Link>
-              </div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <Card variant="elevated" className="rounded-[var(--radius-2xl)]">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 font-semibold">
+              <FileText className="h-5 w-5 text-primary" />
+              最近文章
+            </h3>
+            <Link href="/write" className={adminLinkButtonCls}>
+              <Plus className="h-4 w-4" />
+              写文章
+            </Link>
+          </div>
+
+          {recentPosts.length === 0 ? (
+            <StatePanel
+              tone="empty"
+              title="还没有文章"
+              description="发布第一篇文章后，这里会显示最近内容。"
+            />
+          ) : (
+            <div className="space-y-3">
+              {recentPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-xs)]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <h4 className="truncate font-medium">{post.title}</h4>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span>{formatDate(post.created_at)}</span>
+                      <Badge tone={postStatusTone(post.status)} variant="soft">
+                        {post.status === 'published' ? '已发布' : '草稿'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <Link href={`/write?edit=${post.id}`}>
+                    <span className={adminIconButtonCls}>
+                      <Edit2 className="h-4 w-4" />
+                    </span>
+                  </Link>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          )}
+        </Card>
 
-      {/* Diary Stats */}
-      <div className="bg-card rounded-2xl p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-primary" />
-          日记统计
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-muted/50 flex items-center gap-3">
-            <Eye className="w-6 h-6 text-green-500" />
-            <div>
-              <div className="text-xl font-bold">{publicDiaries}</div>
+        <Card variant="elevated" className="rounded-[var(--radius-2xl)]">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold">
+            <BookOpen className="h-5 w-5 text-primary" />
+            日记统计
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
+              <Eye className="mb-3 h-6 w-6 text-green-500" />
+              <div className="text-2xl font-semibold">{publicDiaries}</div>
               <div className="text-sm text-muted-foreground">公开日记</div>
             </div>
-          </div>
-          <div className="p-4 rounded-xl bg-muted/50 flex items-center gap-3">
-            <EyeOff className="w-6 h-6 text-amber-500" />
-            <div>
-              <div className="text-xl font-bold">{privateDiaries}</div>
+            <div className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
+              <EyeOff className="mb-3 h-6 w-6 text-amber-500" />
+              <div className="text-2xl font-semibold">{privateDiaries}</div>
               <div className="text-sm text-muted-foreground">私密日记</div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </motion.div>
   );
@@ -476,52 +463,59 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
       exit={{ opacity: 0, y: -20 }}
       className="space-y-4"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">所有文章</h2>
-        <Link href="/write" className="btn-primary">
+        <Link href="/write" className={adminLinkButtonCls}>
           <Plus className="w-4 h-4" />
           写文章
         </Link>
       </div>
 
-      <div className="bg-card rounded-2xl overflow-hidden">
+      <Card variant="elevated" padding="sm" className="overflow-hidden rounded-[var(--radius-2xl)]">
         {posts.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            还没有文章
-          </div>
+          <StatePanel
+            tone="empty"
+            title="还没有文章"
+            description="从写作页开始创建第一篇文章。"
+          />
         ) : (
-          <div className="divide-y divide-border">
-            {posts.map(post => (
-              <div key={post.id} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
-                {post.cover_image && (
-                  <Image src={post.cover_image} alt="" width={64} height={48} className="rounded-lg object-cover" />
+          <div className="space-y-3">
+            {posts.map((post) => (
+              <div
+                key={post.id}
+                className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)]"
+              >
+                {post.cover_image ? (
+                  <Image src={post.cover_image} alt="" width={72} height={54} className="rounded-[var(--radius-lg)] object-cover" />
+                ) : (
+                  <div className="flex h-[54px] w-[72px] shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--surface-overlay)] text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                  </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{post.title}</h3>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <h3 className="truncate font-medium">{post.title}</h3>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <span>{formatDate(post.created_at)}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${
-                      post.status === 'published' ? 'bg-green-500/20 text-green-600' : 'bg-amber-500/20 text-amber-600'
-                    }`}>
+                    <Badge tone={postStatusTone(post.status)} variant="soft">
                       {post.status === 'published' ? '已发布' : '草稿'}
-                    </span>
+                    </Badge>
                     <span>{post.views} 阅读</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Link href={`/blog/${post.slug}`}>
-                    <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+                    <span className={adminIconButtonCls}>
                       <Eye className="w-4 h-4" />
-                    </button>
+                    </span>
                   </Link>
                   <Link href={`/write?edit=${post.id}`}>
-                    <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+                    <span className={adminIconButtonCls}>
                       <Edit2 className="w-4 h-4" />
-                    </button>
+                    </span>
                   </Link>
-                  <button 
+                  <button
                     onClick={() => onDelete(post.id)}
-                    className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                    className={`${adminIconButtonCls} hover:border-red-400 hover:text-red-500`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -530,7 +524,7 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </motion.div>
   );
 }
@@ -544,22 +538,27 @@ function PhotosTab({ photos, onDelete }: { photos: Photo[]; onDelete: (id: strin
       exit={{ opacity: 0, y: -20 }}
       className="space-y-4"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">所有照片</h2>
-        <Link href="/gallery" className="btn-primary">
+        <Link href="/gallery" className={adminLinkButtonCls}>
           <Plus className="w-4 h-4" />
           上传照片
         </Link>
       </div>
 
       {photos.length === 0 ? (
-        <div className="bg-card rounded-2xl p-8 text-center text-muted-foreground">
-          还没有照片
-        </div>
+        <StatePanel
+          tone="empty"
+          title="还没有照片"
+          description="上传第一张照片后，这里会显示相册缩略图。"
+        />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {photos.map(photo => (
-            <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden bg-muted">
+          {photos.map((photo) => (
+            <div
+              key={photo.id}
+              className="group relative aspect-square overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]"
+            >
               <Image
                 src={photo.thumbnail_url || photo.url}
                 alt={photo.title || ''}
@@ -567,10 +566,10 @@ function PhotosTab({ photos, onDelete }: { photos: Photo[]; onDelete: (id: strin
                 sizes="(max-width: 768px) 50vw, 16vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button 
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
                   onClick={() => onDelete(photo.id)}
-                  className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  className="rounded-full bg-red-500 p-2 text-white transition-colors hover:bg-red-600"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -597,43 +596,47 @@ function DiaryTab({ diaries, onDelete }: { diaries: Diary[]; onDelete: (id: stri
       exit={{ opacity: 0, y: -20 }}
       className="space-y-4"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">所有日记</h2>
-        <Link href="/diary" className="btn-primary">
+        <Link href="/diary" className={adminLinkButtonCls}>
           <Plus className="w-4 h-4" />
           写日记
         </Link>
       </div>
 
-      <div className="bg-card rounded-2xl overflow-hidden">
+      <Card variant="elevated" padding="sm" className="overflow-hidden rounded-[var(--radius-2xl)]">
         {diaries.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            还没有日记
-          </div>
+          <StatePanel
+            tone="empty"
+            title="还没有日记"
+            description="去日记页写下第一篇记录吧。"
+          />
         ) : (
-          <div className="divide-y divide-border">
-            {diaries.map(diary => (
-              <div key={diary.id} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
+          <div className="space-y-3">
+            {diaries.map((diary) => (
+              <div
+                key={diary.id}
+                className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)]"
+              >
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{diary.title || formatDate(diary.diary_date)}</h3>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <h3 className="truncate font-medium">{diary.title || formatDate(diary.diary_date)}</h3>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <span>{formatDate(diary.diary_date)}</span>
-                    <span className={`flex items-center gap-1 ${diary.is_public ? 'text-green-600' : 'text-amber-600'}`}>
-                      {diary.is_public ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    <Badge tone={diary.is_public ? 'success' : 'warning'} variant="soft">
                       {diary.is_public ? '公开' : '私密'}
-                    </span>
+                    </Badge>
                     <span>{diary.word_count} 字</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Link href="/diary">
-                    <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+                    <span className={adminIconButtonCls}>
                       <Eye className="w-4 h-4" />
-                    </button>
+                    </span>
                   </Link>
-                  <button 
+                  <button
                     onClick={() => onDelete(diary.id)}
-                    className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                    className={`${adminIconButtonCls} hover:border-red-400 hover:text-red-500`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -642,7 +645,7 @@ function DiaryTab({ diaries, onDelete }: { diaries: Diary[]; onDelete: (id: stri
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </motion.div>
   );
 }
@@ -661,51 +664,60 @@ function AlbumsTab({ albums, onDelete, onEdit, onAdd }: {
       exit={{ opacity: 0, y: -20 }}
       className="space-y-4"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">所有相册</h2>
-        <button onClick={onAdd} className="btn-primary">
+        <button onClick={onAdd} className={adminLinkButtonCls}>
           <Plus className="w-4 h-4" />
           新建相册
         </button>
       </div>
 
       {albums.length === 0 ? (
-        <div className="bg-card rounded-2xl p-8 text-center text-muted-foreground">
-          还没有相册
-        </div>
+        <StatePanel
+          tone="empty"
+          title="还没有相册"
+          description="创建第一个相册后，就可以开始整理照片专题。"
+        />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {albums.map(album => (
-            <div key={album.id} className="group relative overflow-hidden rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all">
+          {albums.map((album) => (
+            <Card
+              key={album.id}
+              variant="default"
+              padding="sm"
+              className="group overflow-hidden rounded-[var(--radius-2xl)] p-0 transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+            >
               {album.cover_image ? (
-                <Image src={album.cover_image} alt="" width={400} height={225} className="w-full aspect-video object-cover" />
+                <Image src={album.cover_image} alt="" width={400} height={225} className="aspect-video w-full object-cover" />
               ) : (
-                <div className="w-full aspect-video bg-muted flex items-center justify-center">
-                  <Folder className="w-12 h-12 text-muted-foreground/30" />
+                <div className="flex aspect-video w-full items-center justify-center bg-[var(--surface-overlay)]">
+                  <Folder className="h-12 w-12 text-muted-foreground/40" />
                 </div>
               )}
               <div className="p-4">
-                <h3 className="font-semibold">{album.name}</h3>
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-semibold">{album.name}</h3>
+                  <Badge variant="outline">{album.photo_count} 张</Badge>
+                </div>
                 <p className="text-sm text-muted-foreground line-clamp-2">{album.description || '暂无描述'}</p>
                 <div className="flex items-center justify-between mt-3">
-                  <span className="text-xs text-muted-foreground">{album.photo_count} 张照片</span>
                   <div className="flex items-center gap-1">
-                    <button 
+                    <button
                       onClick={() => onEdit(album)}
-                      className="p-2 rounded-lg hover:bg-muted transition-colors"
+                      className={adminIconButtonCls}
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => onDelete(album.id)}
-                      className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                      className={`${adminIconButtonCls} hover:border-red-400 hover:text-red-500`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -743,17 +755,17 @@ function AlbumModal({ album, onClose, onSave }: {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md bg-card rounded-3xl shadow-2xl overflow-hidden"
+        className="w-full max-w-md overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-border">
+        <div className="border-b border-[color:var(--border-default)] p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Folder className="w-5 h-5 text-primary" />
@@ -761,9 +773,9 @@ function AlbumModal({ album, onClose, onSave }: {
             </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
+              className={adminIconButtonCls}
             >
-              <X className="w-5 h-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -771,11 +783,10 @@ function AlbumModal({ album, onClose, onSave }: {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">相册名称 *</label>
-            <input
+            <Input
               type="text"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               placeholder="给相册起个名字"
               required
             />
@@ -783,10 +794,9 @@ function AlbumModal({ album, onClose, onSave }: {
 
           <div>
             <label className="block text-sm font-medium mb-2">描述</label>
-            <textarea
+            <Textarea
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
               rows={3}
               placeholder="简单描述一下这个相册"
             />
@@ -794,34 +804,30 @@ function AlbumModal({ album, onClose, onSave }: {
 
           <div>
             <label className="block text-sm font-medium mb-2">封面图片URL</label>
-            <input
+            <Input
               type="url"
               value={formData.cover_image}
               onChange={e => setFormData({ ...formData, cover_image: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               placeholder="https://..."
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
+              variant="secondary"
             >
               取消
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              loading={loading}
               disabled={loading || !formData.name.trim()}
-              className="btn-primary disabled:opacity-50"
             >
-              {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> 保存中...</>
-              ) : (
-                <><Save className="w-4 h-4" /> 保存</>
-              )}
-            </button>
+              {!loading && <Save className="w-4 h-4" />}
+              {loading ? '保存中...' : '保存'}
+            </Button>
           </div>
         </form>
       </motion.div>

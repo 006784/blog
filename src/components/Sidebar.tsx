@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import clsx from 'clsx';
+import { siteConfig } from '@/lib/site-config';
 import { useAdmin } from './AdminProvider';
 import { useProfile } from './ProfileProvider';
 import { bottomSheetVariants, modalBackdropVariants } from './Animations';
@@ -172,6 +173,9 @@ export function Sidebar() {
     () => false
   );
   const activeIcon = panelOpen ? (panelIcon ?? routeActiveIcon) : routeActiveIcon;
+  const profileLabel = profile.nickname || siteConfig.name;
+  const profileSignature = profile.signature || '持续写作，持续迭代。';
+  const profileHref = isAdmin ? '/profile' : '/about';
 
   // Sync sidebar-width CSS var with panel state
   useEffect(() => {
@@ -227,11 +231,12 @@ export function Sidebar() {
           style={{
             width: 52,
             minWidth: 52,
-            background: 'var(--paper)',
+            background: 'linear-gradient(180deg, var(--surface-base) 0%, var(--surface-raised) 100%)',
             borderRight: '1px solid var(--line)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
           {/* Logo */}
@@ -338,29 +343,30 @@ export function Sidebar() {
             {/* Avatar */}
             <button
               type="button"
-              onClick={() => router.push(isAdmin ? '/profile' : '/about')}
+              onClick={() => router.push(profileHref)}
               title={isAdmin ? '个人资料' : '关于我'}
               aria-label={isAdmin ? '个人资料' : '关于我'}
-              className="rail-btn"
+              className="rail-btn rail-avatar-btn"
               style={{
                 width: 30,
                 height: 30,
                 borderRadius: '50%',
-                background: 'var(--paper-deep)',
-                border: '1px solid var(--line)',
+                background: 'var(--surface-panel)',
+                border: '1px solid var(--border-default)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
                 flexShrink: 0,
                 padding: 0,
+                boxShadow: 'var(--shadow-xs)',
               }}
             >
               {profile.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={profile.avatar}
-                  alt={profile.nickname}
+                  alt={profileLabel}
                   width={30}
                   height={30}
                   style={{ width: 30, height: 30, objectFit: 'cover' }}
@@ -373,7 +379,7 @@ export function Sidebar() {
                     color: 'var(--ink-secondary)',
                   }}
                 >
-                  {(profile.nickname || '拾').charAt(0)}
+                  {profileLabel.charAt(0)}
                 </span>
               )}
             </button>
@@ -434,6 +440,25 @@ export function Sidebar() {
               {panelGroup.title}
             </span>
 
+            <Link href={profileHref} className="sidebar-panel-profile-card">
+              <div className="sidebar-panel-profile-avatar">
+                {profile.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar}
+                    alt={profileLabel}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span>{profileLabel.charAt(0)}</span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="sidebar-panel-profile-name">{profileLabel}</p>
+                <p className="sidebar-panel-profile-signature">{profileSignature}</p>
+              </div>
+            </Link>
+
             {/* Nav links */}
             <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
               {panelGroup.items.map(item => (
@@ -442,6 +467,9 @@ export function Sidebar() {
                   href={item.href}
                   className={clsx('panel-link', itemActive(pathname, item.href) && 'active')}
                 >
+                  <span className="panel-link-icon">
+                    <item.icon style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                  </span>
                   <span className="panel-link-dot" />
                   <span className="panel-link-text">{item.label}</span>
                 </Link>
@@ -464,7 +492,7 @@ export function Sidebar() {
               {isAdmin ? (
                 <>
                   <Link href="/write">
-                    <span className="sidebar-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <span className="sidebar-text-link">
                       <PenLine style={{ width: 11, height: 11 }} strokeWidth={1.5} />
                       <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                         Write
@@ -472,7 +500,7 @@ export function Sidebar() {
                     </span>
                   </Link>
                   <Link href="/admin">
-                    <span className="sidebar-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <span className="sidebar-text-link">
                       <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
                       <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                         Dashboard
@@ -482,7 +510,7 @@ export function Sidebar() {
                   <button
                     onClick={logout}
                     className="sidebar-text-ghost"
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     <LogOut style={{ width: 11, height: 11 }} strokeWidth={1.5} />
                     <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
@@ -494,7 +522,7 @@ export function Sidebar() {
                 <button
                   onClick={() => showLoginModal()}
                   className="sidebar-text-link"
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                 >
                   <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
                   <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
@@ -539,7 +567,9 @@ export function Sidebar() {
           left: 0,
           right: 0,
           zIndex: 40,
-          background: 'var(--paper)',
+          background: 'rgba(15, 17, 23, 0.84)',
+          backdropFilter: 'blur(18px) saturate(130%)',
+          WebkitBackdropFilter: 'blur(18px) saturate(130%)',
           borderTop: '1px solid var(--line)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
@@ -559,13 +589,11 @@ export function Sidebar() {
           ] as { href: string; icon: React.ElementType }[]).map(({ href, icon: Icon }) => {
             const active = itemActive(pathname, href);
             return (
-              <Link key={href} href={href}>
+              <Link key={href} href={href} className={clsx('sidebar-mobile-nav-item', active && 'active')}>
                 <Icon
                   style={{
-                    width: 20,
-                    height: 20,
-                    color: active ? 'var(--gold)' : 'var(--ink)',
-                    opacity: active ? 1 : 0.4,
+                    width: 18,
+                    height: 18,
                   }}
                   strokeWidth={1.5}
                 />
@@ -576,35 +604,14 @@ export function Sidebar() {
           {/* FAB */}
           {isAdmin ? (
             <Link href="/write">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  background: 'var(--ink)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: -20,
-                  border: '2px solid var(--paper)',
-                }}
-              >
+              <div className="sidebar-mobile-fab">
                 <PenLine style={{ width: 18, height: 18, color: 'var(--paper)' }} strokeWidth={1.5} />
               </div>
             </Link>
           ) : (
             <button
               onClick={() => showLoginModal()}
-              style={{
-                width: 40,
-                height: 40,
-                background: 'var(--ink)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: -20,
-                border: '2px solid var(--paper)',
-                cursor: 'pointer',
-              }}
+              className="sidebar-mobile-fab"
             >
               <Shield style={{ width: 18, height: 18, color: 'var(--paper)' }} strokeWidth={1.5} />
             </button>
@@ -612,9 +619,10 @@ export function Sidebar() {
 
           <button
             onClick={() => setMobileOpen(true)}
-            style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer' }}
+            className="sidebar-mobile-nav-item"
+            style={{ border: 'none', padding: 0 }}
           >
-            <Menu style={{ width: 20, height: 20, color: 'var(--ink)', opacity: 0.4 }} strokeWidth={1.5} />
+            <Menu style={{ width: 18, height: 18 }} strokeWidth={1.5} />
           </button>
         </div>
       </nav>
@@ -647,10 +655,13 @@ export function Sidebar() {
                 zIndex: 50,
                 maxHeight: '82vh',
                 overflowY: 'auto',
-                background: 'var(--paper)',
+                background: 'linear-gradient(180deg, rgba(16, 17, 22, 0.98) 0%, rgba(24, 26, 33, 0.98) 100%)',
                 borderTop: '1px solid var(--line)',
                 padding: '24px 0 0',
                 paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))',
+                borderTopLeftRadius: '24px',
+                borderTopRightRadius: '24px',
+                boxShadow: 'var(--shadow-2xl)',
               }}
             >
               {/* Header */}
@@ -680,8 +691,9 @@ export function Sidebar() {
                       key={item.key}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 28px', textDecoration: 'none' }}
+                      className={clsx('sidebar-mobile-sheet-link', itemActive(pathname, item.href) && 'active')}
                     >
+                      <item.icon style={{ width: 14, height: 14 }} strokeWidth={1.5} />
                       <span style={{ width: 4, height: 4, borderRadius: '50%', background: itemActive(pathname, item.href) ? 'var(--gold)' : 'var(--line)', flexShrink: 0 }} />
                       <span style={{ fontFamily: 'var(--font-jp-serif)', fontSize: 13, fontWeight: itemActive(pathname, item.href) ? 400 : 300, color: itemActive(pathname, item.href) ? 'var(--ink)' : 'var(--ink-secondary)', letterSpacing: '0.05em' }}>
                         {item.label}
@@ -696,7 +708,7 @@ export function Sidebar() {
                 <button
                   onClick={toggleTheme}
                   className="sidebar-text-link"
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                 >
                   {resolvedTheme === 'dark'
                     ? <Sun style={{ width: 13, height: 13 }} strokeWidth={1.5} />
@@ -710,7 +722,7 @@ export function Sidebar() {
                 {isAdmin && (
                   <>
                     <Link href="/admin" onClick={() => setMobileOpen(false)}>
-                      <span className="sidebar-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      <span className="sidebar-text-link">
                         <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)' }} />
                         <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Dashboard</span>
                       </span>
@@ -718,7 +730,7 @@ export function Sidebar() {
                     <button
                       onClick={() => { logout(); setMobileOpen(false); }}
                       className="sidebar-text-ghost"
-                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                     >
                       <LogOut style={{ width: 13, height: 13 }} strokeWidth={1.5} />
                       <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Logout</span>
@@ -730,7 +742,7 @@ export function Sidebar() {
                   <button
                     onClick={() => { showLoginModal(); setMobileOpen(false); }}
                     className="sidebar-text-link"
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
                     <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Admin</span>
@@ -743,11 +755,11 @@ export function Sidebar() {
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <Compass style={{ width: 11, height: 11, color: 'var(--ink-muted)', opacity: 0.6 }} strokeWidth={1.5} />
                   <span style={{ fontFamily: 'var(--font-mincho)', fontSize: 11, color: 'var(--ink-muted)', letterSpacing: '0.08em' }}>
-                    {profile.nickname || 'Lumen'}
+                    {profileLabel}
                   </span>
                 </div>
                 <p style={{ fontFamily: 'var(--font-jp-serif)', fontWeight: 300, fontSize: 11, color: 'var(--ink-muted)', marginTop: 4, lineHeight: 1.8, letterSpacing: '0.04em' }}>
-                  {profile.signature || '持续写作，持续迭代。'}
+                  {profileSignature}
                 </p>
               </div>
             </motion.div>

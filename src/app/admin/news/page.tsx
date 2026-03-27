@@ -1,18 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Newspaper, 
-  Settings, 
-  Play, 
-  CheckCircle, 
-  XCircle, 
-  Loader2,
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
   Globe,
+  Loader2,
+  Newspaper,
+  Play,
   Server,
-  AlertCircle
+  Settings,
+  XCircle,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAdmin } from '@/components/AdminProvider';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { StatePanel } from '@/components/ui/StatePanel';
 
 interface NewsSource {
   id: string;
@@ -31,6 +39,8 @@ interface TestResult {
 }
 
 export default function NewsAdminPage() {
+  const { isAdmin, loading: authLoading } = useAdmin();
+  const router = useRouter();
   const [sources, setSources] = useState<NewsSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState<string | null>(null);
@@ -38,8 +48,14 @@ export default function NewsAdminPage() {
   const [runningTest, setRunningTest] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAdmin) {
+      router.replace('/admin/login?redirect=/admin/news');
+      return;
+    }
+
     loadSources();
-  }, []);
+  }, [authLoading, isAdmin, router]);
 
   const loadSources = async () => {
     try {
@@ -48,9 +64,12 @@ export default function NewsAdminPage() {
       const data = await response.json();
       if (data.success) {
         setSources(data.data);
+      } else {
+        setSources([]);
       }
     } catch (error) {
       console.error('加载新闻源失败:', error);
+      setSources([]);
     } finally {
       setLoading(false);
     }
@@ -62,15 +81,15 @@ export default function NewsAdminPage() {
       const response = await fetch('/api/news/sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sourceId })
+        body: JSON.stringify({ sourceId }),
       });
       const data = await response.json();
-      setTestResults(prev => ({ ...prev, [sourceId]: data.data }));
+      setTestResults((prev) => ({ ...prev, [sourceId]: data.data }));
     } catch (error) {
       console.error('测试新闻源失败:', error);
-      setTestResults(prev => ({ 
-        ...prev, 
-        [sourceId]: { success: false, itemCount: 0, error: '测试失败' } 
+      setTestResults((prev) => ({
+        ...prev,
+        [sourceId]: { success: false, itemCount: 0, error: '测试失败' },
       }));
     } finally {
       setTesting(null);
@@ -80,10 +99,7 @@ export default function NewsAdminPage() {
   const runFullTest = async () => {
     try {
       setRunningTest(true);
-      const response = await fetch('/api/news/test?test=true');
-      const data = await response.json();
-      console.log('完整测试结果:', data);
-      // 可以在这里显示测试结果
+      await fetch('/api/news/test?test=true');
     } catch (error) {
       console.error('完整测试失败:', error);
     } finally {
@@ -91,182 +107,167 @@ export default function NewsAdminPage() {
     }
   };
 
-  if (loading) {
+  const activeSources = useMemo(() => sources.filter((source) => source.isActive).length, [sources]);
+  const languageCount = useMemo(() => new Set(sources.map((source) => source.language)).size, [sources]);
+  const categoryCount = useMemo(() => new Set(sources.map((source) => source.category)).size, [sources]);
+
+  if (authLoading || !isAdmin) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="min-h-screen px-6 py-20">
+        <div className="mx-auto max-w-2xl">
+          <StatePanel
+            tone="loading"
+            title={authLoading ? '正在验证管理员身份' : '正在跳转登录页'}
+            description="新闻后台会在身份验证完成后自动恢复。"
+            icon={<Newspaper className="h-6 w-6" />}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        {/* 头部 */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Newspaper className="w-8 h-8" />
-              新闻收集管理系统
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              管理新闻源和监控收集状态
-            </p>
+    <div className="min-h-screen px-6 py-10">
+      <div className="mx-auto max-w-6xl space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+          <div className="flex items-start gap-3">
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                  <Newspaper className="h-5 w-5 text-primary" />
+                </span>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">新闻收集管理</h1>
+                  <p className="text-sm text-muted-foreground">检查新闻源状态、语言覆盖和测试抓取结果。</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <button 
-            onClick={runFullTest} 
-            disabled={runningTest}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {runningTest ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                测试中...
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                运行完整测试
-              </>
-            )}
-          </button>
+
+          <Button onClick={runFullTest} disabled={runningTest}>
+            {runningTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+            运行完整测试
+          </Button>
+        </motion.div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">总新闻源</p>
+                <p className="mt-3 text-3xl font-semibold">{sources.length}</p>
+              </div>
+              <Globe className="h-8 w-8 text-primary" />
+            </div>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">活跃源</p>
+                <p className="mt-3 text-3xl font-semibold">{activeSources}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-emerald-500" />
+            </div>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">语言种类</p>
+                <p className="mt-3 text-3xl font-semibold">{languageCount}</p>
+              </div>
+              <Server className="h-8 w-8 text-cyan-500" />
+            </div>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">分类数量</p>
+                <p className="mt-3 text-3xl font-semibold">{categoryCount}</p>
+              </div>
+              <Settings className="h-8 w-8 text-amber-500" />
+            </div>
+          </Card>
         </div>
 
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">总新闻源</p>
-                <p className="text-2xl font-bold">{sources.length}</p>
-              </div>
-              <Globe className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">活跃源</p>
-                <p className="text-2xl font-bold">
-                  {sources.filter(s => s.isActive).length}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">语言种类</p>
-                <p className="text-2xl font-bold">
-                  {new Set(sources.map(s => s.language)).size}
-                </p>
-              </div>
-              <Server className="w-8 h-8 text-purple-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">分类数量</p>
-                <p className="text-2xl font-bold">
-                  {new Set(sources.map(s => s.category)).size}
-                </p>
-              </div>
-              <Settings className="w-8 h-8 text-orange-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* 新闻源列表 */}
-        <div className="bg-white rounded-lg shadow border">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              新闻源管理
-            </h2>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {sources.map((source) => (
-                <div 
-                  key={source.id} 
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+        {loading ? (
+          <StatePanel
+            tone="loading"
+            title="正在加载新闻源"
+            description="正在同步新闻源配置和最近测试结果。"
+          />
+        ) : sources.length === 0 ? (
+          <StatePanel
+            tone="empty"
+            title="暂无新闻源配置"
+            description="先在服务端配置新闻源，这里会自动显示抓取入口和状态。"
+            icon={<AlertCircle className="h-6 w-6" />}
+          />
+        ) : (
+          <Card variant="elevated" padding="sm" className="space-y-3 rounded-[var(--radius-2xl)]">
+            {sources.map((source) => {
+              const result = testResults[source.id];
+              return (
+                <div
+                  key={source.id}
+                  className="flex flex-col gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-4 shadow-[var(--shadow-xs)] md:flex-row md:items-center md:justify-between"
                 >
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <h3 className="font-medium">{source.name}</h3>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
-                          {source.category}
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
-                          {source.language}
-                        </span>
-                        {source.country && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
-                            {source.country}
-                          </span>
-                        )}
-                        <span className={`px-2 py-1 text-xs rounded ${source.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {source.isActive ? "活跃" : "停用"}
-                        </span>
-                      </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-sm font-semibold">{source.name}</h2>
+                      <Badge tone={source.isActive ? 'success' : 'error'} variant="soft">
+                        {source.isActive ? '活跃' : '停用'}
+                      </Badge>
                     </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant="outline">{source.category}</Badge>
+                      <Badge variant="outline">{source.language}</Badge>
+                      {source.country ? <Badge variant="outline">{source.country}</Badge> : null}
+                    </div>
+                    {result?.error ? (
+                      <p className="mt-2 text-xs text-red-500">{result.error}</p>
+                    ) : null}
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {testResults[source.id] && (
-                      <div className="flex items-center gap-2 text-sm">
-                        {testResults[source.id].success ? (
-                          <div className="flex items-center gap-1 text-green-600">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>{testResults[source.id].itemCount}条</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1 text-red-600">
-                            <XCircle className="w-4 h-4" />
-                            <span>失败</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    <button
+
+                  <div className="flex items-center gap-3">
+                    {result ? (
+                      result.success ? (
+                        <div className="inline-flex items-center gap-1.5 text-sm text-emerald-600">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>{result.itemCount} 条</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 text-sm text-red-500">
+                          <XCircle className="h-4 w-4" />
+                          <span>失败</span>
+                        </div>
+                      )
+                    ) : null}
+
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => testSource(source.id)}
                       disabled={testing === source.id}
-                      className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50"
                     >
-                      {testing === source.id ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 inline animate-spin" />
-                          测试中
-                        </>
-                      ) : (
-                        '测试'
-                      )}
-                    </button>
+                      {testing === source.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                      {testing === source.id ? '测试中' : '测试'}
+                    </Button>
                   </div>
                 </div>
-              ))}
-              
-              {sources.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>暂无新闻源配置</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </motion.div>
+              );
+            })}
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

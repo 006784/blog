@@ -9,6 +9,11 @@ import remarkGfm from 'remark-gfm';
 import { Calendar, Clock, ChevronLeft, Loader2, FileText, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getPostBySlug, getPublishedPosts, incrementPostViews, Post } from '@/lib/supabase';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
 import { formatDate } from '@/lib/types';
 import TableOfContents from '@/components/TableOfContents';
 import { ShareButtons } from '@/components/ShareButtons';
@@ -16,6 +21,7 @@ import PostInteractions from '@/components/PostInteractions';
 import { Comments } from '@/components/GiscusComments';
 import { getPageStructuredData } from '@/lib/seo';
 import { PostReadingMemory } from '@/components/post/PostReadingMemory';
+import { siteConfig } from '@/lib/site-config';
 
 interface BlogPostPageClientProps {
   slug: string;
@@ -206,10 +212,16 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
     return (
       <div className="min-h-screen px-6 py-24">
         <div className="mx-auto max-w-4xl">
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-3">正在加载文章...</span>
-          </div>
+          <Card variant="elevated" padding="lg" className="space-y-6 rounded-[var(--radius-2xl)]">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">正在加载文章...</p>
+            </div>
+            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-4/5" />
+            <Skeleton className="h-[24rem] w-full rounded-[var(--radius-xl)]" />
+          </Card>
         </div>
       </div>
     );
@@ -218,12 +230,18 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
   if (loadError) {
     return (
       <div className="min-h-screen px-6 py-24">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-border/60 bg-card/70 p-10 text-center">
-          <h1 className="text-2xl font-semibold">加载失败</h1>
-          <p className="mt-3 text-muted-foreground">{loadError}</p>
-          <Link href="/blog" className="btn-secondary mt-8 inline-flex px-6 py-3">
-            返回博客首页
-          </Link>
+        <div className="mx-auto max-w-3xl">
+          <StatePanel
+            tone="error"
+            title="加载失败"
+            description={loadError}
+            icon={<FileText className="h-6 w-6" />}
+            action={
+              <Link href="/blog">
+                <Button variant="secondary">返回博客首页</Button>
+              </Link>
+            }
+          />
         </div>
       </div>
     );
@@ -232,13 +250,18 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
   if (!post) {
     return (
       <div className="min-h-screen px-6 py-24">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-border/60 bg-card/70 p-10 text-center">
-          <FileText className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h1 className="mt-4 text-2xl font-semibold">文章不存在或已下线</h1>
-          <p className="mt-3 text-muted-foreground">你访问的链接可能已失效，试试从博客列表重新进入。</p>
-          <Link href="/blog" className="btn-secondary mt-8 inline-flex px-6 py-3">
-            返回博客列表
-          </Link>
+        <div className="mx-auto max-w-3xl">
+          <StatePanel
+            tone="empty"
+            title="文章不存在或已下线"
+            description="你访问的链接可能已失效，试试从博客列表重新进入。"
+            icon={<FileText className="h-6 w-6" />}
+            action={
+              <Link href="/blog">
+                <Button variant="secondary">返回博客列表</Button>
+              </Link>
+            }
+          />
         </div>
       </div>
     );
@@ -261,7 +284,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
       <div className="mx-auto max-w-6xl">
         <Link
           href="/blog"
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-2 text-sm text-muted-foreground shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
           返回文章列表
@@ -271,11 +294,11 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-sm backdrop-blur md:p-10"
+          className="rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-lg)] backdrop-blur md:p-10"
         >
-          <div className="mb-4 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          <Badge className="mb-4 px-3 py-1">
             {categoryLabel(post.category)}
-          </div>
+          </Badge>
 
           <h1 className="max-w-4xl text-3xl font-semibold leading-tight md:text-5xl">{post.title}</h1>
 
@@ -283,20 +306,32 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
             <p className="mt-4 max-w-3xl text-base text-muted-foreground md:text-lg">{post.description}</p>
           )}
 
-          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span>{post.author || 'Lumen'}</span>
-            <span className="inline-flex items-center gap-1.5">
+          <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            <Badge variant="outline" className="px-3 py-1.5 font-normal">
+              {post.author || siteConfig.name}
+            </Badge>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-3 py-1.5 shadow-[var(--shadow-xs)]">
               <Calendar className="h-4 w-4" />
               {formatDate(articleDate)}
             </span>
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-3 py-1.5 shadow-[var(--shadow-xs)]">
               <Clock className="h-4 w-4" />
               {post.reading_time || '约 5 分钟'}
             </span>
           </div>
 
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {post.tags.slice(0, 5).map((tag) => (
+                <Badge key={tag} variant="soft">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
           {coverImage && (
-            <div className="relative mt-8 overflow-hidden rounded-2xl border border-border/60 bg-secondary/50">
+            <div className="relative mt-8 overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-secondary/50 shadow-[var(--shadow-sm)]">
               <Image
                 src={coverImage}
                 alt={post.title}
@@ -309,39 +344,39 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           )}
         </motion.header>
 
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border/60 bg-card/60 px-5 py-4">
+        <Card variant="default" className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-xl)] px-5 py-4">
           <PostInteractions postId={post.id} />
           <ShareButtons
             url={shareUrl || `/blog/${post.slug}`}
             title={post.title}
             description={post.description}
           />
-        </div>
+        </Card>
 
         <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1fr)_280px]">
-          <article className="article-content rounded-3xl border border-border/70 bg-card/70 p-6 md:p-10">
+          <Card variant="elevated" className="article-content rounded-[var(--radius-2xl)] md:p-10">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {post.content || ''}
             </ReactMarkdown>
-          </article>
+          </Card>
 
           <aside>
             <TableOfContents content={post.content || ''} className="xl:pl-2" />
           </aside>
         </div>
 
-        <section className="mt-14 rounded-3xl border border-border/70 bg-card/70 p-6 md:p-8">
+        <Card variant="elevated" className="mt-14 rounded-[var(--radius-2xl)] md:p-8">
           <h2 className="text-2xl font-semibold">评论区</h2>
           <p className="mt-2 text-sm text-muted-foreground">欢迎分享你的观点或补充你的实践经验。</p>
           <Comments />
-        </section>
+        </Card>
 
         {relatedPosts.length > 0 && (
           <section className="mt-14">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-semibold">继续阅读</h2>
-              <Link href="/blog" className="text-sm text-primary hover:underline">
-                查看全部
+              <Link href="/blog">
+                <Button variant="link">查看全部</Button>
               </Link>
             </div>
 
@@ -357,7 +392,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-40px' }}
                     transition={{ delay: index * 0.08 }}
-                    className="overflow-hidden rounded-2xl border border-border/60 bg-card/80"
+                    className="overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
                   >
                     <Link href={`/blog/${item.slug}`}>
                       <div className="relative h-40 w-full bg-secondary/60">
@@ -369,7 +404,9 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
                       </div>
 
                       <div className="p-4">
-                        <p className="text-xs text-muted-foreground">{categoryLabel(item.category)}</p>
+                        <Badge variant="soft" className="text-[0.7rem]">
+                          {categoryLabel(item.category)}
+                        </Badge>
                         <h3 className="mt-1 line-clamp-2 text-base font-semibold">{item.title}</h3>
                         <p className="mt-2 text-xs text-muted-foreground">{formatDate(itemDate)}</p>
                         <span className="mt-3 inline-flex items-center gap-1 text-sm text-primary">

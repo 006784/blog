@@ -8,6 +8,9 @@ import { ArrowRight, Bell, Calendar, Clock, Edit2, Eye, Tag, Trash2 } from 'luci
 import clsx from 'clsx';
 import { APPLE_EASE, APPLE_EASE_SOFT, APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
 import { useAdmin } from './AdminProvider';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Post, formatDate } from '@/lib/types';
 
 interface BlogCardProps {
@@ -36,6 +39,17 @@ const categoryStyle: Record<string, { chip: string; glow: string }> = {
     glow: 'radial-gradient(360px circle at 62% 26%, rgba(245,158,11,0.12), transparent 72%)',
   },
 };
+
+const categoryLabels: Record<string, string> = {
+  tech: '技术',
+  design: '设计',
+  life: '生活',
+  thoughts: '思考',
+};
+
+function getCategoryLabel(category: string): string {
+  return categoryLabels[category] || category;
+}
 
 export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify }: BlogCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -85,7 +99,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={onMouseLeave}
       className={clsx(
-        'surface-card premium-blog-card interactive-card group relative overflow-hidden rounded-[1.7rem]',
+        'surface-card premium-blog-card interactive-card group relative overflow-hidden rounded-[1.7rem] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-md)] transition-[transform,box-shadow] duration-[var(--duration-normal)]',
         featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
       )}
     >
@@ -110,14 +124,14 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/62 via-black/16 to-transparent opacity-62 transition-opacity duration-500 group-hover:opacity-54" />
 
-          <span
+          <Badge
             className={clsx(
-              'absolute left-5 top-5 inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.02em] backdrop-blur-xl',
+              'absolute left-5 top-5 rounded-full px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.08em] backdrop-blur-xl',
               style.chip
             )}
           >
-            {post.category}
-          </span>
+            {getCategoryLabel(post.category)}
+          </Badge>
 
           <motion.div
             initial={false}
@@ -182,16 +196,16 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
             {post.title}
           </h3>
 
-          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/85">
+          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/85">
             {post.description}
           </p>
 
           <div className="mt-5 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="chip-filter !text-[0.72rem]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-3 py-1.5 text-[0.72rem] shadow-[var(--shadow-xs)]">
               <Calendar className="h-3.5 w-3.5 text-primary" />
               {formatDate(post.date)}
             </span>
-            <span className="chip-filter !text-[0.72rem]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-3 py-1.5 text-[0.72rem] shadow-[var(--shadow-xs)]">
               <Clock className="h-3.5 w-3.5 text-primary" />
               {post.readingTime}
             </span>
@@ -207,7 +221,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.06 + tagIndex * 0.05, ease: APPLE_EASE }}
                   whileHover={{ scale: 1.03 }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-secondary/45 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-overlay)]/70 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm"
                 >
                   <Tag className="h-3 w-3" />
                   {tag}
@@ -244,28 +258,22 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
 
 export function BlogCardSkeleton() {
   return (
-    <div className="surface-card overflow-hidden rounded-[1.7rem]">
-      <div className="relative h-56 overflow-hidden bg-secondary/80">
-        <motion.div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)' }}
-          animate={{ x: ['-120%', '180%'] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: 'linear' }}
-        />
-      </div>
+    <Card padding="sm" className="overflow-hidden rounded-[1.7rem] p-0">
+      <Skeleton className="h-56 w-full rounded-none" />
       <div className="space-y-4 p-7">
-        <div className="h-6 w-3/4 rounded-xl bg-secondary/70" />
-        <div className="h-4 rounded-xl bg-secondary/65" />
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
         <div className="flex gap-3 pt-1">
-          <div className="h-7 w-24 rounded-full bg-secondary/60" />
-          <div className="h-7 w-20 rounded-full bg-secondary/60" />
+          <Skeleton className="h-7 w-24 rounded-full" />
+          <Skeleton className="h-7 w-20 rounded-full" />
         </div>
         <div className="flex gap-2 pt-1">
-          <div className="h-7 w-14 rounded-full bg-secondary/55" />
-          <div className="h-7 w-20 rounded-full bg-secondary/55" />
-          <div className="h-7 w-16 rounded-full bg-secondary/55" />
+          <Skeleton className="h-7 w-14 rounded-full" />
+          <Skeleton className="h-7 w-20 rounded-full" />
+          <Skeleton className="h-7 w-16 rounded-full" />
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

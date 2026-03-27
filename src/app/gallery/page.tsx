@@ -1,14 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Camera, Image as ImageIcon, Plus, X, Heart, MapPin, 
+import {
+  Camera, Image as ImageIcon, Plus, X, Heart, MapPin,
   Calendar, Folder, Trash2, ZoomIn, ChevronLeft, ChevronRight,
-  Grid3X3, LayoutGrid, Sparkles, Upload, Loader2, Shield, Edit2, Save
+  Grid3X3, LayoutGrid, Sparkles, Upload, Shield, Edit2, Save
 } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
 import {
   Photo, Album,
   getAllPhotos, getAlbums, getPhotos,
@@ -16,10 +23,35 @@ import {
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 
+function GallerySkeleton({ viewMode }: { viewMode: 'grid' | 'masonry' }) {
+  if (viewMode === 'masonry') {
+    return (
+      <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <Skeleton
+            key={i}
+            className="mb-4 h-[220px] rounded-[var(--radius-2xl)]"
+            style={{ height: `${180 + (i % 3) * 72}px` }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        <Skeleton key={i} className="aspect-square rounded-[var(--radius-2xl)]" />
+      ))}
+    </div>
+  );
+}
+
 export default function GalleryPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
@@ -27,13 +59,10 @@ export default function GalleryPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('masonry');
   const { isAdmin, showLoginModal } = useAdmin();
 
-  useEffect(() => {
-    loadData();
-  }, [selectedAlbum]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(false);
       const [photosData, albumsData] = await Promise.all([
         selectedAlbum ? getPhotos(selectedAlbum) : getAllPhotos(),
         getAlbums()
@@ -42,17 +71,24 @@ export default function GalleryPage() {
       setAlbums(albumsData);
     } catch (error) {
       console.error('加载数据失败:', error);
+      setPhotos([]);
+      setAlbums([]);
+      setError(true);
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedAlbum]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   async function handleDeletePhoto(id: string) {
     if (!confirm('确定删除这张照片吗？')) return;
     try {
       const res = await fetch(`/api/gallery/photos/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('删除失败');
-      setPhotos(photos.filter(p => p.id !== id));
+      setPhotos((current) => current.filter((p) => p.id !== id));
     } catch (error) {
       console.error('删除失败:', error);
     }
@@ -67,7 +103,7 @@ export default function GalleryPage() {
       });
       if (!res.ok) throw new Error('更新失败');
       const { photo } = await res.json();
-      setPhotos(photos.map(p => p.id === id ? photo : p));
+      setPhotos((current) => current.map((p) => p.id === id ? photo : p));
       setEditingPhoto(null);
     } catch (error) {
       console.error('更新失败:', error);
@@ -88,141 +124,160 @@ export default function GalleryPage() {
     setLightboxPhoto(photos[nextIndex]);
   }
 
+  const activeAlbumName = useMemo(
+    () => albums.find((album) => album.id === selectedAlbum)?.name ?? '全部照片',
+    [albums, selectedAlbum]
+  );
+
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="space-y-5"
         >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 border border-[var(--line,#ddd9d0)]" style={{ background: 'var(--paper-deep,#ede9e0)' }}>
-              <Camera className="w-8 h-8" style={{ color: 'var(--gold,#c4a96d)' }} />
+          <Badge tone="warning" variant="soft" className="w-fit gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" />
+            Photo Archive
+          </Badge>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+                相册
+              </h1>
+              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+                用镜头保存生活切片。这里展示最近拍下来的画面、地点和当时的心情。
+              </p>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text">
-              相册
-            </h1>
+            <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Photos</p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{photos.length}</p>
+              </Card>
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Albums</p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{albums.length}</p>
+              </Card>
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Current View</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--color-neutral-900)]">{activeAlbumName}</p>
+              </Card>
+            </div>
           </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            用镜头记录生活，每一张照片都是时光的印记 📸
-          </p>
         </motion.div>
 
-        {/* Albums Filter */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-8"
+          className="space-y-4"
         >
-          <button
-            onClick={() => setSelectedAlbum(null)}
-            className={`px-4 py-2 text-sm font-medium transition-all border ${
-              !selectedAlbum
-                ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
-                : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
-            }`}
-          >
-            <Grid3X3 className="w-4 h-4 inline mr-2" />
-            全部照片
-          </button>
+          <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedAlbum(null)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
+                    !selectedAlbum
+                      ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
+                      : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                  }`}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  全部照片
+                </button>
 
-          {albums.map(album => (
-            <button
-              key={album.id}
-              onClick={() => setSelectedAlbum(album.id)}
-              className={`px-4 py-2 text-sm font-medium transition-all border ${
-                selectedAlbum === album.id
-                  ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
-                  : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
-              }`}
-            >
-              <Folder className="w-4 h-4 inline mr-2" />
-              {album.name}
-              <span className="ml-1 text-xs opacity-70">({album.photo_count})</span>
-            </button>
-          ))}
+                {albums.map((album) => (
+                  <button
+                    key={album.id}
+                    onClick={() => setSelectedAlbum(album.id)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
+                      selectedAlbum === album.id
+                        ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
+                        : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                    }`}
+                  >
+                    <Folder className="h-4 w-4" />
+                    {album.name}
+                    <span className="opacity-70">({album.photo_count})</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-base)] p-1">
+                  <Button
+                    variant={viewMode === 'masonry' ? 'primary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('masonry')}
+                    className="rounded-full"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="rounded-full"
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    if (!isAdmin) {
+                      showLoginModal();
+                      return;
+                    }
+                    setShowAddModal(true);
+                  }}
+                >
+                  {isAdmin ? <Plus className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                  {isAdmin ? '添加照片' : '管理员登录'}
+                </Button>
+              </div>
+            </div>
+          </Card>
         </motion.div>
 
-        {/* View Mode & Add Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <div className="flex items-center gap-0 border border-[var(--line)]">
-            <button
-              onClick={() => setViewMode('masonry')}
-              className={`p-2 transition-all ${
-                viewMode === 'masonry'
-                  ? 'bg-[var(--ink)] text-[var(--paper)]'
-                  : 'text-[var(--ink-muted)] hover:text-[var(--gold)]'
-              }`}
-            >
-              <LayoutGrid className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 transition-all border-l border-[var(--line)] ${
-                viewMode === 'grid'
-                  ? 'bg-[var(--ink)] text-[var(--paper)]'
-                  : 'text-[var(--ink-muted)] hover:text-[var(--gold)]'
-              }`}
-            >
-              <Grid3X3 className="w-5 h-5" />
-            </button>
-          </div>
-
-          <button
-            onClick={() => {
-              if (!isAdmin) {
-                showLoginModal();
-                return;
-              }
-              setShowAddModal(true);
-            }}
-            className="btn-primary"
-          >
-            {isAdmin ? <Plus className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
-            {isAdmin ? '添加照片' : '管理员登录'}
-          </button>
-        </motion.div>
-
-        {/* Photos Grid */}
         {loading ? (
-          <div className="columns-2 sm:columns-3 lg:columns-4 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div
-                key={i}
-                className="mb-4 rounded-2xl bg-muted animate-pulse"
-                style={{ height: `${160 + (i % 3) * 60}px` }}
-              />
-            ))}
-          </div>
+          <GallerySkeleton viewMode={viewMode} />
+        ) : error ? (
+          <StatePanel
+            tone="error"
+            icon={<Camera className="h-6 w-6" />}
+            title="相册加载失败"
+            description="这次没能拿到照片和相册数据，你可以重新试一次。"
+            action={
+              <Button onClick={() => void loadData()}>
+                <Sparkles className="h-4 w-4" />
+                重新加载
+              </Button>
+            }
+          />
         ) : photos.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <ImageIcon className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">还没有添加照片</p>
-            <button
-              onClick={() => {
-                if (!isAdmin) {
-                  showLoginModal();
-                  return;
-                }
-                setShowAddModal(true);
-              }}
-              className="mt-4 text-primary hover:underline"
-            >
-              {isAdmin ? '上传第一张照片' : '管理员登录后可上传'}
-            </button>
-          </motion.div>
+          <StatePanel
+            tone="empty"
+            icon={<ImageIcon className="h-6 w-6" />}
+            title="还没有照片"
+            description={selectedAlbum ? `“${activeAlbumName}” 这个相册里还没有内容。` : '相册还没有内容，上传第一张照片后这里就会开始有画面。'}
+            action={
+              <Button
+                onClick={() => {
+                  if (!isAdmin) {
+                    showLoginModal();
+                    return;
+                  }
+                  setShowAddModal(true);
+                }}
+              >
+                {isAdmin ? <Upload className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                {isAdmin ? '上传第一张照片' : '管理员登录后上传'}
+              </Button>
+            }
+          />
         ) : viewMode === 'masonry' ? (
           <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
             {photos.map((photo, index) => (
@@ -268,7 +323,7 @@ export default function GalleryPage() {
                 });
                 if (!res.ok) throw new Error('添加失败');
                 const { photo: newPhoto } = await res.json();
-                setPhotos([newPhoto, ...photos]);
+                setPhotos((current) => [newPhoto, ...current]);
                 setShowAddModal(false);
               }}
             />
@@ -331,7 +386,7 @@ function PhotoCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
-      className={`group relative overflow-hidden rounded-2xl bg-card mb-4 cursor-pointer ${
+      className={`group relative mb-4 cursor-pointer overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] ${
         square ? 'aspect-square' : ''
       }`}
       onClick={onClick}
@@ -349,10 +404,10 @@ function PhotoCard({
       />
       
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       
       {/* Info */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform">
+      <div className="absolute bottom-0 left-0 right-0 translate-y-full p-4 transition-transform group-hover:translate-y-0">
         {photo.title && (
           <h3 className="font-medium text-white truncate">{photo.title}</h3>
         )}
@@ -373,10 +428,10 @@ function PhotoCard({
       </div>
 
       {/* Actions - 只有管理员可见 */}
-      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           onClick={(e) => { e.stopPropagation(); }}
-          className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
+          className="rounded-full bg-black/30 p-2 backdrop-blur-sm transition-colors hover:bg-black/50"
         >
           <Heart className="w-4 h-4 text-white" />
         </button>
@@ -385,14 +440,14 @@ function PhotoCard({
             {onEdit && (
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(photo); }}
-                className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-primary/80 transition-colors"
+                className="rounded-full bg-black/30 p-2 backdrop-blur-sm transition-colors hover:bg-[var(--color-primary-600)]"
               >
                 <Edit2 className="w-4 h-4 text-white" />
               </button>
             )}
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }}
-              className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/80 transition-colors"
+              className="rounded-full bg-black/30 p-2 backdrop-blur-sm transition-colors hover:bg-red-500/80"
             >
               <Trash2 className="w-4 h-4 text-white" />
             </button>
@@ -460,7 +515,7 @@ function EditPhotoModal({
         className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-border">
+        <div className="border-b border-[color:var(--border-default)] p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-primary" />
@@ -468,7 +523,7 @@ function EditPhotoModal({
             </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
+              className="rounded-full p-2 transition-colors hover:bg-[var(--surface-overlay)]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -483,22 +538,21 @@ function EditPhotoModal({
 
           <div>
             <label className="block text-sm font-medium mb-2">标题</label>
-            <input
+            <Input
               type="text"
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               placeholder="给照片起个名字"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">描述</label>
-            <textarea
+            <Textarea
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
               rows={2}
+              className="resize-none"
               placeholder="这张照片的故事..."
             />
           </div>
@@ -506,21 +560,19 @@ function EditPhotoModal({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="block text-sm font-medium mb-2">地点</label>
-              <input
+              <Input
                 type="text"
                 value={formData.location}
                 onChange={e => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="拍摄地点"
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">拍摄日期</label>
-              <input
+              <Input
                 type="date"
                 value={formData.taken_at}
                 onChange={e => setFormData({ ...formData, taken_at: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               />
             </div>
           </div>
@@ -540,25 +592,21 @@ function EditPhotoModal({
           </div>
         </div>
 
-        <div className="p-6 border-t border-border flex justify-end gap-3">
-          <button
+        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] p-6">
+          <Button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
+            variant="secondary"
           >
             取消
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
-            disabled={loading}
-            className="btn-primary disabled:opacity-50"
+            loading={loading}
           >
-            {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> 保存中...</>
-            ) : (
-              <><Save className="w-4 h-4" /> 保存修改</>
-            )}
-          </button>
+            {!loading ? <Save className="w-4 h-4" /> : null}
+            保存修改
+          </Button>
         </div>
       </motion.div>
     </motion.div>
@@ -729,7 +777,7 @@ function AddPhotoModal({
         className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-border">
+        <div className="border-b border-[color:var(--border-default)] p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -737,7 +785,7 @@ function AddPhotoModal({
             </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
+              className="rounded-full p-2 transition-colors hover:bg-[var(--surface-overlay)]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -759,22 +807,21 @@ function AddPhotoModal({
 
           <div>
             <label className="block text-sm font-medium mb-2">标题</label>
-            <input
+            <Input
               type="text"
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               placeholder="给照片起个名字"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">描述</label>
-            <textarea
+            <Textarea
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
               rows={2}
+              className="resize-none"
               placeholder="这张照片的故事..."
             />
           </div>
@@ -782,21 +829,19 @@ function AddPhotoModal({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="block text-sm font-medium mb-2">地点</label>
-              <input
+              <Input
                 type="text"
                 value={formData.location}
                 onChange={e => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="拍摄地点"
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">拍摄日期</label>
-              <input
+              <Input
                 type="date"
                 value={formData.taken_at}
                 onChange={e => setFormData({ ...formData, taken_at: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               />
             </div>
           </div>
@@ -816,25 +861,22 @@ function AddPhotoModal({
           </div>
         </div>
 
-        <div className="p-6 border-t border-border flex justify-end gap-3">
-          <button
+        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] p-6">
+          <Button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
+            variant="secondary"
           >
             取消
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
-            disabled={loading || !formData.url}
-            className="btn-primary disabled:opacity-50"
+            loading={loading}
+            disabled={!formData.url}
           >
-            {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> 保存中...</>
-            ) : (
-              <><Upload className="w-4 h-4" /> 保存照片</>
-            )}
-          </button>
+            {!loading ? <Upload className="w-4 h-4" /> : null}
+            保存照片
+          </Button>
         </div>
       </motion.div>
     </motion.div>

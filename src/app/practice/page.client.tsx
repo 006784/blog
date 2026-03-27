@@ -1,9 +1,23 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Code2, Search, Terminal, Zap, BookOpen, HelpCircle, MessageSquare } from 'lucide-react';
+import {
+  BookOpen,
+  Code2,
+  HelpCircle,
+  MessageSquare,
+  Search,
+  Terminal,
+  Zap,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
 import { DifficultyBadge } from '@/components/practice/DifficultyBadge';
 
 interface Problem {
@@ -19,197 +33,283 @@ interface Problem {
 }
 
 const TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
-  algorithm:       { label: '算法', icon: <Zap className="w-3.5 h-3.5" /> },
-  multiple_choice: { label: '选择题', icon: <HelpCircle className="w-3.5 h-3.5" /> },
-  interview:       { label: '面试题', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+  algorithm: { label: '算法', icon: <Zap className="h-3.5 w-3.5" /> },
+  multiple_choice: { label: '选择题', icon: <HelpCircle className="h-3.5 w-3.5" /> },
+  interview: { label: '面试题', icon: <MessageSquare className="h-3.5 w-3.5" /> },
 };
+
+function PracticeSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3, 4, 5].map((item) => (
+        <Skeleton key={item} className="h-28 rounded-[var(--radius-2xl)]" />
+      ))}
+    </div>
+  );
+}
 
 export function PracticeListClient() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [q, setQ] = useState('');
   const [type, setType] = useState('');
   const [difficulty, setDifficulty] = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (q) params.set('q', q);
-    if (type) params.set('type', type);
-    if (difficulty) params.set('difficulty', difficulty);
-    params.set('limit', '100');
-    const res = await fetch(`/api/practice/problems?${params}`);
-    const data = await res.json();
-    setProblems(data.problems ?? []);
-    setLoading(false);
-  }, [q, type, difficulty]);
+  useEffect(() => {
+    let cancelled = false;
 
-  useEffect(() => { load(); }, [load]);
+    const loadProblems = async () => {
+      setLoading(true);
+      setError(false);
 
-  const stats = {
-    total: problems.length,
-    easy: problems.filter(p => p.difficulty === 'easy').length,
-    medium: problems.filter(p => p.difficulty === 'medium').length,
-    hard: problems.filter(p => p.difficulty === 'hard').length,
-  };
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (type) params.set('type', type);
+      if (difficulty) params.set('difficulty', difficulty);
+      params.set('limit', '100');
+
+      try {
+        const res = await fetch(`/api/practice/problems?${params}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error('failed');
+        if (!cancelled) {
+          setProblems(data.problems ?? []);
+        }
+      } catch {
+        if (!cancelled) {
+          setProblems([]);
+          setError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadProblems();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [difficulty, q, type]);
+
+  const stats = useMemo(
+    () => ({
+      total: problems.length,
+      easy: problems.filter((p) => p.difficulty === 'easy').length,
+      medium: problems.filter((p) => p.difficulty === 'medium').length,
+      hard: problems.filter((p) => p.difficulty === 'hard').length,
+    }),
+    [problems]
+  );
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 border border-[var(--line,#ddd9d0)]" style={{ background: 'var(--paper-deep,#ede9e0)' }}>
-              <Code2 className="w-8 h-8" style={{ color: 'var(--gold,#c4a96d)' }} />
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text">编程练习</h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            算法题、选择题、面试题 — 支持 Python、JS、Java、C++、C、PHP、TypeScript 在线运行
-          </p>
-          <Link
-            href="/code"
-            className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl border border-[var(--line)] hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors text-sm text-muted-foreground"
-          >
-            <Terminal className="w-4 h-4" />
-            打开代码运行环境
-          </Link>
-        </motion.div>
-
-        {/* Stats */}
+    <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-4 gap-4 mb-8"
+          className="space-y-5"
+        >
+          <Badge tone="info" variant="soft" className="w-fit gap-1.5">
+            <Code2 className="h-3.5 w-3.5" />
+            Practice Arena
+          </Badge>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+                编程练习
+              </h1>
+              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+                算法题、选择题和面试题都放在这里，配合在线运行环境一起练习会更顺手。
+              </p>
+            </div>
+            <Link href="/code" className="w-full lg:w-auto">
+              <Button variant="secondary" className="w-full lg:w-auto">
+                <Terminal className="h-4 w-4" />
+                打开代码运行环境
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
         >
           {[
-            { label: '全部', value: stats.total, color: 'text-[var(--ink)]' },
-            { label: '简单', value: stats.easy, color: 'text-emerald-600' },
-            { label: '中等', value: stats.medium, color: 'text-amber-600' },
-            { label: '困难', value: stats.hard, color: 'text-red-600' },
-          ].map(s => (
-            <div key={s.label} className="text-center p-4 rounded-xl border border-[var(--line)] bg-[var(--paper-deep,#ede9e0)]">
-              <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
-            </div>
+            { label: '全部', value: stats.total, tone: 'default' as const },
+            { label: '简单', value: stats.easy, tone: 'success' as const },
+            { label: '中等', value: stats.medium, tone: 'warning' as const },
+            { label: '困难', value: stats.hard, tone: 'error' as const },
+          ].map((stat) => (
+            <Card key={stat.label} variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">{stat.label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{stat.value}</p>
+                </div>
+                <Badge tone={stat.tone}>{stat.label}</Badge>
+              </div>
+            </Card>
           ))}
         </motion.div>
 
-        {/* Filters */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="flex flex-wrap items-center gap-3 mb-6"
+          transition={{ delay: 0.12 }}
         >
-          {/* Search */}
-          <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="搜索题目..."
-              value={q}
-              onChange={e => setQ(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors"
-            />
-          </div>
+          <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative flex-1 max-w-xl">
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                  <Input
+                    type="text"
+                    placeholder="搜索题目..."
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    className="pl-11"
+                  />
+                </div>
 
-          {/* Type filter */}
-          <div className="flex items-center gap-1 border border-[var(--line)] rounded-lg p-1">
-            {[['', '全部'], ['algorithm', '算法'], ['multiple_choice', '选择'], ['interview', '面试']].map(([v, l]) => (
-              <button
-                key={v}
-                onClick={() => setType(v)}
-                className={`px-3 py-1 rounded text-sm transition-colors ${type === v ? 'bg-[var(--ink)] text-[var(--paper)]' : 'text-muted-foreground hover:text-[var(--ink)]'}`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    ['', '全部'],
+                    ['algorithm', '算法'],
+                    ['multiple_choice', '选择'],
+                    ['interview', '面试'],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => setType(value)}
+                      className={`rounded-full border px-3.5 py-2 text-sm transition ${
+                        type === value
+                          ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
+                          : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          {/* Difficulty filter */}
-          <div className="flex items-center gap-1 border border-[var(--line)] rounded-lg p-1">
-            {[['', '全部'], ['easy', '简单'], ['medium', '中等'], ['hard', '困难']].map(([v, l]) => (
-              <button
-                key={v}
-                onClick={() => setDifficulty(v)}
-                className={`px-3 py-1 rounded text-sm transition-colors ${difficulty === v ? 'bg-[var(--ink)] text-[var(--paper)]' : 'text-muted-foreground hover:text-[var(--ink)]'}`}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  ['', '全部'],
+                  ['easy', '简单'],
+                  ['medium', '中等'],
+                  ['hard', '困难'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setDifficulty(value)}
+                    className={`rounded-full border px-3.5 py-2 text-sm transition ${
+                      difficulty === value
+                        ? 'border-[var(--color-primary-500)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]'
+                        : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Card>
         </motion.div>
 
-        {/* Problem list */}
         {loading ? (
-          <div className="space-y-2">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className="h-16 rounded-xl bg-[var(--paper-deep)] animate-pulse" />
-            ))}
-          </div>
+          <PracticeSkeleton />
+        ) : error ? (
+          <StatePanel
+            tone="error"
+            title="题目列表加载失败"
+            description="这次没能获取到练习题数据，你可以稍后刷新再试。"
+          />
         ) : problems.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p>没有找到题目</p>
-          </div>
+          <StatePanel
+            tone="empty"
+            icon={<BookOpen className="h-6 w-6" />}
+            title="没有找到题目"
+            description={q || type || difficulty ? '试试切换筛选条件，看看其他类型或难度的题目。' : '题库还没有内容，稍后这里会出现练习题列表。'}
+          />
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="rounded-xl border border-[var(--line)] overflow-hidden"
+            transition={{ delay: 0.16 }}
+            className="space-y-4"
           >
-            {/* Table header */}
-            <div className="grid grid-cols-[2rem_1fr_5rem_5rem_6rem_5rem] gap-4 px-4 py-2.5 bg-[var(--paper-deep)] text-xs font-medium text-muted-foreground border-b border-[var(--line)]">
-              <span>#</span>
-              <span>题目</span>
-              <span>类型</span>
-              <span>难度</span>
-              <span>标签</span>
-              <span className="text-right">通过率</span>
-            </div>
-
             {problems.map((problem, index) => {
-              const acceptRate = problem.submission_count > 0
-                ? Math.round((problem.accept_count / problem.submission_count) * 100)
-                : null;
+              const acceptRate =
+                problem.submission_count > 0
+                  ? Math.round((problem.accept_count / problem.submission_count) * 100)
+                  : null;
               const typeInfo = TYPE_LABELS[problem.type];
 
               return (
-                <Link
+                <motion.div
                   key={problem.id}
-                  href={`/practice/${problem.slug}`}
-                  className="grid grid-cols-[2rem_1fr_5rem_5rem_6rem_5rem] gap-4 px-4 py-3.5 hover:bg-[var(--paper-deep)] transition-colors border-b border-[var(--line)] last:border-0 group items-center"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
                 >
-                  <span className="text-sm text-muted-foreground">{index + 1}</span>
+                  <Link href={`/practice/${problem.slug}`} className="block">
+                    <Card
+                      variant="glass"
+                      padding="sm"
+                      className="rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                    >
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                        <div className="flex min-w-0 flex-1 items-start gap-4">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                            <span className="text-sm font-semibold">{index + 1}</span>
+                          </div>
 
-                  <span className="text-sm font-medium group-hover:text-[var(--gold)] transition-colors truncate">
-                    {problem.title}
-                  </span>
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="truncate text-base font-semibold text-[var(--color-neutral-900)] transition-colors hover:text-[var(--color-primary-600)]">
+                                {problem.title}
+                              </h3>
+                              <Badge variant="soft" className="gap-1.5">
+                                {typeInfo?.icon}
+                                {typeInfo?.label}
+                              </Badge>
+                              <DifficultyBadge difficulty={problem.difficulty} />
+                            </div>
 
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {typeInfo?.icon}
-                    {typeInfo?.label}
-                  </span>
+                            <div className="flex flex-wrap gap-2">
+                              {problem.tags?.slice(0, 3).map((tag) => (
+                                <Badge key={tag} variant="soft" className="font-normal">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {problem.tags?.length > 3 ? (
+                                <Badge variant="soft" className="font-normal">
+                                  +{problem.tags.length - 3}
+                                </Badge>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
 
-                  <span><DifficultyBadge difficulty={problem.difficulty} /></span>
-
-                  <span className="flex flex-wrap gap-1">
-                    {problem.tags?.slice(0, 2).map(tag => (
-                      <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-[var(--paper-deep)] border border-[var(--line)] text-muted-foreground">
-                        {tag}
-                      </span>
-                    ))}
-                  </span>
-
-                  <span className="text-xs text-right text-muted-foreground">
-                    {acceptRate !== null ? (
-                      <span className={acceptRate >= 50 ? 'text-emerald-600' : 'text-amber-600'}>{acceptRate}%</span>
-                    ) : '—'}
-                  </span>
-                </Link>
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-neutral-500)] lg:min-w-[220px] lg:justify-end">
+                          <span>提交 {problem.submission_count}</span>
+                          <span>通过 {problem.accept_count}</span>
+                          <span className={acceptRate !== null && acceptRate >= 50 ? 'text-emerald-600' : 'text-amber-600'}>
+                            {acceptRate !== null ? `${acceptRate}%` : '—'}
+                          </span>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                </motion.div>
               );
             })}
           </motion.div>

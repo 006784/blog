@@ -1,78 +1,105 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Wrench, Plus, Edit2, Trash2, X, Loader2, Save,
-  ArrowLeft, Search, ImageDown, ExternalLink, Check,
+  ArrowLeft,
+  Check,
+  ExternalLink,
+  ImageDown,
+  Loader2,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  Edit2,
+  Wrench,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAdmin } from '@/components/AdminProvider';
-import { UsesItem } from '@/lib/supabase';
 import { UsesIcon } from '@/components/UsesIcon';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
+import { UsesItem } from '@/lib/supabase';
 
-// ── 分类配置 ────────────────────────────────────────────────
 const CATEGORIES = [
-  { value: 'hardware',   label: '硬件设备',       icon: '💻' },
-  { value: 'chips',      label: '芯片 / CPU',     icon: '⚡' },
-  { value: 'software',   label: '常用软件',        icon: '📱' },
-  { value: 'notes',      label: '笔记工具',        icon: '📝' },
-  { value: 'opensource', label: 'Mac 开源工具',    icon: '🐙' },
-  { value: 'dev-tools',  label: '开发工具 / IDE',  icon: '🛠' },
-  { value: 'languages',  label: '编程语言',         icon: '🔤' },
-  { value: 'services',   label: '云服务',           icon: '☁️' },
-  { value: 'design',     label: '设计工具',         icon: '🎨' },
-  { value: 'daily',      label: '日常',             icon: '✨' },
+  { value: 'hardware', label: '硬件设备', icon: '💻' },
+  { value: 'chips', label: '芯片 / CPU', icon: '⚡' },
+  { value: 'software', label: '常用软件', icon: '📱' },
+  { value: 'notes', label: '笔记工具', icon: '📝' },
+  { value: 'opensource', label: 'Mac 开源工具', icon: '🐙' },
+  { value: 'dev-tools', label: '开发工具 / IDE', icon: '🛠' },
+  { value: 'languages', label: '编程语言', icon: '🔤' },
+  { value: 'services', label: '云服务', icon: '☁️' },
+  { value: 'design', label: '设计工具', icon: '🎨' },
+  { value: 'daily', label: '日常', icon: '✨' },
 ];
 
-const getCat = (v: string) => CATEGORIES.find(c => c.value === v) ?? { label: v, icon: '📦', value: v };
-
 const EMPTY: Partial<UsesItem> = {
-  category: 'software', name: '', description: '', icon_url: '', link: '', sort_order: 0,
+  category: 'software',
+  name: '',
+  description: '',
+  icon_url: '',
+  link: '',
+  sort_order: 0,
 };
 
-// ── 输入框组件 ──────────────────────────────────────────────
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-muted-foreground">{label}</label>
-      {children}
-    </div>
-  );
+const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
+const selectCls =
+  'w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-sm text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-base)]';
+const iconButtonCls =
+  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+
+function getCategory(value: string) {
+  return CATEGORIES.find((category) => category.value === value) ?? { label: value, icon: '📦', value };
 }
 
-const inputCls = 'w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors';
-
-// ── 表单弹窗 ────────────────────────────────────────────────
 function ItemModal({
-  editing, onClose, onSaved,
+  editing,
+  initialForm,
+  onClose,
+  onSaved,
 }: {
   editing: UsesItem | null;
+  initialForm: Partial<UsesItem>;
   onClose: () => void;
   onSaved: (item: UsesItem, isNew: boolean) => void;
 }) {
-  const [form, setForm] = useState<Partial<UsesItem>>(editing ?? EMPTY);
+  const [form, setForm] = useState<Partial<UsesItem>>(editing ?? initialForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const set = (key: keyof UsesItem) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm(f => ({ ...f, [key]: e.target.value }));
+  const setField =
+    (key: keyof UsesItem) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setForm((current) => ({ ...current, [key]: event.target.value }));
 
   async function handleSave() {
-    if (!form.name?.trim()) { setError('名称不能为空'); return; }
+    if (!form.name?.trim()) {
+      setError('名称不能为空');
+      return;
+    }
+
     setSaving(true);
     setError('');
     try {
       const url = editing ? `/api/uses/${editing.id}` : '/api/uses';
       const method = editing ? 'PUT' : 'POST';
-      const res = await fetch(url, {
+      const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) { setError('保存失败，请重试'); return; }
-      const saved = await res.json();
+      if (!response.ok) {
+        setError('保存失败，请重试');
+        return;
+      }
+      const saved = await response.json();
       onSaved(saved, !editing);
       onClose();
     } catch {
@@ -82,173 +109,219 @@ function ItemModal({
     }
   }
 
+  const categoryMeta = getCategory(form.category ?? 'software');
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={e => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+      onClick={(event) => event.target === event.currentTarget && onClose()}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 12 }}
-        className="w-full max-w-lg rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl overflow-hidden"
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        className="w-full max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
       >
-        {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
-          <h2 className="font-semibold">{editing ? '编辑工具' : '添加工具'}</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--paper-deep)] transition-colors">
-            <X className="w-4 h-4" />
+        <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+          <div>
+            <h2 className="text-lg font-semibold">{editing ? '编辑工具' : '添加工具'}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">维护工具图标、说明和跳转链接。</p>
+          </div>
+          <button onClick={onClose} className={iconButtonCls} title="关闭">
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-          {/* 图标预览 + URL */}
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl border border-[var(--line)] bg-[var(--paper-deep)] flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="space-y-4 px-6 py-6">
+          <div className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-overlay)]">
               {form.icon_url ? (
                 <UsesIcon
                   key={`preview:${form.icon_url ?? ''}:${form.link ?? ''}`}
                   iconUrl={form.icon_url}
                   link={form.link}
                   name={form.name || '工具图标'}
-                  fallback={getCat(form.category ?? '').icon}
-                  wrapperClassName="w-10 h-10 flex items-center justify-center"
-                  imgClassName="w-10 h-10 object-contain"
+                  fallback={categoryMeta.icon}
+                  wrapperClassName="flex h-11 w-11 items-center justify-center"
+                  imgClassName="h-11 w-11 object-contain"
                   fallbackClassName="text-2xl"
                 />
               ) : (
-                <span className="text-2xl">{getCat(form.category ?? '').icon}</span>
+                <span className="text-2xl">{categoryMeta.icon}</span>
               )}
             </div>
-            <Field label="图标 URL">
-              <input value={form.icon_url ?? ''} onChange={set('icon_url')} placeholder="https://example.com/favicon.ico" className={inputCls} />
-            </Field>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">{form.name || '未命名工具'}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{categoryMeta.label}</p>
+            </div>
           </div>
 
-          {/* 分类 + 排序 */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="分类">
-              <select value={form.category} onChange={set('category')} className={inputCls}>
-                {CATEGORIES.map(c => (
-                  <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className={fieldLabelCls}>分类</label>
+              <select value={form.category} onChange={setField('category')} className={selectCls}>
+                {CATEGORIES.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.icon} {category.label}
+                  </option>
                 ))}
               </select>
-            </Field>
-            <Field label="排序（数字越小越靠前）">
-              <input type="number" value={form.sort_order ?? 0}
-                onChange={e => setForm(f => ({ ...f, sort_order: Number(e.target.value) }))}
-                className={inputCls} />
-            </Field>
+            </div>
+            <div>
+              <label className={fieldLabelCls}>排序</label>
+              <Input
+                type="number"
+                value={form.sort_order ?? 0}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, sort_order: Number(event.target.value) }))
+                }
+              />
+            </div>
           </div>
 
-          {/* 名称 */}
-          <Field label="名称 *">
-            <input value={form.name ?? ''} onChange={set('name')} placeholder="工具名称" className={inputCls} autoFocus />
-          </Field>
+          <div>
+            <label className={fieldLabelCls}>名称 *</label>
+            <Input
+              value={form.name ?? ''}
+              onChange={setField('name')}
+              placeholder="工具名称"
+              autoFocus
+            />
+          </div>
 
-          {/* 简介 */}
-          <Field label="简介">
-            <textarea value={form.description ?? ''} onChange={set('description')}
-              placeholder="一句话描述这个工具的用途…"
-              rows={2}
-              className={`${inputCls} resize-none`} />
-          </Field>
+          <div>
+            <label className={fieldLabelCls}>简介</label>
+            <Textarea
+              value={form.description ?? ''}
+              onChange={setField('description')}
+              rows={3}
+              placeholder="一句话描述这个工具的用途和亮点。"
+            />
+          </div>
 
-          {/* 链接 */}
-          <Field label="官网 / 下载链接">
-            <input value={form.link ?? ''} onChange={set('link')} placeholder="https://..." className={inputCls} />
-          </Field>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className={fieldLabelCls}>图标 URL</label>
+              <Input
+                value={form.icon_url ?? ''}
+                onChange={setField('icon_url')}
+                placeholder="https://example.com/favicon.ico"
+              />
+            </div>
+            <div>
+              <label className={fieldLabelCls}>官网 / 下载链接</label>
+              <Input
+                value={form.link ?? ''}
+                onChange={setField('link')}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
 
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error ? <p className="text-sm text-red-500">{error}</p> : null}
         </div>
 
-        <div className="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm hover:bg-[var(--paper-deep)] transition-colors">
+        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+          <Button variant="secondary" onClick={onClose}>
             取消
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || !form.name?.trim()}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40 transition-opacity"
-            style={{ background: 'var(--gold)' }}
-          >
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            保存
-          </button>
+          </Button>
+          <Button onClick={handleSave} disabled={saving || !form.name?.trim()} loading={saving}>
+            {!saving && <Save className="h-4 w-4" />}
+            保存工具
+          </Button>
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
-// ── 主页面 ──────────────────────────────────────────────────
 export default function AdminUsesPage() {
   const { isAdmin, showLoginModal } = useAdmin();
   const [items, setItems] = useState<UsesItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<UsesItem | null>(null);
+  const [draftForm, setDraftForm] = useState<Partial<UsesItem>>(EMPTY);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activeCat, setActiveCat] = useState('all');
   const [q, setQ] = useState('');
   const [caching, setCaching] = useState(false);
   const [cacheMsg, setCacheMsg] = useState('');
-  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isAdmin) { showLoginModal(); return; }
-    fetch('/api/uses').then(r => r.json()).then(setItems).finally(() => setLoading(false));
+    if (!isAdmin) {
+      showLoginModal();
+      return;
+    }
+
+    fetch('/api/uses')
+      .then((response) => response.json())
+      .then(setItems)
+      .finally(() => setLoading(false));
   }, [isAdmin, showLoginModal]);
 
-  function openCreate() {
+  function openCreate(category = 'software') {
+    const nextSort = items.filter((item) => item.category === category).length + 1;
     setEditing(null);
+    setDraftForm({
+      ...EMPTY,
+      category,
+      sort_order: nextSort,
+    });
     setModalOpen(true);
   }
 
   function openEdit(item: UsesItem) {
+    setDraftForm(EMPTY);
     setEditing(item);
     setModalOpen(true);
   }
 
   function handleSaved(item: UsesItem, isNew: boolean) {
-    setItems(prev =>
+    setEditing(null);
+    setItems((prev) =>
       isNew
         ? [...prev, item].sort((a, b) => a.sort_order - b.sort_order)
-        : prev.map(i => i.id === item.id ? item : i)
+        : prev.map((existing) => (existing.id === item.id ? item : existing))
     );
   }
 
   async function handleDelete(id: string) {
     if (!confirm('确认删除这条工具？')) return;
+
     setDeleting(id);
     try {
       await fetch(`/api/uses/${id}`, { method: 'DELETE' });
-      setItems(prev => prev.filter(i => i.id !== id));
+      setItems((prev) => prev.filter((item) => item.id !== id));
     } finally {
       setDeleting(null);
     }
   }
 
   async function handleSeed() {
-    if (!confirm('将写入约 80 条示例工具箱数据（硬件/软件/语言/开源工具等），确认？')) return;
+    if (!confirm('将写入约 80 条示例工具箱数据，确认？')) return;
+
     setCaching(true);
     setCacheMsg('正在写入种子数据…');
     try {
       const endpoints = ['/api/admin/seed-uses', '/api/admin/seed-uses-more', '/api/admin/seed-uses-notes-ide'];
-      for (const ep of endpoints) {
-        const res = await fetch(ep, { method: 'POST', credentials: 'include' });
-        const data = await res.json();
-        if (!res.ok) { setCacheMsg(data.error || '写入失败'); return; }
+      for (const endpoint of endpoints) {
+        const response = await fetch(endpoint, { method: 'POST', credentials: 'include' });
+        const data = await response.json();
+        if (!response.ok) {
+          setCacheMsg(data.error || '写入失败');
+          return;
+        }
       }
       setCacheMsg('写入完成，正在刷新…');
-      const fresh = await fetch('/api/uses').then(r => r.json());
+      const fresh = await fetch('/api/uses').then((response) => response.json());
       setItems(fresh);
       setCacheMsg('初始化成功！');
-    } catch (e) {
-      setCacheMsg('失败：' + String(e));
+    } catch (error) {
+      setCacheMsg(`失败：${String(error)}`);
     } finally {
       setCaching(false);
       setTimeout(() => setCacheMsg(''), 5000);
@@ -259,11 +332,10 @@ export default function AdminUsesPage() {
     setCaching(true);
     setCacheMsg('正在下载并缓存图标，请稍候…');
     try {
-      const res = await fetch('/api/admin/cache-icons', { method: 'POST', credentials: 'include' });
-      const data = await res.json();
+      const response = await fetch('/api/admin/cache-icons', { method: 'POST', credentials: 'include' });
+      const data = await response.json();
       setCacheMsg(data.message ?? '完成');
-      // 刷新数据
-      const fresh = await fetch('/api/uses').then(r => r.json());
+      const fresh = await fetch('/api/uses').then((res) => res.json());
       setItems(fresh);
     } catch {
       setCacheMsg('缓存失败，请重试');
@@ -273,250 +345,279 @@ export default function AdminUsesPage() {
     }
   }
 
-  // 过滤
-  const filtered = items.filter(item => {
+  const filtered = items.filter((item) => {
     if (activeCat !== 'all' && item.category !== activeCat) return false;
-    if (q && !item.name.toLowerCase().includes(q.toLowerCase()) && !(item.description ?? '').toLowerCase().includes(q.toLowerCase())) return false;
+    if (
+      q &&
+      !item.name.toLowerCase().includes(q.toLowerCase()) &&
+      !(item.description ?? '').toLowerCase().includes(q.toLowerCase())
+    ) {
+      return false;
+    }
     return true;
   });
 
-  // 按分类分组
   const grouped = filtered.reduce<Record<string, UsesItem[]>>((acc, item) => {
     (acc[item.category] ??= []).push(item);
     return acc;
   }, {});
 
   const orderedCats = [
-    ...CATEGORIES.map(c => c.value).filter(v => grouped[v]),
-    ...Object.keys(grouped).filter(k => !CATEGORIES.find(c => c.value === k)),
+    ...CATEGORIES.map((category) => category.value).filter((value) => grouped[value]),
+    ...Object.keys(grouped).filter((key) => !CATEGORIES.find((category) => category.value === key)),
   ];
 
-  // 统计
-  const catCounts = CATEGORIES.reduce<Record<string, number>>((acc, c) => {
-    acc[c.value] = items.filter(i => i.category === c.value).length;
+  const catCounts = CATEGORIES.reduce<Record<string, number>>((acc, category) => {
+    acc[category.value] = items.filter((item) => item.category === category.value).length;
     return acc;
   }, {});
 
-  return (
-    <div className="min-h-screen bg-[var(--paper)]">
-      <div className="max-w-5xl mx-auto px-6 py-10">
+  const visibleCategoryCount = orderedCats.length;
 
-        {/* ── 顶部 ── */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors text-muted-foreground">
-              <ArrowLeft className="w-4 h-4" />
+  return (
+    <div className="min-h-screen px-6 py-10">
+      <div className="mx-auto max-w-6xl space-y-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-3">
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
             </Link>
-            <Wrench className="w-5 h-5" style={{ color: 'var(--gold)' }} />
-            <h1 className="text-xl font-bold">工具箱管理</h1>
-            <span className="text-sm text-muted-foreground">({items.length} 条)</span>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                  <Wrench className="h-5 w-5 text-primary" />
+                </span>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">工具箱管理</h1>
+                  <p className="text-sm text-muted-foreground">维护工具清单、图标缓存和分类展示顺序。</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* 初始化数据 */}
-            {items.length === 0 && (
-              <button
-                onClick={handleSeed}
-                disabled={caching}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-[var(--line)] text-sm hover:border-[var(--gold)] transition-colors disabled:opacity-50"
-              >
-                {caching ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>📦</span>}
-                <span className="hidden sm:inline">初始化数据</span>
-              </button>
-            )}
-            {/* 缓存图标 */}
-            <button
-              onClick={handleCacheIcons}
-              disabled={caching}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--line)] text-sm hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors disabled:opacity-50"
-              title="将所有图标下载到 Supabase Storage"
-            >
-              {caching ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageDown className="w-4 h-4" />}
-              <span className="hidden sm:inline">{caching ? '缓存中…' : '缓存图标'}</span>
-            </button>
-
-            {/* 添加 */}
-            <button
-              onClick={openCreate}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-85"
-              style={{ background: 'var(--gold)' }}
-            >
-              <Plus className="w-4 h-4" />
+          <div className="flex flex-wrap gap-3">
+            {items.length === 0 ? (
+              <Button variant="secondary" onClick={handleSeed} disabled={caching}>
+                {caching ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>📦</span>}
+                初始化数据
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={handleCacheIcons} disabled={caching}>
+              {caching ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageDown className="h-4 w-4" />}
+              缓存图标
+            </Button>
+            <Button onClick={() => openCreate()}>
+              <Plus className="h-4 w-4" />
               添加工具
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* 缓存提示 */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <p className="text-sm text-muted-foreground">工具总数</p>
+            <p className="mt-3 text-3xl font-semibold">{items.length}</p>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <p className="text-sm text-muted-foreground">当前分类</p>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-3xl font-semibold">{visibleCategoryCount}</p>
+              <Badge variant="soft">可视分类</Badge>
+            </div>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <p className="text-sm text-muted-foreground">已筛选结果</p>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-3xl font-semibold">{filtered.length}</p>
+              <Badge tone="info" variant="soft">实时更新</Badge>
+            </div>
+          </Card>
+        </div>
+
         <AnimatePresence>
-          {cacheMsg && (
+          {cacheMsg ? (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--paper-deep)] text-sm"
             >
-              {caching ? <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--gold)' }} /> : <Check className="w-4 h-4 text-emerald-500" />}
-              {cacheMsg}
+              <Card variant="default" padding="sm" className="flex items-center gap-3 rounded-[var(--radius-xl)]">
+                {caching ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : (
+                  <Check className="h-4 w-4 text-emerald-500" />
+                )}
+                <p className="text-sm text-[var(--color-neutral-700)]">{cacheMsg}</p>
+              </Card>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
 
-        {/* ── 搜索 + 分类筛选 ── */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              ref={searchRef}
-              value={q}
-              onChange={e => setQ(e.target.value)}
-              placeholder="搜索工具名称或描述…"
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors"
-            />
-          </div>
+        <Card variant="elevated" className="space-y-4 rounded-[var(--radius-2xl)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(event) => setQ(event.target.value)}
+                placeholder="搜索工具名称或描述…"
+                className="pl-11"
+              />
+            </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              onClick={() => setActiveCat('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeCat === 'all' ? 'text-white' : 'border border-[var(--line)] hover:border-[var(--gold)] text-muted-foreground'}`}
-              style={activeCat === 'all' ? { background: 'var(--gold)' } : {}}
-            >
-              全部 ({items.length})
-            </button>
-            {CATEGORIES.filter(c => catCounts[c.value] > 0).map(c => (
-              <button
-                key={c.value}
-                onClick={() => setActiveCat(c.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeCat === c.value ? 'text-white' : 'border border-[var(--line)] hover:border-[var(--gold)] text-muted-foreground'}`}
-                style={activeCat === c.value ? { background: 'var(--gold)' } : {}}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={activeCat === 'all' ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setActiveCat('all')}
+                className="rounded-full"
               >
-                {c.icon} {c.label} ({catCounts[c.value]})
-              </button>
-            ))}
+                全部 ({items.length})
+              </Button>
+              {CATEGORIES.filter((category) => catCounts[category.value] > 0).map((category) => (
+                <Button
+                  key={category.value}
+                  variant={activeCat === category.value ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setActiveCat(category.value)}
+                  className="rounded-full"
+                >
+                  {category.icon} {category.label} ({catCounts[category.value]})
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
+        </Card>
 
-        {/* ── 内容区 ── */}
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
+          <StatePanel
+            tone="loading"
+            title="正在加载工具箱"
+            description="正在同步工具、图标和分类信息，请稍等。"
+          />
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            <Wrench className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p>{q ? '没有匹配的工具' : '点击右上角添加第一个工具'}</p>
-          </div>
+          <StatePanel
+            tone="empty"
+            title={q ? '没有匹配的工具' : '工具箱还是空的'}
+            description={q ? '试试更换关键词，或者切到别的分类看看。' : '先添加第一条工具记录，前台工具箱页就会显示出来。'}
+            action={
+              <Button onClick={() => openCreate(activeCat === 'all' ? 'software' : activeCat)}>
+                <Plus className="h-4 w-4" />
+                添加工具
+              </Button>
+            }
+          />
         ) : (
           <div className="space-y-8">
-            {orderedCats.map(cat => {
-              const meta = getCat(cat);
+            {orderedCats.map((cat) => {
+              const meta = getCategory(cat);
               return (
-                <div key={cat}>
-                  {/* 分类标题 */}
-                  <div className="flex items-center gap-2 mb-3">
+                <Card key={cat} variant="elevated" className="space-y-4 rounded-[var(--radius-2xl)]">
+                  <div className="flex items-center gap-3">
                     <span className="text-base">{meta.icon}</span>
-                    <h2 className="text-sm font-semibold">{meta.label}</h2>
-                    <span className="text-xs text-muted-foreground">({grouped[cat].length})</span>
-                    <div className="flex-1 h-px bg-[var(--line)]" />
+                    <h2 className="text-base font-semibold">{meta.label}</h2>
+                    <Badge variant="outline">{grouped[cat].length} 条</Badge>
+                    <div className="h-px flex-1 bg-[var(--border-default)]" />
                   </div>
 
-                  {/* 卡片网格 */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {grouped[cat].map(item => (
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {grouped[cat].map((item) => (
                       <motion.div
                         key={item.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.95 }}
+                        initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="group relative rounded-xl border border-[var(--line)] bg-[var(--paper-deep)] p-3 hover:border-[var(--gold)] transition-colors"
+                        className="group rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
                       >
-                        {/* 操作按钮 */}
-                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => openEdit(item)}
-                            className="p-1 rounded-md bg-[var(--paper)] border border-[var(--line)] hover:border-[var(--gold)] transition-colors"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            disabled={deleting === item.id}
-                            className="p-1 rounded-md bg-[var(--paper)] border border-[var(--line)] hover:border-red-400 hover:text-red-500 transition-colors"
-                          >
-                            {deleting === item.id
-                              ? <Loader2 className="w-3 h-3 animate-spin" />
-                              : <Trash2 className="w-3 h-3" />}
-                          </button>
-                        </div>
-
-                        {/* 图标 + 名称 */}
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                          <div className="w-8 h-8 rounded-lg border border-[var(--line)] bg-[var(--paper)] flex items-center justify-center shrink-0 overflow-hidden">
-                            {item.icon_url ? (
-                              <UsesIcon
-                                key={`${item.id}:${item.icon_url ?? ''}:${item.link ?? ''}`}
-                                iconUrl={item.icon_url}
-                                link={item.link}
-                                name={item.name}
-                                fallback={meta.icon}
-                                wrapperClassName="w-5 h-5 flex items-center justify-center"
-                                imgClassName="w-5 h-5 object-contain"
-                                fallbackClassName="text-sm"
-                              />
-                            ) : (
-                              <span className="text-sm">{meta.icon}</span>
-                            )}
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-base)]">
+                              {item.icon_url ? (
+                                <UsesIcon
+                                  key={`${item.id}:${item.icon_url ?? ''}:${item.link ?? ''}`}
+                                  iconUrl={item.icon_url}
+                                  link={item.link}
+                                  name={item.name}
+                                  fallback={meta.icon}
+                                  wrapperClassName="flex h-6 w-6 items-center justify-center"
+                                  imgClassName="h-6 w-6 object-contain"
+                                  fallbackClassName="text-sm"
+                                />
+                              ) : (
+                                <span className="text-sm">{meta.icon}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold">{item.name}</p>
+                              <p className="text-xs text-muted-foreground">排序 #{item.sort_order}</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{item.name}</p>
-                            {item.link && (
-                              <a href={item.link} target="_blank" rel="noreferrer"
-                                className="text-[10px] text-muted-foreground hover:text-[var(--gold)] transition-colors flex items-center gap-0.5 truncate"
-                                onClick={e => e.stopPropagation()}>
-                                <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                                <span className="truncate">{item.link.replace(/^https?:\/\//, '')}</span>
-                              </a>
-                            )}
+
+                          <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button onClick={() => openEdit(item)} className={iconButtonCls} title="编辑工具">
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              disabled={deleting === item.id}
+                              className={`${iconButtonCls} hover:border-red-400 hover:text-red-500 disabled:opacity-60`}
+                              title="删除工具"
+                            >
+                              {deleting === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            </button>
                           </div>
                         </div>
 
-                        {/* 描述 */}
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {item.description}
-                          </p>
+                        {item.description ? (
+                          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">还没有填写这条工具的描述。</p>
                         )}
+
+                        {item.link ? (
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-3 inline-flex max-w-full items-center gap-1.5 text-xs text-primary transition-colors hover:text-[var(--color-primary-700)]"
+                          >
+                            <ExternalLink className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{item.link.replace(/^https?:\/\//, '')}</span>
+                          </a>
+                        ) : null}
                       </motion.div>
                     ))}
 
-                    {/* 快速添加到当前分类 */}
                     <button
-                      onClick={() => {
-                        setEditing(null);
-                        setModalOpen(true);
-                      }}
-                      className="rounded-xl border border-dashed border-[var(--line)] p-3 flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors min-h-[80px]"
+                      onClick={() => openCreate(cat)}
+                      className="flex min-h-[146px] flex-col items-center justify-center gap-2 rounded-[var(--radius-xl)] border border-dashed border-[color:var(--border-default)] bg-[var(--surface-raised)] text-sm text-muted-foreground transition-all duration-[var(--duration-fast)] hover:border-[var(--color-primary-500)] hover:text-primary"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span className="text-xs">添加</span>
+                      <Plus className="h-5 w-5" />
+                      添加到 {meta.label}
                     </button>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
         )}
       </div>
 
-      {/* 弹窗 */}
       <AnimatePresence>
-        {modalOpen && (
+        {modalOpen ? (
           <ItemModal
             editing={editing}
-            onClose={() => setModalOpen(false)}
+            initialForm={draftForm}
+            onClose={() => {
+              setModalOpen(false);
+              setEditing(null);
+              setDraftForm(EMPTY);
+            }}
             onSaved={handleSaved}
           />
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );

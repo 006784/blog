@@ -20,6 +20,11 @@ import {
 import clsx from 'clsx';
 import { BlogCard } from '@/components/BlogCard';
 import { SubscribeForm } from '@/components/SubscribeForm';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
 import { APPLE_EASE, HOVER_BUTTON, HOVER_LIFT, TAP_BUTTON, APPLE_SPRING_GENTLE } from '@/components/Animations';
 import { useAdmin } from '@/components/AdminProvider';
 import { decodeAdminToken } from '@/lib/admin-token';
@@ -276,20 +281,22 @@ function BlogPageContent() {
 
               <div className="relative">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="搜索标题、摘要或标签..."
-                  className="input-modern py-3 pl-11 pr-10 text-sm"
+                  className="py-3 pl-11 pr-10 text-sm"
                 />
                 {searchQuery && (
-                  <button
+                  <Button
                     onClick={() => setSearchQuery('')}
-                    className="ios-button-press absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-secondary"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-3 top-1/2 h-8 w-8 -translate-y-1/2 rounded-md p-0"
                     aria-label="清空搜索"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -365,26 +372,26 @@ function BlogPageContent() {
             {loading ? (
               <div className="space-y-4">
                 {/* 精选文章骨架 */}
-                <div className="surface-card overflow-hidden rounded-2xl animate-pulse">
+                <div className="surface-card overflow-hidden rounded-2xl">
                   <div className="grid sm:grid-cols-2 gap-0">
-                    <div className="min-h-[260px] bg-muted" />
+                    <Skeleton className="min-h-[260px] rounded-none" />
                     <div className="p-8 space-y-4">
-                      <div className="h-4 w-20 bg-muted rounded-full" />
-                      <div className="h-6 w-3/4 bg-muted rounded-lg" />
-                      <div className="h-4 w-full bg-muted rounded-lg" />
-                      <div className="h-4 w-2/3 bg-muted rounded-lg" />
+                      <Skeleton className="h-4 w-20 rounded-full" />
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
                     </div>
                   </div>
                 </div>
                 {/* 文章列表骨架 */}
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="surface-card p-5 rounded-2xl animate-pulse flex gap-4">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-muted rounded-xl" />
+                  <div key={i} className="surface-card p-5 rounded-2xl flex gap-4">
+                    <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-xl" />
                     <div className="flex-1 space-y-3 py-1">
-                      <div className="h-3 w-16 bg-muted rounded-full" />
-                      <div className="h-5 w-3/4 bg-muted rounded-lg" />
-                      <div className="h-3 w-full bg-muted rounded-lg" />
-                      <div className="h-3 w-1/2 bg-muted rounded-lg" />
+                      <Skeleton className="h-3 w-16 rounded-full" />
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-1/2" />
                     </div>
                   </div>
                 ))}
@@ -392,9 +399,9 @@ function BlogPageContent() {
             ) : (
               <>
                 <div className="journal-results-head">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-background/70 px-3 py-1.5 text-sm text-muted-foreground">
+                  <Badge variant="outline" className="rounded-full px-3 py-1.5 text-sm">
                     共找到 <span className="font-medium text-foreground">{filteredPosts.length}</span> 篇文章
-                  </div>
+                  </Badge>
 
                   {notifyingSlug && (
                     <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
@@ -434,7 +441,7 @@ function BlogPageContent() {
                         <p>{featuredPost.description}</p>
 
                         <div className="journal-spotlight-meta">
-                          <span>{categoryLabel(featuredPost.category)}</span>
+                          <Badge className="px-2.5 py-1">{categoryLabel(featuredPost.category)}</Badge>
                           <span>{formatDate(featuredPost.published_at || featuredPost.created_at)}</span>
                           <span>{featuredPost.reading_time || '约 5 分钟'}</span>
                         </div>
@@ -478,20 +485,23 @@ function BlogPageContent() {
                     ))}
                   </div>
                 ) : !featuredPost ? (
-                  <div className="surface-card py-20 text-center">
-                    <h3 className="text-xl font-semibold">没有匹配的文章</h3>
-                    <p className="mt-3 text-muted-foreground">试试清空筛选条件或更换关键词。</p>
-                    <button
-                      onClick={() => {
-                        setSearchQuery('');
-                        setSelectedCategory('all');
-                        setSelectedCollection(null);
-                      }}
-                      className="btn-secondary ios-button-press mt-6 px-5 py-2.5 text-sm"
-                    >
-                      重置筛选
-                    </button>
-                  </div>
+                  <StatePanel
+                    tone="empty"
+                    title="没有匹配的文章"
+                    description="试试清空筛选条件、切换专题，或者换一个更宽松的关键词。"
+                    action={
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSelectedCategory('all');
+                          setSelectedCollection(null);
+                        }}
+                      >
+                        重置筛选
+                      </Button>
+                    }
+                  />
                 ) : null}
               </>
             )}
@@ -514,10 +524,12 @@ export default function BlogPage() {
       fallback={
         <div className="min-h-screen px-6 pb-20 pt-10 md:pt-14">
           <div className="mx-auto max-w-6xl">
-            <div className="surface-card py-20 text-center">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="mt-3 text-sm text-muted-foreground">正在加载博客页面...</p>
-            </div>
+            <StatePanel
+              tone="loading"
+              title="正在加载博客页面"
+              description="正在整理文章目录和专题信息，请稍等。"
+              icon={<Loader2 className="h-6 w-6 animate-spin" />}
+            />
           </div>
         </div>
       }

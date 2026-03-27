@@ -6,11 +6,10 @@ import {
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
   Download, Trash2, Eye, EyeOff, Search, Grid, List, X,
   Copy, Check, Shield, HardDrive, Loader2, Settings, Plus, Edit2,
-  AlertCircle, CheckCircle2,
+  AlertCircle, CheckCircle2, RefreshCw,
   Folder, Archive, Code, Database, Book, Link, Star
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
-import { decodeAdminToken } from '@/lib/admin-token';
 import { Turnstile } from '@/components/Turnstile';
 import {
   APPLE_EASE_SOFT,
@@ -21,6 +20,13 @@ import {
   modalBackdropVariants,
   modalPanelVariants,
 } from '@/components/Animations';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
 
 interface Resource {
   id: string;
@@ -97,12 +103,24 @@ function formatDate(dateStr: string): string {
   });
 }
 
-// 获取管理员密码（从 localStorage 中的 token 解码）
-function getAdminPassword(): string {
-  if (typeof window === 'undefined') return '';
-  const token = localStorage.getItem('admin-token');
-  if (!token) return '';
-  return decodeAdminToken(token) || '';
+function ResourceGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+        <Skeleton key={item} className="h-56 rounded-[var(--radius-2xl)]" />
+      ))}
+    </div>
+  );
+}
+
+function ResourceListSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3, 4, 5].map((item) => (
+        <Skeleton key={item} className="h-24 rounded-[var(--radius-2xl)]" />
+      ))}
+    </div>
+  );
 }
 
 export default function ResourcesPage() {
@@ -110,6 +128,7 @@ export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resourceError, setResourceError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -124,7 +143,6 @@ export default function ResourcesPage() {
   
   // 下载验证
   const [downloadModal, setDownloadModal] = useState<Resource | null>(null);
-  const [downloadToken, setDownloadToken] = useState<string | null>(null);
   const [downloadVerified, setDownloadVerified] = useState(false);
   
   // 上传表单
@@ -152,13 +170,11 @@ export default function ResourcesPage() {
   }, []);
   
   // Turnstile 回调
-  const handleDownloadVerify = useCallback((token: string) => {
-    setDownloadToken(token);
+  const handleDownloadVerify = useCallback(() => {
     setDownloadVerified(true);
   }, []);
 
   const handleDownloadError = useCallback(() => {
-    setDownloadToken(null);
     setDownloadVerified(false);
   }, []);
 
@@ -173,7 +189,6 @@ export default function ResourcesPage() {
     }
     // 显示验证模态框
     setDownloadModal(resource);
-    setDownloadToken(null);
     setDownloadVerified(false);
   };
 
@@ -195,7 +210,6 @@ export default function ResourcesPage() {
         
         // 关闭模态框
         setDownloadModal(null);
-        setDownloadToken(null);
         setDownloadVerified(false);
         setDownloadProgress(null);
         pushNotice('success', `已开始下载：${downloadModal.name}`);
@@ -221,15 +235,19 @@ export default function ResourcesPage() {
   const fetchResources = useCallback(async () => {
     try {
       setLoading(true);
+      setResourceError(false);
       const params = new URLSearchParams();
       if (selectedCategory !== 'all') params.set('category', selectedCategory);
       if (searchQuery) params.set('search', searchQuery);
       
       const res = await fetch(`/api/resources?${params}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'failed');
       setResources(data.resources || []);
     } catch (error) {
       console.error('Failed to fetch resources:', error);
+      setResources([]);
+      setResourceError(true);
       pushNotice('error', '资源加载失败，请稍后重试。');
     } finally {
       setLoading(false);
@@ -295,17 +313,15 @@ export default function ResourcesPage() {
     setUploadProgress(0);
     
     try {
-      const adminPassword = getAdminPassword();
-      
       // 步骤1: 获取预签名URL
       const presignRes = await fetch('/api/resources/presign', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fileName: uploadFile.name,
           fileType: uploadFile.type || 'application/octet-stream',
           fileSize: uploadFile.size,
-          adminPassword,
         }),
       });
       
@@ -336,9 +352,9 @@ export default function ResourcesPage() {
       // 步骤3: 保存资源信息到数据库
       const saveRes = await fetch('/api/resources/save', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          adminPassword,
           name: uploadName || uploadFile.name.replace(/\.[^/.]+$/, ''),
           originalName: uploadFile.name,
           description: uploadDesc,
@@ -378,8 +394,9 @@ export default function ResourcesPage() {
     try {
       const res = await fetch('/api/resources', {
         method: 'DELETE',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, adminPassword: getAdminPassword() }),
+        body: JSON.stringify({ id }),
       });
       
       const data = await res.json();
@@ -464,7 +481,6 @@ export default function ResourcesPage() {
       const url = '/api/categories';
       const method = editingCategory ? 'PUT' : 'POST';
       const body = {
-        adminPassword: getAdminPassword(),
         ...(editingCategory && { id: editingCategory.id }),
         name: newCatName,
         slug: newCatSlug,
@@ -475,6 +491,7 @@ export default function ResourcesPage() {
       
       const res = await fetch(url, {
         method,
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
@@ -502,8 +519,9 @@ export default function ResourcesPage() {
     try {
       const res = await fetch('/api/categories', {
         method: 'DELETE',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, adminPassword: getAdminPassword() }),
+        body: JSON.stringify({ id }),
       });
       
       const data = await res.json();
@@ -534,7 +552,7 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="min-h-screen py-20 pb-14">
+    <div className="min-h-screen px-4 py-20 pb-14 sm:px-6 lg:px-8">
       <AnimatePresence>
         {notice && (
           <motion.div
@@ -562,168 +580,191 @@ export default function ResourcesPage() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 页面标题 */}
+      <div className="mx-auto max-w-7xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.62, ease: APPLE_EASE_SOFT }}
-          className="mb-8"
+          className="space-y-5"
         >
-          <div className="surface-hero px-6 py-10 sm:px-10 sm:py-12 text-center">
-            <div className="section-kicker mb-4">
-              <FolderOpen className="w-4 h-4" />
-              <span className="text-sm font-medium">资源中心</span>
+          <Badge tone="info" variant="soft" className="w-fit gap-1.5">
+            <FolderOpen className="h-3.5 w-3.5" />
+            Resource Hub
+          </Badge>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+                资源存储
+              </h1>
+              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+                集中管理文件、安装包、文档和媒体资源，支持公开分享与私有归档。
+              </p>
             </div>
-            <h1 className="apple-display mb-4">资源存储</h1>
-            <p className="text-soft">安全可靠的文件存储服务</p>
+            <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4 lg:max-w-4xl">
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                    <File className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">总文件数</p>
+                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{stats.total}</p>
+                  </div>
+                </div>
+              </Card>
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-warning)]">
+                    <Eye className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">公开资源</p>
+                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{stats.public}</p>
+                  </div>
+                </div>
+              </Card>
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                    <HardDrive className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">总存储</p>
+                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{formatFileSize(stats.totalSize)}</p>
+                  </div>
+                </div>
+              </Card>
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                    <Download className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">总下载</p>
+                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{stats.totalDownloads}</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
         </motion.div>
 
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="surface-card interactive-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <File className="w-5 h-5 text-primary" />
+        <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                <Input
+                  type="text"
+                  placeholder="搜索资源..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-11"
+                />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-soft">总文件数</p>
-              </div>
-            </div>
-          </div>
-          <div className="surface-card interactive-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[var(--paper-deep)] border border-[var(--line)]">
-                <Eye className="w-5 h-5 text-[var(--gold)]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.public}</p>
-                <p className="text-xs text-soft">公开资源</p>
-              </div>
-            </div>
-          </div>
-          <div className="surface-card interactive-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[var(--paper-deep)] border border-[var(--line)]">
-                <HardDrive className="w-5 h-5 text-[var(--ink)]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{formatFileSize(stats.totalSize)}</p>
-                <p className="text-xs text-soft">总存储</p>
-              </div>
-            </div>
-          </div>
-          <div className="surface-card interactive-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[var(--paper-deep)] border border-[var(--line)]">
-                <Download className="w-5 h-5 text-[var(--ink-secondary)]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.totalDownloads}</p>
-                <p className="text-xs text-soft">总下载</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* 工具栏 */}
-        <div className="surface-card flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6 p-4">
-          <div className="flex flex-1 items-center gap-3">
-            {/* 搜索 */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="搜索资源..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-modern w-full pl-10 pr-4 py-2.5"
-              />
-            </div>
-            
-            {/* 分类筛选 */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="input-modern w-auto min-w-[140px] px-4 py-2.5"
-            >
-              <option value="all">全部分类</option>
-              {categories.map((cat) => (
-                <option key={cat.slug} value={cat.slug}>{cat.name}</option>
-              ))}
-            </select>
-            
-            {/* 分类管理按钮 */}
-            {isAdmin && (
-              <button
-                onClick={() => setShowCategoryModal(true)}
-                className="btn-secondary ios-button-press h-11 w-11 rounded-xl p-0"
-                title="管理分类"
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 sm:w-[190px]"
               >
-                <Settings className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+                <option value="all">全部分类</option>
+                {categories.map((cat) => (
+                  <option key={cat.slug} value={cat.slug}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
 
-          <div className="flex items-center gap-3">
-            {/* 视图切换 */}
-            <div className="flex items-center rounded-xl border border-[var(--ui-line)] overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`ios-button-press p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`ios-button-press p-2.5 transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-transparent text-soft hover:bg-black/5 dark:hover:bg-white/10'}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
+              {isAdmin ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowCategoryModal(true)}
+                  title="管理分类"
+                  className="sm:w-auto"
+                >
+                  <Settings className="h-4 w-4" />
+                  分类
+                </Button>
+              ) : null}
             </div>
-            
-            {/* 上传按钮 */}
-            {isAdmin && (
-              <motion.button
-                whileHover={HOVER_BUTTON}
-                whileTap={TAP_BUTTON}
-                transition={APPLE_SPRING_GENTLE}
-                onClick={() => {
-                  setIsDropActive(false);
-                  setShowUploadModal(true);
-                }}
-                className="btn-primary ios-button-press px-5 py-2.5"
-              >
-                <Upload className="w-4 h-4" />
-                上传资源
-              </motion.button>
-            )}
-          </div>
-        </div>
 
-        {/* 资源列表 */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-base)] p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-full"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-full"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {isAdmin ? (
+                <motion.div
+                  whileHover={HOVER_BUTTON}
+                  whileTap={TAP_BUTTON}
+                  transition={APPLE_SPRING_GENTLE}
+                >
+                  <Button
+                    onClick={() => {
+                      setIsDropActive(false);
+                      setShowUploadModal(true);
+                    }}
+                  >
+                    <Upload className="h-4 w-4" />
+                    上传资源
+                  </Button>
+                </motion.div>
+              ) : null}
+            </div>
+          </div>
+        </Card>
+
         {loading ? (
-          <div className="surface-card flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          viewMode === 'grid' ? <ResourceGridSkeleton /> : <ResourceListSkeleton />
+        ) : resourceError ? (
+          <StatePanel
+            tone="error"
+            icon={<RefreshCw className="h-6 w-6" />}
+            title="资源列表加载失败"
+            description="这次没能获取到资源数据，你可以重新试一次。"
+            action={
+              <Button onClick={() => void fetchResources()}>
+                <RefreshCw className="h-4 w-4" />
+                重新加载
+              </Button>
+            }
+          />
         ) : resources.length === 0 ? (
-          <div className="surface-card text-center py-20">
-            <FolderOpen className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">暂无资源</p>
-            {isAdmin && (
-              <button
-                onClick={() => {
-                  setIsDropActive(false);
-                  setShowUploadModal(true);
-                }}
-                className="btn-primary mt-4 px-6 py-2"
-              >
-                上传第一个资源
-              </button>
-            )}
-          </div>
+          <StatePanel
+            tone="empty"
+            icon={<FolderOpen className="h-6 w-6" />}
+            title="还没有资源"
+            description="上传第一个资源后，这里会开始显示文件、分类和下载信息。"
+            action={
+              isAdmin ? (
+                <Button
+                  onClick={() => {
+                    setIsDropActive(false);
+                    setShowUploadModal(true);
+                  }}
+                >
+                  <Upload className="h-4 w-4" />
+                  上传第一个资源
+                </Button>
+              ) : null
+            }
+          />
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {resources.map((resource, index) => {
@@ -738,67 +779,85 @@ export default function ResourcesPage() {
                   transition={{ delay: index * 0.05, duration: 0.58, ease: APPLE_EASE_SOFT }}
                   whileHover={HOVER_LIFT}
                   whileTap={{ y: -2, scale: 0.994 }}
-                  className="surface-card interactive-card ios-hover-surface group p-4"
+                  className="group"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-3 rounded-xl ${config.bg}`}>
-                      <Icon className={`w-6 h-6 ${config.color}`} />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {resource.is_public ? (
-                        <Eye className="w-4 h-4 text-[var(--gold)]" />
-                      ) : (
-                        <EyeOff className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <h3 className="font-medium line-clamp-1 mb-1" title={resource.name}>
-                    {resource.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-1 mb-3">
-                    {resource.original_name}
-                  </p>
-                  
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                    <span>{formatFileSize(resource.file_size)}</span>
-                    <span>·</span>
-                    <span>{formatDate(resource.created_at)}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleDownloadClick(resource)}
-                      className="btn-secondary ios-button-press flex-1 rounded-lg py-2 text-sm"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      下载
-                    </button>
-                    {/* 高频资源预加载提示 */}
-                    {resource.download_count > 10 && (
-                      <div className="text-xs text-[var(--gold)] flex items-center gap-1" title="高频资源，已优化加载">
-                        <Star className="w-3 h-3" />
+                  <Card
+                    variant="glass"
+                    className="h-full rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                  >
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] ${config.bg}`}>
+                        <Icon className={`h-6 w-6 ${config.color}`} />
                       </div>
-                    )}
-                    <button
-                      onClick={() => copyLink(resource.file_url, resource.id)}
-                      className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
-                    >
-                      {copiedId === resource.id ? (
-                        <Check className="w-4 h-4 text-[var(--gold)]" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </button>
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleDelete(resource.id)}
-                        className="ios-button-press p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                      <div className="flex items-center gap-2">
+                        <Badge variant="soft">{config.name}</Badge>
+                        {resource.is_public ? (
+                          <Eye className="h-4 w-4 text-[var(--color-warning)]" />
+                        ) : (
+                          <EyeOff className="h-4 w-4 text-[var(--color-neutral-500)]" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="line-clamp-2 text-base font-semibold text-[var(--color-neutral-900)]" title={resource.name}>
+                        {resource.name}
+                      </h3>
+                      <p className="line-clamp-1 text-sm text-[var(--color-neutral-500)]">
+                        {resource.original_name}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--color-neutral-500)]">
+                      <span>{formatFileSize(resource.file_size)}</span>
+                      <span>·</span>
+                      <span>{formatDate(resource.created_at)}</span>
+                      {resource.download_count > 10 ? (
+                        <>
+                          <span>·</span>
+                          <span className="inline-flex items-center gap-1 text-[var(--color-warning)]">
+                            <Star className="h-3 w-3" />
+                            高频
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-5 flex items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleDownloadClick(resource)}
+                        className="flex-1"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                        <Download className="h-3.5 w-3.5" />
+                        下载
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyLink(resource.file_url, resource.id)}
+                        title="复制链接"
+                      >
+                        {copiedId === resource.id ? (
+                          <Check className="h-4 w-4 text-[var(--color-warning)]" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                      {isAdmin ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(resource.id)}
+                          className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                          title="删除资源"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  </Card>
                 </motion.div>
               );
             })}
@@ -817,61 +876,75 @@ export default function ResourcesPage() {
                   transition={{ delay: index * 0.03, duration: 0.54, ease: APPLE_EASE_SOFT }}
                   whileHover={{ x: 2, scale: 1.003 }}
                   whileTap={{ scale: 0.995 }}
-                  className="surface-card interactive-card ios-hover-surface flex items-center gap-4 p-4"
+                  className="group"
                 >
-                  <div className={`p-2 rounded-lg ${config.bg}`}>
-                    <Icon className={`w-5 h-5 ${config.color}`} />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium truncate">{resource.name}</h3>
-                      {resource.is_public ? (
-                        <Eye className="w-3.5 h-3.5 text-[var(--gold)] flex-shrink-0" />
-                      ) : (
-                        <EyeOff className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">{resource.original_name}</p>
-                  </div>
-                  
-                  <div className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
-                    <span className="w-20 text-right">{formatFileSize(resource.file_size)}</span>
-                    <span className="w-24">{formatDate(resource.created_at)}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleDownloadClick(resource)}
-                      className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] text-primary hover:border-primary/40 transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                    {/* 高频资源预加载提示 */}
-                    {resource.download_count > 10 && (
-                      <div className="text-xs text-[var(--gold)] flex items-center gap-1" title="高频资源，已优化加载">
-                        <Star className="w-3 h-3" />
+                  <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-xl)] ${config.bg}`}>
+                        <Icon className={`h-5 w-5 ${config.color}`} />
                       </div>
-                    )}
-                    <button
-                      onClick={() => copyLink(resource.file_url, resource.id)}
-                      className="ios-button-press p-2 rounded-lg border border-[var(--ui-line)] hover:border-primary/40 transition-colors"
-                    >
-                      {copiedId === resource.id ? (
-                        <Check className="w-4 h-4 text-[var(--gold)]" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </button>
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleDelete(resource.id)}
-                        className="ios-button-press p-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="truncate text-base font-semibold text-[var(--color-neutral-900)]">
+                            {resource.name}
+                          </h3>
+                          <Badge variant="soft">{config.name}</Badge>
+                          {resource.is_public ? (
+                            <Eye className="h-3.5 w-3.5 text-[var(--color-warning)]" />
+                          ) : (
+                            <EyeOff className="h-3.5 w-3.5 text-[var(--color-neutral-500)]" />
+                          )}
+                        </div>
+                        <p className="truncate text-sm text-[var(--color-neutral-500)]">{resource.original_name}</p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-neutral-500)] lg:min-w-[260px] lg:justify-end">
+                        <span>{formatFileSize(resource.file_size)}</span>
+                        <span>{formatDate(resource.created_at)}</span>
+                        {resource.download_count > 10 ? (
+                          <span className="inline-flex items-center gap-1 text-[var(--color-warning)]">
+                            <Star className="h-3 w-3" />
+                            高频
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDownloadClick(resource)}
+                          title="下载资源"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyLink(resource.file_url, resource.id)}
+                          title="复制链接"
+                        >
+                          {copiedId === resource.id ? (
+                            <Check className="h-4 w-4 text-[var(--color-warning)]" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                        {isAdmin ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(resource.id)}
+                            className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                            title="删除资源"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </Card>
                 </motion.div>
               );
             })}
@@ -1053,12 +1126,11 @@ export default function ResourcesPage() {
                   {/* 资源名称 */}
                   <div>
                     <label className="block text-sm font-medium mb-2">资源名称</label>
-                    <input
+                    <Input
                       type="text"
                       value={uploadName}
                       onChange={(e) => setUploadName(e.target.value)}
                       placeholder="为资源起个名字"
-                      className="input-modern w-full px-4 py-2.5"
                     />
                   </div>
 
@@ -1068,7 +1140,7 @@ export default function ResourcesPage() {
                     <select
                       value={uploadCategory}
                       onChange={(e) => setUploadCategory(e.target.value)}
-                      className="input-modern w-full px-4 py-2.5"
+                      className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
                     >
                       <option value="">自动检测</option>
                       {categories.map((cat) => (
@@ -1080,24 +1152,23 @@ export default function ResourcesPage() {
                   {/* 描述 */}
                   <div>
                     <label className="block text-sm font-medium mb-2">描述</label>
-                    <textarea
+                    <Textarea
                       value={uploadDesc}
                       onChange={(e) => setUploadDesc(e.target.value)}
                       placeholder="简单描述一下这个资源"
                       rows={2}
-                      className="input-modern w-full px-4 py-2.5 resize-none"
+                      className="resize-none"
                     />
                   </div>
 
                   {/* 标签 */}
                   <div>
                     <label className="block text-sm font-medium mb-2">标签</label>
-                    <input
+                    <Input
                       type="text"
                       value={uploadTags}
                       onChange={(e) => setUploadTags(e.target.value)}
                       placeholder="用逗号分隔多个标签"
-                      className="input-modern w-full px-4 py-2.5"
                     />
                   </div>
 
@@ -1121,33 +1192,32 @@ export default function ResourcesPage() {
 
                 {/* 按钮 */}
                 <div className="flex gap-3 mt-6">
-                  <button
+                  <Button
                     onClick={() => {
                       setShowUploadModal(false);
                       setIsDropActive(false);
                       resetUploadForm();
                     }}
-                    className="btn-secondary ios-button-press flex-1 px-4 py-2.5 rounded-xl"
+                    variant="secondary"
+                    className="flex-1"
                   >
                     取消
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleUpload}
                     disabled={!uploadFile || uploading}
-                    className="btn-primary ios-button-press flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    loading={uploading}
+                    className="flex-1"
                   >
                     {uploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {uploadProgress > 0 ? `${uploadProgress}%` : '上传中...'}
-                      </>
+                      uploadProgress > 0 ? `${uploadProgress}%` : '上传中...'
                     ) : (
                       <>
                         <Upload className="w-4 h-4" />
                         安全上传
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             </motion.div>
@@ -1191,33 +1261,30 @@ export default function ResourcesPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm mb-1">分类名称</label>
-                        <input
+                        <Input
                           type="text"
                           value={newCatName}
                           onChange={(e) => setNewCatName(e.target.value)}
                           placeholder="例如：设计资源"
-                          className="input-modern w-full px-3 py-2 rounded-lg"
                         />
                       </div>
                       <div>
                         <label className="block text-sm mb-1">标识符</label>
-                        <input
+                        <Input
                           type="text"
                           value={newCatSlug}
                           onChange={(e) => setNewCatSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                           placeholder="例如：design"
                           disabled={editingCategory?.is_system}
-                          className="input-modern w-full px-3 py-2 rounded-lg disabled:opacity-50"
                         />
                       </div>
                       <div className="col-span-2">
                         <label className="block text-sm mb-1">描述</label>
-                        <input
+                        <Input
                           type="text"
                           value={newCatDesc}
                           onChange={(e) => setNewCatDesc(e.target.value)}
                           placeholder="分类说明"
-                          className="input-modern w-full px-3 py-2 rounded-lg"
                         />
                       </div>
                       <div>
@@ -1225,7 +1292,7 @@ export default function ResourcesPage() {
                         <select
                           value={newCatIcon}
                           onChange={(e) => setNewCatIcon(e.target.value)}
-                          className="input-modern w-full px-3 py-2 rounded-lg"
+                          className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
                         >
                           {Object.keys(iconMap).map(icon => (
                             <option key={icon} value={icon}>{icon}</option>
@@ -1237,7 +1304,7 @@ export default function ResourcesPage() {
                         <select
                           value={newCatColor}
                           onChange={(e) => setNewCatColor(e.target.value)}
-                          className="input-modern w-full px-3 py-2 rounded-lg"
+                          className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
                         >
                           {Object.keys(colorMap).map(color => (
                             <option key={color} value={color}>{color}</option>
@@ -1247,21 +1314,21 @@ export default function ResourcesPage() {
                     </div>
                     <div className="flex gap-2 mt-4">
                       {editingCategory && (
-                        <button
+                        <Button
                           onClick={resetCategoryForm}
-                          className="btn-secondary ios-button-press rounded-lg px-4 py-2"
+                          variant="secondary"
                         >
                           取消
-                        </button>
+                        </Button>
                       )}
-                      <button
+                      <Button
                         onClick={handleSaveCategory}
                         disabled={savingCategory || !newCatName || !newCatSlug}
-                        className="btn-primary ios-button-press flex items-center gap-2 rounded-lg px-4 py-2 disabled:opacity-50"
+                        loading={savingCategory}
                       >
-                        {savingCategory ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                        {!savingCategory ? <Plus className="w-4 h-4" /> : null}
                         {editingCategory ? '保存' : '添加'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
 

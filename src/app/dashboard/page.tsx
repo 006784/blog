@@ -1,78 +1,95 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
-import { 
-  Plus, FileText, Send, Clock, Trash2, Edit3, Eye, 
-  MoreVertical, Search, Filter, Calendar, Tag,
-  LayoutDashboard, Files, FileEdit, Settings, ChevronDown,
-  AlertCircle, Check, X
+import {
+  AlertCircle,
+  Calendar,
+  Check,
+  Clock,
+  Edit3,
+  Eye,
+  FileEdit,
+  FileText,
+  Files,
+  LayoutDashboard,
+  MoreVertical,
+  Plus,
+  Search,
+  Send,
+  Tag,
+  Trash2,
 } from 'lucide-react';
-import { 
-  BlogPost, getAllPosts, deletePost, publishPost, unpublishPost,
-  categories, getCategoryInfo 
+import {
+  BlogPost,
+  categories,
+  deletePost,
+  getAllPosts,
+  getCategoryInfo,
+  publishPost,
+  unpublishPost,
 } from '@/lib/blog-store';
 import { formatDate } from '@/lib/types';
-import { Floating } from '@/components/Animations';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { StatePanel } from '@/components/ui/StatePanel';
 
 type TabType = 'all' | 'published' | 'drafts';
 
 export default function DashboardPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>(() => getAllPosts());
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  // 加载文章
-  useEffect(() => {
-    loadPosts();
-  }, []);
+  function loadPosts() {
+    setPosts(getAllPosts());
+  }
 
-  const loadPosts = () => {
-    const allPosts = getAllPosts();
-    setPosts(allPosts);
-  };
-
-  // 显示通知
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // 过滤文章
-  const filteredPosts = posts.filter(post => {
-    // 标签页筛选
-    if (activeTab === 'published' && post.status !== 'published') return false;
-    if (activeTab === 'drafts' && post.status !== 'draft') return false;
-    
-    // 搜索筛选
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      if (!post.title.toLowerCase().includes(query) && 
-          !post.description.toLowerCase().includes(query)) {
-        return false;
-      }
-    }
-    
-    // 分类筛选
-    if (selectedCategory && post.category !== selectedCategory) return false;
-    
-    return true;
-  });
+  const filteredPosts = useMemo(
+    () =>
+      posts.filter((post) => {
+        if (activeTab === 'published' && post.status !== 'published') return false;
+        if (activeTab === 'drafts' && post.status !== 'draft') return false;
 
-  // 统计数据
-  const stats = {
-    total: posts.length,
-    published: posts.filter(p => p.status === 'published').length,
-    drafts: posts.filter(p => p.status === 'draft').length,
-  };
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          if (!post.title.toLowerCase().includes(query) && !post.description.toLowerCase().includes(query)) {
+            return false;
+          }
+        }
 
-  // 删除文章
+        if (selectedCategory && post.category !== selectedCategory) return false;
+
+        return true;
+      }),
+    [activeTab, posts, searchQuery, selectedCategory]
+  );
+
+  const stats = useMemo(
+    () => ({
+      total: posts.length,
+      published: posts.filter((post) => post.status === 'published').length,
+      drafts: posts.filter((post) => post.status === 'draft').length,
+    }),
+    [posts]
+  );
+
   const handleDelete = (id: string) => {
     deletePost(id);
     loadPosts();
@@ -80,7 +97,6 @@ export default function DashboardPage() {
     showNotification('success', '文章已删除');
   };
 
-  // 发布/取消发布
   const handleTogglePublish = (post: BlogPost) => {
     if (post.status === 'published') {
       unpublishPost(post.id);
@@ -89,6 +105,7 @@ export default function DashboardPage() {
       publishPost(post.id);
       showNotification('success', '文章已发布');
     }
+
     loadPosts();
     setOpenMenuId(null);
   };
@@ -100,388 +117,331 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Background decoration */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <Floating duration={15}>
-          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-[var(--bg-gradient-1)] to-[var(--bg-gradient-2)] rounded-full blur-3xl opacity-30" />
-        </Floating>
-        <Floating duration={18}>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-[var(--bg-gradient-3)] to-[var(--bg-gradient-4)] rounded-full blur-3xl opacity-30" />
-        </Floating>
-      </div>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="h-16 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center">
-                    <LayoutDashboard className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="font-semibold hidden sm:block shimmer-text">文章管理</span>
-                </motion.div>
-              </Link>
+    <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-5"
+        >
+          <Badge tone="info" variant="soft" className="w-fit gap-1.5">
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            Content Dashboard
+          </Badge>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+                文章管理
+              </h1>
+              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+                在这里查看文章状态、搜索内容、切换分类，并快速进行发布、编辑和删除。
+              </p>
             </div>
-
-            <Link href="/write">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>写文章</span>
-              </motion.button>
+            <Link href="/write" className="w-full lg:w-auto">
+              <Button className="w-full lg:w-auto">
+                <Plus className="h-4 w-4" />
+                写文章
+              </Button>
             </Link>
           </div>
-        </div>
-      </header>
+        </motion.div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 relative z-10">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { label: '全部文章', value: stats.total, icon: FileText, color: 'from-blue-500 to-cyan-500' },
-            { label: '已发布', value: stats.published, icon: Send, color: 'from-green-500 to-emerald-500' },
-            { label: '草稿箱', value: stats.drafts, icon: Clock, color: 'from-amber-500 to-orange-500' },
+            { label: '全部文章', value: stats.total, tone: 'default' as const, icon: FileText },
+            { label: '已发布', value: stats.published, tone: 'success' as const, icon: Send },
+            { label: '草稿箱', value: stats.drafts, tone: 'warning' as const, icon: Clock },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="relative overflow-hidden rounded-xl bg-card border border-border p-6"
+              transition={{ delay: index * 0.06 }}
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
+              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">{stat.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{stat.value}</p>
+                  </div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                    <stat.icon className="h-5 w-5" />
+                  </div>
                 </div>
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                  <stat.icon className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color}`} />
+              </Card>
             </motion.div>
           ))}
         </div>
 
-        {/* Tabs and Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          {/* Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-xl">
-            {tabs.map(tab => (
-              <motion.button
-                key={tab.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-background shadow-sm text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                <span className="text-sm font-medium">{tab.label}</span>
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.id ? 'bg-primary/10 text-primary' : 'bg-secondary'
-                }`}>
-                  {tab.count}
-                </span>
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Search and Filter */}
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索文章..."
-                className="pl-10 pr-4 py-2 rounded-lg bg-secondary/50 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm w-full sm:w-64"
-              />
+        <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition ${
+                    activeTab === tab.id
+                      ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
+                      : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                  }`}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span>{tab.label}</span>
+                  <span className="opacity-70">{tab.count}</span>
+                </button>
+              ))}
             </div>
 
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 rounded-lg bg-secondary/50 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            >
-              <option value="">全部分类</option>
-              {categories.map(cat => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:justify-end">
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                <Input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索文章..."
+                  className="pl-11"
+                />
+              </div>
 
-        {/* Posts List */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 sm:w-[180px]"
+              >
+                <option value="">全部分类</option>
+                {categories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </Card>
+
         <div className="space-y-4">
           <AnimatePresence>
             {filteredPosts.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-16"
-              >
-                <FileText className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-                <h3 className="text-lg font-medium mb-2">暂无文章</h3>
-                <p className="text-muted-foreground mb-6">
-                  {searchQuery || selectedCategory ? '没有找到匹配的文章' : '开始写你的第一篇文章吧'}
-                </p>
-                <Link href="/write">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors inline-flex items-center gap-2"
+              <StatePanel
+                tone="empty"
+                title="暂无文章"
+                description={searchQuery || selectedCategory ? '没有找到匹配的文章，试试更换搜索词或筛选条件。' : '开始写你的第一篇文章吧。'}
+                action={
+                  <Link
+                    href="/write"
+                    className="inline-flex items-center justify-center rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="mr-2 h-4 w-4" />
                     写文章
-                  </motion.button>
-                </Link>
-              </motion.div>
+                  </Link>
+                }
+              />
             ) : (
               filteredPosts.map((post, index) => {
                 const categoryInfo = getCategoryInfo(post.category);
+
                 return (
                   <motion.div
                     key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="group relative bg-card rounded-xl border border-border hover:border-primary/50 transition-all overflow-hidden"
+                    transition={{ delay: index * 0.04 }}
+                    className="group"
                   >
-                    <div className="flex flex-col sm:flex-row">
-                      {/* Cover Image */}
-                      {post.image && (
-                        <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0 relative">
-                          <Image
-                            src={post.image}
-                            alt={post.title}
-                            fill
-                            sizes="192px"
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-
-                      {/* Content */}
-                      <div className="flex-1 p-4 sm:p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            {/* Status & Category */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                post.status === 'published' 
-                                  ? 'bg-green-500/10 text-green-600 dark:text-green-400' 
-                                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                              }`}>
-                                {post.status === 'published' ? '已发布' : '草稿'}
-                              </span>
-                              <span className={`text-xs px-2 py-1 rounded-full bg-secondary`}>
-                                {categoryInfo.label}
-                              </span>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="text-lg font-semibold mb-2 truncate group-hover:text-primary transition-colors">
-                              {post.title}
-                            </h3>
-
-                            {/* Description */}
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                              {post.description || '暂无描述'}
-                            </p>
-
-                            {/* Meta */}
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {formatDate(post.updatedAt || post.createdAt)}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {post.readingTime}
-                              </span>
-                              {post.tags.length > 0 && (
-                                <span className="flex items-center gap-1">
-                                  <Tag className="w-3 h-3" />
-                                  {post.tags.slice(0, 2).join(', ')}
-                                  {post.tags.length > 2 && ` +${post.tags.length - 2}`}
-                                </span>
-                              )}
-                            </div>
+                    <Card
+                      variant="glass"
+                      padding="sm"
+                      className="rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                    >
+                      <div className="flex flex-col gap-4 md:flex-row">
+                        {post.image ? (
+                          <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-[var(--radius-xl)] md:h-auto md:w-52">
+                            <Image
+                              src={post.image}
+                              alt={post.title}
+                              fill
+                              sizes="208px"
+                              className="object-cover"
+                            />
                           </div>
+                        ) : null}
 
-                          {/* Actions */}
-                          <div className="relative">
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
-                              className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                            >
-                              <MoreVertical className="w-5 h-5" />
-                            </motion.button>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0 flex-1 space-y-3">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Badge tone={post.status === 'published' ? 'success' : 'warning'}>
+                                  {post.status === 'published' ? '已发布' : '草稿'}
+                                </Badge>
+                                <Badge variant="soft">{categoryInfo.label}</Badge>
+                              </div>
 
-                            {/* Dropdown Menu */}
-                            <AnimatePresence>
-                              {openMenuId === post.id && (
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                  className="absolute right-0 top-full mt-2 w-48 bg-card rounded-xl border border-border shadow-xl z-10 overflow-hidden"
-                                >
-                                  <Link
-                                    href={`/write?edit=${post.id}`}
-                                    className="flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
-                                    onClick={() => setOpenMenuId(null)}
+                              <h3 className="truncate text-xl font-semibold text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
+                                {post.title}
+                              </h3>
+                              <p className="line-clamp-2 text-sm leading-7 text-[var(--color-neutral-600)]">
+                                {post.description || '暂无描述'}
+                              </p>
+
+                              <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--color-neutral-500)]">
+                                <span className="inline-flex items-center gap-1">
+                                  <Calendar className="h-3.5 w-3.5" />
+                                  {formatDate(post.updatedAt || post.createdAt)}
+                                </span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {post.readingTime}
+                                </span>
+                                {post.tags.length > 0 ? (
+                                  <span className="inline-flex items-center gap-1">
+                                    <Tag className="h-3.5 w-3.5" />
+                                    {post.tags.slice(0, 2).join(', ')}
+                                    {post.tags.length > 2 ? ` +${post.tags.length - 2}` : ''}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            <div className="relative">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
+                                className="rounded-full"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+
+                              <AnimatePresence>
+                                {openMenuId === post.id ? (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.96, y: -8 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                                    className="absolute right-0 top-full z-10 mt-2 w-48 overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-xl)]"
                                   >
-                                    <Edit3 className="w-4 h-4" />
-                                    编辑
-                                  </Link>
-                                  {post.status === 'published' && (
                                     <Link
-                                      href={`/blog/${post.slug}`}
-                                      className="flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
+                                      href={`/write?edit=${post.id}`}
+                                      className="flex items-center gap-2 px-4 py-3 text-sm transition hover:bg-[var(--surface-overlay)]"
                                       onClick={() => setOpenMenuId(null)}
                                     >
-                                      <Eye className="w-4 h-4" />
-                                      查看
+                                      <Edit3 className="h-4 w-4" />
+                                      编辑
                                     </Link>
-                                  )}
-                                  <button
-                                    onClick={() => handleTogglePublish(post)}
-                                    className="w-full flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
-                                  >
                                     {post.status === 'published' ? (
-                                      <>
-                                        <Clock className="w-4 h-4" />
-                                        转为草稿
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Send className="w-4 h-4" />
-                                        发布
-                                      </>
-                                    )}
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setOpenMenuId(null);
-                                      setShowDeleteModal(post.id);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-4 py-3 hover:bg-red-500/10 text-red-500 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    删除
-                                  </button>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
+                                      <Link
+                                        href={`/blog/${post.slug}`}
+                                        className="flex items-center gap-2 px-4 py-3 text-sm transition hover:bg-[var(--surface-overlay)]"
+                                        onClick={() => setOpenMenuId(null)}
+                                      >
+                                        <Eye className="h-4 w-4" />
+                                        查看
+                                      </Link>
+                                    ) : null}
+                                    <button
+                                      onClick={() => handleTogglePublish(post)}
+                                      className="flex w-full items-center gap-2 px-4 py-3 text-sm transition hover:bg-[var(--surface-overlay)]"
+                                    >
+                                      {post.status === 'published' ? (
+                                        <>
+                                          <Clock className="h-4 w-4" />
+                                          转为草稿
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Send className="h-4 w-4" />
+                                          发布
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setOpenMenuId(null);
+                                        setShowDeleteModal(post.id);
+                                      }}
+                                      className="flex w-full items-center gap-2 px-4 py-3 text-sm text-red-500 transition hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      删除
+                                    </button>
+                                  </motion.div>
+                                ) : null}
+                              </AnimatePresence>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Card>
                   </motion.div>
                 );
               })
             )}
           </AnimatePresence>
         </div>
-      </main>
+      </div>
 
-      {/* Delete Confirmation Modal */}
       <AnimatePresence>
-        {showDeleteModal && (
+        {showDeleteModal ? (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDeleteModal(null)}
-              className="fixed inset-0 bg-black/50 z-50"
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-card rounded-2xl border border-border shadow-2xl z-50 p-6"
+              exit={{ opacity: 0, scale: 0.94 }}
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4"
             >
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-                  <AlertCircle className="w-8 h-8 text-red-500" />
+              <Card variant="elevated" padding="lg" className="rounded-[var(--radius-2xl)] text-center">
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+                  <AlertCircle className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">确认删除</h3>
-                <p className="text-muted-foreground mb-6">
+                <h3 className="text-2xl font-semibold text-[var(--color-neutral-900)]">确认删除</h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--color-neutral-600)]">
                   此操作不可撤销，文章将被永久删除。
                 </p>
-                <div className="flex gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowDeleteModal(null)}
-                    className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors"
-                  >
+                <div className="mt-6 flex gap-3">
+                  <Button variant="secondary" className="flex-1" onClick={() => setShowDeleteModal(null)}>
                     取消
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleDelete(showDeleteModal)}
-                    className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
-                  >
+                  </Button>
+                  <Button variant="danger" className="flex-1" onClick={() => handleDelete(showDeleteModal)}>
                     确认删除
-                  </motion.button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             </motion.div>
           </>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {/* Notification */}
       <AnimatePresence>
-        {notification && (
+        {notification ? (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            initial={{ opacity: 0, y: 50, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 ${
-              notification.type === 'success' 
-                ? 'bg-green-500 text-white' 
-                : 'bg-red-500 text-white'
+            exit={{ opacity: 0, y: 50, scale: 0.94 }}
+            className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-[var(--radius-xl)] px-4 py-3 text-white shadow-[var(--shadow-lg)] ${
+              notification.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
             }`}
           >
             {notification.type === 'success' ? (
-              <Check className="w-5 h-5" />
+              <Check className="h-5 w-5" />
             ) : (
-              <AlertCircle className="w-5 h-5" />
+              <AlertCircle className="h-5 w-5" />
             )}
             {notification.message}
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {/* Click outside to close menu */}
-      {openMenuId && (
-        <div 
-          className="fixed inset-0 z-0" 
-          onClick={() => setOpenMenuId(null)}
-        />
-      )}
+      {openMenuId ? <div className="fixed inset-0 z-0" onClick={() => setOpenMenuId(null)} /> : null}
     </div>
   );
 }

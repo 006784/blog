@@ -9,7 +9,12 @@ import { ArrowRight, CalendarDays, Clock3, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import AdminFloatButton from '@/components/AdminFloatButton';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
 import { getPageStructuredData } from '@/lib/seo';
+import { siteConfig } from '@/lib/site-config';
 import { defaultPosts, formatDate, type Post as LocalPost } from '@/lib/types';
 import { getPublishedPosts, type Post as SupabasePost } from '@/lib/supabase';
 
@@ -127,7 +132,10 @@ function EditorialFeatureCard({
   pinned: boolean;
 }) {
   return (
-    <Link href={`/blog/${post.slug}`} className="atelier-feature-card">
+    <Link
+      href={`/blog/${post.slug}`}
+      className="atelier-feature-card group overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xl)] transition-transform duration-[var(--duration-normal)] hover:-translate-y-1"
+    >
       <div className="atelier-feature-media">
         <ProgressiveImage
           src={post.image}
@@ -137,7 +145,11 @@ function EditorialFeatureCard({
           priority
         />
         <div className="atelier-feature-overlay" />
-        {pinned && <span className="atelier-pill is-spotlight">置顶文章</span>}
+        {pinned && (
+          <Badge className="atelier-pill is-spotlight border-white/20 bg-white/20 text-white backdrop-blur-xl">
+            置顶文章
+          </Badge>
+        )}
       </div>
 
       <div className="atelier-feature-body">
@@ -158,9 +170,9 @@ function EditorialFeatureCard({
 
         <div className="atelier-tag-row">
           {post.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="atelier-tag">
+            <Badge key={tag} variant="soft" className="atelier-tag bg-[var(--surface-glass)] text-[var(--color-neutral-900)] dark:text-[var(--color-neutral-900)]">
               {tag}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>
@@ -177,7 +189,10 @@ function EditorialStoryCard({ post, index }: { post: HomePost; index: number }) 
       transition={{ duration: 0.45, delay: index * 0.05 }}
       className="atelier-story-card"
     >
-      <Link href={`/blog/${post.slug}`} className="atelier-story-link">
+      <Link
+        href={`/blog/${post.slug}`}
+        className="atelier-story-link rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+      >
         <div className="atelier-story-copy">
           <p className="atelier-story-category">{post.category}</p>
           <h3>{post.title}</h3>
@@ -212,7 +227,10 @@ function EditorialFeedCard({
       transition={{ duration: 0.5, delay: index * 0.05 }}
       className={clsx('atelier-feed-card', emphasized && 'is-emphasized')}
     >
-      <Link href={`/blog/${post.slug}`} className="atelier-feed-link">
+      <Link
+        href={`/blog/${post.slug}`}
+        className="atelier-feed-link rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+      >
         <ProgressiveImage
           src={post.image}
           alt={post.title}
@@ -222,7 +240,7 @@ function EditorialFeedCard({
 
         <div className="atelier-feed-body">
           <div className="atelier-feed-topline">
-            <span className="atelier-pill">{post.category}</span>
+            <Badge className="atelier-pill">{post.category}</Badge>
             <span className="atelier-feed-reading">{post.readingTime}</span>
           </div>
 
@@ -396,7 +414,7 @@ export default function HomePageClient({
           <Link href="/" className="atelier-brand">
             <span className="atelier-brand-mark">拾</span>
             <span className="atelier-brand-copy">
-              <strong>Lumen</strong>
+              <strong>{siteConfig.name}</strong>
               <em>Slow digital magazine</em>
             </span>
           </Link>
@@ -410,10 +428,17 @@ export default function HomePageClient({
           </nav>
 
           <div className="atelier-nav-actions">
-            <Link href="/blog?search=1" className="atelier-icon-button" aria-label="搜索文章">
+            <Link
+              href="/blog?search=1"
+              className="atelier-icon-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]"
+              aria-label="搜索文章"
+            >
               <Search strokeWidth={1.5} className="h-4 w-4" />
             </Link>
-            <Link href="/blog" className="atelier-ghost-button">
+            <Link
+              href="/blog"
+              className="atelier-ghost-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+            >
               浏览文章
             </Link>
           </div>
@@ -433,31 +458,37 @@ export default function HomePageClient({
                 <p className="atelier-kicker">独立写作空间&ensp;·&ensp;ESSAY</p>
                 <h1>把技术、设计和日常写成一份值得反复翻阅的私人杂志。</h1>
                 <p className="atelier-intro">
-                  这里不是匆忙的信息流，而是经过挑选、归档与长期更新的内容花园。每一篇文章都希望既有结构感，也保留一点温度。
+                  {siteConfig.description}。这里不是匆忙的信息流，而是经过挑选、归档与长期更新的内容花园。每一篇文章都希望既有结构感，也保留一点温度。
                 </p>
 
                 <div className="atelier-action-row">
-                  <Link href={`/blog/${heroPost.slug}`} className="atelier-primary-button">
+                  <Link
+                    href={`/blog/${heroPost.slug}`}
+                    className="atelier-primary-button rounded-full shadow-[var(--shadow-lg)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5"
+                  >
                     阅读最新文章
                     <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                   </Link>
-                  <Link href="/about" className="atelier-secondary-button">
+                  <Link
+                    href="/about"
+                    className="atelier-secondary-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5"
+                  >
                     认识作者
                   </Link>
                 </div>
 
                 <div className="atelier-metrics">
-                  <div className="atelier-metric-card">
+                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
                     <span>文章存档</span>
                     <strong>{activePosts.length}</strong>
                     <small>持续整理与更新</small>
                   </div>
-                  <div className="atelier-metric-card">
+                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
                     <span>主题章节</span>
                     <strong>{topCategories.length}</strong>
                     <small>技术、设计、生活与思考</small>
                   </div>
-                  <div className="atelier-metric-card">
+                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
                     <span>标签索引</span>
                     <strong>{totalTags}</strong>
                     <small>便于持续回看与关联阅读</small>
@@ -490,7 +521,7 @@ export default function HomePageClient({
             </div>
 
             <div className="atelier-curation-grid">
-              <div className="atelier-category-panel">
+              <Card variant="glass" className="atelier-category-panel rounded-[var(--radius-2xl)]">
                 <p className="atelier-panel-kicker">TOP&ensp;·&ensp;CATEGORIES</p>
                 <h3>这个博客最近在写什么</h3>
                 <div className="atelier-category-list">
@@ -501,7 +532,7 @@ export default function HomePageClient({
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
 
               {curatedPosts.map((post, index) => (
                 <EditorialStoryCard key={post.slug} post={post} index={index} />
@@ -523,23 +554,46 @@ export default function HomePageClient({
             {loading ? (
               <div className="atelier-feed-grid" aria-label="加载中">
                 {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className={clsx('atelier-feed-card atelier-feed-skeleton', item === 1 && 'is-emphasized')} />
+                  <div
+                    key={item}
+                    className={clsx('atelier-feed-card atelier-feed-skeleton rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4', item === 1 && 'is-emphasized')}
+                  >
+                    <Skeleton className="h-56 w-full rounded-[var(--radius-lg)]" />
+                    <div className="space-y-3 pt-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
               <>
-                <div className="atelier-feed-grid">
-                  {visiblePosts.map((post, index) => (
-                    <EditorialFeedCard key={post.slug} post={post} index={index} emphasized={index === 0} />
-                  ))}
-                </div>
+                {visiblePosts.length > 0 ? (
+                  <div className="atelier-feed-grid">
+                    {visiblePosts.map((post, index) => (
+                      <EditorialFeedCard key={post.slug} post={post} index={index} emphasized={index === 0} />
+                    ))}
+                  </div>
+                ) : (
+                  <StatePanel
+                    tone="empty"
+                    title="还没有可展示的文章"
+                    description="等第一篇文章发布之后，这里会自动生成首页内容墙。"
+                    className="mx-auto max-w-2xl"
+                  />
+                )}
 
                 {canLoadMore && (
                   <div className="atelier-load-wrap">
                     <button
                       type="button"
                       onClick={() => setVisibleCount((count) => count + 3)}
-                      className="atelier-secondary-button"
+                      className="atelier-secondary-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5"
                     >
                       加载更多文章
                     </button>

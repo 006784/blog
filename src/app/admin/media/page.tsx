@@ -1,54 +1,87 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Film, Plus, Edit2, Trash2, X, Loader2, Save,
-  ArrowLeft, Search, Star, BookOpen, Tv, Music2, Mic, Gamepad2, Database,
+  ArrowLeft,
+  BookOpen,
+  Database,
+  Edit2,
+  Film,
+  Gamepad2,
+  Loader2,
+  Mic,
+  Music2,
+  Plus,
+  Save,
+  Search,
+  Star,
+  Trash2,
+  Tv,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAdmin } from '@/components/AdminProvider';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
 import { MediaItem } from '@/lib/supabase';
 
-// ── 配置 ────────────────────────────────────────────────────
 const TYPES = [
-  { value: 'book',    label: '📚 书',    icon: BookOpen },
-  { value: 'movie',   label: '🎬 电影',  icon: Film },
-  { value: 'tv',      label: '📺 剧集',  icon: Tv },
-  { value: 'music',   label: '🎵 音乐',  icon: Music2 },
-  { value: 'podcast', label: '🎙 播客',  icon: Mic },
-  { value: 'game',    label: '🎮 游戏',  icon: Gamepad2 },
+  { value: 'book', label: '📚 书', icon: BookOpen },
+  { value: 'movie', label: '🎬 电影', icon: Film },
+  { value: 'tv', label: '📺 剧集', icon: Tv },
+  { value: 'music', label: '🎵 音乐', icon: Music2 },
+  { value: 'podcast', label: '🎙 播客', icon: Mic },
+  { value: 'game', label: '🎮 游戏', icon: Gamepad2 },
 ];
 
 const STATUSES = [
-  { value: 'want',  label: '想看/读', color: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800' },
-  { value: 'doing', label: '进行中',  color: 'bg-blue-50 text-blue-500 dark:bg-blue-950/40' },
-  { value: 'done',  label: '已完成',  color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40' },
+  { value: 'want', label: '想看/读', tone: 'default' as const },
+  { value: 'doing', label: '进行中', tone: 'info' as const },
+  { value: 'done', label: '已完成', tone: 'success' as const },
 ];
 
 const EMPTY: Partial<MediaItem> = {
-  type: 'book', title: '', author: '', status: 'want',
-  rating: undefined, review: '', finish_date: '', external_link: '', cover_image: '',
+  type: 'book',
+  title: '',
+  author: '',
+  status: 'want',
+  rating: undefined,
+  review: '',
+  finish_date: '',
+  external_link: '',
+  cover_image: '',
 };
 
-const inputCls = 'w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors';
+const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
+const iconButtonCls =
+  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
 
-// ── 星级组件 ──────────────────────────────────────────────
 function Stars({ rating }: { rating?: number | null }) {
   if (!rating) return null;
   const stars = Math.round(rating / 2);
   return (
     <span className="flex items-center gap-0.5">
-      {[1,2,3,4,5].map(i => (
-        <Star key={i} className={`w-3 h-3 ${i <= stars ? 'fill-amber-400 text-amber-400' : 'text-zinc-200 dark:text-zinc-700'}`} />
+      {[1, 2, 3, 4, 5].map((index) => (
+        <Star
+          key={index}
+          className={`h-3 w-3 ${index <= stars ? 'fill-amber-400 text-amber-400' : 'text-zinc-200 dark:text-zinc-700'}`}
+        />
       ))}
-      <span className="text-xs text-muted-foreground ml-0.5">{rating}</span>
+      <span className="ml-1 text-xs text-muted-foreground">{rating}</span>
     </span>
   );
 }
 
-// ── 弹窗 ─────────────────────────────────────────────────
-function ItemModal({ editing, onClose, onSaved }: {
+function ItemModal({
+  editing,
+  onClose,
+  onSaved,
+}: {
   editing: MediaItem | null;
   onClose: () => void;
   onSaved: (item: MediaItem, isNew: boolean) => void;
@@ -57,150 +90,188 @@ function ItemModal({ editing, onClose, onSaved }: {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const set = (key: keyof MediaItem) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm(f => ({ ...f, [key]: e.target.value }));
+  const setField =
+    (key: keyof MediaItem) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setForm((current) => ({ ...current, [key]: event.target.value }));
 
   async function handleSave() {
-    if (!form.title?.trim()) { setError('标题不能为空'); return; }
-    setSaving(true); setError('');
+    if (!form.title?.trim()) {
+      setError('标题不能为空');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
     try {
       const url = editing ? `/api/media/${editing.id}` : '/api/media';
-      const res = await fetch(url, {
+      const response = await fetch(url, {
         method: editing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) { setError('保存失败'); return; }
-      onSaved(await res.json(), !editing);
+      if (!response.ok) {
+        setError('保存失败，请重试');
+        return;
+      }
+      onSaved(await response.json(), !editing);
       onClose();
-    } catch { setError('网络错误'); }
-    finally { setSaving(false); }
+    } catch {
+      setError('网络错误');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const typeEmoji = TYPES.find(t => t.value === form.type)?.label.slice(0,2) ?? '📚';
+  const typeEmoji = TYPES.find((type) => type.value === form.type)?.label.slice(0, 2) ?? '📚';
 
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={e => e.target === e.currentTarget && onClose()}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+      onClick={(event) => event.target === event.currentTarget && onClose()}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 12 }}
-        className="w-full max-w-lg rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl overflow-hidden"
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        className="w-full max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">{typeEmoji}</span>
-            <h2 className="font-semibold">{editing ? '编辑' : '添加'}条目</h2>
+        <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+          <div>
+            <h2 className="text-lg font-semibold">{editing ? '编辑条目' : '添加条目'}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">维护书影音记录、评分和封面信息。</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--paper-deep)] transition-colors">
-            <X className="w-4 h-4" />
+          <button onClick={onClose} className={iconButtonCls} title="关闭">
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4 max-h-[72vh] overflow-y-auto">
-          {/* 封面预览 + 类型 */}
-          <div className="flex gap-4">
-            <div className="w-16 h-24 rounded-xl border border-[var(--line)] bg-[var(--paper-deep)] flex items-center justify-center shrink-0 overflow-hidden text-3xl">
-              {form.cover_image
+        <div className="space-y-5 px-6 py-6">
+          <div className="flex gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
+            <div className="flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-overlay)] text-3xl">
+              {form.cover_image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={form.cover_image} alt="" className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display='none')} />
-                : typeEmoji}
+                <img
+                  src={form.cover_image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  onError={(event) => {
+                    event.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                typeEmoji
+              )}
             </div>
-            <div className="flex-1 space-y-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">类型</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {TYPES.map(t => (
-                    <button key={t.value} type="button"
-                      onClick={() => setForm(f => ({ ...f, type: t.value as MediaItem['type'] }))}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${form.type === t.value ? 'text-white border-transparent' : 'border-[var(--line)] text-muted-foreground hover:border-[var(--gold)]'}`}
-                      style={form.type === t.value ? { background: 'var(--gold)' } : {}}
-                    >{t.label}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">状态</label>
-                <div className="flex gap-1.5">
-                  {STATUSES.map(s => (
-                    <button key={s.value} type="button"
-                      onClick={() => setForm(f => ({ ...f, status: s.value as MediaItem['status'] }))}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${form.status === s.value ? s.color + ' ring-1 ring-current' : 'border border-[var(--line)] text-muted-foreground'}`}
-                    >{s.label}</button>
-                  ))}
-                </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">{form.title || '未命名条目'}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{form.author || '作者 / 导演 / 艺术家'}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {TYPES.map((type) => (
+                  <Button
+                    key={type.value}
+                    type="button"
+                    variant={form.type === type.value ? 'primary' : 'secondary'}
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => setForm((current) => ({ ...current, type: type.value as MediaItem['type'] }))}
+                  >
+                    {type.label}
+                  </Button>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* 标题 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">标题 *</label>
-            <input value={form.title ?? ''} onChange={set('title')} placeholder="书名 / 片名…" className={inputCls} autoFocus />
+          <div className="flex flex-wrap gap-2">
+            {STATUSES.map((status) => (
+              <Button
+                key={status.value}
+                type="button"
+                variant={form.status === status.value ? 'primary' : 'secondary'}
+                size="sm"
+                className="rounded-full"
+                onClick={() => setForm((current) => ({ ...current, status: status.value as MediaItem['status'] }))}
+              >
+                {status.label}
+              </Button>
+            ))}
           </div>
 
-          {/* 作者 + 评分 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">作者 / 导演</label>
-              <input value={form.author ?? ''} onChange={set('author')} className={inputCls} />
+          <div>
+            <label className={fieldLabelCls}>标题 *</label>
+            <Input value={form.title ?? ''} onChange={setField('title')} placeholder="书名 / 片名 / 专辑名…" />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className={fieldLabelCls}>作者 / 导演</label>
+              <Input value={form.author ?? ''} onChange={setField('author')} />
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">评分 (1–10)</label>
-              <input type="number" min="1" max="10" step="0.5"
+            <div>
+              <label className={fieldLabelCls}>评分 (1–10)</label>
+              <Input
+                type="number"
+                min="1"
+                max="10"
+                step="0.5"
                 value={form.rating ?? ''}
-                onChange={e => setForm(f => ({ ...f, rating: e.target.value ? Number(e.target.value) : undefined }))}
-                className={inputCls} />
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    rating: event.target.value ? Number(event.target.value) : undefined,
+                  }))
+                }
+              />
             </div>
           </div>
 
-          {/* 完成日期 + 封面 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">完成日期</label>
-              <input type="date" value={form.finish_date ?? ''} onChange={set('finish_date')} className={inputCls} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className={fieldLabelCls}>完成日期</label>
+              <Input type="date" value={form.finish_date ?? ''} onChange={setField('finish_date')} />
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">封面图 URL</label>
-              <input value={form.cover_image ?? ''} onChange={set('cover_image')} placeholder="https://..." className={inputCls} />
+            <div>
+              <label className={fieldLabelCls}>封面图 URL</label>
+              <Input value={form.cover_image ?? ''} onChange={setField('cover_image')} placeholder="https://..." />
             </div>
           </div>
 
-          {/* 外链 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">豆瓣 / 阅读链接</label>
-            <input value={form.external_link ?? ''} onChange={set('external_link')} placeholder="https://..." className={inputCls} />
+          <div>
+            <label className={fieldLabelCls}>外部链接</label>
+            <Input value={form.external_link ?? ''} onChange={setField('external_link')} placeholder="https://..." />
           </div>
 
-          {/* 短评 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">短评</label>
-            <textarea value={form.review ?? ''} onChange={set('review')} rows={2} placeholder="一两句感受…" className={`${inputCls} resize-none`} />
+          <div>
+            <label className={fieldLabelCls}>短评</label>
+            <Textarea
+              value={form.review ?? ''}
+              onChange={setField('review')}
+              rows={3}
+              placeholder="一两句记录你的感受。"
+            />
           </div>
 
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error ? <p className="text-sm text-red-500">{error}</p> : null}
         </div>
 
-        <div className="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm hover:bg-[var(--paper-deep)] transition-colors">取消</button>
-          <button onClick={handleSave} disabled={saving || !form.title?.trim()}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40"
-            style={{ background: 'var(--gold)' }}>
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            保存
-          </button>
+        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+          <Button variant="secondary" onClick={onClose}>
+            取消
+          </Button>
+          <Button onClick={handleSave} disabled={saving || !form.title?.trim()} loading={saving}>
+            {!saving && <Save className="h-4 w-4" />}
+            保存条目
+          </Button>
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
-// ── 主页面 ───────────────────────────────────────────────
 export default function AdminMediaPage() {
   const { isAdmin, showLoginModal } = useAdmin();
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -214,27 +285,37 @@ export default function AdminMediaPage() {
   const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin) { showLoginModal(); return; }
-    fetch('/api/media').then(r => r.json()).then(setItems).finally(() => setLoading(false));
-  }, [isAdmin]);
+    if (!isAdmin) {
+      showLoginModal();
+      return;
+    }
+
+    fetch('/api/media')
+      .then((response) => response.json())
+      .then(setItems)
+      .finally(() => setLoading(false));
+  }, [isAdmin, showLoginModal]);
 
   function handleSaved(item: MediaItem, isNew: boolean) {
-    setItems(prev => isNew ? [item, ...prev] : prev.map(i => i.id === item.id ? item : i));
+    setItems((prev) => (isNew ? [item, ...prev] : prev.map((existing) => (existing.id === item.id ? item : existing))));
   }
 
   async function handleSeed() {
     if (!confirm('将写入约 70 条示例书影音数据，确认？')) return;
+
     setSeeding(true);
     try {
-      const res = await fetch('/api/admin/seed-media', { method: 'POST', credentials: 'include' });
-      const data = await res.json();
-      if (!res.ok) { alert(data.error || '写入失败'); return; }
+      const response = await fetch('/api/admin/seed-media', { method: 'POST', credentials: 'include' });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.error || '写入失败');
+        return;
+      }
       alert(data.message);
-      const r = await fetch('/api/media');
-      const d = await r.json();
-      setItems(d);
-    } catch (e) {
-      alert('请求失败：' + String(e));
+      const refreshed = await fetch('/api/media').then((res) => res.json());
+      setItems(refreshed);
+    } catch (error) {
+      alert(`请求失败：${String(error)}`);
     } finally {
       setSeeding(false);
     }
@@ -242,142 +323,268 @@ export default function AdminMediaPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('确认删除？')) return;
+
     setDeleting(id);
     try {
       await fetch(`/api/media/${id}`, { method: 'DELETE' });
-      setItems(prev => prev.filter(i => i.id !== id));
-    } finally { setDeleting(null); }
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } finally {
+      setDeleting(null);
+    }
   }
 
-  const filtered = items.filter(item => {
+  const filtered = items.filter((item) => {
     if (activeType !== 'all' && item.type !== activeType) return false;
     if (activeStatus !== 'all' && item.status !== activeStatus) return false;
-    if (q && !item.title.toLowerCase().includes(q.toLowerCase()) && !(item.author ?? '').toLowerCase().includes(q.toLowerCase())) return false;
+    if (
+      q &&
+      !item.title.toLowerCase().includes(q.toLowerCase()) &&
+      !(item.author ?? '').toLowerCase().includes(q.toLowerCase())
+    ) {
+      return false;
+    }
     return true;
   });
 
   const typeCounts: Record<string, number> = { all: items.length };
-  TYPES.forEach(t => { typeCounts[t.value] = items.filter(i => i.type === t.value).length; });
+  TYPES.forEach((type) => {
+    typeCounts[type.value] = items.filter((item) => item.type === type.value).length;
+  });
 
   const statusCounts: Record<string, number> = { all: items.length };
-  STATUSES.forEach(s => { statusCounts[s.value] = items.filter(i => i.status === s.value).length; });
+  STATUSES.forEach((status) => {
+    statusCounts[status.value] = items.filter((item) => item.status === status.value).length;
+  });
+
+  const doneCount = items.filter((item) => item.status === 'done').length;
 
   return (
-    <div className="min-h-screen bg-[var(--paper)]">
-      <div className="max-w-5xl mx-auto px-6 py-10">
-
-        {/* 顶部 */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors text-muted-foreground">
-              <ArrowLeft className="w-4 h-4" />
+    <div className="min-h-screen px-6 py-10">
+      <div className="mx-auto max-w-6xl space-y-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-3">
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
             </Link>
-            <Film className="w-5 h-5" style={{ color: 'var(--gold)' }} />
-            <h1 className="text-xl font-bold">书影音管理</h1>
-            <span className="text-sm text-muted-foreground">({items.length} 条)</span>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                  <Film className="h-5 w-5 text-primary" />
+                </span>
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">书影音管理</h1>
+                  <p className="text-sm text-muted-foreground">记录阅读、观影、游戏和播客进度，统一维护封面与评分。</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {items.length === 0 && (
-              <button onClick={handleSeed} disabled={seeding}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-[var(--line)] hover:border-[var(--gold)] transition-colors disabled:opacity-50">
-                {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+
+          <div className="flex flex-wrap gap-3">
+            {items.length === 0 ? (
+              <Button variant="secondary" onClick={handleSeed} disabled={seeding}>
+                {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
                 初始化数据
-              </button>
-            )}
-            <button onClick={() => { setEditing(null); setModalOpen(true); }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-85 transition-opacity"
-              style={{ background: 'var(--gold)' }}>
-              <Plus className="w-4 h-4" /> 添加
-            </button>
+              </Button>
+            ) : null}
+            <Button
+              onClick={() => {
+                setEditing(null);
+                setModalOpen(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              添加条目
+            </Button>
           </div>
         </div>
 
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
-          {[{ value: 'all', label: '全部', emoji: '✦' }, ...TYPES].map(t => (
-            <button key={t.value}
-              onClick={() => setActiveType(t.value)}
-              className={`p-3 rounded-xl border text-center transition-colors ${activeType === t.value ? 'border-[var(--gold)] bg-[var(--paper-deep)]' : 'border-[var(--line)] hover:border-[var(--gold)]'}`}>
-              <div className="text-lg mb-0.5">{'emoji' in t ? t.emoji : t.label.slice(0,2)}</div>
-              <div className="text-xs font-bold">{typeCounts[t.value] ?? 0}</div>
-              <div className="text-[10px] text-muted-foreground">{'emoji' in t ? '全部' : t.label.slice(2)}</div>
-            </button>
-          ))}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <p className="text-sm text-muted-foreground">总条目数</p>
+            <p className="mt-3 text-3xl font-semibold">{items.length}</p>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <p className="text-sm text-muted-foreground">已完成</p>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-3xl font-semibold">{doneCount}</p>
+              <Badge tone="success" variant="soft">已归档</Badge>
+            </div>
+          </Card>
+          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+            <p className="text-sm text-muted-foreground">当前筛选结果</p>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-3xl font-semibold">{filtered.length}</p>
+              <Badge tone="info" variant="soft">实时过滤</Badge>
+            </div>
+          </Card>
         </div>
 
-        {/* 搜索 + 状态筛选 */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input value={q} onChange={e => setQ(e.target.value)}
-              placeholder="搜索标题或作者…"
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors" />
+        <Card variant="elevated" className="space-y-4 rounded-[var(--radius-2xl)]">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(event) => setQ(event.target.value)}
+                placeholder="搜索标题或作者…"
+                className="pl-11"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {[{ value: 'all', label: `全部 (${typeCounts.all})` }, ...TYPES.map((type) => ({
+                value: type.value,
+                label: `${type.label} (${typeCounts[type.value]})`,
+              }))].map((type) => (
+                <Button
+                  key={type.value}
+                  variant={activeType === type.value ? 'primary' : 'secondary'}
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => setActiveType(type.value)}
+                >
+                  {type.label}
+                </Button>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-1.5">
-            {[{ value: 'all', label: `全部(${statusCounts.all})` }, ...STATUSES.map(s => ({ value: s.value, label: `${s.label}(${statusCounts[s.value]})` }))].map(s => (
-              <button key={s.value} onClick={() => setActiveStatus(s.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeStatus === s.value ? 'text-white' : 'border border-[var(--line)] text-muted-foreground hover:border-[var(--gold)]'}`}
-                style={activeStatus === s.value ? { background: 'var(--gold)' } : {}}>
-                {s.label}
-              </button>
+
+          <div className="flex flex-wrap gap-2">
+            {[{ value: 'all', label: `全部状态 (${statusCounts.all})` }, ...STATUSES.map((status) => ({
+              value: status.value,
+              label: `${status.label} (${statusCounts[status.value]})`,
+            }))].map((status) => (
+              <Button
+                key={status.value}
+                variant={activeStatus === status.value ? 'primary' : 'secondary'}
+                size="sm"
+                className="rounded-full"
+                onClick={() => setActiveStatus(status.value)}
+              >
+                {status.label}
+              </Button>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* 列表 */}
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+          <StatePanel
+            tone="loading"
+            title="正在加载书影音记录"
+            description="正在同步条目、封面和状态信息，请稍等。"
+          />
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            <Film className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p>{q ? '没有匹配的内容' : '点击右上角开始添加'}</p>
-          </div>
+          <StatePanel
+            tone="empty"
+            title={q ? '没有匹配的内容' : '还没有书影音记录'}
+            description={q ? '试试换一个关键词，或者调整上面的类型和状态筛选。' : '先添加第一条记录，这里会自动形成你的内容库。'}
+            action={
+              <Button
+                onClick={() => {
+                  setEditing(null);
+                  setModalOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                添加条目
+              </Button>
+            }
+          />
         ) : (
-          <div className="grid gap-2 sm:grid-cols-2">
-            {filtered.map(item => {
-              const typeInfo = TYPES.find(t => t.value === item.type);
-              const statusInfo = STATUSES.find(s => s.value === item.status);
-              return (
-                <motion.div key={item.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="group flex gap-3 rounded-xl border border-[var(--line)] bg-[var(--paper-deep)] p-3 hover:border-[var(--gold)] transition-colors">
-                  {/* 封面 */}
-                  <div className="w-12 h-16 rounded-lg border border-[var(--line)] bg-[var(--paper)] shrink-0 flex items-center justify-center overflow-hidden text-2xl">
-                    {item.cover_image
-                      // eslint-disable-next-line @next/next/no-img-element
-                      ? <img src={item.cover_image} alt={item.title} className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display='none')} />
-                      : typeInfo?.label.slice(0,2)}
-                  </div>
-                  {/* 信息 */}
-                  <div className="flex-1 min-w-0 py-0.5">
-                    <div className="flex items-start justify-between gap-1">
-                      <p className="text-sm font-medium truncate">{item.title}</p>
-                      <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => { setEditing(item); setModalOpen(true); }}
-                          className="p-1 rounded hover:bg-[var(--paper)] transition-colors">
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} disabled={deleting === item.id}
-                          className="p-1 rounded hover:text-red-500 transition-colors">
-                          {deleting === item.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                        </button>
+          <Card variant="elevated" padding="sm" className="rounded-[var(--radius-2xl)]">
+            <div className="grid gap-3 md:grid-cols-2">
+              {filtered.map((item) => {
+                const typeInfo = TYPES.find((type) => type.value === item.type);
+                const statusInfo = STATUSES.find((status) => status.value === item.status);
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="group flex gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+                  >
+                    <div className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-base)] text-2xl">
+                      {item.cover_image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.cover_image}
+                          alt={item.title}
+                          className="h-full w-full object-cover"
+                          onError={(event) => {
+                            event.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        typeInfo?.label.slice(0, 2)
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">{item.title}</p>
+                          {item.author ? <p className="mt-1 text-xs text-muted-foreground">{item.author}</p> : null}
+                        </div>
+
+                        <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                          <button
+                            onClick={() => {
+                              setEditing(item);
+                              setModalOpen(true);
+                            }}
+                            className={iconButtonCls}
+                            title="编辑条目"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            disabled={deleting === item.id}
+                            className={`${iconButtonCls} hover:border-red-400 hover:text-red-500 disabled:opacity-60`}
+                            title="删除条目"
+                          >
+                            {deleting === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <Badge tone={statusInfo?.tone ?? 'default'} variant="soft">
+                          {statusInfo?.label}
+                        </Badge>
+                        <Badge variant="outline">{typeInfo?.label}</Badge>
+                        <Stars rating={item.rating} />
+                      </div>
+
+                      {item.review ? (
+                        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{item.review}</p>
+                      ) : (
+                        <p className="mt-3 text-sm text-muted-foreground">还没有记录这条内容的短评。</p>
+                      )}
                     </div>
-                    {item.author && <p className="text-xs text-muted-foreground mt-0.5">{item.author}</p>}
-                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusInfo?.color}`}>{statusInfo?.label}</span>
-                      <Stars rating={item.rating} />
-                    </div>
-                    {item.review && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{item.review}</p>}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </Card>
         )}
       </div>
 
       <AnimatePresence>
-        {modalOpen && <ItemModal editing={editing} onClose={() => setModalOpen(false)} onSaved={handleSaved} />}
+        {modalOpen ? (
+          <ItemModal
+            editing={editing}
+            onClose={() => {
+              setModalOpen(false);
+              setEditing(null);
+            }}
+            onSaved={handleSaved}
+          />
+        ) : null}
       </AnimatePresence>
     </div>
   );
