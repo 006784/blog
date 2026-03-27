@@ -12,20 +12,20 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  Database, 
-  Shield,
   Smartphone,
-  Laptop,
-  Tablet
+  Laptop
 } from 'lucide-react';
-import { DeviceSyncService, type SyncConfig, type SyncConflict } from '@/lib/diary/device-sync-service';
+import { DeviceSyncService, type SyncConfig, type SyncConflict, type SyncHistory, type SyncStatus } from '@/lib/diary/device-sync-service';
+import type { Diary } from '@/lib/supabase';
+
+type DeviceInfo = ReturnType<typeof DeviceSyncService.getDeviceInfo>;
 
 interface DeviceSyncProps {
-  diaries: any[];
+  diaries: Diary[];
   className?: string;
 }
 
-export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
+export function DeviceSync({ diaries: _diaries, className = '' }: DeviceSyncProps) {
   const [syncConfig, setSyncConfig] = useState<SyncConfig>({
     syncEnabled: false,
     syncFrequency: 'interval',
@@ -35,10 +35,10 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
     encryption: false,
     compression: false
   });
-  const [syncStatus, setSyncStatus] = useState<any>(null);
-  const [deviceInfo, setDeviceInfo] = useState<any>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
   const [conflicts, setConflicts] = useState<SyncConflict[]>([]);
-  const [syncHistory, setSyncHistory] = useState<any[]>([]);
+  const [syncHistory, setSyncHistory] = useState<SyncHistory[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [showConflicts, setShowConflicts] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -344,7 +344,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
           立即同步
         </button>
         
-        {syncStatus?.pendingChanges > 0 && (
+        {(syncStatus?.pendingChanges ?? 0) > 0 && (
           <button
             onClick={handleClearOfflineQueue}
             className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -393,7 +393,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">同步频率</label>
               <select
                 value={syncConfig.syncFrequency}
-                onChange={(e) => setSyncConfig({...syncConfig, syncFrequency: e.target.value as any})}
+                onChange={(e) => setSyncConfig({...syncConfig, syncFrequency: e.target.value as SyncConfig['syncFrequency']})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 <option value="realtime">实时同步</option>
@@ -431,7 +431,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">冲突解决策略</label>
               <select
                 value={syncConfig.conflictResolution}
-                onChange={(e) => setSyncConfig({...syncConfig, conflictResolution: e.target.value as any})}
+                onChange={(e) => setSyncConfig({...syncConfig, conflictResolution: e.target.value as SyncConfig['conflictResolution']})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 <option value="manual">手动解决</option>
@@ -582,7 +582,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
                       
                       {conflict.resolved && conflict.resolution && (
                         <div className="text-sm text-green-600">
-                          已通过 "{conflict.resolution}" 方式解决
+                          已通过 &quot;{conflict.resolution}&quot; 方式解决
                         </div>
                       )}
                     </div>

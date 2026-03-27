@@ -1,8 +1,6 @@
-import type { Post } from '@/lib/supabase';
+import { siteConfig, siteUrls } from '@/lib/site-config';
 
-const SITE_URL =
-  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_SITE_URL) ||
-  'https://your-domain.com';
+const SITE_URL = siteConfig.url;
 
 // ——— 类型定义 ———
 
@@ -34,11 +32,11 @@ export function generateArticleSchema(post: ArticleSchemaInput) {
     author: {
       '@type': 'Person',
       name: authorName,
-      url: `${SITE_URL}/about`,
+      url: siteUrls.about,
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Lumen',
+      name: siteConfig.name,
       logo: {
         '@type': 'ImageObject',
         url: `${SITE_URL}/logo.svg`,
@@ -70,12 +68,12 @@ export function generateWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Lumen',
+    name: siteConfig.name,
     url: SITE_URL,
-    description: '分享技术与生活的个人博客',
+    description: siteConfig.description,
     publisher: {
       '@type': 'Organization',
-      name: 'Lumen',
+      name: siteConfig.name,
     },
     potentialAction: {
       '@type': 'SearchAction',
@@ -89,8 +87,8 @@ export function generatePersonSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
-    name: '博主',
-    url: `${SITE_URL}/about`,
+    name: siteConfig.name,
+    url: siteUrls.about,
     sameAs: [],
   };
 }

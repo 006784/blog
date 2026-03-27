@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 
+type SecurityDemoResponse = {
+  success: boolean;
+  message?: string;
+  error?: string;
+  errors?: string[];
+};
+
 export default function SecurityDemo() {
   const [formData, setFormData] = useState({
     name: '',
@@ -10,7 +17,7 @@ export default function SecurityDemo() {
     message: '',
     website: ''
   });
-  const [response, setResponse] = useState<any>(null);
+  const [response, setResponse] = useState<SecurityDemoResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -37,7 +44,7 @@ export default function SecurityDemo() {
         body: JSON.stringify(formData)
       });
 
-      const data = await res.json();
+      const data = await res.json() as SecurityDemoResponse;
       setResponse(data);
     } catch (error) {
       setResponse({ success: false, error: '网络错误' });

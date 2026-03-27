@@ -26,6 +26,45 @@ const VIEW_LABELS: Record<View, string> = {
   report: '报告',
 };
 
+function getNextDate(date: string): string {
+  const [year, month, day] = date.split('-').map(Number);
+  const nextDate = new Date(year, month - 1, day + 1);
+  return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+}
+
+function getDiaryEditorMeta(diary: Diary | null) {
+  const environmentData =
+    diary?.environment_data &&
+    typeof diary.environment_data === 'object' &&
+    !Array.isArray(diary.environment_data)
+      ? diary.environment_data as Record<string, unknown>
+      : null;
+
+  const editor =
+    environmentData?.editor &&
+    typeof environmentData.editor === 'object' &&
+    !Array.isArray(environmentData.editor)
+      ? environmentData.editor as Record<string, unknown>
+      : null;
+
+  return {
+    mood_score: typeof editor?.mood_score === 'number' ? editor.mood_score : undefined,
+    mood_tags: Array.isArray(editor?.mood_tags)
+      ? editor.mood_tags.filter((item): item is string => typeof item === 'string')
+      : diary?.tags || [],
+    drawing_url: typeof editor?.drawing_url === 'string' ? editor.drawing_url : undefined,
+  };
+}
+
+function upsertDiaryEntries(entries: Diary[], nextDiary: Diary): Diary[] {
+  const remaining = entries.filter((entry) => entry.id !== nextDiary.id);
+  return [nextDiary, ...remaining].sort((a, b) => {
+    const dateDiff = b.diary_date.localeCompare(a.diary_date);
+    if (dateDiff !== 0) return dateDiff;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
+
 // ── Page ───────────────────────────────────────────────────────
 export default function DiaryPage() {
   const { isAdmin, showLoginModal } = useAdmin();
@@ -95,10 +134,16 @@ export default function DiaryPage() {
   // ── Load diary for selected date ──────────────────────────
   const loadDiaryForDate = useCallback(async (date: string) => {
     try {
-      const res = await fetch(`/api/diary/${date}`, { credentials: 'include' });
+      const res = await fetch(`/api/diaries?startDate=${date}&endDate=${getNextDate(date)}&limit=50`, {
+        credentials: 'include',
+      });
       if (!res.ok) return null;
       const data = await res.json();
-      return data.diary as Diary | null;
+      const diariesForDate = Array.isArray(data.data) ? data.data as Diary[] : [];
+
+      return diariesForDate.sort((a, b) => {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })[0] || null;
     } catch {
       return null;
     }
@@ -110,6 +155,12 @@ export default function DiaryPage() {
     setEditingDiary(diary);
     setView('editor');
   };
+
+  const handleCreateDiary = useCallback((date: string) => {
+    setSelectedDate(date);
+    setEditingDiary(null);
+    setView('editor');
+  }, []);
 
   const handleOpenDiary = (diary: Diary) => {
     setSelectedDate(diary.diary_date);
@@ -170,13 +221,17 @@ export default function DiaryPage() {
 
   const selectedDateObj = selectedDate ? new Date(selectedDate) : today;
   const epigraph = editingDiary?.content?.replace(/\s+/g, ' ').slice(-40) || '此刻，时光静止。';
+  const editorMeta = getDiaryEditorMeta(editingDiary);
+  const pageNumber = editingDiary
+    ? diaries.findIndex((d) => d.id === editingDiary.id) + 1
+    : diaries.findIndex((d) => d.diary_date === selectedDate) + 1;
 
   return (
     <div ref={shellRef} className="min-h-screen" style={{ fontFamily: 'var(--d-font-body)' }}>
       <DiaryShell
         theme={theme}
         date={selectedDateObj}
-        pageNumber={diaries.findIndex((d) => d.diary_date === selectedDate) + 1 || 1}
+        pageNumber={pageNumber > 0 ? pageNumber : 1}
         leftSlot={theme === 'washi' ? washiSidebar : undefined}
         epigraph={theme === 'literary' ? epigraph : undefined}
       >
@@ -220,6 +275,16 @@ export default function DiaryPage() {
           >
             导出
           </button>
+
+          {view === 'editor' && (
+            <button
+              onClick={() => handleCreateDiary(selectedDate)}
+              className="text-[10px] transition-opacity hover:opacity-60 ml-4"
+              style={{ color: 'var(--d-accent)', letterSpacing: '.1em' }}
+            >
+              同日新篇
+            </button>
+          )}
 
           {/* Year nav */}
           <div className="flex items-center gap-1 ml-4">
@@ -288,7 +353,7 @@ export default function DiaryPage() {
                   />
                   <div className="mt-6 px-2">
                     <button
-                      onClick={() => handleDateClick(today.toISOString().split('T')[0])}
+                      onClick={() => handleCreateDiary(today.toISOString().split('T')[0])}
                       className="w-full py-3 border text-sm transition-colors hover:border-[var(--d-accent)]"
                       style={{ borderColor: 'var(--d-border)', color: 'var(--d-ink-2)', fontFamily: 'var(--d-font-title)', letterSpacing: '.1em' }}
                     >
@@ -311,7 +376,7 @@ export default function DiaryPage() {
                     点击左侧日历选择日期
                   </span>
                   <button
-                    onClick={() => handleDateClick(today.toISOString().split('T')[0])}
+                    onClick={() => handleCreateDiary(today.toISOString().split('T')[0])}
                     className="px-6 py-2 border text-sm transition-colors hover:border-[var(--d-accent)]"
                     style={{ borderColor: 'var(--d-border)', color: 'var(--d-accent)', fontFamily: 'var(--d-font-title)', letterSpacing: '.1em' }}
                   >
@@ -329,6 +394,7 @@ export default function DiaryPage() {
               {!loading && view === 'editor' && (
                 <motion.div key="editor" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
                   <DiaryEditor
+                    key={editingDiary?.id || `new-${selectedDate}`}
                     theme={theme}
                     onThemeChange={handleThemeChange}
                     date={selectedDateObj}
@@ -337,12 +403,26 @@ export default function DiaryPage() {
                       diary_date: editingDiary.diary_date,
                       title: editingDiary.title,
                       content: editingDiary.content,
-                      mood_score: undefined,
-                      mood_tags: editingDiary.tags || [],
+                      mood_score: editorMeta.mood_score,
+                      mood_tags: editorMeta.mood_tags,
                       weather: null,
                       location: editingDiary.location,
+                      drawing_url: editorMeta.drawing_url,
                     } : undefined}
-                    onSaved={() => loadData()}
+                    onSaved={(savedDiary) => {
+                      setEditingDiary(savedDiary);
+                      setDiaries((prev) => upsertDiaryEntries(prev, savedDiary));
+                      setAllDiaries((prev) => upsertDiaryEntries(prev, savedDiary));
+                      setCalendarDots((prev) => ({
+                        ...prev,
+                        [savedDiary.diary_date]: {
+                          mood: savedDiary.mood,
+                          hasContent: Boolean(savedDiary.content),
+                          mood_score: getDiaryEditorMeta(savedDiary).mood_score,
+                        },
+                      }));
+                      void loadData();
+                    }}
                   />
                 </motion.div>
               )}

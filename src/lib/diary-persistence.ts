@@ -128,6 +128,26 @@ async function updateDiaryById(
     .single();
 }
 
+export async function saveDiary(
+  payload: Partial<Diary> & { diary_date: string; content: string; word_count: number; updated_at: string },
+  id?: string
+) {
+  let result = id
+    ? await updateDiaryById(id, payload)
+    : await insertDiary(payload);
+
+  if (isMissingEnvironmentColumnError(result.error)) {
+    const legacyPayload = { ...payload };
+    delete (legacyPayload as { environment_data?: unknown }).environment_data;
+
+    result = id
+      ? await updateDiaryById(id, legacyPayload)
+      : await insertDiary(legacyPayload);
+  }
+
+  return result;
+}
+
 export async function saveDiaryByDate(
   payload: Partial<Diary> & { diary_date: string; content: string; word_count: number; updated_at: string }
 ) {
@@ -141,18 +161,5 @@ export async function saveDiaryByDate(
     return { data: null, error: lookupError };
   }
 
-  let result = existing?.id
-    ? await updateDiaryById(existing.id, payload)
-    : await insertDiary(payload);
-
-  if (isMissingEnvironmentColumnError(result.error)) {
-    const legacyPayload = { ...payload };
-    delete (legacyPayload as { environment_data?: unknown }).environment_data;
-
-    result = existing?.id
-      ? await updateDiaryById(existing.id, legacyPayload)
-      : await insertDiary(legacyPayload);
-  }
-
-  return result;
+  return saveDiary(payload, existing?.id);
 }

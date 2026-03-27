@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Diary } from '@/lib/supabase';
+import { StatePanel } from '@/components/ui/StatePanel';
 
 const MOOD_DOT_SIZE: Record<string, number> = {
   '难过': 6, '平静': 7, '还好': 8, '开心': 9, '很棒': 10,
@@ -31,10 +32,12 @@ export function TimelineView({ diaries, onOpen }: Props) {
 
   if (!diaries.length) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <span className="text-sm" style={{ color: 'var(--d-ink-3)', fontFamily: 'var(--d-font-title)', letterSpacing: '.15em' }}>
-          尚无日记
-        </span>
+      <div className="px-4 py-8">
+        <StatePanel
+          tone="empty"
+          title="尚无日记"
+          description="时间轴会在你开始记录之后，自动把每天的片段串成一条完整轨迹。"
+        />
       </div>
     );
   }

@@ -3,20 +3,27 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  User, Camera, Save, X, Loader2, 
+  User, Save, X, Loader2, 
   MapPin, Briefcase, Mail, Github, Twitter, Globe,
-  Quote, StickyNote
+  Quote
 } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { useProfile } from '@/components/ProfileProvider';
 import { useAdmin } from '@/components/AdminProvider';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
 
 export default function ProfilePage() {
   const { profile, updateProfile, loading: profileLoading } = useProfile();
-  const { isAdmin, showLoginModal } = useAdmin();
+  const { isAdmin, loading: adminLoading, showLoginModal } = useAdmin();
   const [formData, setFormData] = useState(profile);
   const [saving, setSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState('');
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     setFormData(profile);
@@ -31,28 +38,46 @@ export default function ProfilePage() {
     }
     
     setSaving(true);
+    setSaveMessage(null);
     try {
       await updateProfile(formData);
+      setSaveMessage({ type: 'success', text: '个人资料已保存' });
     } catch (error) {
       console.error('保存失败:', error);
+      setSaveMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : '保存失败，请稍后重试',
+      });
     } finally {
       setSaving(false);
     }
   }
 
+  if (profileLoading || adminLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <StatePanel
+          tone="loading"
+          title="正在加载个人资料"
+          description="稍等一下，我们正在同步最新的站点信息。"
+          icon={<Loader2 className="h-6 w-6 animate-spin" />}
+          className="w-full max-w-md"
+        />
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <User className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">需要管理员权限才能编辑个人资料</p>
-          <button 
-            onClick={() => showLoginModal()}
-            className="btn-primary"
-          >
-            管理员登录
-          </button>
-        </div>
+        <StatePanel
+          tone="empty"
+          title="需要管理员权限"
+          description="个人资料页现在已经接入服务端保存，编辑前需要先登录管理员会话。"
+          icon={<User className="h-6 w-6" />}
+          action={<Button onClick={() => showLoginModal()}>管理员登录</Button>}
+          className="w-full max-w-md"
+        />
       </div>
     );
   }
@@ -77,9 +102,22 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card rounded-2xl border border-border/50 p-6 md:p-8"
         >
+          <Card variant="elevated" padding="lg" className="border border-[color:var(--border-default)]">
           <form onSubmit={handleSubmit} className="space-y-8">
+            {saveMessage && (
+              <div className="rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3">
+                <div className="mb-2">
+                  <Badge tone={saveMessage.type === 'success' ? 'success' : 'error'}>
+                    {saveMessage.type === 'success' ? '已保存' : '保存失败'}
+                  </Badge>
+                </div>
+                <p className="text-sm text-[var(--color-neutral-700)]">
+                  {saveMessage.text}
+                </p>
+              </div>
+            )}
+
             {/* 头像上传 */}
             <div>
               <label className="block text-sm font-medium mb-4">头像</label>
@@ -100,16 +138,18 @@ export default function ProfilePage() {
                     </div>
                   )}
                   {avatarPreview && (
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         setAvatarPreview('');
                         setFormData({ ...formData, avatar: '' });
                       }}
-                      className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                      variant="danger"
+                      size="sm"
+                      className="absolute -top-2 -right-2 h-8 w-8 rounded-full p-0"
                     >
                       <X className="w-3 h-3" />
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <ImageUploader
@@ -128,11 +168,10 @@ export default function ProfilePage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-2">网名 *</label>
-                <input
+                <Input
                   type="text"
                   value={formData.nickname}
                   onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   placeholder="你的网名"
                   required
                 />
@@ -140,11 +179,10 @@ export default function ProfilePage() {
               
               <div>
                 <label className="block text-sm font-medium mb-2">签名</label>
-                <input
+                <Input
                   type="text"
                   value={formData.signature}
                   onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   placeholder="一句话介绍自己"
                 />
               </div>
@@ -156,10 +194,10 @@ export default function ProfilePage() {
                 <Quote className="w-4 h-4" />
                 座右铭
               </label>
-              <textarea
+              <Textarea
                 value={formData.motto}
                 onChange={(e) => setFormData({ ...formData, motto: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                className="resize-none"
                 rows={3}
                 placeholder="激励自己的话语"
               />
@@ -168,10 +206,10 @@ export default function ProfilePage() {
             {/* 个人简介 */}
             <div>
               <label className="block text-sm font-medium mb-2">个人简介</label>
-              <textarea
+              <Textarea
                 value={formData.bio || ''}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                className="resize-none"
                 rows={4}
                 placeholder="详细介绍你自己..."
               />
@@ -184,11 +222,10 @@ export default function ProfilePage() {
                   <Briefcase className="w-4 h-4" />
                   职业
                 </label>
-                <input
+                <Input
                   type="text"
                   value={formData.occupation || ''}
                   onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   placeholder="你的职业"
                 />
               </div>
@@ -198,11 +235,10 @@ export default function ProfilePage() {
                   <MapPin className="w-4 h-4" />
                   地点
                 </label>
-                <input
+                <Input
                   type="text"
                   value={formData.location || ''}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   placeholder="你所在的城市"
                 />
               </div>
@@ -215,44 +251,44 @@ export default function ProfilePage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  <input
+                  <Input
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="flex-1 px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                    className="flex-1"
                     placeholder="邮箱地址"
                   />
                 </div>
                 
                 <div className="flex items-center gap-3">
                   <Github className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  <input
+                  <Input
                     type="url"
                     value={formData.github || ''}
                     onChange={(e) => setFormData({ ...formData, github: e.target.value })}
-                    className="flex-1 px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                    className="flex-1"
                     placeholder="GitHub 链接"
                   />
                 </div>
                 
                 <div className="flex items-center gap-3">
                   <Twitter className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  <input
+                  <Input
                     type="url"
                     value={formData.twitter || ''}
                     onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
-                    className="flex-1 px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                    className="flex-1"
                     placeholder="Twitter 链接"
                   />
                 </div>
                 
                 <div className="flex items-center gap-3">
                   <Globe className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  <input
+                  <Input
                     type="url"
                     value={formData.website || ''}
                     onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                    className="flex-1 px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                    className="flex-1"
                     placeholder="个人网站"
                   />
                 </div>
@@ -261,25 +297,17 @@ export default function ProfilePage() {
 
             {/* 保存按钮 */}
             <div className="flex justify-end pt-4">
-              <button
+              <Button
                 type="submit"
-                disabled={saving}
-                className="btn-primary px-8 py-3 flex items-center gap-2"
+                loading={saving}
+                className="min-w-[8.5rem]"
               >
-                {saving ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    保存中...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5" />
-                    保存设置
-                  </>
-                )}
-              </button>
+                <Save className="w-4 h-4" />
+                {saving ? '保存中...' : '保存设置'}
+              </Button>
             </div>
           </form>
+          </Card>
         </motion.div>
       </div>
     </div>

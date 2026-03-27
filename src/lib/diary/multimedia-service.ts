@@ -348,7 +348,7 @@ export class AudioVisualizer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private analyser: AnalyserNode;
-  private dataArray: Uint8Array;
+  private dataArray: Uint8Array<ArrayBuffer>;
 
   constructor(canvas: HTMLCanvasElement, audioContext: AudioContext, source: MediaStreamAudioSourceNode) {
     this.canvas = canvas;
@@ -357,7 +357,7 @@ export class AudioVisualizer {
     this.analyser = audioContext.createAnalyser();
     this.analyser.fftSize = 256;
     const bufferLength = this.analyser.frequencyBinCount;
-    this.dataArray = new Uint8Array(bufferLength);
+    this.dataArray = new Uint8Array(new ArrayBuffer(bufferLength));
 
     source.connect(this.analyser);
   }
@@ -368,7 +368,7 @@ export class AudioVisualizer {
 
     requestAnimationFrame(() => this.draw());
 
-    this.analyser.getByteFrequencyData(this.dataArray as any);
+    this.analyser.getByteFrequencyData(this.dataArray);
 
     this.ctx.fillStyle = 'rgb(0, 0, 0)';
     this.ctx.fillRect(0, 0, width, height);

@@ -1,6 +1,8 @@
 'use client';
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Button } from '@/components/ui/Button';
+import { StatePanel } from '@/components/ui/StatePanel';
 
 interface Props {
   children: ReactNode;
@@ -39,19 +41,16 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="flex flex-col items-center justify-center gap-4 p-10 text-center rounded-2xl border border-border bg-card">
-          <p className="text-4xl">⚠️</p>
-          <p className="font-semibold text-foreground">组件加载出错了</p>
-          <p className="text-sm text-muted-foreground max-w-xs">
-            {this.state.error?.message || '发生了未知错误，请稍后重试。'}
-          </p>
-          <button
-            onClick={this.handleReset}
-            className="px-4 py-2 text-sm rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-          >
-            重试
-          </button>
-        </div>
+        <StatePanel
+          tone="error"
+          title="组件加载出错了"
+          description={this.state.error?.message || '发生了未知错误，请稍后重试。'}
+          action={
+            <Button variant="secondary" onClick={this.handleReset}>
+              重试
+            </Button>
+          }
+        />
       );
     }
 

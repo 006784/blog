@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { siteConfig } from '@/lib/site-config';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com';
+const SITE_URL = siteConfig.url;
 
 export const metadata: Metadata = {
   title: '书影音',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: '书影音',
     description: '读过的书、看过的影、听过的音。',
     url: `${SITE_URL}/media`,
-    siteName: 'Lumen',
+    siteName: siteConfig.name,
     locale: 'zh_CN',
     type: 'website',
   },

@@ -14,10 +14,11 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CommandPalette } from "@/components/search/CommandPalette";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { generateWebsiteSchema } from "@/lib/seo";
+import { siteConfig, siteUrls } from "@/lib/site-config";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com';
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'Lumen';
-const SITE_DESC = process.env.NEXT_PUBLIC_SITE_DESCRIPTION || '在文字中拾起生活的微光';
+const SITE_URL = siteConfig.url;
+const SITE_NAME = siteConfig.name;
+const SITE_DESC = siteConfig.description;
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     types: {
-      'application/rss+xml': `${SITE_URL}/rss.xml`,
+      'application/rss+xml': siteUrls.rss,
     },
   },
 };
@@ -85,7 +86,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         
         {/* RSS */}
-        <link rel="alternate" type="application/rss+xml" title="Lumen RSS" href="/feed.xml" />
+        <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} RSS`} href="/feed.xml" />
         
         {/* 加载优质中文字体 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -163,16 +164,11 @@ export default function RootLayout({
                       registrations.forEach(function(registration) {
                         registration.unregister();
                       });
-                      console.log('SW unregistered in local dev');
                     });
                     return;
                   }
 
-                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('SW registered: ', registration);
-                  }).catch(function(registrationError) {
-                    console.log('SW registration failed: ', registrationError);
-                  });
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });
               }
             `}

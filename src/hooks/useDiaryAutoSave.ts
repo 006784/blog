@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { type Diary } from '@/lib/supabase';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface DiaryPayload {
+  id?: string;
   diary_date: string;
   title?: string;
   content: string;
@@ -14,12 +16,29 @@ interface DiaryPayload {
   [key: string]: unknown;
 }
 
-export function useDiaryAutoSave(payload: DiaryPayload | null, debounceMs = 3000) {
+interface UseDiaryAutoSaveOptions {
+  debounceMs?: number;
+  onSaved?: (diary: Diary) => void;
+}
+
+export function useDiaryAutoSave(
+  payload: DiaryPayload | null,
+  { debounceMs = 3000, onSaved }: UseDiaryAutoSaveOptions = {}
+) {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const payloadRef = useRef(payload);
+  const onSavedRef = useRef(onSaved);
+  const currentDiaryIdRef = useRef<string | null>(payload?.id ?? null);
+
   payloadRef.current = payload;
+  onSavedRef.current = onSaved;
+
+  useEffect(() => {
+    const nextId = payload?.id ?? null;
+    currentDiaryIdRef.current = nextId;
+  }, [payload?.id, payload?.diary_date]);
 
   const save = useCallback(async () => {
     const p = payloadRef.current;
@@ -31,13 +50,23 @@ export function useDiaryAutoSave(payload: DiaryPayload | null, debounceMs = 3000
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(p),
+        body: JSON.stringify({
+          ...p,
+          id: currentDiaryIdRef.current ?? p.id,
+        }),
       });
-      if (!res.ok) throw new Error('save failed');
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.diary) throw new Error(result?.error || 'save failed');
+
+      const savedDiary = result.diary as Diary;
+      currentDiaryIdRef.current = savedDiary.id;
       setStatus('saved');
       setLastSaved(new Date());
+      onSavedRef.current?.(savedDiary);
+      return savedDiary;
     } catch {
       setStatus('error');
+      return null;
     }
   }, []);
 

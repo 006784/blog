@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { requireAdminSession } from '@/lib/auth-server';
-import { buildDiaryPayload, saveDiaryByDate } from '@/lib/diary-persistence';
+import { buildDiaryPayload, saveDiary } from '@/lib/diary-persistence';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,10 +15,10 @@ export async function GET(req: NextRequest, ctx: RouteContext) {
     .from('diaries')
     .select('*')
     .eq('diary_date', date)
-    .maybeSingle();
+    .order('created_at', { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ diary: data });
+  return NextResponse.json({ diary: data?.[0] ?? null, diaries: data ?? [] });
 }
 
 export async function PUT(req: NextRequest, ctx: RouteContext) {
@@ -27,12 +27,13 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   const { date } = await ctx.params;
   const body = await req.json();
   const payload = buildDiaryPayload(body, date);
+  const diaryId = typeof body.id === 'string' && body.id.trim().length > 0 ? body.id : undefined;
 
   if (!payload.content) {
     return NextResponse.json({ error: '日记内容不能为空' }, { status: 400 });
   }
 
-  const { data, error } = await saveDiaryByDate(payload);
+  const { data, error } = await saveDiary(payload, diaryId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ diary: data });

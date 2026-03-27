@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Script from 'next/script';
 import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { siteConfig } from '@/lib/site-config';
 
 export interface BreadcrumbItem {
   label: string;
@@ -16,8 +18,10 @@ interface BreadcrumbProps {
 }
 
 export function Breadcrumb({ items, withJsonLd = true }: BreadcrumbProps) {
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com';
-
+  const schemaId = `breadcrumb-jsonld-${items
+    .map((item) => item.href || item.label)
+    .join('-')
+    .replace(/[^a-zA-Z0-9-]/g, '-')}`;
   const schema = withJsonLd
     ? {
         '@context': 'https://schema.org',
@@ -26,7 +30,7 @@ export function Breadcrumb({ items, withJsonLd = true }: BreadcrumbProps) {
           '@type': 'ListItem',
           position: idx + 1,
           name: item.label,
-          ...(item.href ? { item: `${SITE_URL}${item.href}` } : {}),
+          ...(item.href ? { item: `${siteConfig.url}${item.href}` } : {}),
         })),
       }
     : null;
@@ -35,7 +39,8 @@ export function Breadcrumb({ items, withJsonLd = true }: BreadcrumbProps) {
     <>
       {/* JSON-LD */}
       {schema && (
-        <script
+        <Script
+          id={schemaId}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />

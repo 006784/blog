@@ -1,6 +1,8 @@
 // 情绪趋势分析服务
 // 提供情绪变化图表、月度/年度报告、情绪与天气关联分析等功能
 
+import type { Diary } from '../supabase';
+
 export interface EmotionDataPoint {
   date: string;
   mood: string;
@@ -43,14 +45,27 @@ export interface MoodAnalysis {
   days: number;
 }
 
+interface EmotionDiaryEntry extends Diary {
+  mood_intensity?: number;
+  environment?: {
+    weather?: {
+      temperature?: number;
+    };
+  } | null;
+}
+
 export class EmotionAnalyticsService {
   /**
    * 分析情绪趋势数据
    */
-  static analyzeEmotionTrends(diaries: any[]): EmotionTrend {
+  static analyzeEmotionTrends(diaries: EmotionDiaryEntry[]): EmotionTrend {
     // 提取情绪数据点
     const dataPoints: EmotionDataPoint[] = diaries
-      .filter(diary => diary.mood && diary.mood_intensity)
+      .filter((diary): diary is EmotionDiaryEntry & { mood: string; mood_intensity: number } => (
+        typeof diary.mood === 'string' &&
+        diary.mood.length > 0 &&
+        typeof diary.mood_intensity === 'number'
+      ))
       .map(diary => ({
         date: diary.diary_date,
         mood: diary.mood,
@@ -86,8 +101,18 @@ export class EmotionAnalyticsService {
   /**
    * 生成情绪报告
    */
-  static generateEmotionReport(diaries: any[], period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): EmotionReport {
-    const filteredDiaries = diaries.filter(diary => diary.mood && diary.diary_date);
+  static generateEmotionReport(
+    diaries: EmotionDiaryEntry[],
+    period: 'weekly' | 'monthly' | 'yearly' = 'monthly'
+  ): EmotionReport {
+    const filteredDiaries = diaries.filter(
+      (diary): diary is EmotionDiaryEntry & { mood: string; diary_date: string } => (
+        typeof diary.mood === 'string' &&
+        diary.mood.length > 0 &&
+        typeof diary.diary_date === 'string' &&
+        diary.diary_date.length > 0
+      )
+    );
     
     // 计算周期
     const dates = filteredDiaries.map(d => new Date(d.diary_date));
@@ -95,7 +120,7 @@ export class EmotionAnalyticsService {
     const endDate = dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : new Date();
     
     // 情绪分布
-    const moodCounts = filteredDiaries.reduce((acc: Record<string, number>, diary: any) => {
+    const moodCounts = filteredDiaries.reduce((acc: Record<string, number>, diary) => {
       acc[diary.mood] = (acc[diary.mood] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -117,7 +142,7 @@ export class EmotionAnalyticsService {
     const dominantEmotion = moodDistribution.length > 0 ? moodDistribution[0].mood : 'Unknown';
     
     // 天气影响分析
-    const weatherImpact = filteredDiaries.reduce((acc: Record<string, { totalIntensity: number; count: number }>, diary: any) => {
+    const weatherImpact = filteredDiaries.reduce((acc: Record<string, { totalIntensity: number; count: number }>, diary) => {
       const weather = diary.weather || 'Unknown';
       if (!acc[weather]) {
         acc[weather] = { totalIntensity: 0, count: 0 };
@@ -136,7 +161,7 @@ export class EmotionAnalyticsService {
       .sort((a, b) => b.avgIntensity - a.avgIntensity);
     
     // 生产力洞察
-    const moodProductivity = filteredDiaries.reduce((acc: Record<string, { totalIntensity: number; count: number }>, diary: any) => {
+    const moodProductivity = filteredDiaries.reduce((acc: Record<string, { totalIntensity: number; count: number }>, diary) => {
       const mood = diary.mood;
       if (!acc[mood]) {
         acc[mood] = { totalIntensity: 0, count: 0 };
@@ -186,8 +211,8 @@ export class EmotionAnalyticsService {
   /**
    * 生成情绪分析
    */
-  static analyzeMoods(diaries: any[]): MoodAnalysis[] {
-    const moodData = diaries.reduce((acc: Record<string, { count: number; totalIntensity: number; dates: Date[] }>, diary: any) => {
+  static analyzeMoods(diaries: EmotionDiaryEntry[]): MoodAnalysis[] {
+    const moodData = diaries.reduce((acc: Record<string, { count: number; totalIntensity: number; dates: Date[] }>, diary) => {
       const mood = diary.mood;
       if (!mood) return acc;
       
@@ -236,7 +261,7 @@ export class EmotionAnalyticsService {
   /**
    * 获取情绪统计摘要
    */
-  static getEmotionSummary(diaries: any[]): {
+  static getEmotionSummary(diaries: EmotionDiaryEntry[]): {
     totalEntries: number;
     positivePercentage: number;
     negativePercentage: number;
@@ -245,7 +270,13 @@ export class EmotionAnalyticsService {
     mostCommonMood: string;
     moodTrend: 'positive' | 'negative' | 'mixed' | 'neutral';
   } {
-    const filteredDiaries = diaries.filter(d => d.mood && d.mood_intensity);
+    const filteredDiaries = diaries.filter(
+      (diary): diary is EmotionDiaryEntry & { mood: string; mood_intensity: number } => (
+        typeof diary.mood === 'string' &&
+        diary.mood.length > 0 &&
+        typeof diary.mood_intensity === 'number'
+      )
+    );
     const totalEntries = filteredDiaries.length;
     
     if (totalEntries === 0) {
@@ -358,12 +389,19 @@ export class EmotionAnalyticsService {
   /**
    * 计算情绪变化趋势
    */
-  static calculateMoodTrend(diaries: any[], mood: string): {
+  static calculateMoodTrend(diaries: EmotionDiaryEntry[], mood: string): {
     trend: 'increasing' | 'decreasing' | 'stable';
     slope: number;
     confidence: number;
   } {
-    const moodDiaries = diaries.filter(d => d.mood === mood && d.mood_intensity && d.diary_date);
+    const moodDiaries = diaries.filter(
+      (diary): diary is EmotionDiaryEntry & { mood: string; mood_intensity: number; diary_date: string } => (
+        diary.mood === mood &&
+        typeof diary.mood_intensity === 'number' &&
+        typeof diary.diary_date === 'string' &&
+        diary.diary_date.length > 0
+      )
+    );
     
     if (moodDiaries.length < 2) {
       return { trend: 'stable', slope: 0, confidence: 0 };

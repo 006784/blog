@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { type Diary } from '@/lib/supabase';
 import { DiaryTheme } from '@/lib/diary/themes';
 import { MoodPicker, MOOD_LEVELS } from './MoodPicker';
 import { WeatherPicker, WeatherData } from './WeatherPicker';
@@ -24,6 +25,7 @@ interface DiaryData {
   mood_tags: string[];
   weather: WeatherData | null;
   location?: string;
+  drawing_url?: string;
 }
 
 interface Props {
@@ -31,7 +33,7 @@ interface Props {
   onThemeChange: (t: DiaryTheme) => void;
   date: Date;
   initial?: Partial<DiaryData>;
-  onSaved?: (d: DiaryData) => void;
+  onSaved?: (d: Diary) => void;
 }
 
 export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Props) {
@@ -43,7 +45,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
   const [weather, setWeather] = useState<WeatherData | null>(initial?.weather || null);
   const [location, setLocation] = useState(initial?.location || '');
   const [showDrawing, setShowDrawing] = useState(false);
-  const [drawingUrl, setDrawingUrl] = useState('');
+  const [drawingUrl, setDrawingUrl] = useState(initial?.drawing_url || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -55,6 +57,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
   }, [content]);
 
   const payload = {
+    id: initial?.id,
     diary_date: dateStr,
     title,
     content,
@@ -66,7 +69,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
     drawing_url: drawingUrl || undefined,
   };
 
-  const { status, statusLabel, save } = useDiaryAutoSave(payload);
+  const { status, statusLabel, save } = useDiaryAutoSave(payload, { onSaved });
 
   const handleSaveDrawing = (dataUrl: string) => {
     setDrawingUrl(dataUrl);

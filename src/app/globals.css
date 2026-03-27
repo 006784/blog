@@ -1,114 +1,109 @@
 @import "tailwindcss";
+@import "../styles/tokens.css";
 
 :root {
   /* ===== 日系杂志设计系统 ===== */
-  --paper:         #faf8f5;
-  --paper-warm:    #f4f0e8;
-  --paper-deep:    #ede9e0;
+  --paper:         var(--surface-base);
+  --paper-warm:    var(--surface-raised);
+  --paper-deep:    var(--surface-overlay);
 
-  --ink:           #1a1a18;
-  --ink-secondary: #5a5650;
-  --ink-muted:     #9a9188;
-  --ink-ghost:     #c8c4bb;
-  --line:          #ddd9d0;
-  --line-light:    #eae6de;
-  --gold:          #c4a96d;
-  --gold-light:    #e8d9b4;
-  --kana-ghost:    #e8e4de;
+  --ink:           var(--color-neutral-900);
+  --ink-secondary: var(--color-neutral-600);
+  --ink-muted:     var(--color-neutral-500);
+  --ink-ghost:     var(--color-neutral-400);
+  --line:          var(--color-neutral-300);
+  --line-light:    var(--surface-sunken);
+  --gold:          var(--color-primary-500);
+  --gold-light:    var(--color-primary-200);
+  --kana-ghost:    var(--surface-overlay);
   --font-mincho:   'Shippori Mincho', 'Noto Serif SC', serif;
   --font-jp-serif: 'Noto Serif JP', 'Noto Serif SC', serif;
   --font-garamond: 'Cormorant Garamond', 'Georgia', serif;
   /* ============================= */
 
-  --background: #faf8f5;
-  --foreground: #1a1a18;
-  --card: #faf8f5;
-  --card-foreground: #1a1a18;
-  --primary: #c4a96d;
-  --primary-foreground: #faf8f5;
-  --secondary: #f4f0e8;
-  --secondary-foreground: #1a1a18;
-  --muted: #9a9188;
-  --muted-foreground: #5a5650;
-  --accent: #ede9e0;
-  --accent-foreground: #1a1a18;
-  --border: #ddd9d0;
-  --ring: #c4a96d;
+  --background: var(--surface-base);
+  --foreground: var(--color-neutral-900);
+  --card: var(--surface-base);
+  --card-foreground: var(--color-neutral-900);
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--color-neutral-900);
+  --muted: var(--color-neutral-500);
+  --muted-foreground: var(--color-neutral-600);
+  --accent: var(--surface-overlay);
+  --accent-foreground: var(--color-neutral-900);
+  --border: var(--border-default);
+  --ring: var(--color-primary-500);
   
   /* 统一的间距系统 */
-  --spacing-xs: 0.5rem;    /* 8px */
-  --spacing-sm: 1rem;      /* 16px */
-  --spacing-md: 1.5rem;    /* 24px */
-  --spacing-lg: 2rem;      /* 32px */
-  --spacing-xl: 3rem;      /* 48px */
-  --spacing-2xl: 4rem;     /* 64px */
+  --spacing-xs: var(--space-2);
+  --spacing-sm: var(--space-4);
+  --spacing-md: var(--space-6);
+  --spacing-lg: var(--space-8);
+  --spacing-xl: var(--space-12);
+  --spacing-2xl: var(--space-16);
   
   /* 简化的配色系统 */
-  --color-primary: #c4a96d;
-  --color-primary-dark: #8b6f3a;
-  --color-secondary: #f4f0e8;
-  --color-accent: #e8d9b4;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-primary: var(--color-primary-500);
+  --color-primary-dark: var(--color-primary-700);
+  --color-secondary: var(--surface-raised);
+  --color-accent: var(--color-primary-200);
   
   --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
-  --gradient-start: #c4a96d;
-  --gradient-end: #8b6f3a;
+  --gradient-start: var(--color-primary-500);
+  --gradient-end: var(--color-primary-700);
   
   /* 背景渐变 — 改为纸色调，与杂志纸底融合 */
-  --bg-gradient-1: #f0ece3;
-  --bg-gradient-2: #ede9e0;
-  --bg-gradient-3: #e8d9b4;
-  --bg-gradient-4: #f4f0e8;
+  --bg-gradient-1: var(--surface-raised);
+  --bg-gradient-2: var(--surface-overlay);
+  --bg-gradient-3: var(--color-primary-200);
+  --bg-gradient-4: var(--surface-base);
 }
 
 .dark {
   /* 日系杂志深色适配 */
-  --paper:         #1a1a18;
-  --paper-warm:    #201e1b;
-  --paper-deep:    #141210;
-  --ink:           #f0ede8;
-  --ink-secondary: #c8c4bb;
-  --ink-muted:     #9a9188;
-  --ink-ghost:     #5a5650;
-  --line:          #2a2826;
-  --line-light:    #222018;
-  --kana-ghost:    #1e1c18;
+  --paper:         var(--surface-base);
+  --paper-warm:    var(--surface-raised);
+  --paper-deep:    var(--surface-sunken);
+  --ink:           var(--color-neutral-900);
+  --ink-secondary: var(--color-neutral-700);
+  --ink-muted:     var(--color-neutral-500);
+  --ink-ghost:     var(--color-neutral-400);
+  --line:          var(--border-default);
+  --line-light:    var(--surface-overlay);
+  --kana-ghost:    var(--surface-overlay);
 
   /* 背景渐变 — 深色纸色调 */
-  --bg-gradient-1: #1e1c18;
-  --bg-gradient-2: #201e1b;
-  --bg-gradient-3: #2a2620;
-  --bg-gradient-4: #221e18;
+  --bg-gradient-1: var(--surface-base);
+  --bg-gradient-2: var(--surface-raised);
+  --bg-gradient-3: var(--surface-overlay);
+  --bg-gradient-4: var(--surface-sunken);
 
-  --background: #1a1a18;
-  --foreground: #f0ede8;
-  --card: #201e1b;
-  --card-foreground: #f0ede8;
-  --primary: #e8d9b4;
-  --primary-foreground: #1a1a18;
-  --secondary: #201e1b;
-  --secondary-foreground: #c8c4bb;
-  --muted: #3a3830;
-  --muted-foreground: #9a9188;
-  --accent: #2a2826;
-  --accent-foreground: #f0ede8;
-  --border: #2a2826;
-  --ring: #e8d9b4;
+  --background: var(--surface-base);
+  --foreground: var(--color-neutral-900);
+  --card: var(--surface-raised);
+  --card-foreground: var(--color-neutral-900);
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--color-neutral-700);
+  --muted: var(--color-neutral-400);
+  --muted-foreground: var(--color-neutral-500);
+  --accent: var(--surface-overlay);
+  --accent-foreground: var(--color-neutral-900);
+  --border: var(--border-default);
+  --ring: var(--color-primary-500);
   
   /* 暗色模式配色 */
-  --color-primary: #e8d9b4;
-  --color-primary-dark: #c4a96d;
-  --color-secondary: #201e1b;
-  --color-accent: #c4a96d;
-  --color-success: #34d399;
-  --color-warning: #fbbf24;
-  --color-error: #f87171;
+  --color-primary: var(--color-primary-500);
+  --color-primary-dark: var(--color-primary-700);
+  --color-secondary: var(--surface-raised);
+  --color-accent: var(--color-primary-200);
   
-  --gradient-start: #e8d9b4;
-  --gradient-end: #c4a96d;
+  --gradient-start: var(--color-primary-500);
+  --gradient-end: var(--color-primary-700);
 }
 
 @theme inline {
