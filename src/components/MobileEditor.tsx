@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Send, Image, Bold, Italic, List, 
-  Hash, Link2, Code, Quote, Heading1, Heading2,
-  Eye, EyeOff, Check, X, Loader2, ChevronDown
+  Image, Bold, Italic, List, Link2, Code, Quote, Heading1, Heading2,
+  Eye, EyeOff, Loader2
 } from 'lucide-react';
 import { uploadFile, compressImage } from '@/lib/storage';
 import ReactMarkdown from 'react-markdown';
@@ -21,7 +20,6 @@ export function MobileEditor({ value, onChange, placeholder }: MobileEditorProps
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [showToolbar, setShowToolbar] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 

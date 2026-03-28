@@ -26,12 +26,18 @@ export class MultimediaService {
   private static mediaRecorder: MediaRecorder | null = null;
   private static audioChunks: Blob[] = [];
   private static recordingStartTime: number | null = null;
+  private static recordingMimeType = 'audio/webm';
 
   /**
    * 检查浏览器是否支持录音
    */
   static isRecordingSupported(): boolean {
-    return !!(navigator.mediaDevices && window.MediaRecorder);
+    return !!(
+      typeof window !== 'undefined' &&
+      navigator.mediaDevices &&
+      typeof navigator.mediaDevices.getUserMedia === 'function' &&
+      window.MediaRecorder
+    );
   }
 
   /**
@@ -40,10 +46,20 @@ export class MultimediaService {
   static async startRecording(onDataAvailable?: (chunk: Blob) => void): Promise<boolean> {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      this.mediaRecorder = new MediaRecorder(stream);
+
+      const preferredMimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/aac',
+      ].find((mimeType) => MediaRecorder.isTypeSupported(mimeType));
+
+      this.mediaRecorder = preferredMimeType
+        ? new MediaRecorder(stream, { mimeType: preferredMimeType })
+        : new MediaRecorder(stream);
       this.audioChunks = [];
       this.recordingStartTime = Date.now();
+      this.recordingMimeType = this.mediaRecorder.mimeType || preferredMimeType || 'audio/webm';
 
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -72,7 +88,7 @@ export class MultimediaService {
 
       this.mediaRecorder.onstop = async () => {
         try {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+          const audioBlob = new Blob(this.audioChunks, { type: this.recordingMimeType });
           const audioUrl = URL.createObjectURL(audioBlob);
           const duration = this.recordingStartTime 
             ? (Date.now() - this.recordingStartTime) / 1000 
@@ -83,7 +99,7 @@ export class MultimediaService {
             blob: audioBlob,
             url: audioUrl,
             duration,
-            mimeType: 'audio/webm',
+            mimeType: this.recordingMimeType,
             createdAt: new Date()
           };
 
@@ -91,6 +107,7 @@ export class MultimediaService {
           this.mediaRecorder!.stream.getTracks().forEach(track => track.stop());
           this.mediaRecorder = null;
           this.recordingStartTime = null;
+          this.recordingMimeType = 'audio/webm';
 
           resolve(recording);
         } catch (error) {
@@ -126,6 +143,7 @@ export class MultimediaService {
       this.mediaRecorder = null;
       this.audioChunks = [];
       this.recordingStartTime = null;
+      this.recordingMimeType = 'audio/webm';
     }
   }
 
@@ -229,9 +247,9 @@ export class MultimediaService {
 
     // 检查文件类型
     const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif',
       'video/mp4', 'video/webm', 'video/quicktime',
-      'audio/mp3', 'audio/wav', 'audio/mpeg', 'audio/webm',
+      'audio/mp3', 'audio/wav', 'audio/mpeg', 'audio/webm', 'audio/mp4', 'audio/m4a', 'audio/x-m4a',
       'image/gif' // 专门列出GIF
     ];
 
@@ -254,7 +272,7 @@ export class MultimediaService {
       formData.append('file', file);
       formData.append('folder', folder);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/', {
         method: 'POST',
         body: formData,
       });

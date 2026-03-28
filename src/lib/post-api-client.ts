@@ -10,7 +10,7 @@ async function readApiError(res: Response, fallback: string): Promise<string> {
 }
 
 export async function apiCreatePost(body: Partial<Post>): Promise<Post> {
-  const res = await fetch('/api/posts', {
+  const res = await fetch('/api/posts/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -26,7 +26,7 @@ export async function apiCreatePost(body: Partial<Post>): Promise<Post> {
 }
 
 export async function apiUpdatePost(id: string, body: Partial<Post>): Promise<Post> {
-  const res = await fetch(`/api/posts/${id}`, {
+  const res = await fetch(`/api/posts/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

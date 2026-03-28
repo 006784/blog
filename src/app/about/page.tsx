@@ -1,19 +1,35 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Image from 'next/image';
-import Link from 'next/link';
-import { Github, Twitter, Mail, MapPin, Briefcase, GraduationCap, Heart, Code2, Palette, Coffee, Music } from 'lucide-react';
-import { AnimatedSection, Floating } from '@/components/Animations';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  Briefcase,
+  Code2,
+  Coffee,
+  Github,
+  Globe,
+  GraduationCap,
+  Heart,
+  Linkedin,
+  Mail,
+  MapPin,
+  Music,
+  Palette,
+  Twitter,
+} from 'lucide-react';
 import { useProfile } from '@/components/ProfileProvider';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 
 const skills = [
-  { name: 'React', level: 95 },
-  { name: 'TypeScript', level: 90 },
-  { name: 'Next.js', level: 88 },
-  { name: 'Node.js', level: 85 },
-  { name: 'Tailwind CSS', level: 92 },
-  { name: 'Python', level: 75 },
+  { name: 'React', level: 95, summary: '复杂交互、状态管理与组件抽象' },
+  { name: 'TypeScript', level: 90, summary: '类型建模、接口设计与重构安全性' },
+  { name: 'Next.js', level: 88, summary: '内容站点、全栈接口与渲染策略' },
+  { name: 'Node.js', level: 85, summary: 'API 设计、数据处理与服务整合' },
+  { name: 'Tailwind CSS', level: 92, summary: '设计系统落地与视觉统一' },
+  { name: 'Python', level: 75, summary: '脚本自动化与数据工具辅助' },
 ];
 
 const experiences = [
@@ -38,305 +54,439 @@ const experiences = [
 ];
 
 const interests = [
-  { icon: Code2, label: '编程', color: 'bg-[var(--ink)]' },
-  { icon: Palette, label: '设计', color: 'bg-[var(--ink-secondary)]' },
-  { icon: Coffee, label: '咖啡', color: 'bg-[var(--gold)]' },
-  { icon: Music, label: '音乐', color: 'bg-[var(--ink)]' },
+  {
+    icon: Code2,
+    label: '编程',
+    description: '喜欢把复杂问题拆开，再做成顺手好用的产品。',
+  },
+  {
+    icon: Palette,
+    label: '设计',
+    description: '关注排版、节奏和细节，希望页面既清晰也耐看。',
+  },
+  {
+    icon: Coffee,
+    label: '咖啡',
+    description: '一杯热咖啡，通常是一个想法开始落地的信号。',
+  },
+  {
+    icon: Music,
+    label: '音乐',
+    description: '写代码和写文章时，音乐总能把状态慢慢拉回来。',
+  },
 ];
 
 export default function AboutPage() {
   const { profile } = useProfile();
-  
+
   const socialLinks = [
-    { name: 'GitHub', href: profile.github || 'https://github.com', icon: Github },
-    { name: 'Twitter', href: profile.twitter || 'https://twitter.com', icon: Twitter },
-    { name: 'Email', href: `mailto:${profile.email || 'hello@example.com'}`, icon: Mail },
+    profile.github
+      ? { name: 'GitHub', href: profile.github, icon: Github }
+      : null,
+    profile.twitter
+      ? { name: 'Twitter', href: profile.twitter, icon: Twitter }
+      : null,
+    profile.linkedin
+      ? { name: 'LinkedIn', href: profile.linkedin, icon: Linkedin }
+      : null,
+    profile.website
+      ? { name: 'Website', href: profile.website, icon: Globe }
+      : null,
+    profile.email
+      ? { name: 'Email', href: `mailto:${profile.email}`, icon: Mail }
+      : null,
+  ].filter(Boolean) as Array<{
+    name: string;
+    href: string;
+    icon: typeof Github;
+  }>;
+
+  const highlightStats = [
+    { label: '核心技能', value: `${skills.length}+` },
+    { label: '成长阶段', value: `${experiences.length} 段` },
+    { label: '关注方向', value: `${interests.length} 类` },
   ];
-  
+
+  const profileHighlights = [
+    profile.location
+      ? {
+          label: '所在城市',
+          value: profile.location,
+          icon: MapPin,
+        }
+      : null,
+    profile.occupation
+      ? {
+          label: '当前身份',
+          value: profile.occupation,
+          icon: Briefcase,
+        }
+      : null,
+    {
+      label: '学习背景',
+      value: '计算机科学学士',
+      icon: GraduationCap,
+    },
+  ].filter(Boolean) as Array<{
+    label: string;
+    value: string;
+    icon: typeof MapPin;
+  }>;
+
   return (
-    <div className="min-h-screen pb-14">
-      {/* Background decorations */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-r from-[var(--bg-gradient-1)] to-[var(--bg-gradient-2)] rounded-full blur-3xl opacity-20" />
-        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-[var(--bg-gradient-3)] to-[var(--bg-gradient-4)] rounded-full blur-3xl opacity-15" />
+    <div className="relative min-h-screen overflow-hidden px-4 pb-16 pt-12 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[8%] top-20 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-primary-200)_0%,transparent_72%)] opacity-35 blur-3xl" />
+        <div className="absolute bottom-0 right-[10%] h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--surface-overlay)_0%,transparent_70%)] opacity-70 blur-3xl" />
       </div>
 
-      {/* Hero Section */}
-      <section className="relative px-6 pt-24 pb-16 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary/50 via-background to-background" />
-        <Floating duration={10}>
-          <div className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-r from-[var(--gradient-start)]/20 to-[var(--gradient-end)]/20 rounded-full blur-3xl" />
-        </Floating>
-        <Floating duration={15}>
-          <div className="absolute bottom-20 left-10 w-64 h-64 bg-gradient-to-r from-[var(--bg-gradient-4)]/30 to-[var(--bg-gradient-3)]/30 rounded-full blur-3xl" />
-        </Floating>
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-10">
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]"
+        >
+          <Card
+            variant="glass"
+            padding="lg"
+            className="overflow-hidden border-[color:var(--border-strong)]"
+          >
+            <div className="mb-5 flex flex-wrap items-center gap-3">
+              <Badge variant="soft" className="gap-1.5 px-3 py-1.5">
+                <Heart className="h-3.5 w-3.5" />
+                关于我
+              </Badge>
+              <Badge variant="outline" className="px-3 py-1.5">
+                {profile.signature || '探索 · 记录 · 分享'}
+              </Badge>
+            </div>
 
-        <div className="relative max-w-6xl mx-auto">
-          <div className="surface-hero grid lg:grid-cols-2 gap-12 items-center p-7 sm:p-12">
-            {/* Image */}
-            <AnimatedSection>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="relative aspect-square max-w-md mx-auto lg:max-w-none"
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <h1 className="text-4xl font-semibold tracking-[-0.03em] text-[var(--color-neutral-900)] sm:text-5xl">
+                  你好，我是
+                  <span className="ml-3 bg-[linear-gradient(120deg,var(--color-primary-600),var(--color-primary-900))] bg-clip-text text-transparent">
+                    {profile.nickname}
+                  </span>
+                </h1>
+                <p className="max-w-2xl text-[var(--text-lg)] leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                  {profile.bio ||
+                    '一名热爱技术和设计的全栈开发者，专注于创建美观、高性能的 Web 应用。'}
+                </p>
+              </div>
+
+              <Card
+                variant="bordered"
+                className="rounded-[var(--radius-2xl)] bg-[linear-gradient(135deg,var(--surface-raised),var(--surface-base))]"
               >
-                <div className="absolute inset-0 border border-[var(--line)] rotate-3 opacity-40" style={{ background: 'var(--paper-deep)' }} />
-                <div className="about-avatar-frame relative aspect-square overflow-hidden border border-[var(--line)]">
+                <p className="text-sm font-medium tracking-[0.16em] text-[var(--color-primary-700)]">
+                  个人宣言
+                </p>
+                <p className="mt-3 text-[var(--text-lg)] leading-[var(--leading-relaxed)] text-[var(--color-neutral-700)]">
+                  {profile.motto || '用代码编织梦想，用文字记录时光。'}
+                </p>
+              </Card>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {highlightStats.map((item) => (
+                  <Card
+                    key={item.label}
+                    variant="bordered"
+                    padding="sm"
+                    className="rounded-[var(--radius-xl)] bg-[var(--surface-base)]"
+                  >
+                    <p className="text-sm text-[var(--color-neutral-500)]">{item.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">
+                      {item.value}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => window.location.assign('/contact')}>
+                  联系我
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => window.location.assign('/blog')}
+                >
+                  看看最近写了什么
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          <div className="grid gap-6">
+            <Card
+              variant="elevated"
+              padding="lg"
+              className="relative overflow-hidden border-[color:var(--border-strong)]"
+            >
+              <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(135deg,var(--color-primary-100),transparent)] opacity-80" />
+              <div className="relative grid gap-6 sm:grid-cols-[220px_1fr] sm:items-center">
+                <div className="mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-[calc(var(--radius-2xl)+4px)] border border-[color:var(--border-strong)] bg-[var(--surface-overlay)] shadow-[var(--shadow-lg)]">
                   {profile.avatar ? (
                     <Image
                       src={profile.avatar}
-                      alt="个人头像"
-                      fill
-                      sizes="(max-width: 1024px) 80vw, 40vw"
-                      className="object-cover"
+                      alt={`${profile.nickname} 的头像`}
+                      width={440}
+                      height={440}
+                      className="h-full w-full object-cover"
                       priority
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--paper-deep)' }}>
-                      <span className="text-6xl font-bold" style={{ fontFamily: 'var(--font-mincho)', color: 'var(--gold)' }}>{profile.nickname.charAt(0)}</span>
+                    <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,var(--surface-overlay),var(--surface-base))] text-6xl font-semibold text-[var(--color-primary-700)]">
+                      {profile.nickname.charAt(0)}
                     </div>
                   )}
                 </div>
-                {/* Floating badges */}
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                  className="surface-card absolute -top-4 -right-4 px-4 py-2 rounded-xl"
-                >
-                  <span className="text-2xl">👋</span>
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="surface-card absolute -bottom-4 -left-4 px-4 py-2 rounded-xl"
-                >
-                  <span className="text-sm font-medium">5+ 年经验</span>
-                </motion.div>
-              </motion.div>
-            </AnimatedSection>
 
-            {/* Content */}
-            <AnimatedSection delay={0.2}>
-              <div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="section-kicker mb-6"
-                >
-                  <span className="w-2 h-2 animate-pulse" style={{ background: 'var(--gold)' }} />
-                  开放合作机会
-                </motion.div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium tracking-[0.18em] text-[var(--color-primary-700)]">
+                      当前状态
+                    </p>
+                    <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">
+                      保持创作，也保持好奇
+                    </h2>
+                    <p className="text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                      这里记录我的技术栈、成长经历和日常偏好，也希望让你更快理解这个站点背后的气质。
+                    </p>
+                  </div>
 
-                <h1 className="apple-display mb-6">
-                  你好，我是 <span className="aurora-text">{profile.nickname}</span>
-                </h1>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {profileHighlights.map((item) => (
+                      <div
+                        key={item.label}
+                        className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3"
+                      >
+                        <div className="flex items-center gap-2 text-sm text-[var(--color-neutral-500)]">
+                          <item.icon className="h-4 w-4 text-[var(--color-primary-600)]" />
+                          {item.label}
+                        </div>
+                        <p className="mt-2 text-base font-medium text-[var(--color-neutral-900)]">
+                          {item.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
 
-                <p className="text-lg text-soft mb-6 leading-relaxed">
-                  {profile.bio || '一名热爱技术和设计的全栈开发者，专注于创建美观、高性能的 Web 应用。我相信优秀的产品来源于对细节的追求和对用户体验的深刻理解。'}
-                </p>
-
-                <div className="flex flex-wrap gap-4 mb-8">
-                  {profile.location && (
-                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-secondary/35 px-3 py-1.5 text-sm text-soft">
-                      <MapPin className="w-4 h-4" />
-                      {profile.location}
-                    </span>
+                  {socialLinks.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                      {socialLinks.map((social) => (
+                        <motion.a
+                          key={social.name}
+                          href={social.href}
+                          target={social.name === 'Email' ? undefined : '_blank'}
+                          rel={social.name === 'Email' ? undefined : 'noopener noreferrer'}
+                          whileHover={{ y: -2 }}
+                          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-base)] px-4 py-2 text-sm font-medium text-[var(--color-neutral-700)] transition-colors hover:border-[var(--color-primary-500)] hover:text-[var(--color-primary-700)]"
+                        >
+                          <social.icon className="h-4 w-4" />
+                          {social.name}
+                        </motion.a>
+                      ))}
+                    </div>
+                  ) : (
+                    <Badge variant="outline" className="px-3 py-1.5">
+                      社交链接稍后补充
+                    </Badge>
                   )}
-                  {profile.occupation && (
-                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-secondary/35 px-3 py-1.5 text-sm text-soft">
-                      <Briefcase className="w-4 h-4" />
-                      {profile.occupation}
-                    </span>
-                  )}
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ui-line)] bg-secondary/35 px-3 py-1.5 text-sm text-soft">
-                    <GraduationCap className="w-4 h-4" />
-                    计算机科学学士
-                  </span>
-                </div>
-
-                {/* Social Links */}
-                <div className="flex gap-3">
-                  {socialLinks.map((social) => (
-                    <motion.a
-                      key={social.name}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.1, y: -3 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--ui-line)] bg-card/80 text-soft transition hover:border-primary hover:text-primary"
-                    >
-                      <social.icon className="w-5 h-5" />
-                    </motion.a>
-                  ))}
                 </div>
               </div>
-            </AnimatedSection>
+            </Card>
           </div>
-        </div>
-      </section>
+        </motion.section>
 
-      {/* Skills Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <AnimatedSection className="text-center mb-16">
-            <span className="section-kicker mb-4">Core Skills</span>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">技能专长</h2>
-            <p className="text-soft max-w-lg mx-auto">
-              我专注于现代 Web 技术栈，持续学习和探索新技术
-            </p>
-          </AnimatedSection>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {skills.map((skill, index) => (
-              <motion.div
-                key={skill.name}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="surface-card p-5 interactive-card"
-              >
-                <div className="flex justify-between mb-2">
-                  <span className="font-medium">{skill.name}</span>
-                  <span className="text-soft">{skill.level}%</span>
-                </div>
-                <div className="h-1 overflow-hidden" style={{ background: 'var(--line)' }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${skill.level}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="h-full"
-                    style={{ background: 'var(--gold)' }}
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Experience Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <AnimatedSection className="text-center mb-16">
-            <span className="section-kicker mb-4">Timeline</span>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">工作经历</h2>
-            <p className="text-soft max-w-lg mx-auto">
-              从初级开发者到技术负责人的成长之路
-            </p>
-          </AnimatedSection>
-
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-[var(--ui-line)] md:-translate-x-1/2" />
-
-            {experiences.map((exp, index) => (
-              <motion.div
-                key={exp.title}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
-                className={`relative flex flex-col md:flex-row gap-8 mb-12 ${
-                  index % 2 === 0 ? 'md:flex-row-reverse' : ''
-                }`}
-              >
-                {/* Dot */}
-                <div className="absolute left-0 md:left-1/2 w-3 h-3 md:-translate-x-1/2 -translate-y-0.5 border border-[var(--gold)]" style={{ background: 'var(--paper-deep)' }} />
-
-                {/* Content */}
-                <div className={`flex-1 ${index % 2 === 0 ? 'md:text-right md:pr-12' : 'md:pl-12'} pl-8 md:pl-0`}>
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="surface-card interactive-card p-6"
-                  >
-                    <span className="text-sm font-medium" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', color: 'var(--gold)', letterSpacing: '0.05em' }}>
-                      {exp.period}
-                    </span>
-                    <h3 className="text-xl font-semibold mt-1 mb-2">
-                      {exp.title}
-                    </h3>
-                    <p className="text-soft text-sm mb-2">
-                      {exp.company}
-                    </p>
-                    <p className="text-soft">
-                      {exp.description}
-                    </p>
-                  </motion.div>
-                </div>
-
-                {/* Spacer */}
-                <div className="flex-1 hidden md:block" />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Interests Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <AnimatedSection className="text-center mb-16">
-            <span className="section-kicker mb-4">Life</span>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">兴趣爱好</h2>
-            <p className="text-soft max-w-lg mx-auto">
-              工作之外，我也热爱生活
-            </p>
-          </AnimatedSection>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {interests.map((interest, index) => (
-              <motion.div
-                key={interest.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -8 }}
-                className="surface-card interactive-card p-6 text-center"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 10 }}
-                  className={`w-16 h-16 ${interest.color} flex items-center justify-center mx-auto mb-4`}
-                >
-                  <interest.icon className="w-8 h-8 text-[var(--paper)]" />
-                </motion.div>
-                <h3 className="font-semibold">{interest.label}</h3>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <AnimatedSection>
-            <div className="surface-hero relative overflow-hidden text-center p-12">
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--gradient-start)]/25 via-transparent to-[var(--gradient-end)]/30" />
-              <Heart className="w-12 h-12 mx-auto mb-6 opacity-80" />
-              <h2 className="relative text-3xl sm:text-4xl font-bold mb-4">
-                让我们一起创造精彩
-              </h2>
-              <p className="relative text-soft mb-8 max-w-lg mx-auto">
-                无论是项目合作、技术交流还是单纯的聊天，我都很期待与你连接
-              </p>
-              <Link href="/contact">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="btn-primary px-8 py-4"
-                >
-                  联系我
-                </motion.button>
-              </Link>
+        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <Card variant="default" padding="lg">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <Badge variant="soft" className="mb-3 px-3 py-1.5">
+                  Core Skills
+                </Badge>
+                <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+                  技能专长
+                </h2>
+                <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                  主要聚焦现代 Web 技术栈，也持续把设计系统、体验细节和工程质量一起往前推。
+                </p>
+              </div>
             </div>
-          </AnimatedSection>
-        </div>
-      </section>
+
+            <div className="grid gap-4">
+              {skills.map((skill, index) => (
+                <motion.div
+                  key={skill.name}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ delay: index * 0.06 }}
+                  className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] p-4"
+                >
+                  <div className="mb-3 flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-base font-semibold text-[var(--color-neutral-900)]">
+                        {skill.name}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--color-neutral-600)]">
+                        {skill.summary}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="shrink-0 px-3 py-1.5">
+                      {skill.level}%
+                    </Badge>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-overlay)]">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${skill.level}%` }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.8, delay: index * 0.06 }}
+                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-primary-500),var(--color-primary-700))]"
+                    />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </Card>
+
+          <Card variant="glass" padding="lg">
+            <Badge variant="soft" className="mb-3 px-3 py-1.5">
+              Life
+            </Badge>
+            <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+              兴趣爱好
+            </h2>
+            <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+              工作之外，我也希望生活保持层次感，这些兴趣会直接反过来影响产品审美和表达方式。
+            </p>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {interests.map((interest, index) => (
+                <motion.div
+                  key={interest.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ delay: index * 0.08 }}
+                >
+                  <Card
+                    variant="bordered"
+                    padding="sm"
+                    className="h-full rounded-[var(--radius-2xl)] bg-[var(--surface-base)]"
+                  >
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-100),var(--surface-overlay))] text-[var(--color-primary-700)]">
+                      <interest.icon className="h-5 w-5" />
+                    </div>
+                    <p className="text-lg font-semibold text-[var(--color-neutral-900)]">
+                      {interest.label}
+                    </p>
+                    <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                      {interest.description}
+                    </p>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </Card>
+        </section>
+
+        <section>
+          <Card variant="default" padding="lg">
+            <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <Badge variant="soft" className="mb-3 px-3 py-1.5">
+                  Timeline
+                </Badge>
+                <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+                  工作经历
+                </h2>
+                <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                  从执行项目，到搭建系统，再到开始关注产品气质和整体体验。
+                </p>
+              </div>
+              <Badge variant="outline" className="px-3 py-1.5">
+                持续成长中
+              </Badge>
+            </div>
+
+            <div className="grid gap-4">
+              {experiences.map((experience, index) => (
+                <motion.div
+                  key={experience.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ delay: index * 0.08 }}
+                >
+                  <Card
+                    variant="bordered"
+                    padding="md"
+                    className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[linear-gradient(180deg,var(--surface-base),var(--surface-panel))]"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-2">
+                        <Badge variant="soft" className="px-3 py-1.5">
+                          {experience.period}
+                        </Badge>
+                        <div>
+                          <h3 className="text-xl font-semibold text-[var(--color-neutral-900)]">
+                            {experience.title}
+                          </h3>
+                          <p className="mt-1 text-sm font-medium text-[var(--color-primary-700)]">
+                            {experience.company}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="max-w-2xl text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                        {experience.description}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </Card>
+        </section>
+
+        <section>
+          <Card
+            variant="glass"
+            padding="lg"
+            className="overflow-hidden border-[color:var(--border-strong)]"
+          >
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <Badge variant="soft" className="mb-3 px-3 py-1.5">
+                  Connect
+                </Badge>
+                <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+                  让我们一起创造精彩
+                </h2>
+                <p className="mt-3 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                  如果你想聊项目合作、站点设计、内容系统，或者只是想打个招呼，都欢迎来联系我。
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => window.location.assign('/contact')}>
+                  进入联系页
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => window.location.assign('/timeline')}
+                >
+                  看成长时间线
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </section>
+      </div>
     </div>
   );
 }

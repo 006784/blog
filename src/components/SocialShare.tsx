@@ -1,7 +1,8 @@
 // 社交分享组件
 'use client';
 
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useState } from 'react';
 import { Share2, Heart, MessageCircle, ExternalLink, Copy, Check, Globe, Users, TrendingUp } from 'lucide-react';
 import { SocialShareService, type ShareOptions } from '@/lib/diary/social-share-service';
 import type { Diary } from '@/lib/supabase';
@@ -18,12 +19,7 @@ export function SocialShare({ diary, className = '' }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
   const [likes, setLikes] = useState(diary.likes || 0);
   const [liked, setLiked] = useState(false);
-  const [shareStats, setShareStats] = useState(SocialShareService.getShareStats());
-
-  // 更新分享统计
-  useEffect(() => {
-    setShareStats(SocialShareService.getShareStats());
-  }, []);
+  const shareStats = SocialShareService.getShareStats();
 
   // 处理分享到平台
   const handleShare = (platform: string) => {
@@ -199,10 +195,13 @@ export function TimelineView({ diaries, className = '' }: TimelineProps) {
               {day.entries.map((entry) => (
                 <div key={entry.id} className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <img
+                    <Image
                       src={entry.avatar}
                       alt={entry.author}
-                      className="w-8 h-8 rounded-full"
+                      width={32}
+                      height={32}
+                      unoptimized
+                      className="h-8 w-8 rounded-full object-cover"
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">

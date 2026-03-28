@@ -89,7 +89,6 @@ export class SmartTagService {
    */
   private static generateEmotionTags(content: string): Tag[] {
     const tags: Tag[] = [];
-    const lowerContent = content.toLowerCase();
 
     Object.entries(EMOTION_KEYWORDS).forEach(([emotion, keywords]) => {
       let matchCount = 0;
@@ -123,7 +122,6 @@ export class SmartTagService {
    */
   private static generateActivityTags(content: string): Tag[] {
     const tags: Tag[] = [];
-    const lowerContent = content.toLowerCase();
 
     Object.entries(ACTIVITY_KEYWORDS).forEach(([activity, keywords]) => {
       let matchCount = 0;

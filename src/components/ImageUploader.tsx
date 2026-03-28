@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
@@ -138,10 +139,12 @@ export function ImageUploader({
               exit={{ opacity: 0 }}
               className="absolute inset-0"
             >
-              <img
+              <Image
                 src={previewUrl}
-                alt="Preview"
-                className="w-full h-full object-cover"
+                alt="图片预览"
+                fill
+                unoptimized
+                className="object-cover"
               />
               {/* Overlay */}
               <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
@@ -230,10 +233,11 @@ export function MultiImageUploader({
   images,
   onImagesChange,
   folder = 'uploads',
-  maxCount = 9,
+  maxCount = 60,
   maxSize = 10
 }: MultiImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = async (files: FileList) => {
@@ -242,28 +246,52 @@ export function MultiImageUploader({
 
     const filesToUpload = Array.from(files).slice(0, remaining);
     setUploading(true);
+    setError(null);
 
     try {
+      const batches: File[][] = [];
+      for (let index = 0; index < filesToUpload.length; index += 4) {
+        batches.push(filesToUpload.slice(index, index + 4));
+      }
+
       const newImages: string[] = [];
-      
-      for (const file of filesToUpload) {
-        if (!file.type.startsWith('image/')) continue;
-        if (file.size > maxSize * 1024 * 1024) continue;
+      let rejectedCount = 0;
 
-        let fileToUpload = file;
-        if (file.size > 500 * 1024) {
-          fileToUpload = await compressImage(file, 1920, 0.85);
-        }
+      for (const batch of batches) {
+        const results = await Promise.all(
+          batch.map(async (file) => {
+            if (!file.type.startsWith('image/')) {
+              rejectedCount += 1;
+              return null;
+            }
+            if (file.size > maxSize * 1024 * 1024) {
+              rejectedCount += 1;
+              return null;
+            }
 
-        const result = await uploadFile(fileToUpload, 'images', folder);
-        if (result) {
-          newImages.push(result.url);
-        }
+            let fileToUpload = file;
+            if (file.size > 500 * 1024) {
+              fileToUpload = await compressImage(file, 1920, 0.85);
+            }
+
+            return uploadFile(fileToUpload, 'images', folder);
+          })
+        );
+
+        results.forEach((result) => {
+          if (result?.url) {
+            newImages.push(result.url);
+          }
+        });
       }
 
       onImagesChange([...images, ...newImages]);
+      if (rejectedCount > 0) {
+        setError(`有 ${rejectedCount} 张图片因格式或大小不符合要求而被跳过`);
+      }
     } catch (err) {
       console.error('Upload error:', err);
+      setError('批量上传失败，请稍后重试');
     } finally {
       setUploading(false);
     }
@@ -276,45 +304,54 @@ export function MultiImageUploader({
   };
 
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {images.map((url, index) => (
-        <div key={index} className="relative aspect-square rounded-xl overflow-hidden group">
-          <img src={url} alt="" className="w-full h-full object-cover" />
-          <button
-            onClick={() => removeImage(index)}
-            className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      ))}
-      
-      {images.length < maxCount && (
-        <>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => e.target.files && handleFiles(e.target.files)}
-            className="hidden"
-          />
-          <button
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-            className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/30 hover:bg-muted/50 transition-all flex flex-col items-center justify-center"
-          >
-            {uploading ? (
-              <Loader2 className="w-6 h-6 text-primary animate-spin" />
-            ) : (
-              <>
-                <Upload className="w-6 h-6 text-muted-foreground mb-1" />
-                <span className="text-xs text-muted-foreground">上传</span>
-              </>
-            )}
-          </button>
-        </>
-      )}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>已上传 {images.length} / {maxCount}</span>
+        <span>支持多选与连续追加</span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {images.map((url, index) => (
+          <div key={index} className="relative aspect-square rounded-xl overflow-hidden group">
+            <Image src={url} alt="" fill unoptimized className="object-cover" />
+            <button
+              onClick={() => removeImage(index)}
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+
+        {images.length < maxCount && (
+          <>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => e.target.files && handleFiles(e.target.files)}
+              className="hidden"
+            />
+            <button
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/30 hover:bg-muted/50 transition-all flex flex-col items-center justify-center"
+            >
+              {uploading ? (
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              ) : (
+                <>
+                  <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                  <span className="text-xs text-muted-foreground">批量上传</span>
+                </>
+              )}
+            </button>
+          </>
+        )}
+      </div>
+
+      {error ? <p className="text-xs text-red-500">{error}</p> : null}
     </div>
   );
 }

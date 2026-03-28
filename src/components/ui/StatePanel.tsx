@@ -47,7 +47,7 @@ export function StatePanel({
         className
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(180deg,var(--surface-card-start),var(--surface-overlay))] text-[var(--color-primary-600)] shadow-[0_14px_26px_-20px_var(--surface-card-shadow-strong)]">
         {icon || defaultIcons[tone]}
       </div>
       <div className="space-y-1">

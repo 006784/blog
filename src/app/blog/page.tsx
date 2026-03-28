@@ -2,12 +2,10 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertCircle,
-  ArrowRight,
   BellRing,
   CheckCircle2,
   FolderOpen,
@@ -25,11 +23,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
-import { APPLE_EASE, HOVER_BUTTON, HOVER_LIFT, TAP_BUTTON, APPLE_SPRING_GENTLE } from '@/components/Animations';
+import { APPLE_EASE, HOVER_BUTTON, TAP_BUTTON, APPLE_SPRING_GENTLE } from '@/components/Animations';
 import { useAdmin } from '@/components/AdminProvider';
 import { decodeAdminToken } from '@/lib/admin-token';
+import { filterRenderablePosts, getSamplePosts, toPublicCatalogPosts, type PublicCatalogPost } from '@/lib/sample-posts';
 import { Collection, deletePost, getCollections, getPublishedPosts, Post } from '@/lib/supabase';
-import { formatDate } from '@/lib/types';
 
 const categoryList = [
   { id: 'all', name: '全部' },
@@ -44,19 +42,8 @@ type NotificationType = {
   message: string;
 };
 
-function categoryLabel(category: string): string {
-  const labels: Record<string, string> = {
-    tech: '技术',
-    design: '设计',
-    life: '生活',
-    thoughts: '思考',
-  };
-
-  return labels[category] || category;
-}
-
 function BlogPageContent() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<PublicCatalogPost[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,11 +67,13 @@ function BlogPageContent() {
       setLoading(true);
       try {
         const [postsData, collectionsData] = await Promise.all([getPublishedPosts(), getCollections()]);
-        setPosts(postsData);
+        const livePosts = filterRenderablePosts(toPublicCatalogPosts(postsData));
+        setPosts(livePosts.length > 0 ? livePosts : getSamplePosts());
         setCollections(collectionsData);
       } catch (error) {
         console.error('加载博客数据失败:', error);
-        setNotification({ type: 'error', message: '文章加载失败，请稍后重试。' });
+        setPosts(getSamplePosts());
+        setNotification({ type: 'error', message: '实时文章暂时不可用，当前显示示例文章。' });
       } finally {
         setLoading(false);
       }
@@ -95,7 +84,7 @@ function BlogPageContent() {
 
   async function handleDeletePost(slug: string) {
     const target = posts.find((item) => item.slug === slug);
-    if (!target) return;
+    if (!target || target.is_demo) return;
 
     const confirmed = window.confirm(`确定删除《${target.title}》吗？`);
     if (!confirmed) return;
@@ -180,10 +169,7 @@ function BlogPageContent() {
     });
   }, [posts, searchQuery, selectedCategory, selectedCollection]);
 
-  const featuredPost = filteredPosts[0] || null;
-  const restPosts = filteredPosts.slice(1);
-
-  const formattedPosts = restPosts.map((post) => ({
+  const formattedPosts = filteredPosts.map((post) => ({
     slug: post.slug,
     title: post.title,
     description: post.description,
@@ -193,6 +179,7 @@ function BlogPageContent() {
     image: post.cover_image || post.image,
     author: post.author,
     readingTime: post.reading_time,
+    isDemo: Boolean(post.is_demo),
   }));
 
   useEffect(() => {
@@ -411,71 +398,20 @@ function BlogPageContent() {
                   )}
                 </div>
 
-                {featuredPost && (
-                  <motion.article
-                    initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    whileHover={HOVER_LIFT}
-                    transition={{ duration: 0.64, ease: APPLE_EASE }}
-                    className="journal-spotlight surface-card interactive-card ios-hover-surface overflow-hidden"
-                  >
-                    <Link href={`/blog/${featuredPost.slug}`} className="journal-spotlight-grid">
-                      <div className="journal-spotlight-media relative min-h-[260px] bg-secondary/50">
-                        {featuredPost.cover_image || featuredPost.image ? (
-                          <Image
-                            src={featuredPost.cover_image || featuredPost.image}
-                            alt={featuredPost.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-gradient-to-br from-secondary to-secondary/60" />
-                        )}
-                        <div className="journal-spotlight-overlay" />
-                      </div>
-
-                      <div className="journal-spotlight-copy">
-                        <p className="section-kicker">Featured Story</p>
-                        <h2>{featuredPost.title}</h2>
-                        <p>{featuredPost.description}</p>
-
-                        <div className="journal-spotlight-meta">
-                          <Badge className="px-2.5 py-1">{categoryLabel(featuredPost.category)}</Badge>
-                          <span>{formatDate(featuredPost.published_at || featuredPost.created_at)}</span>
-                          <span>{featuredPost.reading_time || '约 5 分钟'}</span>
-                        </div>
-
-                        {featuredPost.tags && featuredPost.tags.length > 0 && (
-                          <div className="journal-spotlight-tags">
-                            {featuredPost.tags.slice(0, 4).map((tag) => (
-                              <span key={tag}>{tag}</span>
-                            ))}
-                          </div>
-                        )}
-
-                        <span className="journal-link-pill">
-                          阅读全文
-                          <ArrowRight className="h-4 w-4" />
-                        </span>
-                      </div>
-                    </Link>
-                  </motion.article>
-                )}
-
                 {formattedPosts.length > 0 ? (
-                  <div className="journal-card-grid">
+                  <div className="journal-card-grid journal-card-grid-grounded">
                     {formattedPosts.map((post, index) => (
                       <BlogCard
                         key={post.slug}
                         post={post}
                         index={index}
+                        featured={index === 0}
                         onDelete={isAdmin ? handleDeletePost : undefined}
                         onNotify={
                           isAdmin
                             ? (postData) => {
-                                const target = posts.find((item) => item.slug === postData.slug);
-                                if (target) {
+                              const target = posts.find((item) => item.slug === postData.slug);
+                                if (target && !target.is_demo) {
                                   void handleNotifyPost(target);
                                 }
                               }
@@ -484,7 +420,7 @@ function BlogPageContent() {
                       />
                     ))}
                   </div>
-                ) : !featuredPost ? (
+                ) : (
                   <StatePanel
                     tone="empty"
                     title="没有匹配的文章"
@@ -502,7 +438,7 @@ function BlogPageContent() {
                       </Button>
                     }
                   />
-                ) : null}
+                )}
               </>
             )}
           </section>

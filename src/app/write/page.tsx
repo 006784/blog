@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useEffectEvent, Suspense } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -104,35 +104,17 @@ function WritePageContent() {
   const [loading, setLoading] = useState(!!editId);
   const [showPreviewPane, setShowPreviewPane] = useState(false);
 
-  useEffect(() => {
-    if (editId) loadPost(editId);
-  }, [editId]);
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
-  useEffect(() => {
-    loadCollections();
-    if (!editId) loadLocalDraft();
-  }, [editId]);
-
-  useEffect(() => {
-    if (editId) return;
-    const timer = setTimeout(saveLocalDraft, 5000);
-    return () => clearTimeout(timer);
-  }, [title, description, content, category, tags, coverImage, editId]);
-
-  useEffect(() => {
-    if (!title && !content) return;
-    const timer = setTimeout(() => {
-      if (title.trim() || content.trim()) autoSaveDraft();
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [title, content]);
-
-  function saveLocalDraft() {
+  const saveLocalDraft = useEffectEvent(() => {
     if (!title.trim() && !content.trim()) return;
     localStorage.setItem('blog-draft', JSON.stringify({ title, description, content, category, tags, coverImage, isPinned, savedAt: new Date().toISOString() }));
-  }
+  });
 
-  function loadLocalDraft() {
+  const loadLocalDraft = useEffectEvent(() => {
     try {
       const saved = localStorage.getItem('blog-draft');
       if (saved) {
@@ -151,13 +133,9 @@ function WritePageContent() {
     } catch (e) {
       console.error('加载本地草稿失败:', e);
     }
-  }
+  });
 
-  function clearLocalDraft() {
-    localStorage.removeItem('blog-draft');
-  }
-
-  async function loadCollections() {
+  const loadCollections = useEffectEvent(async () => {
     try {
       const res = await fetch('/api/collections');
       if (res.ok) {
@@ -167,9 +145,9 @@ function WritePageContent() {
     } catch (error) {
       console.error('加载集合失败:', error);
     }
-  }
+  });
 
-  async function loadPost(id: string) {
+  const loadPost = useEffectEvent(async (id: string) => {
     try {
       setLoading(true);
       const post = await getPostById(id) || await getPostBySlug(id);
@@ -193,14 +171,9 @@ function WritePageContent() {
     } finally {
       setLoading(false);
     }
-  }
+  });
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  async function autoSaveDraft() {
+  const autoSaveDraft = useEffectEvent(async () => {
     if (!title.trim() && !content.trim()) return;
     try {
       const resolvedPinnedAt = isPinned ? (pinnedAt || new Date().toISOString()) : null;
@@ -224,7 +197,43 @@ function WritePageContent() {
     } catch (error) {
       console.error('自动保存失败:', error);
     }
+  });
+
+  useEffect(() => {
+    if (editId) {
+      void loadPost(editId);
+    }
+  }, [editId]);
+
+  useEffect(() => {
+    void loadCollections();
+    if (!editId) {
+      void loadLocalDraft();
+    }
+  }, [editId]);
+
+  useEffect(() => {
+    if (editId) return;
+    const timer = setTimeout(() => {
+      saveLocalDraft();
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [title, description, content, category, tags, coverImage, editId]);
+
+  useEffect(() => {
+    if (!title && !content) return;
+    const timer = setTimeout(() => {
+      if (title.trim() || content.trim()) {
+        void autoSaveDraft();
+      }
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, [title, content]);
+
+  function clearLocalDraft() {
+    localStorage.removeItem('blog-draft');
   }
+
 
   async function handleCreateCollection() {
     if (!newCollectionName.trim()) return;

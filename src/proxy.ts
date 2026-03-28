@@ -26,7 +26,7 @@ function applySecurityHeaders(res: NextResponse): void {
   res.headers.set('X-XSS-Protection', '1; mode=block');
   res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.headers.set('Permissions-Policy', 'geolocation=(self), microphone=(self), camera=(self)');
 }
 
 // ─── 需要管理员权限的路径 ──────────────────────────────────────────────────────

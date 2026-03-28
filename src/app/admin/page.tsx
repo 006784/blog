@@ -73,7 +73,7 @@ export default function AdminPage() {
   async function handleDeletePost(id: string) {
     if (!confirm('确定删除这篇文章吗？')) return;
     try {
-      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/posts/${id}/`, { method: 'DELETE' });
       if (!res.ok) throw new Error('删除失败');
       setPosts(posts.filter(p => p.id !== id));
     } catch (error) {
@@ -84,7 +84,7 @@ export default function AdminPage() {
   async function handleDeletePhoto(id: string) {
     if (!confirm('确定删除这张照片吗？')) return;
     try {
-      const res = await fetch(`/api/gallery/photos/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/gallery/photos/${id}/`, { method: 'DELETE' });
       if (!res.ok) throw new Error('删除失败');
       setPhotos(photos.filter(p => p.id !== id));
     } catch (error) {

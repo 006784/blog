@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { type ComponentPropsWithoutRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check } from 'lucide-react';
 import { APPLE_EASE_SOFT, APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
@@ -95,10 +95,15 @@ export function CodeBlock({ children, language }: CodeBlockProps) {
 
 // 用于 ReactMarkdown 的自定义组件
 export const markdownComponents = {
-  pre: ({ children, ...props }: any) => {
-    return <div {...props}>{children}</div>;
+  pre: ({ children, className }: ComponentPropsWithoutRef<'pre'>) => {
+    return <div className={className}>{children}</div>;
   },
-  code: ({ node, inline, className, children, ...props }: any) => {
+  code: ({
+    inline,
+    className,
+    children,
+    ...props
+  }: ComponentPropsWithoutRef<'code'> & { inline?: boolean }) => {
     const match = /language-(\w+)/.exec(className || '');
     const language = match ? match[1] : undefined;
     const codeString = String(children).replace(/\n$/, '');

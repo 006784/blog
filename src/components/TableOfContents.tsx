@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { List, ChevronRight, X } from 'lucide-react';
 import {
-  APPLE_EASE_SOFT,
   APPLE_SPRING_GENTLE,
   HOVER_BUTTON,
   TAP_BUTTON,
@@ -24,15 +23,14 @@ interface TableOfContentsProps {
 }
 
 export function TableOfContents({ content, className = '' }: TableOfContentsProps) {
-  const [headings, setHeadings] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
 
   // 解析Markdown标题
-  useEffect(() => {
+  const headings = useMemo(() => {
     const regex = /^(#{1,6})\s+(.+)$/gm;
     const items: TocItem[] = [];
-    let match;
+    let match: RegExpExecArray | null;
 
     while ((match = regex.exec(content)) !== null) {
       const level = match[1].length;
@@ -45,7 +43,7 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
       items.push({ id, text, level });
     }
 
-    setHeadings(items);
+    return items;
   }, [content]);
 
   // 监听滚动更新当前活动标题

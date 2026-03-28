@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Loader2, CheckCircle, XCircle, Eye, EyeOff, Zap, HelpCircle, MessageSquare } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Eye, EyeOff, Zap, HelpCircle, MessageSquare } from 'lucide-react';
 import { DifficultyBadge } from '../DifficultyBadge';
 import { ProblemFormModal } from './ProblemFormModal';
 
@@ -18,7 +18,7 @@ interface Problem {
   accept_count: number;
 }
 
-const TYPE_ICON: Record<string, React.ReactNode> = {
+const TYPE_ICON: Record<string, ReactNode> = {
   algorithm:       <Zap className="w-3.5 h-3.5" />,
   multiple_choice: <HelpCircle className="w-3.5 h-3.5" />,
   interview:       <MessageSquare className="w-3.5 h-3.5" />,
@@ -42,7 +42,25 @@ export function PracticeAdminTab() {
     setLoading(false);
   }
 
-  useEffect(() => { loadProblems(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchProblems = async () => {
+      setLoading(true);
+      const res = await fetch('/api/practice/problems?limit=200');
+      const data = await res.json();
+      if (!cancelled) {
+        setProblems(data.problems ?? []);
+        setLoading(false);
+      }
+    };
+
+    fetchProblems();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleDelete(id: string) {
     if (!confirm('确定删除这道题目吗？相关提交记录也会一并删除。')) return;

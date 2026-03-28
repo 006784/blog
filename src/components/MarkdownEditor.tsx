@@ -18,7 +18,7 @@ interface MarkdownEditorProps {
 interface ToolbarButton {
   icon: React.ElementType;
   label: string;
-  action: () => void;
+  action: 'bold' | 'italic' | 'heading1' | 'heading2' | 'heading3' | 'list' | 'orderedList' | 'taskList' | 'quote' | 'code' | 'link' | 'image' | 'table' | 'divider';
   shortcut?: string;
 }
 
@@ -80,21 +80,68 @@ export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorP
   }, [history, historyIndex, onChange]);
 
   const toolbarButtons: ToolbarButton[] = [
-    { icon: Bold, label: '粗体', action: () => insertText('**', '**', '粗体文字'), shortcut: 'Ctrl+B' },
-    { icon: Italic, label: '斜体', action: () => insertText('*', '*', '斜体文字'), shortcut: 'Ctrl+I' },
-    { icon: Heading1, label: '标题1', action: () => insertAtLineStart('# ') },
-    { icon: Heading2, label: '标题2', action: () => insertAtLineStart('## ') },
-    { icon: Heading3, label: '标题3', action: () => insertAtLineStart('### ') },
-    { icon: List, label: '无序列表', action: () => insertAtLineStart('- ') },
-    { icon: ListOrdered, label: '有序列表', action: () => insertAtLineStart('1. ') },
-    { icon: CheckSquare, label: '任务列表', action: () => insertAtLineStart('- [ ] ') },
-    { icon: Quote, label: '引用', action: () => insertAtLineStart('> ') },
-    { icon: Code, label: '代码', action: () => insertText('`', '`', 'code') },
-    { icon: Link2, label: '链接', action: () => insertText('[', '](url)', '链接文字') },
-    { icon: Image, label: '图片', action: () => insertText('![', '](图片链接)', '图片描述') },
-    { icon: Table, label: '表格', action: () => insertText('\n| 列1 | 列2 | 列3 |\n|------|------|------|\n| 内容 | 内容 | 内容 |\n', '') },
-    { icon: Minus, label: '分割线', action: () => insertText('\n---\n', '') },
+    { icon: Bold, label: '粗体', action: 'bold', shortcut: 'Ctrl+B' },
+    { icon: Italic, label: '斜体', action: 'italic', shortcut: 'Ctrl+I' },
+    { icon: Heading1, label: '标题1', action: 'heading1' },
+    { icon: Heading2, label: '标题2', action: 'heading2' },
+    { icon: Heading3, label: '标题3', action: 'heading3' },
+    { icon: List, label: '无序列表', action: 'list' },
+    { icon: ListOrdered, label: '有序列表', action: 'orderedList' },
+    { icon: CheckSquare, label: '任务列表', action: 'taskList' },
+    { icon: Quote, label: '引用', action: 'quote' },
+    { icon: Code, label: '代码', action: 'code' },
+    { icon: Link2, label: '链接', action: 'link' },
+    { icon: Image, label: '图片', action: 'image' },
+    { icon: Table, label: '表格', action: 'table' },
+    { icon: Minus, label: '分割线', action: 'divider' },
   ];
+
+  const handleToolbarAction = useCallback((action: ToolbarButton['action']) => {
+    switch (action) {
+      case 'bold':
+        insertText('**', '**', '粗体文字');
+        break;
+      case 'italic':
+        insertText('*', '*', '斜体文字');
+        break;
+      case 'heading1':
+        insertAtLineStart('# ');
+        break;
+      case 'heading2':
+        insertAtLineStart('## ');
+        break;
+      case 'heading3':
+        insertAtLineStart('### ');
+        break;
+      case 'list':
+        insertAtLineStart('- ');
+        break;
+      case 'orderedList':
+        insertAtLineStart('1. ');
+        break;
+      case 'taskList':
+        insertAtLineStart('- [ ] ');
+        break;
+      case 'quote':
+        insertAtLineStart('> ');
+        break;
+      case 'code':
+        insertText('`', '`', 'code');
+        break;
+      case 'link':
+        insertText('[', '](url)', '链接文字');
+        break;
+      case 'image':
+        insertText('![', '](图片链接)', '图片描述');
+        break;
+      case 'table':
+        insertText('\n| 列1 | 列2 | 列3 |\n|------|------|------|\n| 内容 | 内容 | 内容 |\n', '');
+        break;
+      case 'divider':
+        insertText('\n---\n', '');
+        break;
+    }
+  }, [insertAtLineStart, insertText]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.ctrlKey || e.metaKey) {
@@ -127,7 +174,7 @@ export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorP
 
   // 简单的 Markdown 渲染
   const renderMarkdown = (text: string) => {
-    let html = text
+    const html = text
       // 代码块
       .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-secondary rounded-lg p-4 overflow-x-auto my-4"><code class="text-sm">$2</code></pre>')
       // 行内代码
@@ -198,7 +245,7 @@ export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorP
             key={index}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={btn.action}
+            onClick={() => handleToolbarAction(btn.action)}
             className="p-2 rounded-lg hover:bg-secondary transition-colors"
             title={btn.label + (btn.shortcut ? ` (${btn.shortcut})` : '')}
           >

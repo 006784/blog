@@ -8,7 +8,6 @@ interface Props {
   onClose: () => void;
 }
 
-type ExportFormat = 'markdown';
 type ExportRange = 'all' | 'month' | 'year';
 
 function buildMarkdown(diary: Diary): string {

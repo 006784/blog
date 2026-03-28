@@ -25,7 +25,7 @@ interface DeviceSyncProps {
   className?: string;
 }
 
-export function DeviceSync({ diaries: _diaries, className = '' }: DeviceSyncProps) {
+export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
   const [syncConfig, setSyncConfig] = useState<SyncConfig>({
     syncEnabled: false,
     syncFrequency: 'interval',
@@ -228,10 +228,13 @@ export function DeviceSync({ diaries: _diaries, className = '' }: DeviceSyncProp
   return (
     <div className={`bg-white rounded-xl border border-gray-200 p-6 ${className}`}>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <RefreshCw className="w-5 h-5 text-amber-500" />
-          多设备同步
-        </h3>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <RefreshCw className="w-5 h-5 text-amber-500" />
+            多设备同步
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">当前管理 {diaries.length} 篇日记</p>
+        </div>
         
         <div className="flex items-center gap-3">
           <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
@@ -323,7 +326,10 @@ export function DeviceSync({ diaries: _diaries, className = '' }: DeviceSyncProp
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-600">平台:</span>
-              <span className="font-medium">{deviceInfo.platform}</span>
+              <span className="font-medium inline-flex items-center gap-1">
+                {getDeviceIcon(deviceInfo.platform)}
+                {deviceInfo.platform}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-600">上次更新:</span>

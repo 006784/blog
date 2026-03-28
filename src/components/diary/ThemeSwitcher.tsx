@@ -15,16 +15,13 @@ export function ThemeSwitcher({ current, onChange }: Props) {
   const handleChange = (t: DiaryTheme) => {
     onChange(t);
     setOpen(false);
-    // Persist
-    const token = typeof window !== 'undefined' ? localStorage.getItem('admin-token') : null;
-    if (token) {
-      fetch('/api/diary/settings', {
+    if (typeof window !== 'undefined') {
+      fetch('/api/diary/settings/', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme: t }),
       }).catch(() => {});
-    }
-    if (typeof window !== 'undefined') {
       localStorage.setItem('diary-theme', t);
     }
   };

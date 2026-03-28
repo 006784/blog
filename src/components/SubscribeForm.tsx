@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useEffectEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Loader2, Check, AlertCircle, Sparkles, Shield } from 'lucide-react';
 import { Turnstile } from './Turnstile';
@@ -33,14 +33,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
     setError('验证已过期，请重新验证');
   }, []);
 
-  // 当获取到 token 且有待提交时，自动提交
-  useEffect(() => {
-    if (pendingSubmit && turnstileToken) {
-      doSubmit();
-    }
-  }, [turnstileToken, pendingSubmit]);
-
-  const doSubmit = async () => {
+  const doSubmit = useCallback(async () => {
     setLoading(true);
     setError(null);
     setPendingSubmit(false);
@@ -65,7 +58,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
       setEmail('');
       setTurnstileToken(null);
       setShowTurnstile(false);
-      
+
       setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
       console.error('订阅失败:', err);
@@ -73,7 +66,18 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [email, turnstileToken]);
+
+  const runPendingSubmit = useEffectEvent(() => {
+    void doSubmit();
+  });
+
+  // 当获取到 token 且有待提交时，自动提交
+  useEffect(() => {
+    if (pendingSubmit && turnstileToken) {
+      runPendingSubmit();
+    }
+  }, [turnstileToken, pendingSubmit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,5 +1,12 @@
 import { Diary } from '@/lib/supabase';
 
+interface DiaryPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 // 获取日记列表
 export async function getDiariesFromApi(params: {
   page?: number;
@@ -7,7 +14,7 @@ export async function getDiariesFromApi(params: {
   mood?: string;
   startDate?: string;
   endDate?: string;
-}): Promise<{ data: Diary[]; pagination: any }> {
+}): Promise<{ data: Diary[]; pagination: DiaryPagination }> {
   const { page = 1, limit = 10, mood, startDate, endDate } = params;
   
   let url = `/api/diaries?page=${page}&limit=${limit}`;

@@ -46,7 +46,7 @@ export default function SecurityDemo() {
 
       const data = await res.json() as SecurityDemoResponse;
       setResponse(data);
-    } catch (error) {
+    } catch {
       setResponse({ success: false, error: '网络错误' });
     } finally {
       setLoading(false);

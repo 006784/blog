@@ -1,12 +1,10 @@
 // 日记模板选择组件
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Calendar, 
   MapPin, 
   Heart, 
-  Cloud, 
   BookOpen, 
   Briefcase, 
   GraduationCap, 
@@ -16,7 +14,7 @@ import {
   Trash2,
   Sparkles
 } from 'lucide-react';
-import { DiaryTemplateService, type DiaryTemplate, type TemplateVariable } from '@/lib/diary/template-service';
+import { DiaryTemplateService, type DiaryTemplate } from '@/lib/diary/template-service';
 
 interface DiaryTemplateSelectorProps {
   onSelect: (template: DiaryTemplate, variables: Record<string, string>) => void;
@@ -24,7 +22,7 @@ interface DiaryTemplateSelectorProps {
 }
 
 export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplateSelectorProps) {
-  const [templates, setTemplates] = useState<DiaryTemplate[]>([]);
+  const [templates, setTemplates] = useState<DiaryTemplate[]>(() => DiaryTemplateService.getAllTemplates());
   const [selectedTemplate, setSelectedTemplate] = useState<DiaryTemplate | null>(null);
   const [templateVariables, setTemplateVariables] = useState<Record<string, string>>({});
   const [showCustomForm, setShowCustomForm] = useState(false);
@@ -33,30 +31,25 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
   const [activeCategory, setActiveCategory] = useState('all');
   const [variableErrors, setVariableErrors] = useState<Record<string, string>>({});
 
-  // 初始化模板数据
-  useEffect(() => {
-    const allTemplates = DiaryTemplateService.getAllTemplates();
-    setTemplates(allTemplates);
-  }, []);
+  const buildInitialVariables = (template: DiaryTemplate): Record<string, string> => {
+    const variables = DiaryTemplateService.getTemplateVariables(template);
+    const initialVars: Record<string, string> = {};
 
-  // 当选择模板时，初始化变量
-  useEffect(() => {
-    if (selectedTemplate) {
-      const variables = DiaryTemplateService.getTemplateVariables(selectedTemplate);
-      const initialVars: Record<string, string> = {};
-      
-      variables.forEach(variable => {
-        initialVars[variable.name] = variable.defaultValue;
-      });
-      
-      // 如果有当前内容，尝试保留部分内容
-      if (currentContent && currentContent.trim()) {
-        initialVars.content = currentContent;
-      }
-      
-      setTemplateVariables(initialVars);
+    variables.forEach(variable => {
+      initialVars[variable.name] = variable.defaultValue;
+    });
+
+    if (currentContent && currentContent.trim()) {
+      initialVars.content = currentContent;
     }
-  }, [selectedTemplate, currentContent]);
+
+    return initialVars;
+  };
+
+  const handleSelectTemplate = (template: DiaryTemplate) => {
+    setSelectedTemplate(template);
+    setTemplateVariables(buildInitialVariables(template));
+  };
 
   // 获取分类图标
   const getCategoryIcon = (category: string) => {
@@ -127,7 +120,7 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
       return;
     }
 
-    const result = DiaryTemplateService.applyTemplate(selectedTemplate, templateVariables);
+    DiaryTemplateService.applyTemplate(selectedTemplate, templateVariables);
     onSelect(selectedTemplate, templateVariables);
   };
 
@@ -176,6 +169,7 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
       setTemplates(templates.filter(t => t.id !== templateId));
       if (selectedTemplate?.id === templateId) {
         setSelectedTemplate(null);
+        setTemplateVariables({});
       }
       alert('模板删除成功！');
     } else {
@@ -292,7 +286,7 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
                 ? 'border-amber-500 bg-amber-50'
                 : 'border-gray-200 hover:border-amber-300 hover:bg-amber-25'
             }`}
-            onClick={() => setSelectedTemplate(template)}
+            onClick={() => handleSelectTemplate(template)}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -367,7 +361,10 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
               应用模板
             </button>
             <button
-              onClick={() => setSelectedTemplate(null)}
+              onClick={() => {
+                setSelectedTemplate(null);
+                setTemplateVariables({});
+              }}
               className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
             >
               取消

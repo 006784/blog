@@ -13,9 +13,9 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const toneClasses: Record<BadgeTone, Record<BadgeVariant, string>> = {
   default: {
-    solid: 'border-transparent bg-[var(--color-primary-500)] text-[var(--color-primary-foreground)]',
-    outline: 'border-[color:var(--border-default)] bg-transparent text-[var(--color-neutral-700)]',
-    soft: 'border-transparent bg-[var(--surface-overlay)] text-[var(--color-neutral-700)]',
+    solid: 'border-white/35 bg-[linear-gradient(135deg,var(--color-primary-500),var(--color-primary-600))] text-[var(--color-primary-foreground)] shadow-[0_12px_22px_-18px_var(--surface-button-shadow)]',
+    outline: 'border-[color:var(--border-default)] bg-white/35 text-[var(--color-neutral-700)]',
+    soft: 'border-transparent bg-[linear-gradient(180deg,var(--surface-overlay),var(--surface-raised))] text-[var(--color-neutral-700)] shadow-[inset_0_1px_0_var(--surface-card-highlight)]',
   },
   success: {
     solid: 'border-transparent bg-[var(--color-success)] text-white',
@@ -48,7 +48,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium tracking-[0.04em]',
+        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium tracking-[0.04em] backdrop-blur-sm',
         toneClasses[tone][variant],
         className
       )}

@@ -1,6 +1,4 @@
 'use client';
-
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Type, Minus, Plus, X, Check, RotateCcw } from 'lucide-react';
 import { useFont, fonts } from './FontProvider';

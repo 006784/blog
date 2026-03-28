@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Bookmark, Eye, Share2, Check } from 'lucide-react';
 import { APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
@@ -17,12 +17,7 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    fetchStats();
-    trackView();
-  }, [postId]);
-
-  const fetchStats = async () => {
+  const fetchStats = useEffectEvent(async () => {
     try {
       const res = await fetch(`/api/interactions?postId=${postId}`);
       const data = await res.json();
@@ -40,9 +35,9 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
     } finally {
       setLoading(false);
     }
-  };
+  });
 
-  const trackView = async () => {
+  const trackView = useEffectEvent(async () => {
     try {
       await fetch('/api/stats', {
         method: 'POST',
@@ -56,7 +51,12 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
     } catch (error) {
       console.error('Track error:', error);
     }
-  };
+  });
+
+  useEffect(() => {
+    void fetchStats();
+    void trackView();
+  }, [postId]);
 
   const handleInteraction = async (type: 'like' | 'bookmark') => {
     try {

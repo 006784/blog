@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Image, Video, FileText, X, Download, Upload, Play, Pause } from 'lucide-react';
+import { Image as ImageIcon, Video, FileText, X, Download, Upload, Play, Pause } from 'lucide-react';
 import { MultimediaService, type MediaAttachment } from '@/lib/diary/multimedia-service';
 
 interface AttachmentManagerProps {
@@ -88,36 +88,11 @@ export function AttachmentManager({ onAttachmentsChange, className = '' }: Attac
     onAttachmentsChange(newAttachments);
   };
 
-  // 上传附件到服务器
-  const uploadAttachment = async (attachment: MediaAttachment) => {
-    if (attachment.url.startsWith('blob:')) {
-      setUploading(true);
-      try {
-        const result = await MultimediaService.uploadMedia(attachment.file);
-        if (result.success && result.url) {
-          // 更新附件URL
-          const updatedAttachments = attachments.map(att => 
-            att.id === attachment.id ? { ...att, url: result.url! } : att
-          );
-          setAttachments(updatedAttachments);
-          onAttachmentsChange(updatedAttachments);
-        } else {
-          alert(`上传失败: ${result.error}`);
-        }
-      } catch (error) {
-        console.error('上传失败:', error);
-        alert('上传失败');
-      } finally {
-        setUploading(false);
-      }
-    }
-  };
-
   // 获取文件图标
   const getFileIcon = (type: string) => {
     switch (true) {
       case type.startsWith('image/'):
-        return <Image className="w-4 h-4" />;
+        return <ImageIcon className="w-4 h-4" />;
       case type.startsWith('video/'):
         return <Video className="w-4 h-4" />;
       case type.startsWith('audio/'):
@@ -252,6 +227,7 @@ export function GifPlayer({ src, alt = '', className = '' }: GifPlayerProps) {
 
   return (
     <div className={`relative inline-block ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt}

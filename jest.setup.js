@@ -20,10 +20,13 @@ jest.mock('next/navigation', () => ({
 
 // Mock Next.js image component
 jest.mock('next/image', () => {
-  return ({ src, alt, ...props }) => {
-    // eslint-disable-next-line @next/next/no-img-element
+  function MockNextImage({ src, alt, ...props }) {
     return React.createElement('img', { src, alt, ...props });
-  };
+  }
+
+  MockNextImage.displayName = 'MockNextImage';
+
+  return MockNextImage;
 });
 
 // Mock framer-motion

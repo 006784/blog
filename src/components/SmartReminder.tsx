@@ -1,20 +1,29 @@
 // 智能提醒组件
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Bell, Clock, MapPin, Sun, Moon, Trash2, Plus, CheckCircle, AlertCircle } from 'lucide-react';
+import { useEffect, useEffectEvent, useState } from 'react';
+import { Bell, Clock, MapPin, Sun, Trash2, Plus, CheckCircle, AlertCircle } from 'lucide-react';
 import { SmartReminderService, type Reminder, type ReminderNotification } from '@/lib/diary/smart-reminder-service';
 
 interface SmartReminderProps {
   className?: string;
 }
 
+type ReminderDraft = {
+  title: string;
+  description: string;
+  type: Reminder['type'];
+  schedule: string;
+  location: NonNullable<Reminder['location']>;
+  weatherConditions: NonNullable<Reminder['weatherConditions']>;
+};
+
 export function SmartReminder({ className = '' }: SmartReminderProps) {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [notifications, setNotifications] = useState<ReminderNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
-  const [newReminder, setNewReminder] = useState({
+  const [newReminder, setNewReminder] = useState<ReminderDraft>({
     title: '',
     description: '',
     type: 'daily' as Reminder['type'],
@@ -26,19 +35,8 @@ export function SmartReminder({ className = '' }: SmartReminderProps) {
   const [loading, setLoading] = useState(true);
 
   // 初始化和加载数据
-  useEffect(() => {
-    loadRemindersAndNotifications();
-    
-    // 定期检查提醒
-    const interval = setInterval(async () => {
-      await checkAndProcessReminders();
-    }, 60000); // 每分钟检查一次
-
-    return () => clearInterval(interval);
-  }, []);
-
   // 加载提醒和通知
-  const loadRemindersAndNotifications = async () => {
+  const loadRemindersAndNotifications = useEffectEvent(async () => {
     setLoading(true);
     try {
       const loadedReminders = await SmartReminderService.getReminders();
@@ -53,10 +51,10 @@ export function SmartReminder({ className = '' }: SmartReminderProps) {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   // 检查并处理提醒
-  const checkAndProcessReminders = async () => {
+  const checkAndProcessReminders = useEffectEvent(async () => {
     try {
       // 这里通常需要获取用户的当前位置和天气信息
       // 在实际应用中，可以从API获取这些信息
@@ -91,28 +89,33 @@ export function SmartReminder({ className = '' }: SmartReminderProps) {
     } catch (error) {
       console.error('检查提醒失败:', error);
     }
-  };
+  });
+
+  useEffect(() => {
+    void loadRemindersAndNotifications();
+
+    const interval = setInterval(() => {
+      void checkAndProcessReminders();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // 创建新提醒
   const handleCreateReminder = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const reminderData = {
+      const reminderData: Omit<Reminder, 'id' | 'createdAt' | 'enabled'> = {
         title: newReminder.title,
         description: newReminder.description,
         type: newReminder.type,
         schedule: newReminder.schedule || new Date().toISOString(),
-        enabled: true
+        ...(newReminder.type === 'location' ? { location: newReminder.location } : {}),
+        ...(newReminder.type === 'weather' ? { weatherConditions: newReminder.weatherConditions } : {})
       };
 
-      if (newReminder.type === 'location') {
-        (reminderData as any).location = newReminder.location;
-      } else if (newReminder.type === 'weather') {
-        (reminderData as any).weatherConditions = newReminder.weatherConditions;
-      }
-
-      const createdReminder = await SmartReminderService.createReminder(reminderData as any);
+      const createdReminder = await SmartReminderService.createReminder(reminderData);
       setReminders([...reminders, createdReminder]);
       setNewReminder({
         title: '',
@@ -193,7 +196,7 @@ export function SmartReminder({ className = '' }: SmartReminderProps) {
   };
 
   // 获取天气条件描述
-  const getWeatherConditionText = (conditions: any) => {
+  const getWeatherConditionText = (conditions?: Reminder['weatherConditions']) => {
     if (!conditions) return '';
     const parts = [];
     
@@ -330,7 +333,7 @@ export function SmartReminder({ className = '' }: SmartReminderProps) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
                 <select
                   value={newReminder.type}
-                  onChange={(e) => setNewReminder({...newReminder, type: e.target.value as any})}
+                  onChange={(e) => setNewReminder({...newReminder, type: e.target.value as Reminder['type']})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   <option value="daily">日常提醒</option>
@@ -511,7 +514,7 @@ export function SmartReminder({ className = '' }: SmartReminderProps) {
           <div className="text-center py-8 text-gray-500">
             <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p>还没有创建任何提醒</p>
-            <p className="text-sm">点击"新增提醒"按钮创建第一个提醒</p>
+            <p className="text-sm">点击&quot;新增提醒&quot;按钮创建第一个提醒</p>
           </div>
         ) : (
           <div className="space-y-3">

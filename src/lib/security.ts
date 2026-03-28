@@ -36,7 +36,7 @@ const SECURITY_CONFIG = {
     'X-XSS-Protection': '1; mode=block',
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+    'Permissions-Policy': 'geolocation=(self), microphone=(self), camera=(self)',
   }
 };
 
@@ -58,6 +58,12 @@ const rateLimiters = {
     duration: SECURITY_CONFIG.rateLimits.upload.duration,
   })
 };
+
+type RateLimitError = {
+  msBeforeNext?: number;
+};
+
+type ValidationRule = (value: unknown) => boolean | string;
 
 // 获取客户端IP
 function getClientIP(request: NextRequest): string {
@@ -142,8 +148,9 @@ export async function rateLimitMiddleware(
     try {
       await limiter.consume(key, 1);
       return null; // 允许通过
-    } catch (rateLimiterRes: any) {
-      const retrySecs = rateLimiterRes?.msBeforeNext ? rateLimiterRes.msBeforeNext / 1000 : 60;
+    } catch (rateLimiterRes: unknown) {
+      const limiterError = rateLimiterRes as RateLimitError;
+      const retrySecs = limiterError.msBeforeNext ? limiterError.msBeforeNext / 1000 : 60;
       
       return NextResponse.json(
         { 
@@ -220,7 +227,7 @@ export function getContentSecurityPolicy(): string {
 
 // 安全响应包装器
 export function createSecureResponse(
-  data: any, 
+  data: unknown,
   options?: { status?: number; headers?: Record<string, string> }
 ): NextResponse {
   const response = NextResponse.json(data, { status: options?.status });
@@ -242,12 +249,19 @@ export function createSecureResponse(
 }
 
 // 输入验证装饰器
-export function validateInput(validationRules: Record<string, (value: any) => boolean | string>) {
-  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
+export function validateInput(validationRules: Record<string, ValidationRule>) {
+  return function(_target: object, _propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value as ((...args: unknown[]) => unknown) | undefined;
+    if (!originalMethod) {
+      return descriptor;
+    }
     
-    descriptor.value = function(...args: any[]) {
-      const [requestData] = args;
+    descriptor.value = function(this: unknown, ...args: unknown[]) {
+      const requestData = (
+        args[0] && typeof args[0] === 'object'
+          ? args[0]
+          : {}
+      ) as Record<string, unknown>;
       
       // 验证输入数据
       for (const [field, validator] of Object.entries(validationRules)) {

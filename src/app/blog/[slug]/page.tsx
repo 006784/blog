@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import BlogPostPageClient from './page-client';
-import { getPostBySlug } from '@/lib/supabase';
+import { getSamplePostBySlug, getSamplePosts } from '@/lib/sample-posts';
+import { getPublicPostBySlug } from '@/lib/supabase';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { generateArticleSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
@@ -14,18 +15,19 @@ export async function generateStaticParams() {
   try {
     const { getPublishedPosts } = await import('@/lib/supabase');
     const posts = await getPublishedPosts();
-    return posts.map((post) => ({
+    const samplePosts = getSamplePosts();
+    return [...posts, ...samplePosts].map((post) => ({
       slug: post.slug,
     }));
   } catch (error) {
     console.error('生成博客文章静态参数失败:', error);
-    return [];
+    return getSamplePosts().map((post) => ({ slug: post.slug }));
   }
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(decodeURIComponent(slug));
+  const post = (await getPublicPostBySlug(decodeURIComponent(slug))) || getSamplePostBySlug(decodeURIComponent(slug));
 
   if (!post) {
     return { title: '文章未找到 - Lumen' };
@@ -72,7 +74,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  const post = await getPostBySlug(decodedSlug);
+  const post = (await getPublicPostBySlug(decodedSlug)) || getSamplePostBySlug(decodedSlug);
 
   const articleSchema = post ? generateArticleSchema(post) : null;
   const breadcrumbSchema = generateBreadcrumbSchema([

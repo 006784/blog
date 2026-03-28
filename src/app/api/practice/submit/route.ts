@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
   let status: string = 'accepted';
   let output = '';
   let errorMsg = '';
-  let caseResults: Array<{ input: string; expected: string; actual: string; passed: boolean; hidden: boolean }> = [];
+  const caseResults: Array<{ input: string; expected: string; actual: string; passed: boolean; hidden: boolean }> = [];
   const startTime = Date.now();
 
   // 选择题判断

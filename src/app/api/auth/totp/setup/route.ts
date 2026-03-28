@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { generateSecret, generateURI } from 'otplib';
 import QRCode from 'qrcode';
 import { ok, err } from '@/lib/api';

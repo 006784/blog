@@ -15,6 +15,15 @@ interface ReadingPosition {
   savedAt: number;
 }
 
+function getSavedPosition(slug: string): ReadingPosition | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const positions = getPositions();
+  return positions[slug] || null;
+}
+
 function getPositions(): Record<string, ReadingPosition> {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -42,23 +51,31 @@ interface PostReadingMemoryProps {
 }
 
 export function PostReadingMemory({ slug }: PostReadingMemoryProps) {
-  const [savedPosition, setSavedPosition] = useState<ReadingPosition | null>(null);
-  const [showToast, setShowToast] = useState(false);
+  const [savedPosition, setSavedPosition] = useState<ReadingPosition | null>(() => getSavedPosition(slug));
+  const [showToast, setShowToast] = useState(() => {
+    const saved = getSavedPosition(slug);
+    return Boolean(saved && saved.percentage > SHOW_TOAST_THRESHOLD);
+  });
   const lastSaveRef = useRef<number>(0);
   const toastDismissed = useRef(false);
 
   // 初始化：读取保存的位置
   useEffect(() => {
-    const positions = getPositions();
-    const saved = positions[slug];
-    if (saved && saved.percentage > SHOW_TOAST_THRESHOLD) {
+    const frame = window.requestAnimationFrame(() => {
+      const saved = getSavedPosition(slug);
       setSavedPosition(saved);
-      setShowToast(true);
-      // 5 秒后自动关闭 toast
-      const timer = setTimeout(() => setShowToast(false), 5000);
-      return () => clearTimeout(timer);
-    }
+      setShowToast(Boolean(saved && saved.percentage > SHOW_TOAST_THRESHOLD && !toastDismissed.current));
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [slug]);
+
+  useEffect(() => {
+    if (!showToast) return;
+
+    const timer = setTimeout(() => setShowToast(false), 5000);
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   // 滚动监听：节流保存位置
   useEffect(() => {

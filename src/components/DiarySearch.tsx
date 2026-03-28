@@ -1,8 +1,8 @@
 // 日记搜索组件
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, X, Filter, Calendar, Heart, Cloud, Hash } from 'lucide-react';
+import { useEffect, useEffectEvent, useState } from 'react';
+import { Search, X, Filter, Calendar, Heart, Cloud } from 'lucide-react';
 import { DiarySearchService, type SearchOptions, type SearchResult } from '@/lib/diary/search-service';
 import type { Diary } from '@/lib/supabase';
 
@@ -12,6 +12,8 @@ interface DiarySearchProps {
   onClearSearch: () => void;
 }
 
+type SearchStats = ReturnType<typeof DiarySearchService.getSearchStats>;
+
 export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySearchProps) {
   const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -20,10 +22,11 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
     sortOrder: 'desc'
   });
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searchStats, setSearchStats] = useState<any>(null);
+  const [searchStats, setSearchStats] = useState<SearchStats | null>(null);
+  const searchOptionsKey = JSON.stringify(searchOptions);
 
   // 执行搜索
-  const performSearch = () => {
+  const performSearch = useEffectEvent(() => {
     if (!query.trim() && Object.keys(searchOptions).length <= 2) {
       setSearchResults([]);
       setSearchStats(null);
@@ -42,7 +45,7 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
     setSearchResults(results);
     setSearchStats(stats);
     onSearchResults(results);
-  };
+  });
 
   // 更新搜索选项
   const updateSearchOptions = (updates: Partial<SearchOptions>) => {
@@ -65,7 +68,7 @@ export function DiarySearch({ diaries, onSearchResults, onClearSearch }: DiarySe
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [query, JSON.stringify(searchOptions)]);
+  }, [query, searchOptionsKey]);
 
   return (
     <div className="mb-8">

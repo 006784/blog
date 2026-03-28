@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useEffectEvent, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -35,11 +35,7 @@ function MobileWriteContent() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [loading, setLoading] = useState(!!editId);
 
-  useEffect(() => {
-    if (editId) loadPost(editId);
-  }, [editId]);
-
-  async function loadPost(id: string) {
+  const loadPost = useEffectEvent(async (id: string) => {
     try {
       setLoading(true);
       const post = await getPostById(id) || await getPostBySlug(id);
@@ -54,7 +50,13 @@ function MobileWriteContent() {
     } finally {
       setLoading(false);
     }
-  }
+  });
+
+  useEffect(() => {
+    if (editId) {
+      void loadPost(editId);
+    }
+  }, [editId]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });

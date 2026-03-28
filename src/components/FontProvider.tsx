@@ -67,18 +67,21 @@ export function FontProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    // 从 localStorage 恢复设置
-    const savedFont = localStorage.getItem('article-font');
-    const savedSize = localStorage.getItem('article-font-size');
-    const savedLineHeight = localStorage.getItem('article-line-height');
-    
-    if (savedFont) {
-      const font = fonts.find(f => f.id === savedFont);
-      if (font) setCurrentFont(font);
-    }
-    if (savedSize) setFontSize(parseInt(savedSize));
-    if (savedLineHeight) setLineHeight(parseFloat(savedLineHeight));
+    const frame = window.requestAnimationFrame(() => {
+      setMounted(true);
+      const savedFont = localStorage.getItem('article-font');
+      const savedSize = localStorage.getItem('article-font-size');
+      const savedLineHeight = localStorage.getItem('article-line-height');
+
+      if (savedFont) {
+        const font = fonts.find(f => f.id === savedFont);
+        if (font) setCurrentFont(font);
+      }
+      if (savedSize) setFontSize(parseInt(savedSize, 10));
+      if (savedLineHeight) setLineHeight(parseFloat(savedLineHeight));
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const setFont = (fontId: string) => {

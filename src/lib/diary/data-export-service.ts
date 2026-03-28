@@ -1,6 +1,8 @@
 // 数据导出备份服务
 // 提供多种格式导出、自动云备份、版本历史记录等功能
 
+import type { Diary } from '../supabase';
+
 export interface ExportFormat {
   type: 'pdf' | 'txt' | 'markdown' | 'json' | 'html';
   name: string;
@@ -32,6 +34,25 @@ export interface ExportOptions {
   encryption: boolean;
 }
 
+interface DiaryExportEntry extends Diary {
+  mood_intensity?: number;
+}
+
+interface JsonDiaryExportEntry {
+  date: string;
+  title?: string;
+  content: string;
+  mood?: string;
+  weather?: string;
+  location?: string;
+  tags?: string[];
+  images?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  isPublic?: boolean;
+  wordCount?: number;
+}
+
 export class DataExportService {
   private static readonly SUPPORTED_FORMATS: ExportFormat[] = [
     { type: 'pdf', name: 'PDF', description: '便携文档格式，适合打印和分享' },
@@ -55,7 +76,7 @@ export class DataExportService {
    * 导出日记为指定格式
    */
   static async exportDiaries(
-    diaries: any[], 
+    diaries: DiaryExportEntry[],
     format: ExportFormat['type'], 
     options: ExportOptions = {
       includeImages: true,
@@ -84,7 +105,7 @@ export class DataExportService {
   /**
    * 导出为PDF格式
    */
-  private static async exportToPDF(diaries: any[], options: ExportOptions): Promise<Blob> {
+  private static async exportToPDF(diaries: DiaryExportEntry[], options: ExportOptions): Promise<Blob> {
     // 这里使用 jsPDF 库来生成PDF
     // 由于这是服务端代码，我们模拟返回一个文本格式的PDF
     
@@ -126,7 +147,7 @@ export class DataExportService {
   /**
    * 导出为TXT格式
    */
-  private static exportToTXT(diaries: any[], options: ExportOptions): Blob {
+  private static exportToTXT(diaries: DiaryExportEntry[], options: ExportOptions): Blob {
     let content = `日记导出报告\n\n`;
     content += `导出时间: ${new Date().toLocaleString()}\n`;
     content += `日记总数: ${diaries.length}\n\n`;
@@ -164,7 +185,7 @@ export class DataExportService {
   /**
    * 导出为Markdown格式
    */
-  private static exportToMarkdown(diaries: any[], options: ExportOptions): Blob {
+  private static exportToMarkdown(diaries: DiaryExportEntry[], options: ExportOptions): Blob {
     let content = `# 日记导出报告\n\n`;
     content += `导出时间: ${new Date().toLocaleString()}\n`;
     content += `日记总数: ${diaries.length}\n\n`;
@@ -201,7 +222,7 @@ export class DataExportService {
   /**
    * 导出为JSON格式
    */
-  private static exportToJSON(diaries: any[], options: ExportOptions): Blob {
+  private static exportToJSON(diaries: DiaryExportEntry[], options: ExportOptions): Blob {
     const exportData = {
       exportInfo: {
         timestamp: new Date().toISOString(),
@@ -214,7 +235,7 @@ export class DataExportService {
         latestDate: diaries.length > 0 ? diaries[0].diary_date : null
       } : undefined,
       diaries: diaries.map(diary => {
-        const result: any = {
+        const result: JsonDiaryExportEntry = {
           date: diary.diary_date,
           title: diary.title,
           content: diary.content,
@@ -242,7 +263,7 @@ export class DataExportService {
   /**
    * 导出为HTML格式
    */
-  private static exportToHTML(diaries: any[], options: ExportOptions): Blob {
+  private static exportToHTML(diaries: DiaryExportEntry[], options: ExportOptions): Blob {
     let content = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -466,7 +487,7 @@ export class DataExportService {
   /**
    * 触发自动备份
    */
-  static async triggerAutoBackup(diaries: any[]): Promise<boolean> {
+  static async triggerAutoBackup(diaries: DiaryExportEntry[]): Promise<boolean> {
     const config = await this.getBackupConfig();
     
     if (!config.autoBackupEnabled) {
@@ -501,8 +522,8 @@ export class DataExportService {
 
       // 如果启用了云存储，上传到云存储（这里模拟）
       if (config.cloudStorage) {
-        // 在实际应用中，这里会调用云存储API
-        console.log(`模拟上传备份到云端: ${filename}`);
+        // 在实际应用中，这里会调用云存储 API，这里只保留版本记录。
+        void filename;
       }
 
       return true;
@@ -515,7 +536,7 @@ export class DataExportService {
   /**
    * 生成导出预览
    */
-  static generatePreview(diaries: any[], format: ExportFormat['type']): string {
+  static generatePreview(diaries: DiaryExportEntry[], format: ExportFormat['type']): string {
     if (diaries.length === 0) {
       return '没有可预览的日记内容';
     }

@@ -86,13 +86,19 @@ export function Navbar() {
   const { setTheme, resolvedTheme } = useTheme();
 
   useEffect(() => {
-    setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+    const frame = window.requestAnimationFrame(() => {
+      setMounted(true);
+      handleScroll();
+    });
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const toggleTheme = () => {

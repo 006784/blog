@@ -2,13 +2,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { HandwritingService, type HandwritingOptions } from '@/lib/diary/handwriting-service';
-import { PenTool, Eraser, Undo2, Redo2, Download, Palette } from 'lucide-react';
+import { HandwritingService, type HandwritingOptions, type Stroke } from '@/lib/diary/handwriting-service';
+import { Eraser, Undo2, Download, Palette } from 'lucide-react';
 
 interface HandwritingCanvasProps {
   width?: number;
   height?: number;
-  onStroke?: (stroke: any) => void;
+  onStroke?: (stroke: Stroke) => void;
   className?: string;
 }
 
@@ -28,6 +28,7 @@ export function HandwritingCanvas({
     pressureSensitivity: false,
     inkEffect: true
   });
+  const initialOptionsRef = useRef(options);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   // 初始化手写服务
@@ -38,7 +39,7 @@ export function HandwritingCanvas({
     canvas.width = width;
     canvas.height = height;
 
-    const service = new HandwritingService(canvas, options);
+    const service = new HandwritingService(canvas, initialOptionsRef.current);
     serviceRef.current = service;
 
     // 清除画布
@@ -107,6 +108,10 @@ export function HandwritingCanvas({
     if (!serviceRef.current) return;
 
     serviceRef.current.endStroke();
+    const latestStroke = serviceRef.current.getStrokes().at(-1);
+    if (latestStroke && onStroke) {
+      onStroke(latestStroke);
+    }
     setIsDrawing(false);
   };
 

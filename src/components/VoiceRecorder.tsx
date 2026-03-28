@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Pause, RotateCcw, Volume2, Download } from 'lucide-react';
+import { Mic, Square, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { MultimediaService, type AudioRecording } from '@/lib/diary/multimedia-service';
 
 interface VoiceRecorderProps {
@@ -16,12 +16,11 @@ export function VoiceRecorder({ onRecordingComplete, className = '' }: VoiceReco
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordings, setRecordings] = useState<AudioRecording[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [supported, setSupported] = useState(true);
+  const [supported] = useState(() =>
+    typeof window !== 'undefined' ? MultimediaService.isRecordingSupported() : true
+  );
 
   useEffect(() => {
-    // 检查浏览器是否支持录音
-    setSupported(MultimediaService.isRecordingSupported());
-    
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);

@@ -6,6 +6,8 @@ import { Calendar, TrendingUp, Target, Trophy, Clock, BarChart3, Star } from 'lu
 import { WritingHabitsService, type WritingHabit, type WritingStatistics, type TimeAnalysis, type GoalSetting } from '@/lib/diary/writing-habits-service';
 import type { Diary } from '@/lib/supabase';
 
+type WritingMilestone = ReturnType<typeof WritingHabitsService.getMilestones>[number];
+
 interface WritingHabitsTrackerProps {
   diaries: Diary[];
   className?: string;
@@ -16,7 +18,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
   const [timeAnalysis, setTimeAnalysis] = useState<TimeAnalysis | null>(null);
   const [goals, setGoals] = useState<GoalSetting | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [milestones, setMilestones] = useState<any[]>([]);
+  const [milestones, setMilestones] = useState<WritingMilestone[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

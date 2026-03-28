@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { verify as totpVerify } from 'otplib';
 import { z } from 'zod';
 import { parseBody, ok, err } from '@/lib/api';

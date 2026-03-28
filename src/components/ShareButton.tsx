@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Link2, Twitter, MessageCircle, Copy, Check, X, QrCode } from 'lucide-react';
+import { Share2, Twitter, MessageCircle, Copy, Check, X, QrCode } from 'lucide-react';
 
 interface ShareButtonProps {
   title: string;
@@ -64,8 +64,8 @@ export function ShareButton({ title, url, description = '' }: ShareButtonProps) 
           text: description,
           url: shareUrl,
         });
-      } catch (err) {
-        console.log('Share cancelled');
+      } catch {
+        // 用户取消分享时不需要额外提示
       }
     } else {
       setIsOpen(true);

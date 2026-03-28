@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Image as ImageIcon, Palette, Type, Sparkles, RotateCcw } from 'lucide-react';
+import { Download, Image as ImageIcon, Palette, Type, Sparkles } from 'lucide-react';
 
 interface CoverGeneratorProps {
   title?: string;
@@ -35,6 +35,25 @@ export function CoverGenerator({ title = '', onGenerate }: CoverGeneratorProps) 
   const [selectedGradient, setSelectedGradient] = useState(0);
   const [selectedPattern, setSelectedPattern] = useState('none');
   const [fontSize, setFontSize] = useState(48);
+
+  function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+    const lines: string[] = [];
+    let line = '';
+    
+    for (const char of text) {
+      const testLine = line + char;
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && line) {
+        lines.push(line);
+        line = char;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) lines.push(line);
+    
+    return lines;
+  }
 
   const generateCover = useCallback(() => {
     const canvas = canvasRef.current;
@@ -127,7 +146,7 @@ export function CoverGenerator({ title = '', onGenerate }: CoverGeneratorProps) 
     
     // 标题
     ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-    const titleLines = wrapText(ctx, articleTitle || '文章标题', width - 160, fontSize);
+    const titleLines = wrapText(ctx, articleTitle || '文章标题', width - 160);
     const titleStartY = height / 2 - (titleLines.length - 1) * (fontSize * 0.6);
     
     titleLines.forEach((line, index) => {
@@ -152,26 +171,6 @@ export function CoverGenerator({ title = '', onGenerate }: CoverGeneratorProps) 
     const dataUrl = canvas.toDataURL('image/png');
     onGenerate?.(dataUrl);
   }, [articleTitle, subtitle, selectedGradient, selectedPattern, fontSize, onGenerate]);
-
-  // 文本换行
-  const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number, fontSize: number): string[] => {
-    const lines: string[] = [];
-    let line = '';
-    
-    for (const char of text) {
-      const testLine = line + char;
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && line) {
-        lines.push(line);
-        line = char;
-      } else {
-        line = testLine;
-      }
-    }
-    if (line) lines.push(line);
-    
-    return lines;
-  };
 
   const downloadCover = () => {
     const canvas = canvasRef.current;

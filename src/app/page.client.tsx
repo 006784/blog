@@ -14,8 +14,9 @@ import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { getPageStructuredData } from '@/lib/seo';
+import { filterRenderablePosts, getSamplePosts, toPublicCatalogPosts } from '@/lib/sample-posts';
 import { siteConfig } from '@/lib/site-config';
-import { defaultPosts, formatDate, type Post as LocalPost } from '@/lib/types';
+import { formatDate } from '@/lib/types';
 import { getPublishedPosts, type Post as SupabasePost } from '@/lib/supabase';
 
 interface HomePost {
@@ -29,6 +30,7 @@ interface HomePost {
   readingTime: string;
   isPinned: boolean;
   pinnedAt: string | null;
+  isDemo: boolean;
 }
 
 const navItems = [
@@ -59,39 +61,25 @@ function getCategoryLabel(category: string): string {
   return categoryLabels[normalized] || category;
 }
 
-function normalizePost(post: SupabasePost | LocalPost, index: number): HomePost {
-  if ('created_at' in post) {
-    const image = post.cover_image || post.image || fallbackImages[index % fallbackImages.length];
-
-    return {
-      slug: post.slug,
-      title: post.title,
-      description: post.description,
-      date: post.published_at || post.created_at,
-      category: getCategoryLabel(post.category),
-      tags: Array.isArray(post.tags) ? post.tags : [],
-      image,
-      readingTime: post.reading_time || '5 分钟',
-      isPinned: Boolean(post.is_pinned),
-      pinnedAt: post.pinned_at || null,
-    };
-  }
+function normalizePost(post: SupabasePost & { is_demo?: boolean }, index: number): HomePost {
+  const image = post.cover_image || post.image || fallbackImages[index % fallbackImages.length];
 
   return {
     slug: post.slug,
     title: post.title,
     description: post.description,
-    date: post.date,
+    date: post.published_at || post.created_at,
     category: getCategoryLabel(post.category),
     tags: Array.isArray(post.tags) ? post.tags : [],
-    image: post.image || fallbackImages[index % fallbackImages.length],
-    readingTime: post.readingTime || '5 分钟',
-    isPinned: false,
-    pinnedAt: null,
+    image,
+    readingTime: post.reading_time || '5 分钟',
+    isPinned: Boolean(post.is_pinned),
+    pinnedAt: post.pinned_at || null,
+    isDemo: Boolean(post.is_demo),
   };
 }
 
-const fallbackHomePosts = defaultPosts.map((post, index) => normalizePost(post, index));
+const fallbackHomePosts = getSamplePosts().map((post, index) => normalizePost(post, index));
 
 function ProgressiveImage({
   src,
@@ -148,6 +136,11 @@ function EditorialFeatureCard({
         {pinned && (
           <Badge className="atelier-pill is-spotlight border-white/20 bg-white/20 text-white backdrop-blur-xl">
             置顶文章
+          </Badge>
+        )}
+        {post.isDemo && (
+          <Badge className="atelier-pill is-demo border-white/25 bg-black/25 text-white backdrop-blur-xl">
+            示例文章
           </Badge>
         )}
       </div>
@@ -244,6 +237,12 @@ function EditorialFeedCard({
             <span className="atelier-feed-reading">{post.readingTime}</span>
           </div>
 
+          {post.isDemo && (
+            <Badge variant="soft" className="mb-3 w-fit">
+              示例
+            </Badge>
+          )}
+
           <h3>{post.title}</h3>
           <p>{post.description}</p>
 
@@ -267,7 +266,7 @@ export default function HomePageClient({
 }) {
   const [posts, setPosts] = useState<HomePost[]>(() =>
     initialPosts.length > 0
-      ? initialPosts.map((post, index) => normalizePost(post, index))
+      ? toPublicCatalogPosts(initialPosts).map((post, index) => normalizePost(post, index))
       : []
   );
   const [loading, setLoading] = useState(initialPosts.length === 0);
@@ -282,14 +281,11 @@ export default function HomePageClient({
   }, []);
 
   useEffect(() => {
-    // 服务端已预取数据，跳过客户端请求
-    if (initialPosts.length > 0) return;
-
     let mounted = true;
 
     const loadPosts = async () => {
       try {
-        const data = await getPublishedPosts();
+        const data = filterRenderablePosts(toPublicCatalogPosts(await getPublishedPosts()));
 
         if (!mounted) return;
 
@@ -314,7 +310,7 @@ export default function HomePageClient({
         }
       } catch (error) {
         console.error('加载文章失败:', error);
-        if (mounted) {
+        if (mounted && initialPosts.length === 0) {
           setPosts(fallbackHomePosts);
         }
       } finally {

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  PieChart, Pie, Cell, ResponsiveContainer, Legend,
+  PieChart, Pie, Cell, ResponsiveContainer,
 } from 'recharts';
 import { Eye, Users, TrendingUp, Heart, Loader2, Monitor, Smartphone, Tablet } from 'lucide-react';
 import { ContributionHeatmap } from './ContributionHeatmap';
@@ -83,11 +83,7 @@ export function AnalyticsDashboard() {
   const [heatmapData, setHeatmapData] = useState<{ date: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadAll();
-  }, [period]);
-
-  async function loadAll() {
+  const loadAll = useEffectEvent(async () => {
     setLoading(true);
     try {
       const [overviewRes, trendRes, devicesRes, postsRes] = await Promise.all([
@@ -124,7 +120,11 @@ export function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  });
+
+  useEffect(() => {
+    void loadAll();
+  }, [period]);
 
   if (loading) {
     return (

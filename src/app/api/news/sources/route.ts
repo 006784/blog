@@ -11,7 +11,7 @@ export const revalidate = 0;
  * GET /api/news/sources - 获取新闻源列表
  * POST /api/news/sources - 测试特定新闻源
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const newsService = new NewsCollectionService();
     const sourcesStatus = newsService.getSourcesStatus();

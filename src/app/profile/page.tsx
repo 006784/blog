@@ -8,6 +8,7 @@ import {
   Quote
 } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
+import { PasskeyManager } from '@/components/PasskeyManager';
 import { useProfile } from '@/components/ProfileProvider';
 import { useAdmin } from '@/components/AdminProvider';
 import { Badge } from '@/components/ui/Badge';
@@ -308,6 +309,15 @@ export default function ProfilePage() {
             </div>
           </form>
           </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mt-8"
+        >
+          <PasskeyManager />
         </motion.div>
       </div>
     </div>

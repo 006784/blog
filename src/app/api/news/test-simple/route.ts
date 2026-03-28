@@ -1,6 +1,5 @@
 // 简化测试版本 - 避免复杂对象序列化问题
 import { NextRequest } from 'next/server';
-import { NewsCollectionService } from '@/lib/news/news-collection-service';
 import { logger } from '@/lib/logger';
 
 // 配置静态导出
@@ -21,28 +20,7 @@ export async function POST(request: NextRequest) {
     
     logger.info('手动触发新闻收集', { recipientEmail });
     
-    // 创建简化配置
-    const config = {
-      recipientEmail,
-      sendTime: '09:00',
-      timezone: 'Asia/Shanghai',
-      categories: ['technology'],
-      minImportanceScore: 70,
-      maxItemsPerCategory: 2,
-      includeSummary: true,
-      includeImages: false
-    };
-    
-    // 先测试收集功能（不发送邮件）
-    const newsService = new NewsCollectionService();
-    
-    // 只收集科技类新闻进行测试
-    const testSources = [
-      { id: 'techcrunch', name: 'TechCrunch', url: 'http://feeds.feedburner.com/TechCrunch/', type: 'rss', category: 'technology', language: 'en', country: 'US', isActive: true },
-      { id: 'the-verge', name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', type: 'rss', category: 'technology', language: 'en', country: 'US', isActive: true }
-    ] as any;
-    
-    // 模拟收集结果
+    // 当前接口仍返回 mock 内容，用于验证邮件模板与投递链路。
     const mockResult = {
       id: `test_${Date.now()}`,
       date: new Date().toISOString(),

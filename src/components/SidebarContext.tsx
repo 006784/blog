@@ -14,8 +14,14 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved) setIsCollapsed(JSON.parse(saved));
+    const frame = window.requestAnimationFrame(() => {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      if (saved) {
+        setIsCollapsed(JSON.parse(saved));
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const toggleCollapse = () => {

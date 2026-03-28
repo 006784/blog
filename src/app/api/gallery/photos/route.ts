@@ -10,11 +10,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '未授权' }, { status: 401 });
   }
   const body = await request.json();
+  const photos = Array.isArray(body?.photos)
+    ? body.photos
+    : body
+      ? [body]
+      : [];
+
+  if (photos.length === 0) {
+    return NextResponse.json({ error: '缺少照片数据' }, { status: 400 });
+  }
+
   const { data, error } = await supabaseAdmin
     .from('photos')
-    .insert([body])
-    .select()
-    .single();
+    .insert(photos)
+    .select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ photo: data }, { status: 201 });
+  return NextResponse.json({
+    photo: data?.[0] ?? null,
+    photos: data ?? [],
+  }, { status: 201 });
 }

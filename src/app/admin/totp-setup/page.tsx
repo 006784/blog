@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState } from 'react';
 
 export default function TotpSetupPage() {
@@ -57,7 +58,14 @@ export default function TotpSetupPage() {
         <>
           <h2>扫描二维码</h2>
           <p>用 Google Authenticator 扫下方二维码，或手动输入密钥：</p>
-          <img src={qr} alt="TOTP QR" style={{ width: 200, height: 200, display: 'block', margin: '16px 0' }} />
+          <Image
+            src={qr}
+            alt="TOTP 二维码"
+            width={200}
+            height={200}
+            unoptimized
+            style={{ display: 'block', margin: '16px 0' }}
+          />
           <p style={{ wordBreak: 'break-all', background: '#f5f5f5', padding: 8 }}>
             手动密钥：<strong>{secret}</strong>
           </p>

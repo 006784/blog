@@ -34,6 +34,7 @@ const JWT_SECRET = new TextEncoder().encode(RAW_SECRET);
 const ACCESS_EXPIRY_S  = 60 * 60;
 const REFRESH_EXPIRY_S = 7 * 24 * 60 * 60;
 const EMAIL_LOGIN_EXPIRY_S = 10 * 60;
+const PASSKEY_CHALLENGE_EXPIRY_S = 10 * 60;
 
 function cookieOpts(maxAgeSeconds: number) {
   return {
@@ -59,6 +60,8 @@ export async function signRefreshToken(sessionId: string): Promise<string> {
 
 const COOKIE_TOTP_PENDING = 'admin_totp_pending';
 const COOKIE_EMAIL_LOGIN_PENDING = 'admin_email_login_pending';
+const COOKIE_PASSKEY_REGISTRATION_PENDING = 'admin_passkey_registration_pending';
+const COOKIE_PASSKEY_AUTH_PENDING = 'admin_passkey_auth_pending';
 
 export async function signTotpPendingCookie(secret: string): Promise<string> {
   return new SignJWT({ totpSecret: secret })
@@ -115,6 +118,44 @@ export function isEmailLoginCodeValid(inputCode: string, codeHash: string): bool
 
 export { COOKIE_EMAIL_LOGIN_PENDING, EMAIL_LOGIN_EXPIRY_S };
 
+type PasskeyChallengeKind = 'registration' | 'authentication';
+
+export async function signPasskeyChallengeCookie(
+  kind: PasskeyChallengeKind,
+  challenge: string
+): Promise<string> {
+  return new SignJWT({
+    type: 'passkey_challenge',
+    kind,
+    challenge,
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(`${PASSKEY_CHALLENGE_EXPIRY_S}s`)
+    .sign(JWT_SECRET);
+}
+
+export async function verifyPasskeyChallengeCookie(
+  token: string,
+  expectedKind: PasskeyChallengeKind
+): Promise<{ challenge: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    if (payload.type !== 'passkey_challenge' || payload.kind !== expectedKind) return null;
+    const challenge = typeof payload.challenge === 'string' ? payload.challenge : null;
+    if (!challenge) return null;
+    return { challenge };
+  } catch {
+    return null;
+  }
+}
+
+export {
+  COOKIE_PASSKEY_REGISTRATION_PENDING,
+  COOKIE_PASSKEY_AUTH_PENDING,
+  PASSKEY_CHALLENGE_EXPIRY_S,
+};
+
 export async function signTotpStepToken(ip: string): Promise<string> {
   return new SignJWT({ step: 'totp', ip })
     .setProtectedHeader({ alg: 'HS256' })
@@ -163,6 +204,8 @@ export function clearAuthCookies(res: NextResponse): void {
   res.cookies.delete(COOKIE_REFRESH);
   res.cookies.delete(COOKIE_TOTP_STEP);
   res.cookies.delete(COOKIE_EMAIL_LOGIN_PENDING);
+  res.cookies.delete(COOKIE_PASSKEY_REGISTRATION_PENDING);
+  res.cookies.delete(COOKIE_PASSKEY_AUTH_PENDING);
 }
 
 // ─── 角色鉴权（API Route 中使用）─────────────────────────────────────────────

@@ -65,6 +65,21 @@ export interface Post {
   published_at?: string;
 }
 
+function isRenderablePostRecord(post: Partial<Post> | null | undefined): post is Post {
+  return Boolean(
+    post &&
+      post.status === 'published' &&
+      typeof post.slug === 'string' &&
+      post.slug.trim() &&
+      typeof post.title === 'string' &&
+      post.title.trim() &&
+      typeof post.description === 'string' &&
+      post.description.trim() &&
+      typeof post.created_at === 'string' &&
+      typeof post.updated_at === 'string'
+  );
+}
+
 // 文章集合（系列/专题）
 export interface Collection {
   id: string;
@@ -224,7 +239,7 @@ async function fetchPostList(
 // ============ 文章操作 ============
 
 export async function getPublishedPosts() {
-  return fetchPostList((fields) =>
+  const posts = await fetchPostList((fields) =>
     supabase
       .from('posts')
       .select(fields)
@@ -232,6 +247,7 @@ export async function getPublishedPosts() {
       .order('published_at', { ascending: false })
       .limit(LIST_LIMIT)
   );
+  return posts.filter(isRenderablePostRecord);
 }
 
 export async function getAllPosts() {
@@ -251,6 +267,18 @@ export async function getPostBySlug(slug: string) {
     .eq('slug', slug)
     .single();
   if (error) return null;
+  return data as Post;
+}
+
+export async function getPublicPostBySlug(slug: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .maybeSingle();
+
+  if (error || !isRenderablePostRecord(data as Post | null)) return null;
   return data as Post;
 }
 
@@ -690,8 +718,7 @@ export function subscribeRealtime(table: string, callback: (payload: unknown) =>
 // 邮箱订阅
 export async function subscribe(email: string) {
   // 这里可以实现邮箱订阅功能，保存到数据库或发送到邮件服务
-  // 目前先记录到控制台
-  console.log('Email subscription:', email);
+  void email;
   // 如果有 subscribers 表，可以保存
   // const { error } = await supabase.from('subscribers').insert([{ email }]);
   // if (error) throw error;

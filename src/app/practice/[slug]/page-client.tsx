@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { CodeEditor } from '@/components/practice/CodeEditor';
 import { HtmlPreview } from '@/components/practice/HtmlPreview';

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { NewsCollectionService } from '@/lib/news/news-collection-service';
-import { ScheduleManager, DEFAULT_SCHEDULED_CONFIG } from '@/lib/news/schedule-config';
+import { ScheduleManager } from '@/lib/news/schedule-config';
 import { logger } from '@/lib/logger';
 
 // 配置静态导出
@@ -14,7 +14,7 @@ export const revalidate = 0;
  * DELETE /api/news/schedule - 删除定时任务
  * PUT /api/news/schedule/run - 立即执行定时任务
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const scheduleManager = ScheduleManager.getInstance();
     const schedules = scheduleManager.getAllSchedules();

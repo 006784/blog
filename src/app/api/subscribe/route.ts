@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
           .limit(3);
 
         await sendSubscriptionConfirmation(email, undefined, posts ?? []);
-        console.log('订阅确认邮件已发送:', email);
       } catch (emailError) {
         console.error('发送订阅确认邮件失败:', emailError);
         // 邮件发送失败不影响订阅成功

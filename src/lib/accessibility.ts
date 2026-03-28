@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ARIA标签生成器
-export function generateAriaLabels(elementType: string, content: string, index?: number): Record<string, string> {
+export function generateAriaLabels(elementType: string, content: string): Record<string, string> {
   const baseLabel = content.trim();
   
   switch (elementType) {
@@ -66,7 +66,7 @@ export function useKeyboardNavigation(callbacks: {
   onSpace?: () => void;
   onTab?: () => void;
 }) {
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     switch (event.key) {
       case 'Enter':
         event.preventDefault();
@@ -100,19 +100,19 @@ export function useKeyboardNavigation(callbacks: {
         callbacks.onTab?.();
         break;
     }
-  };
+  }, [callbacks]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [callbacks]);
+  }, [handleKeyDown]);
 }
 
 // 焦点管理工具
 export function useFocusTrap(ref: React.RefObject<HTMLElement>) {
-  const handleFocus = (event: FocusEvent) => {
+  const handleFocus = useCallback((event: FocusEvent) => {
     if (!ref.current) return;
     
     const focusableElements = ref.current.querySelectorAll(
@@ -131,7 +131,7 @@ export function useFocusTrap(ref: React.RefObject<HTMLElement>) {
       event.preventDefault();
       lastElement.focus();
     }
-  };
+  }, [ref]);
 
   useEffect(() => {
     const element = ref.current;
@@ -141,7 +141,7 @@ export function useFocusTrap(ref: React.RefObject<HTMLElement>) {
     return () => {
       element.removeEventListener('focusout', handleFocus);
     };
-  }, [ref]);
+  }, [handleFocus, ref]);
 }
 
 // 屏幕阅读器通知
@@ -171,31 +171,29 @@ export function createSkipLink(href: string, label: string) {
 
 // 表单可访问性增强
 export function enhanceFormAccessibility(formRef: React.RefObject<HTMLFormElement>) {
-  useEffect(() => {
-    if (!formRef.current) return;
-    
-    const form = formRef.current;
-    const inputs = form.querySelectorAll('input, select, textarea');
-    
-    inputs.forEach((input, index) => {
-      const element = input as HTMLInputElement;
-      
-      // 添加必要的ARIA属性
-      if (!element.hasAttribute('aria-describedby') && element.nextElementSibling?.classList.contains('error-message')) {
-        element.setAttribute('aria-describedby', `error-${element.id || index}`);
-      }
-      
-      // 确保必填字段有适当标记
-      if (element.required) {
-        element.setAttribute('aria-required', 'true');
-      }
-      
-      // 添加无效状态标记
-      if (!element.validity.valid) {
-        element.setAttribute('aria-invalid', 'true');
-      }
-    });
-  }, [formRef]);
+  if (!formRef.current) return;
+
+  const form = formRef.current;
+  const inputs = form.querySelectorAll('input, select, textarea');
+
+  inputs.forEach((input, index) => {
+    const element = input as HTMLInputElement;
+
+    // 添加必要的ARIA属性
+    if (!element.hasAttribute('aria-describedby') && element.nextElementSibling?.classList.contains('error-message')) {
+      element.setAttribute('aria-describedby', `error-${element.id || index}`);
+    }
+
+    // 确保必填字段有适当标记
+    if (element.required) {
+      element.setAttribute('aria-required', 'true');
+    }
+
+    // 添加无效状态标记
+    if (!element.validity.valid) {
+      element.setAttribute('aria-invalid', 'true');
+    }
+  });
 }
 
 // 图片可访问性
@@ -216,29 +214,27 @@ export function getImageAccessibilityProps(alt: string, decorative: boolean = fa
 
 // 表格可访问性
 export function enhanceTableAccessibility(tableRef: React.RefObject<HTMLTableElement>) {
-  useEffect(() => {
-    if (!tableRef.current) return;
-    
-    const table = tableRef.current;
-    
-    // 确保表格有caption
-    if (!table.querySelector('caption')) {
-      const caption = document.createElement('caption');
-      caption.className = 'sr-only';
-      caption.textContent = '数据表格';
-      table.insertBefore(caption, table.firstChild);
+  if (!tableRef.current) return;
+
+  const table = tableRef.current;
+
+  // 确保表格有caption
+  if (!table.querySelector('caption')) {
+    const caption = document.createElement('caption');
+    caption.className = 'sr-only';
+    caption.textContent = '数据表格';
+    table.insertBefore(caption, table.firstChild);
+  }
+
+  // 为表头添加scope属性
+  const headers = table.querySelectorAll('th');
+  headers.forEach(header => {
+    if (header.parentElement?.tagName === 'THEAD') {
+      header.setAttribute('scope', 'col');
+    } else if (header.parentElement?.tagName === 'TBODY') {
+      header.setAttribute('scope', 'row');
     }
-    
-    // 为表头添加scope属性
-    const headers = table.querySelectorAll('th');
-    headers.forEach(header => {
-      if (header.parentElement?.tagName === 'THEAD') {
-        header.setAttribute('scope', 'col');
-      } else if (header.parentElement?.tagName === 'TBODY') {
-        header.setAttribute('scope', 'row');
-      }
-    });
-  }, [tableRef]);
+  });
 }
 
 // 动态内容更新通知
@@ -274,11 +270,13 @@ export function useLiveRegion() {
 
 // 高对比度模式检测
 export function useHighContrastMode(): boolean {
-  const [isHighContrast, setIsHighContrast] = useState(false);
+  const [isHighContrast, setIsHighContrast] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-contrast: high)').matches;
+  });
   
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-contrast: high)');
-    setIsHighContrast(mediaQuery.matches);
     
     const handler = (e: MediaQueryListEvent) => setIsHighContrast(e.matches);
     mediaQuery.addEventListener('change', handler);
@@ -291,11 +289,13 @@ export function useHighContrastMode(): boolean {
 
 // 减少动画偏好检测
 export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
   
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
     
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener('change', handler);
@@ -305,4 +305,3 @@ export function useReducedMotion(): boolean {
   
   return prefersReducedMotion;
 }
-

@@ -1,25 +1,56 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Music, Heart, Play, Plus, X, Disc3, ListMusic, 
-  Sparkles, ExternalLink, Trash2, Upload, FileAudio, Image as ImageIcon,
-  FileText, Check, Loader2, Pause
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Check,
+  Disc3,
+  ExternalLink,
+  FileAudio,
+  FileText,
+  Globe2,
+  Heart,
+  Image as ImageIcon,
+  ListMusic,
+  Loader2,
+  Music,
+  Pause,
+  Play,
+  Plus,
+  Search,
+  Sparkles,
+  Trash2,
+  Upload,
+  X,
 } from 'lucide-react';
 import {
-  Song, Playlist,
-  getAllSongs, getFavoriteSongs, getPlaylists,
-  createPlaylist, platformIcons
+  type Playlist,
+  type Song,
+  getAllSongs,
+  getPlaylists,
+  platformIcons,
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
-import dynamic from 'next/dynamic';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatePanel } from '@/components/ui/StatePanel';
+import { Textarea } from '@/components/ui/Textarea';
+import { cn } from '@/lib/cn';
+import type { AudiusSearchTrack } from '@/lib/audius';
+import { getPlayableSongUrl } from '@/lib/music';
 
 const MusicPlayer = dynamic(() => import('@/components/MusicPlayer'), {
   ssr: false,
   loading: () => (
-    <div className="h-24 rounded-2xl bg-muted animate-pulse" aria-label="播放器加载中" />
+    <div
+      className="h-24 rounded-[var(--radius-2xl)] bg-[var(--surface-overlay)] animate-pulse"
+      aria-label="播放器加载中"
+    />
   ),
 });
 
@@ -32,11 +63,52 @@ const moods = [
   { value: 'focus', label: '专注', emoji: '🎯' },
 ];
 
+function formatSongDuration(seconds?: number): string | undefined {
+  if (!seconds || !Number.isFinite(seconds)) {
+    return undefined;
+  }
+
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function getSongPlatformMeta(song: Pick<Song, 'platform' | 'platform_id' | 'music_url'>) {
+  const isAudius =
+    typeof song.platform_id === 'string' && song.platform_id.startsWith('audius:') ||
+    typeof song.music_url === 'string' && song.music_url.includes('audius.co');
+
+  if (isAudius) {
+    return { name: 'Audius', color: '#cc0fe0' };
+  }
+
+  return platformIcons[song.platform] || platformIcons.other;
+}
+
+function mapAudiusTrackToSong(track: AudiusSearchTrack): Partial<Song> {
+  return {
+    title: track.title,
+    artist: track.artist,
+    cover_image: track.artwork,
+    audio_url: track.streamUrl,
+    music_url: track.permalink,
+    duration_seconds: track.durationSeconds,
+    duration: formatSongDuration(track.durationSeconds),
+    platform: 'other',
+    platform_id: `audius:${track.id}`,
+    note: track.description?.trim() || `从 Audius 导入 · ${track.genre || '在线音乐'}`,
+    mood: track.mood || '',
+    is_favorite: false,
+  };
+}
+
 export default function MusicPage() {
   const { isAdmin } = useAdmin();
+  const hasPrimedAutoPlayer = useRef(false);
   const [songs, setSongs] = useState<Song[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'favorites'>('all');
   const [moodFilter, setMoodFilter] = useState<string | null>(null);
@@ -44,208 +116,276 @@ export default function MusicPage() {
   const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   async function loadData() {
     try {
       setLoading(true);
+      setError('');
       const [songsData, playlistsData] = await Promise.all([
         getAllSongs(),
-        getPlaylists()
+        getPlaylists(),
       ]);
       setSongs(songsData);
       setPlaylists(playlistsData);
-    } catch (error) {
-      console.error('加载数据失败:', error);
+    } catch {
+      setError('音乐列表暂时加载失败，请稍后再试。');
     } finally {
       setLoading(false);
     }
   }
 
-  // 只显示有audio_url的歌曲可以播放
-  const playableSongs = songs.filter(s => s.audio_url);
-  
-  const filteredSongs = songs.filter(song => {
+  const playableSongs = songs.filter((song) => Boolean(getPlayableSongUrl(song)));
+
+  const filteredSongs = songs.filter((song) => {
     if (filter === 'favorites' && !song.is_favorite) return false;
     if (moodFilter && song.mood !== moodFilter) return false;
     return true;
   });
 
+  const favoriteCount = songs.filter((song) => song.is_favorite).length;
+  const directPlayCount = playableSongs.length;
+  const moodCount = new Set(songs.map((song) => song.mood).filter(Boolean)).size;
+
+  useEffect(() => {
+    if (loading || hasPrimedAutoPlayer.current || playableSongs.length === 0) {
+      return;
+    }
+
+    setCurrentSong(playableSongs[0]);
+    setShowPlayer(true);
+    hasPrimedAutoPlayer.current = true;
+  }, [loading, playableSongs]);
+
   async function handleToggleFavorite(id: string, current: boolean) {
     try {
-      await fetch(`/api/music/songs/${id}`, {
+      const res = await fetch(`/api/music/songs/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_favorite: !current }),
         credentials: 'include',
       });
-      setSongs(songs.map(s => s.id === id ? { ...s, is_favorite: !current } : s));
-    } catch (error) {
-      console.error('操作失败:', error);
+      if (!res.ok) {
+        throw new Error('收藏状态更新失败');
+      }
+      setSongs((prev) =>
+        prev.map((song) =>
+          song.id === id ? { ...song, is_favorite: !current } : song
+        )
+      );
+    } catch {
+      setError('更新收藏状态失败，请稍后再试。');
     }
   }
 
   async function handleDeleteSong(id: string) {
     if (!confirm('确定删除这首歌吗？')) return;
     try {
-      await fetch(`/api/music/songs/${id}`, { method: 'DELETE', credentials: 'include' });
-      setSongs(songs.filter(s => s.id !== id));
+      const res = await fetch(`/api/music/songs/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        throw new Error('删除失败');
+      }
+      setSongs((prev) => prev.filter((song) => song.id !== id));
       if (currentSong?.id === id) {
         setCurrentSong(null);
         setShowPlayer(false);
       }
-    } catch (error) {
-      console.error('删除失败:', error);
+    } catch {
+      setError('删除歌曲失败，请稍后再试。');
     }
   }
 
   function handlePlaySong(song: Song) {
-    if (song.audio_url) {
+    if (getPlayableSongUrl(song)) {
       setCurrentSong(song);
       setShowPlayer(true);
-    } else if (song.music_url) {
-      window.open(song.music_url, '_blank');
+      return;
+    }
+    if (song.music_url) {
+      window.open(song.music_url, '_blank', 'noopener,noreferrer');
     }
   }
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+    <div className="relative min-h-screen overflow-hidden px-4 pb-24 pt-12 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[6%] top-16 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-primary-200)_0%,transparent_72%)] opacity-30 blur-3xl" />
+        <div className="absolute bottom-0 right-[10%] h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--surface-overlay)_0%,transparent_72%)] opacity-75 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-8">
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
         >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-3 border border-[var(--line,#ddd9d0)]" style={{ background: 'var(--paper-deep,#ede9e0)' }}>
-              <Music className="w-8 h-8" style={{ color: 'var(--gold,#c4a96d)' }} />
+          <Card variant="glass" padding="lg" className="overflow-hidden">
+            <div className="mb-5 flex flex-wrap items-center gap-3">
+              <Badge variant="soft" className="gap-1.5 px-3 py-1.5">
+                <Music className="h-3.5 w-3.5" />
+                音乐空间
+              </Badge>
+              <Badge variant="outline" className="px-3 py-1.5">
+                用旋律存档情绪
+              </Badge>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text">
-              我的歌单
-            </h1>
+
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-4xl font-semibold tracking-[-0.03em] text-[var(--color-neutral-900)] sm:text-5xl">
+                  我的歌单
+                </h1>
+                <p className="mt-3 max-w-2xl text-[var(--text-lg)] leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                  这里收着我最近反复播放的音乐。可以是陪我写代码的背景声，也可以是一首突然把回忆拽回来的歌。
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant={filter === 'all' ? 'primary' : 'secondary'}
+                  onClick={() => setFilter('all')}
+                >
+                  <ListMusic className="h-4 w-4" />
+                  全部歌曲
+                </Button>
+                <Button
+                  variant={filter === 'favorites' ? 'primary' : 'secondary'}
+                  onClick={() => setFilter('favorites')}
+                >
+                  <Heart className="h-4 w-4" />
+                  最爱收藏
+                </Button>
+                {isAdmin ? (
+                  <Button onClick={() => setShowAddModal(true)}>
+                    <Plus className="h-4 w-4" />
+                    添加歌曲
+                  </Button>
+                ) : null}
+              </div>
+
+              {playlists.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {playlists.slice(0, 6).map((playlist) => (
+                    <Badge key={playlist.id} variant="soft" className="px-3 py-1.5">
+                      {playlist.name}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </Card>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <StatsCard label="歌曲总数" value={songs.length} hint="持续更新中" />
+            <StatsCard label="直接可播" value={directPlayCount} hint="本地上传或在线直链" />
+            <StatsCard label="收藏歌曲" value={favoriteCount} hint="一键进入最爱筛选" />
+            <StatsCard label="情绪标签" value={moodCount} hint="按氛围快速检索" />
           </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            分享我喜欢的音乐，每一首歌都有一个故事 🎵
-          </p>
-        </motion.div>
+        </motion.section>
 
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-8"
-        >
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 text-sm font-medium transition-all border ${
-              filter === 'all'
-                ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
-                : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
-            }`}
-          >
-            <ListMusic className="w-4 h-4 inline mr-2" />
-            全部
-          </button>
-          <button
-            onClick={() => setFilter('favorites')}
-            className={`px-4 py-2 text-sm font-medium transition-all border ${
-              filter === 'favorites'
-                ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
-                : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
-            }`}
-          >
-            <Heart className="w-4 h-4 inline mr-2" />
-            最爱
-          </button>
-          
-          <div className="w-px h-6 bg-border mx-2" />
-          
-          {moods.map(mood => (
-            <button
-              key={mood.value}
-              onClick={() => setMoodFilter(moodFilter === mood.value ? null : mood.value)}
-              className={`px-3 py-1.5 text-sm transition-all border ${
-                moodFilter === mood.value
-                  ? 'border-[var(--gold)] text-[var(--gold)] bg-transparent'
-                  : 'border-[var(--line)] text-[var(--ink-muted)] bg-transparent hover:border-[var(--gold)] hover:text-[var(--gold)]'
-              }`}
-            >
-              {mood.emoji} {mood.label}
-            </button>
-          ))}
-        </motion.div>
+        <Card variant="default" padding="lg" className="space-y-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium tracking-[0.16em] text-[var(--color-primary-700)]">
+                Mood Filters
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">
+                按情绪筛歌
+              </h2>
+              <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                当前结果 {filteredSongs.length} 首，可以先按收藏筛一轮，再用心情标签缩小范围。
+              </p>
+            </div>
 
-        {/* Add Button - admin only */}
-        {isAdmin && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex justify-center mb-8"
-          >
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="btn-primary"
-            >
-              <Plus className="w-5 h-5" />
-              上传歌曲
-            </button>
-          </motion.div>
-        )}
-
-        {/* Songs Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Disc3 className="w-12 h-12 text-primary animate-spin" />
-          </div>
-        ) : filteredSongs.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <Music className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              {filter === 'favorites' ? '还没有收藏的歌曲' : '还没有添加歌曲'}
-            </p>
-            {isAdmin && (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="mt-4 text-primary hover:underline"
-              >
-                上传第一首歌曲
-              </button>
-            )}
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-          >
-            <AnimatePresence>
-              {filteredSongs.map((song, index) => (
-                <SongCard
-                  key={song.id}
-                  song={song}
-                  index={index}
-                  isPlaying={currentSong?.id === song.id && showPlayer}
-                  onPlay={handlePlaySong}
-                  onToggleFavorite={handleToggleFavorite}
-                  onDelete={handleDeleteSong}
-                  isAdmin={isAdmin}
-                />
+            <div className="flex flex-wrap gap-2">
+              {moods.map((mood) => (
+                <button
+                  key={mood.value}
+                  type="button"
+                  onClick={() =>
+                    setMoodFilter((current) =>
+                      current === mood.value ? null : mood.value
+                    )
+                  }
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-all duration-[var(--duration-fast)]',
+                    moodFilter === mood.value
+                      ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-100)] text-[var(--color-primary-900)]'
+                      : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-700)] hover:border-[var(--color-primary-300)] hover:bg-[var(--surface-overlay)]'
+                  )}
+                >
+                  <span>{mood.emoji}</span>
+                  {mood.label}
+                </button>
               ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+            </div>
+          </div>
 
-        {/* Add Modal */}
+          {error ? (
+            <StatePanel
+              tone="error"
+              title="音乐列表加载失败"
+              description={error}
+              action={
+                <Button variant="secondary" onClick={() => void loadData()}>
+                  重新加载
+                </Button>
+              }
+            />
+          ) : loading ? (
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <SongSkeleton key={index} />
+              ))}
+            </div>
+          ) : filteredSongs.length === 0 ? (
+            <StatePanel
+              tone="empty"
+              title={filter === 'favorites' ? '还没有收藏的歌曲' : '还没有匹配的歌曲'}
+              description={
+                filter === 'favorites'
+                  ? '先把喜欢的歌标成最爱，这里就会慢慢变成自己的固定歌单。'
+                  : '可以切换筛选条件，或者上传一首最近常听的歌。'
+              }
+              action={
+                isAdmin ? (
+                  <Button onClick={() => setShowAddModal(true)}>
+                    <Plus className="h-4 w-4" />
+                    添加第一首歌曲
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
+            >
+              <AnimatePresence>
+                {filteredSongs.map((song, index) => (
+                  <SongCard
+                    key={song.id}
+                    song={song}
+                    index={index}
+                    isPlaying={currentSong?.id === song.id && showPlayer}
+                    onPlay={handlePlaySong}
+                    onToggleFavorite={handleToggleFavorite}
+                    onDelete={handleDeleteSong}
+                    isAdmin={isAdmin}
+                  />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </Card>
+
         <AnimatePresence>
-          {showAddModal && (
+          {showAddModal ? (
             <AddSongModal
               onClose={() => setShowAddModal(false)}
               onAdd={async (song) => {
@@ -255,31 +395,78 @@ export default function MusicPage() {
                   body: JSON.stringify(song),
                   credentials: 'include',
                 });
-                const { song: newSong } = await res.json();
-                setSongs([newSong, ...songs]);
+
+                const payload = (await res.json().catch(() => null)) as
+                  | { song?: Song; error?: string }
+                  | null;
+
+                if (!res.ok || !payload?.song) {
+                  throw new Error(payload?.error || '上传歌曲失败');
+                }
+
+                setSongs((prev) => [payload.song as Song, ...prev]);
                 setShowAddModal(false);
               }}
             />
-          )}
+          ) : null}
         </AnimatePresence>
 
-        {/* Music Player */}
         <AnimatePresence>
-          {showPlayer && currentSong && (
+          {showPlayer && currentSong ? (
             <MusicPlayer
               songs={playableSongs}
               currentSong={currentSong}
               onSongChange={setCurrentSong}
               onClose={() => setShowPlayer(false)}
             />
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </div>
   );
 }
 
-// Song Card Component
+function StatsCard({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: number;
+  hint: string;
+}) {
+  return (
+    <Card
+      variant="elevated"
+      padding="md"
+      className="rounded-[var(--radius-2xl)] bg-[linear-gradient(180deg,var(--surface-base),var(--surface-panel))]"
+    >
+      <p className="text-sm text-[var(--color-neutral-500)]">{label}</p>
+      <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[var(--color-neutral-900)]">
+        {value}
+      </p>
+      <p className="mt-2 text-sm text-[var(--color-neutral-600)]">{hint}</p>
+    </Card>
+  );
+}
+
+function SongSkeleton() {
+  return (
+    <Card variant="default" className="overflow-hidden p-0">
+      <Skeleton className="aspect-square rounded-none" />
+      <div className="space-y-3 p-4">
+        <Skeleton className="h-5 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-16 w-full" />
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-7 w-20 rounded-full" />
+          <Skeleton className="h-8 w-16 rounded-full" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function SongCard({
   song,
   index,
@@ -297,172 +484,229 @@ function SongCard({
   onDelete: (id: string) => void;
   isAdmin?: boolean;
 }) {
-  const platform = platformIcons[song.platform] || platformIcons.other;
-  const mood = song.mood ? moods.find(m => m.value === song.mood) : null;
-  const hasAudio = !!song.audio_url;
+  const platform = getSongPlatformMeta(song);
+  const mood = song.mood ? moods.find((item) => item.value === song.mood) : null;
+  const hasAudio = Boolean(getPlayableSongUrl(song));
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ delay: index * 0.05 }}
-      className={`group relative overflow-hidden rounded-2xl bg-card border transition-all hover:shadow-xl hover:shadow-primary/5 ${
-        isPlaying ? 'border-primary ring-2 ring-primary/20' : 'border-border/50 hover:border-primary/30'
-      }`}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ delay: index * 0.04 }}
     >
-      {/* Cover */}
-      <div className="relative aspect-square overflow-hidden">
-        {song.cover_image ? (
-          <Image
-            src={song.cover_image}
-            alt={song.title}
-            fill
-            sizes="(max-width: 768px) 50vw, 25vw"
-            className={`object-cover transition-transform duration-500 ${
-              isPlaying ? 'scale-105' : 'group-hover:scale-105'
-            }`}
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-            <Disc3 className={`w-20 h-20 text-primary/30 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '3s' }} />
-          </div>
+      <Card
+        variant={isPlaying ? 'elevated' : 'default'}
+        className={cn(
+          'group overflow-hidden p-0 transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-xl)]',
+          isPlaying && 'ring-2 ring-[var(--color-primary-500)] ring-offset-2 ring-offset-[var(--surface-base)]'
         )}
-        
-        {/* Overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity ${
-          isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`} />
-        
-        {/* Play Button */}
-        <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-          isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`}>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onPlay(song)}
-            className={`p-4 rounded-full backdrop-blur-sm border border-white/30 ${
-              hasAudio ? 'bg-white/20' : 'bg-black/30'
-            }`}
-          >
-            {isPlaying ? (
-              <Pause className="w-8 h-8 text-white" />
-            ) : hasAudio ? (
-              <Play className="w-8 h-8 text-white fill-white" />
-            ) : (
-              <ExternalLink className="w-6 h-6 text-white" />
+      >
+        <div className="relative aspect-square overflow-hidden">
+          {song.cover_image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={song.cover_image}
+              alt={song.title}
+              className={cn(
+                'h-full w-full object-cover transition-transform duration-500',
+                isPlaying ? 'scale-105' : 'group-hover:scale-105'
+              )}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,var(--surface-overlay),var(--surface-base))]">
+              <Disc3
+                className={cn(
+                  'h-20 w-20 text-[var(--color-primary-600)]/40',
+                  isPlaying && 'animate-spin'
+                )}
+                style={{ animationDuration: '3s' }}
+              />
+            </div>
+          )}
+
+          <div
+            className={cn(
+              'absolute inset-0 bg-[linear-gradient(180deg,rgba(20,18,15,0.05)_0%,rgba(20,18,15,0.72)_100%)] transition-opacity duration-300',
+              isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             )}
-          </motion.button>
+          />
+
+          <div
+            className={cn(
+              'absolute inset-0 flex items-center justify-center transition-opacity duration-300',
+              isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => onPlay(song)}
+              className="flex h-16 w-16 items-center justify-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-md transition-transform hover:scale-105"
+              aria-label={hasAudio ? `播放 ${song.title}` : `打开 ${song.title}`}
+            >
+              {isPlaying ? (
+                <Pause className="h-8 w-8" />
+              ) : hasAudio ? (
+                <Play className="h-8 w-8 fill-white" />
+              ) : (
+                <ExternalLink className="h-7 w-7" />
+              )}
+            </button>
+          </div>
+
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+            {mood ? (
+              <Badge className="border-none bg-black/45 px-3 py-1.5 text-white backdrop-blur-md">
+                {mood.emoji} {mood.label}
+              </Badge>
+            ) : null}
+            {hasAudio ? (
+              <Badge className="border-none bg-[rgba(232,217,180,0.92)] px-3 py-1.5 text-[var(--color-primary-900)]">
+                <FileAudio className="mr-1 h-3.5 w-3.5" />
+                支持播放
+              </Badge>
+            ) : null}
+          </div>
+
+          <div className="absolute right-3 top-3 flex gap-2">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleFavorite(song.id, song.is_favorite);
+              }}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-md transition-colors hover:bg-black/50"
+              aria-label={song.is_favorite ? '取消收藏' : '加入收藏'}
+            >
+              <Heart
+                className={cn(
+                  'h-5 w-5',
+                  song.is_favorite && 'fill-[var(--color-primary-500)] text-[var(--color-primary-500)]'
+                )}
+              />
+            </button>
+          </div>
+
+          {isPlaying ? (
+            <div className="absolute bottom-3 left-3">
+              <Badge className="border-none bg-[var(--color-primary-600)] px-3 py-1.5 text-[var(--color-primary-foreground)]">
+                <Disc3 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                正在播放
+              </Badge>
+            </div>
+          ) : null}
         </div>
 
-        {/* Playing indicator */}
-        {isPlaying && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/90 text-white text-xs">
-            <Disc3 className="w-3 h-3 animate-spin" />
-            正在播放
+        <div className="space-y-4 p-4">
+          <div className="space-y-1.5">
+            <h3 className="line-clamp-1 text-xl font-semibold text-[var(--color-neutral-900)]">
+              {song.title}
+            </h3>
+            <p className="line-clamp-1 text-sm text-[var(--color-neutral-600)]">
+              {song.artist}
+            </p>
+            {song.album ? (
+              <p className="line-clamp-1 text-xs text-[var(--color-neutral-500)]">
+                {song.album}
+              </p>
+            ) : null}
           </div>
-        )}
 
-        {/* Favorite Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(song.id, song.is_favorite);
-          }}
-          className="absolute top-3 right-3 p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
-        >
-          <Heart 
-            className={`w-5 h-5 transition-colors ${
-              song.is_favorite ? 'text-[var(--gold)] fill-[var(--gold)]' : 'text-white'
-            }`} 
-          />
-        </button>
+          {song.note ? (
+            <p className="line-clamp-3 min-h-[4.25rem] text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+              “{song.note}”
+            </p>
+          ) : (
+            <p className="min-h-[4.25rem] text-sm text-[var(--color-neutral-500)]">
+              这首歌暂时还没写下备注。
+            </p>
+          )}
 
-        {/* Mood Badge */}
-        {mood && (
-          <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-xs">
-            {mood.emoji} {mood.label}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              variant="soft"
+              className="px-3 py-1.5"
+              style={{
+                backgroundColor: `${platform.color}18`,
+                color: platform.color,
+              }}
+            >
+              {song.platform === 'local' ? '本地上传' : platform.name}
+            </Badge>
+            {song.lyrics ? (
+              <Badge variant="outline" className="px-3 py-1.5">
+                <FileText className="mr-1 h-3.5 w-3.5" />
+                附带歌词
+              </Badge>
+            ) : null}
           </div>
-        )}
 
-        {/* Local badge */}
-        {hasAudio && (
-          <div className="absolute bottom-3 right-3 px-2 py-1 bg-[var(--paper-deep)] border border-[var(--gold)] text-[var(--gold)] text-xs flex items-center gap-1" style={{ fontFamily: 'var(--font-garamond)', letterSpacing: '0.08em' }}>
-            <FileAudio className="w-3 h-3" />
-            本地
-          </div>
-        )}
-      </div>
+          <div className="flex items-center justify-between border-t border-[color:var(--border-default)] pt-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onPlay(song)}
+              className="text-[var(--color-neutral-700)]"
+            >
+              {hasAudio ? (
+                <>
+                  {isPlaying ? (
+                    <Pause className="h-4 w-4" />
+                  ) : (
+                    <Play className="h-4 w-4 fill-current" />
+                  )}
+                  {isPlaying ? '暂停中' : '立即播放'}
+                </>
+              ) : (
+                <>
+                  <ExternalLink className="h-4 w-4" />
+                  打开链接
+                </>
+              )}
+            </Button>
 
-      {/* Info */}
-      <div className="p-4">
-        <h3 className="font-semibold text-lg truncate">{song.title}</h3>
-        <p className="text-muted-foreground text-sm truncate">{song.artist}</p>
-        {song.album && (
-          <p className="text-muted-foreground/60 text-xs truncate mt-1">{song.album}</p>
-        )}
-        
-        {/* Note */}
-        {song.note && (
-          <p className="text-sm text-muted-foreground mt-3 line-clamp-2 italic">
-            "{song.note}"
-          </p>
-        )}
-
-        {/* Lyrics indicator */}
-        {song.lyrics && (
-          <div className="flex items-center gap-1 mt-2 text-xs text-primary">
-            <FileText className="w-3 h-3" />
-            <span>有歌词</span>
-          </div>
-        )}
-
-        {/* Platform & Actions */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
-          <span 
-            className="text-xs px-2 py-1 rounded-full"
-            style={{ backgroundColor: `${platform.color}20`, color: platform.color }}
-          >
-            {song.platform === 'local' ? '本地上传' : platform.name}
-          </span>
-          
-          <div className="flex items-center gap-1">
-            {song.music_url && (
-              <a
-                href={song.music_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            )}
-            {isAdmin && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(song.id);
-                }}
-                className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {song.music_url ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 px-0"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    window.open(song.music_url, '_blank', 'noopener,noreferrer');
+                  }}
+                  aria-label="打开外部音乐链接"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              ) : null}
+              {isAdmin ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 px-0 text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete(song.id);
+                  }}
+                  aria-label="删除歌曲"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
+      </Card>
     </motion.div>
   );
 }
 
-// Add Song Modal
-function AddSongModal({ 
-  onClose, 
-  onAdd 
-}: { 
+function AddSongModal({
+  onClose,
+  onAdd,
+}: {
   onClose: () => void;
   onAdd: (song: Partial<Song>) => Promise<void>;
 }) {
@@ -482,89 +726,156 @@ function AddSongModal({
   const [loading, setLoading] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-  
+  const [audioInputMode, setAudioInputMode] = useState<'upload' | 'url' | null>(null);
+  const [submitError, setSubmitError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchingAudius, setSearchingAudius] = useState(false);
+  const [audiusTracks, setAudiusTracks] = useState<AudiusSearchTrack[]>([]);
+  const [audiusError, setAudiusError] = useState('');
+  const [importingTrackId, setImportingTrackId] = useState<string | null>(null);
+
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const lyricsInputRef = useRef<HTMLInputElement>(null);
 
-  // 上传文件
   async function uploadFile(file: File, type: 'audio' | 'cover') {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-    
+    const payload = new FormData();
+    payload.append('file', file);
+    payload.append('type', type);
+
     const res = await fetch('/api/music/upload', {
       method: 'POST',
-      body: formData,
+      body: payload,
     });
-    
+
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || '上传失败');
+      const error = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(error?.error || '上传失败');
     }
-    
-    return await res.json();
+
+    return (await res.json()) as { url: string };
   }
 
-  // 处理音频上传
-  async function handleAudioUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function handleAudioUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
     if (!file) return;
-    
+
     setUploadingAudio(true);
+    setSubmitError('');
     try {
       const result = await uploadFile(file, 'audio');
-      setFormData(prev => ({ 
-        ...prev, 
+      setFormData((prev) => ({
+        ...prev,
         audio_url: result.url,
         platform: 'local',
-        // 尝试从文件名解析歌曲信息
-        title: prev.title || file.name.replace(/\.[^/.]+$/, '').split(' - ')[1] || file.name.replace(/\.[^/.]+$/, ''),
-        artist: prev.artist || file.name.replace(/\.[^/.]+$/, '').split(' - ')[0] || '',
+        title:
+          prev.title ||
+          file.name.replace(/\.[^/.]+$/, '').split(' - ')[1] ||
+          file.name.replace(/\.[^/.]+$/, ''),
+        artist:
+          prev.artist ||
+          file.name.replace(/\.[^/.]+$/, '').split(' - ')[0] ||
+          '',
       }));
-    } catch (error: any) {
-      alert(error.message || '音频上传失败');
+      setAudioInputMode('upload');
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : '音频上传失败');
     } finally {
       setUploadingAudio(false);
     }
   }
 
-  // 处理封面上传
-  async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function handleCoverUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
     if (!file) return;
-    
+
     setUploadingCover(true);
+    setSubmitError('');
     try {
       const result = await uploadFile(file, 'cover');
-      setFormData(prev => ({ ...prev, cover_image: result.url }));
-    } catch (error: any) {
-      alert(error.message || '封面上传失败');
+      setFormData((prev) => ({ ...prev, cover_image: result.url }));
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : '封面上传失败');
     } finally {
       setUploadingCover(false);
     }
   }
 
-  // 处理歌词文件上传
-  async function handleLyricsUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  function handleLyricsUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      setFormData(prev => ({ ...prev, lyrics: content }));
+    reader.onload = (loadEvent) => {
+      const content = String(loadEvent.target?.result || '');
+      setFormData((prev) => ({ ...prev, lyrics: content }));
     };
     reader.readAsText(file);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function searchAudius() {
+    const query = searchQuery.trim();
+    if (!query) {
+      setAudiusTracks([]);
+      setAudiusError('请输入歌名或歌手再搜索。');
+      return;
+    }
+
+    setSearchingAudius(true);
+    setAudiusError('');
+
+    try {
+      const res = await fetch(`/api/music/audius/search?q=${encodeURIComponent(query)}`, {
+        credentials: 'include',
+      });
+      const payload = (await res.json().catch(() => null)) as
+        | { tracks?: AudiusSearchTrack[]; error?: string }
+        | null;
+
+      if (!res.ok) {
+        throw new Error(payload?.error || 'Audius 搜索失败');
+      }
+
+      setAudiusTracks(Array.isArray(payload?.tracks) ? payload.tracks : []);
+      if (!payload?.tracks?.length) {
+        setAudiusError('这次没有找到可直接播放的结果，换个关键词试试。');
+      }
+    } catch (error: unknown) {
+      setAudiusTracks([]);
+      setAudiusError(error instanceof Error ? error.message : 'Audius 搜索失败');
+    } finally {
+      setSearchingAudius(false);
+    }
+  }
+
+  async function importAudiusTrack(track: AudiusSearchTrack) {
+    setSubmitError('');
+    setAudiusError('');
+    setImportingTrackId(track.id);
+
+    try {
+      await onAdd(mapAudiusTrackToSong(track));
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : '导入 Audius 歌曲失败');
+    } finally {
+      setImportingTrackId(null);
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!formData.title || !formData.artist) return;
-    
+    if (!getPlayableSongUrl(formData)) {
+      setSubmitError('请上传音频，或填写一个可直接播放的在线音频地址。');
+      return;
+    }
+
     setLoading(true);
+    setSubmitError('');
     try {
       await onAdd(formData);
+    } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : '上传歌曲失败');
     } finally {
       setLoading(false);
     }
@@ -575,264 +886,515 @@ function AddSongModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-md"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-2xl bg-card rounded-3xl shadow-2xl overflow-hidden"
-        onClick={e => e.stopPropagation()}
+        exit={{ scale: 0.96, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-3xl"
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="p-6 border-b border-border">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              上传歌曲
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-          {/* 音频上传区域 */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium">音频文件 *</label>
-            <div
-              onClick={() => audioInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
-                formData.audio_url 
-                  ? 'border-[var(--gold)] bg-[var(--paper-deep)]'
-                  : 'border-border hover:border-primary/50 hover:bg-primary/5'
-              }`}
-            >
-              {uploadingAudio ? (
-                <Loader2 className="w-10 h-10 text-primary mx-auto animate-spin" />
-              ) : formData.audio_url ? (
-                <div className="flex items-center justify-center gap-3">
-                  <FileAudio className="w-10 h-10 text-[var(--gold)]" />
-                  <div className="text-left">
-                    <p className="font-medium text-[var(--gold)]">音频已上传</p>
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">
-                      {formData.audio_url.split('/').pop()}
-                    </p>
-                  </div>
+        <Card variant="elevated" className="overflow-hidden p-0">
+          <div className="border-b border-[color:var(--border-default)] px-6 py-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <Badge variant="soft" className="px-3 py-1.5">
+                    <Sparkles className="mr-1 h-3.5 w-3.5" />
+                    添加歌曲
+                  </Badge>
                 </div>
-              ) : (
-                <>
-                  <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    点击上传音频文件 (MP3, M4A, WAV, FLAC)
-                  </p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">
-                    支持从 Apple Music 下载的歌曲
-                  </p>
-                </>
-              )}
-              <input
-                ref={audioInputRef}
-                type="file"
-                accept="audio/*"
-                className="hidden"
-                onChange={handleAudioUpload}
-              />
+                <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">
+                  做一个可直接播放的音乐卡片
+                </h2>
+                <p className="mt-2 text-sm text-[var(--color-neutral-600)]">
+                  支持上传本地音频，也支持直接填写在线音频地址，保存后会直接进入站内播放器。
+                </p>
+              </div>
+
+              <Button
+                variant="ghost"
+                className="h-10 w-10 px-0"
+                onClick={onClose}
+                aria-label="关闭上传弹窗"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
           </div>
 
-          {/* 封面上传 */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <label className="block text-sm font-medium">封面图片</label>
-              <div
-                onClick={() => coverInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all aspect-square flex items-center justify-center ${
-                  formData.cover_image 
-                    ? 'border-transparent p-0 overflow-hidden' 
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                {uploadingCover ? (
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                ) : formData.cover_image ? (
-                  <img 
-                    src={formData.cover_image} 
-                    alt="封面" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
+          <form onSubmit={handleSubmit} className="max-h-[78vh] overflow-y-auto px-6 py-6">
+            <div className="space-y-6">
+              <div className="rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[linear-gradient(135deg,rgba(244,228,255,0.6),rgba(255,244,234,0.82))] p-4">
+                <div className="flex flex-col gap-4">
                   <div>
-                    <ImageIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-xs text-muted-foreground">上传封面</p>
-                  </div>
-                )}
-                <input
-                  ref={coverInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleCoverUpload}
-                />
-              </div>
-            </div>
-
-            {/* 歌词上传 */}
-            <div className="space-y-3">
-              <label className="block text-sm font-medium">歌词文件 (LRC格式)</label>
-              <div
-                onClick={() => lyricsInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all aspect-square flex items-center justify-center ${
-                  formData.lyrics 
-                    ? 'border-[var(--gold)] bg-[var(--paper-deep)]'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                {formData.lyrics ? (
-                  <div>
-                    <FileText className="w-8 h-8 text-[var(--gold)] mx-auto mb-2" />
-                    <p className="text-xs text-[var(--gold)]">歌词已导入</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {formData.lyrics.split('\n').length} 行
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge className="border-none bg-[rgba(204,15,224,0.12)] px-3 py-1.5 text-[#8b0ca1]">
+                        <Globe2 className="mr-1 h-3.5 w-3.5" />
+                        Audius 搜索导入
+                      </Badge>
+                    </div>
+                    <h3 className="text-lg font-semibold text-[var(--color-neutral-900)]">
+                      直接搜索免费线上的歌
+                    </h3>
+                    <p className="mt-1 text-sm text-[var(--color-neutral-600)]">
+                      搜到后可以一键导入到你的歌单，并直接走站内播放器播放。
                     </p>
                   </div>
-                ) : (
-                  <div>
-                    <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-xs text-muted-foreground">上传 .lrc 歌词</p>
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Input
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="输入歌名、歌手或关键词"
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          void searchAudius();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => void searchAudius()}
+                      disabled={searchingAudius || !searchQuery.trim()}
+                    >
+                      {searchingAudius ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      搜索
+                    </Button>
                   </div>
-                )}
-                <input
-                  ref={lyricsInputRef}
-                  type="file"
-                  accept=".lrc,.txt"
-                  className="hidden"
-                  onChange={handleLyricsUpload}
-                />
+
+                  {audiusError ? (
+                    <div className="rounded-[var(--radius-xl)] border border-[rgba(204,15,224,0.12)] bg-white/70 px-4 py-3 text-sm text-[var(--color-neutral-700)]">
+                      {audiusError}
+                    </div>
+                  ) : null}
+
+                  {audiusTracks.length > 0 ? (
+                    <div className="grid gap-3">
+                      {audiusTracks.map((track) => (
+                        <div
+                          key={track.id}
+                          className="flex flex-col gap-3 rounded-[var(--radius-2xl)] border border-white/60 bg-white/80 p-3 shadow-[0_12px_28px_rgba(129,78,30,0.08)] sm:flex-row sm:items-center"
+                        >
+                          <div className="relative h-16 w-16 overflow-hidden rounded-[20px] bg-[var(--surface-overlay)]">
+                            {track.artwork ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={track.artwork}
+                                alt={track.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(233,213,255,0.9),rgba(251,226,255,0.7))]">
+                                <Music className="h-7 w-7 text-[#8b0ca1]" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <p className="line-clamp-1 text-base font-semibold text-[var(--color-neutral-900)]">
+                              {track.title}
+                            </p>
+                            <p className="line-clamp-1 text-sm text-[var(--color-neutral-600)]">
+                              {track.artist}
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-2 text-xs text-[var(--color-neutral-500)]">
+                              {track.genre ? <span>{track.genre}</span> : null}
+                              {track.durationSeconds ? <span>{formatSongDuration(track.durationSeconds)}</span> : null}
+                              <span>Audius</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={() => window.open(track.permalink, '_blank', 'noopener,noreferrer')}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              查看
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => void importAudiusTrack(track)}
+                              loading={importingTrackId === track.id}
+                              disabled={importingTrackId !== null}
+                            >
+                              <Plus className="h-4 w-4" />
+                              导入
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* 基本信息 */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium mb-2">歌曲名称 *</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                placeholder="输入歌曲名称"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">歌手 *</label>
-              <input
-                type="text"
-                value={formData.artist}
-                onChange={e => setFormData({ ...formData, artist: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                placeholder="输入歌手名称"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">专辑</label>
-            <input
-              type="text"
-              value={formData.album}
-              onChange={e => setFormData({ ...formData, album: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-              placeholder="输入专辑名称"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">心情标签</label>
-            <div className="flex flex-wrap gap-2">
-              {moods.map(mood => (
-                <button
-                  key={mood.value}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, mood: formData.mood === mood.value ? '' : mood.value })}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                    formData.mood === mood.value
-                      ? 'bg-primary/20 text-primary ring-2 ring-primary/30'
-                      : 'bg-muted hover:bg-muted/80'
-                  }`}
+              <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+                <UploadDropzone
+                  title="音频文件 *"
+                  description="点击上传音频文件（MP3、M4A、WAV、FLAC）"
+                  helper="支持从本地音乐库整理进站点。"
+                  active={Boolean(formData.audio_url)}
+                  uploading={uploadingAudio}
+                  onClick={() => audioInputRef.current?.click()}
+                  icon={<Upload className="h-10 w-10 text-[var(--color-neutral-500)]" />}
+                  activeContent={
+                    audioInputMode === 'url' ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <ExternalLink className="h-10 w-10 text-[var(--color-primary-700)]" />
+                        <div className="text-left">
+                          <p className="font-medium text-[var(--color-primary-800)]">
+                            在线音频已连接
+                          </p>
+                          <p className="max-w-xs truncate text-xs text-[var(--color-neutral-500)]">
+                            {formData.audio_url}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-3">
+                        <FileAudio className="h-10 w-10 text-[var(--color-primary-700)]" />
+                        <div className="text-left">
+                          <p className="font-medium text-[var(--color-primary-800)]">
+                            音频已上传
+                          </p>
+                          <p className="max-w-xs truncate text-xs text-[var(--color-neutral-500)]">
+                            {formData.audio_url.split('/').pop()}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  }
                 >
-                  {mood.emoji} {mood.label}
-                </button>
-              ))}
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    onChange={handleAudioUpload}
+                  />
+                </UploadDropzone>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                  <UploadDropzone
+                    title="封面图片"
+                    description="上传封面后，列表卡片会直接显示。"
+                    active={Boolean(formData.cover_image)}
+                    uploading={uploadingCover}
+                    onClick={() => coverInputRef.current?.click()}
+                    icon={<ImageIcon className="h-8 w-8 text-[var(--color-neutral-500)]" />}
+                    className="aspect-square"
+                    activeContent={
+                      formData.cover_image ? (
+                        <div className="relative h-full w-full overflow-hidden rounded-[var(--radius-xl)]">
+                          <Image
+                            src={formData.cover_image}
+                            alt="歌曲封面预览"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : null
+                    }
+                  >
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCoverUpload}
+                    />
+                  </UploadDropzone>
+
+                  <UploadDropzone
+                    title="歌词文件"
+                    description="支持 .lrc 或 .txt，后面会用于歌词展示。"
+                    active={Boolean(formData.lyrics)}
+                    onClick={() => lyricsInputRef.current?.click()}
+                    icon={<FileText className="h-8 w-8 text-[var(--color-neutral-500)]" />}
+                    className="aspect-square"
+                    activeContent={
+                      formData.lyrics ? (
+                        <div className="text-center">
+                          <FileText className="mx-auto mb-2 h-8 w-8 text-[var(--color-primary-700)]" />
+                          <p className="text-sm font-medium text-[var(--color-primary-800)]">
+                            歌词已导入
+                          </p>
+                          <p className="mt-1 text-xs text-[var(--color-neutral-500)]">
+                            {formData.lyrics.split('\n').length} 行内容
+                          </p>
+                        </div>
+                      ) : null
+                    }
+                  >
+                    <input
+                      ref={lyricsInputRef}
+                      type="file"
+                      accept=".lrc,.txt"
+                      className="hidden"
+                      onChange={handleLyricsUpload}
+                    />
+                  </UploadDropzone>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="歌曲名称 *">
+                  <Input
+                    value={formData.title}
+                    onChange={(event) =>
+                      setFormData((prev) => ({ ...prev, title: event.target.value }))
+                    }
+                    placeholder="输入歌曲名称"
+                    required
+                  />
+                </Field>
+                <Field label="歌手 *">
+                  <Input
+                    value={formData.artist}
+                    onChange={(event) =>
+                      setFormData((prev) => ({ ...prev, artist: event.target.value }))
+                    }
+                    placeholder="输入歌手名称"
+                    required
+                  />
+                </Field>
+              </div>
+
+              <Field label="专辑">
+                <Input
+                  value={formData.album}
+                  onChange={(event) =>
+                    setFormData((prev) => ({ ...prev, album: event.target.value }))
+                  }
+                  placeholder="输入专辑名称"
+                />
+              </Field>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field
+                  label="在线音频地址"
+                  description="可填写 MP3、M4A、AAC、OGG、WAV、FLAC 或 M3U8 直链。"
+                >
+                  <Input
+                    type="url"
+                    value={formData.audio_url}
+                    placeholder="https://example.com/stream/song.mp3"
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setAudioInputMode(value ? 'url' : null);
+                      setFormData((prev) => ({
+                        ...prev,
+                        audio_url: value,
+                        platform:
+                          prev.platform === 'local' && value
+                            ? 'other'
+                            : prev.platform,
+                      }));
+                    }}
+                  />
+                </Field>
+
+                <Field
+                  label="歌曲来源链接"
+                  description="可选，播放器右上角会保留一个跳转按钮。"
+                >
+                  <Input
+                    type="url"
+                    value={formData.music_url}
+                    onChange={(event) =>
+                      setFormData((prev) => ({ ...prev, music_url: event.target.value }))
+                    }
+                    placeholder="https://music.example.com/song/123"
+                  />
+                </Field>
+              </div>
+
+              <Field label="心情标签">
+                <div className="flex flex-wrap gap-2">
+                  {moods.map((mood) => (
+                    <button
+                      key={mood.value}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          mood: prev.mood === mood.value ? '' : mood.value,
+                        }))
+                      }
+                      className={cn(
+                        'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-all duration-[var(--duration-fast)]',
+                        formData.mood === mood.value
+                          ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-100)] text-[var(--color-primary-900)]'
+                          : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-700)] hover:border-[var(--color-primary-300)] hover:bg-[var(--surface-overlay)]'
+                      )}
+                    >
+                      <span>{mood.emoji}</span>
+                      {mood.label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <Field label="推荐理由">
+                <Textarea
+                  value={formData.note}
+                  onChange={(event) =>
+                    setFormData((prev) => ({ ...prev, note: event.target.value }))
+                  }
+                  rows={3}
+                  placeholder="为什么喜欢这首歌？"
+                />
+              </Field>
+
+              <Field label="歌词内容 (LRC 格式)" description="可手动补充或修改上传的歌词。">
+                <Textarea
+                  value={formData.lyrics}
+                  onChange={(event) =>
+                    setFormData((prev) => ({ ...prev, lyrics: event.target.value }))
+                  }
+                  rows={6}
+                  className="font-mono"
+                  placeholder="[00:00.00]歌词第一行&#10;[00:05.00]歌词第二行&#10;..."
+                />
+              </Field>
+
+              <label className="inline-flex items-center gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={formData.is_favorite}
+                  onChange={(event) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      is_favorite: event.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-[color:var(--border-default)] text-[var(--color-primary-600)] focus:ring-[var(--color-primary-500)]"
+                />
+                <span className="text-sm font-medium text-[var(--color-neutral-700)]">
+                  直接加入我的最爱
+                </span>
+              </label>
+
+              {submitError ? (
+                <div className="rounded-[var(--radius-xl)] border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-600 dark:text-red-300">
+                  {submitError}
+                </div>
+              ) : null}
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">推荐理由</label>
-            <textarea
-              value={formData.note}
-              onChange={e => setFormData({ ...formData, note: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-              rows={2}
-              placeholder="为什么喜欢这首歌？"
-            />
-          </div>
-
-          {/* 手动输入歌词 */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              歌词内容 (LRC格式)
-              <span className="text-muted-foreground text-xs ml-2">可选</span>
-            </label>
-            <textarea
-              value={formData.lyrics}
-              onChange={e => setFormData({ ...formData, lyrics: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none font-mono text-sm"
-              rows={4}
-              placeholder="[00:00.00]歌词第一行&#10;[00:05.00]歌词第二行&#10;..."
-            />
-          </div>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.is_favorite}
-              onChange={e => setFormData({ ...formData, is_favorite: e.target.checked })}
-              className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
-            />
-            <span className="text-sm">添加到最爱 ❤️</span>
-          </label>
-        </form>
-
-        <div className="p-6 border-t border-border flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors"
-          >
-            取消
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !formData.title || !formData.artist || (!formData.audio_url && !formData.music_url)}
-            className="btn-primary disabled:opacity-50"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Check className="w-5 h-5" />
-            )}
-            上传歌曲
-          </button>
-        </div>
+            <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-[color:var(--border-default)] pt-5">
+              <Button type="button" variant="secondary" onClick={onClose}>
+                取消
+              </Button>
+              <Button
+                type="submit"
+                loading={loading}
+                disabled={
+                  !formData.title ||
+                  !formData.artist ||
+                  !getPlayableSongUrl(formData)
+                }
+              >
+                {!loading ? <Check className="h-4 w-4" /> : null}
+                添加歌曲
+              </Button>
+            </div>
+          </form>
+        </Card>
       </motion.div>
     </motion.div>
+  );
+}
+
+function UploadDropzone({
+  title,
+  description,
+  helper,
+  active,
+  uploading = false,
+  onClick,
+  icon,
+  activeContent,
+  className,
+  children,
+}: {
+  title: string;
+  description: string;
+  helper?: string;
+  active: boolean;
+  uploading?: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  activeContent?: React.ReactNode;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-sm font-medium text-[var(--color-neutral-800)]">{title}</p>
+        <p className="mt-1 text-xs text-[var(--color-neutral-500)]">{description}</p>
+      </div>
+
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          'relative flex min-h-[220px] w-full items-center justify-center overflow-hidden rounded-[var(--radius-2xl)] border border-dashed px-4 py-5 text-center transition-all duration-[var(--duration-fast)]',
+          active
+            ? 'border-[var(--color-primary-300)] bg-[linear-gradient(180deg,var(--color-primary-50),var(--surface-base))]'
+            : 'border-[color:var(--border-default)] bg-[var(--surface-base)] hover:border-[var(--color-primary-300)] hover:bg-[var(--surface-raised)]',
+          className
+        )}
+      >
+        {uploading ? (
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-600)]" />
+        ) : active && activeContent ? (
+          activeContent
+        ) : (
+          <div className="space-y-3">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-overlay)]">
+              {icon}
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-[var(--color-neutral-700)]">{description}</p>
+              {helper ? (
+                <p className="text-xs text-[var(--color-neutral-500)]">{helper}</p>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </button>
+      {children}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  description,
+  children,
+}: {
+  label: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-[var(--color-neutral-800)]">
+        {label}
+      </label>
+      {description ? (
+        <p className="-mt-1 text-xs text-[var(--color-neutral-500)]">{description}</p>
+      ) : null}
+      {children}
+    </div>
   );
 }

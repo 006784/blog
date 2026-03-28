@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -111,20 +112,27 @@ export function OptimizedImage({
       />
       
       {/* 实际图片 */}
-      <img
-        src={priority ? src : undefined}
-        data-src={!priority ? src : undefined}
-        alt={alt}
-        width={width}
-        height={height}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-        className="relative w-full h-full object-cover transition-opacity duration-300"
-        style={{ opacity: priority ? 1 : 0 }}
-        onLoad={(e) => {
-          e.currentTarget.style.opacity = '1';
-        }}
-      />
+      {width && height ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          priority={priority}
+          unoptimized
+          className="relative h-full w-full object-cover transition-opacity duration-300"
+        />
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="100vw"
+          priority={priority}
+          unoptimized
+          className="relative object-cover transition-opacity duration-300"
+        />
+      )}
     </div>
   );
 }

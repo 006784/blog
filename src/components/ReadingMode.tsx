@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, X, Minus, Plus, Type, Moon, Sun } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { BookOpen, X, Minus, Plus, Type } from 'lucide-react';
 
 interface ReadingModeContextType {
   isReadingMode: boolean;
@@ -31,15 +31,21 @@ export function ReadingModeProvider({ children }: { children: ReactNode }) {
 
   // 加载设置从localStorage
   useEffect(() => {
-    setMounted(true);
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('readingModeSettings');
-      if (saved) {
-        const settings = JSON.parse(saved);
-        setFontSize(settings.fontSize || 18);
-        setLineHeight(settings.lineHeight || 1.8);
-      }
+      const frame = window.requestAnimationFrame(() => {
+        setMounted(true);
+        const saved = localStorage.getItem('readingModeSettings');
+        if (saved) {
+          const settings = JSON.parse(saved);
+          setFontSize(settings.fontSize || 18);
+          setLineHeight(settings.lineHeight || 1.8);
+        }
+      });
+
+      return () => window.cancelAnimationFrame(frame);
     }
+
+    return undefined;
   }, []);
 
   // 保存设置到localStorage
@@ -97,8 +103,6 @@ export function ReadingModePanel() {
     setLineHeight 
   } = useReadingMode();
   
-  const [showPanel, setShowPanel] = useState(false);
-
   if (!isReadingMode) return null;
 
   return (

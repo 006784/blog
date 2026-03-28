@@ -8,7 +8,15 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Calendar, Clock, ChevronLeft, Loader2, FileText, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getPostBySlug, getPublishedPosts, incrementPostViews, Post } from '@/lib/supabase';
+import {
+  filterRenderablePosts,
+  getSamplePostBySlug,
+  getSamplePosts,
+  toPublicCatalogPost,
+  toPublicCatalogPosts,
+  type PublicCatalogPost,
+} from '@/lib/sample-posts';
+import { getPublicPostBySlug, getPublishedPosts, incrementPostViews } from '@/lib/supabase';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -61,8 +69,8 @@ function categoryLabel(category: string): string {
 }
 
 export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
-  const [post, setPost] = useState<Post | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
+  const [post, setPost] = useState<PublicCatalogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<PublicCatalogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState('');
@@ -79,7 +87,8 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
       setLoadError(null);
 
       try {
-        const current = await getPostBySlug(slug);
+        const livePost = await getPublicPostBySlug(slug);
+        const current = livePost ? toPublicCatalogPost(livePost) : getSamplePostBySlug(slug);
         if (!current) {
           setPost(null);
           setRelatedPosts([]);
@@ -88,7 +97,9 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
         setPost(current);
 
-        const allPosts = await getPublishedPosts();
+        const allPosts = current.is_demo
+          ? getSamplePosts()
+          : filterRenderablePosts(toPublicCatalogPosts(await getPublishedPosts()));
         const related = allPosts
           .filter((item) => item.slug !== current.slug)
           .sort((a, b) => {
@@ -100,10 +111,12 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
         setRelatedPosts(related);
 
-        try {
+        if (!current.is_demo) {
+          try {
           await incrementPostViews(current.id);
-        } catch (trackError) {
-          console.warn('文章阅读量更新失败:', trackError);
+          } catch (trackError) {
+            console.warn('文章阅读量更新失败:', trackError);
+          }
         }
       } catch (error) {
         console.error('加载文章失败:', error);

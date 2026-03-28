@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Upload, HardDrive, Cloud, Settings, History, Eye, Lock, FileText, Archive } from 'lucide-react';
+import { Download, HardDrive, Cloud, Settings, History, Eye, Archive } from 'lucide-react';
 import { DataExportService, type ExportFormat, type BackupConfig, type VersionHistory } from '@/lib/diary/data-export-service';
 import type { Diary } from '@/lib/supabase';
 
@@ -226,7 +226,7 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
               <label className="block text-sm font-medium text-gray-700 mb-1">备份频率</label>
               <select
                 value={backupConfig.backupFrequency}
-                onChange={(e) => setBackupConfig({...backupConfig, backupFrequency: e.target.value as any})}
+                onChange={(e) => setBackupConfig({...backupConfig, backupFrequency: e.target.value as BackupConfig['backupFrequency']})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 <option value="daily">每日</option>
@@ -301,7 +301,7 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
             <label className="block text-sm font-medium text-blue-800 mb-2">导出格式</label>
             <select
               value={selectedFormat}
-              onChange={(e) => setSelectedFormat(e.target.value as any)}
+              onChange={(e) => setSelectedFormat(e.target.value as ExportFormat['type'])}
               className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
             >
               {formats.map(format => (

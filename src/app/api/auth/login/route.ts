@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { parseBody, ok, err } from '@/lib/api';
 import { verifyAdminPassword } from '@/lib/env';
 import { logger } from '@/lib/logger';
-import { supabase } from '@/lib/supabase';
 import {
   setAuthCookies,
   createDbSession,
@@ -21,18 +20,6 @@ export const dynamic = 'force-dynamic';
 const loginSchema = z.object({
   password: z.string().min(1, '密码不能为空'),
 });
-
-/** 检查是否启用了 TOTP */
-async function isTotpEnabled(): Promise<string | null> {
-  const { data } = await supabase
-    .from('site_settings')
-    .select('value')
-    .eq('key', 'admin_totp')
-    .single();
-
-  if (!data?.value?.enabled) return null;
-  return (data.value as { secret: string }).secret ?? null;
-}
 
 /**
  * POST /api/auth/login

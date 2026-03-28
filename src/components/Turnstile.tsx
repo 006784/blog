@@ -41,7 +41,7 @@ export function Turnstile({ onVerify, onError, onExpire, theme = 'auto' }: Turns
     if (widgetIdRef.current) {
       try {
         window.turnstile.remove(widgetIdRef.current);
-      } catch (e) {
+      } catch {
         // 忽略错误
       }
     }
@@ -87,7 +87,7 @@ export function Turnstile({ onVerify, onError, onExpire, theme = 'auto' }: Turns
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
-        } catch (e) {
+        } catch {
           // 忽略错误
         }
       }

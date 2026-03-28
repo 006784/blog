@@ -1,5 +1,5 @@
 // 手写笔迹效果组件
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useEffectEvent, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface HandwritingEffectProps {
@@ -23,6 +23,40 @@ export const HandwritingEffect: React.FC<HandwritingEffectProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const drawHandwriting = useEffectEvent((ctx: CanvasRenderingContext2D, content: string) => {
+    const fontSize = 18;
+    const lineHeight = fontSize * 1.4;
+    const maxWidth = 600;
+    
+    ctx.font = `${fontSize}px 'Kalam', cursive`;
+    ctx.fillStyle = penColor;
+    
+    const x = 20;
+    let y = 40;
+    let currentLine = '';
+    
+    for (let i = 0; i < content.length; i++) {
+      const char = content[i];
+      const testLine = currentLine + char;
+      const metrics = ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth && char !== ' ') {
+        ctx.fillText(currentLine, x, y);
+        currentLine = char;
+        y += lineHeight;
+      } else {
+        currentLine = testLine;
+      }
+      
+      const offsetX = Math.sin(i * 0.3) * 0.5;
+      const offsetY = Math.cos(i * 0.2) * 0.3;
+      
+      if (i === content.length - 1) {
+        ctx.fillText(currentLine, x + offsetX, y + offsetY);
+      }
+    }
+  });
 
   useEffect(() => {
     if (currentIndex < text.length) {
@@ -59,42 +93,6 @@ export const HandwritingEffect: React.FC<HandwritingEffectProps> = ({
       drawHandwriting(ctx, displayedText);
     }
   }, [displayedText, penColor, penSize]);
-
-  const drawHandwriting = (ctx: CanvasRenderingContext2D, text: string) => {
-    const fontSize = 18;
-    const lineHeight = fontSize * 1.4;
-    const maxWidth = 600;
-    
-    ctx.font = `${fontSize}px 'Kalam', cursive`;
-    ctx.fillStyle = penColor;
-    
-    let x = 20;
-    let y = 40;
-    let currentLine = '';
-    
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      const testLine = currentLine + char;
-      const metrics = ctx.measureText(testLine);
-      
-      if (metrics.width > maxWidth && char !== ' ') {
-        // 换行
-        ctx.fillText(currentLine, x, y);
-        currentLine = char;
-        y += lineHeight;
-      } else {
-        currentLine = testLine;
-      }
-      
-      // 添加手写波动效果
-      const offsetX = Math.sin(i * 0.3) * 0.5;
-      const offsetY = Math.cos(i * 0.2) * 0.3;
-      
-      if (i === text.length - 1) {
-        ctx.fillText(currentLine, x + offsetX, y + offsetY);
-      }
-    }
-  };
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>

@@ -4,7 +4,6 @@ import { RSSCollector } from './collectors/rss-collector';
 import { NewsProcessor } from './services/news-processor';
 import { 
   NewsSource, 
-  RawNewsItem, 
   ProcessedNewsItem, 
   DailyNewsletter,
   NewsletterConfig,
@@ -130,8 +129,8 @@ export class NewsCollectionService {
    */
   private async sendNewsletter(newsletter: DailyNewsletter, config: NewsletterConfig) {
     try {
-      const htmlContent = this.generateNewsletterHTML(newsletter, config);
-      const textContent = this.generateNewsletterText(newsletter, config);
+      const htmlContent = this.generateNewsletterHTML(newsletter);
+      const textContent = this.generateNewsletterText(newsletter);
       
       const resend = new Resend(process.env.RESEND_API_KEY);
       
@@ -156,7 +155,7 @@ export class NewsCollectionService {
   /**
    * 生成HTML格式的新闻简报
    */
-  private generateNewsletterHTML(newsletter: DailyNewsletter, config: NewsletterConfig): string {
+  private generateNewsletterHTML(newsletter: DailyNewsletter): string {
     const categoriesHtml = newsletter.categories
       .map((categoryGroup: { category: NewsCategory; items: ProcessedNewsItem[] }) => {
         if (categoryGroup.items.length === 0) return '';
@@ -291,7 +290,7 @@ export class NewsCollectionService {
   /**
    * 生成纯文本格式的新闻简报
    */
-  private generateNewsletterText(newsletter: DailyNewsletter, config: NewsletterConfig): string {
+  private generateNewsletterText(newsletter: DailyNewsletter): string {
     let text = `📰 ${newsletter.title}\n`;
     text += `日期: ${new Date().toLocaleDateString('zh-CN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n`;
     text += `今日共收集 ${newsletter.totalItems} 条新闻，涵盖 ${newsletter.categories.length} 个分类\n\n`;

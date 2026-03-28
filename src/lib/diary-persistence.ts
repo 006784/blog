@@ -1,3 +1,4 @@
+import { normalizeDiaryAttachments, normalizeDiaryLocationMeta } from '@/lib/diary-editor';
 import { supabaseAdmin as supabase, type Diary } from './supabase';
 
 type DiaryWriteInput = {
@@ -11,6 +12,8 @@ type DiaryWriteInput = {
   mood_tags?: unknown;
   mood_score?: unknown;
   drawing_url?: unknown;
+  attachments?: unknown;
+  location_meta?: unknown;
   is_public?: unknown;
   environment?: unknown;
   environment_data?: unknown;
@@ -47,6 +50,10 @@ export function buildDiaryPayload(
   const content = typeof input.content === 'string' ? input.content.trim() : '';
   const moodTags = normalizeStringArray(input.mood_tags);
   const tags = normalizeStringArray(input.tags);
+  const hasAttachmentsField = Array.isArray(input.attachments);
+  const attachments = normalizeDiaryAttachments(input.attachments);
+  const hasLocationMetaField = input.location_meta !== undefined;
+  const locationMeta = normalizeDiaryLocationMeta(input.location_meta);
 
   const baseEnvironment = isRecord(input.environment_data)
     ? input.environment_data
@@ -69,16 +76,34 @@ export function buildDiaryPayload(
     editorMeta.drawing_url = drawingUrl;
   }
 
+  if (hasAttachmentsField) {
+    editorMeta.attachments = attachments;
+  }
+
   const environment_data = (() => {
-    if (!baseEnvironment && Object.keys(editorMeta).length === 0) return null;
+    if (!baseEnvironment && Object.keys(editorMeta).length === 0 && !hasLocationMetaField) return null;
 
     const merged = baseEnvironment ? { ...baseEnvironment } : {};
     if (Object.keys(editorMeta).length > 0) {
       const existingEditor = isRecord(merged.editor) ? merged.editor : {};
       merged.editor = { ...existingEditor, ...editorMeta };
     }
+
+    if (hasLocationMetaField) {
+      if (locationMeta) {
+        merged.location = locationMeta;
+      } else {
+        delete merged.location;
+      }
+    }
     return merged;
   })();
+
+  const imageUrls = hasAttachmentsField
+    ? attachments
+        .filter((attachment) => attachment.type === 'image' || attachment.type === 'gif')
+        .map((attachment) => attachment.url)
+    : normalizeStringArray(input.images);
 
   const payload: Partial<Diary> & {
     diary_date: string;
@@ -92,7 +117,7 @@ export function buildDiaryPayload(
     mood: normalizeString(input.mood),
     weather: normalizeString(input.weather),
     location: normalizeString(input.location),
-    images: normalizeStringArray(input.images),
+    images: imageUrls,
     tags: tags.length > 0 ? tags : moodTags,
     is_public: typeof input.is_public === 'boolean' ? input.is_public : false,
     word_count: content.length,

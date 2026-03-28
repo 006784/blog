@@ -28,6 +28,8 @@ export interface AppliedTemplate {
   location?: string;
 }
 
+type TemplateCategory = DiaryTemplate['category'];
+
 export class DiaryTemplateService {
   private static readonly DEFAULT_TEMPLATES: DiaryTemplate[] = [
     {
@@ -175,7 +177,7 @@ export class DiaryTemplateService {
   /**
    * 获取特定分类的模板
    */
-  static getTemplatesByCategory(category: string): DiaryTemplate[] {
+  static getTemplatesByCategory(category: TemplateCategory | 'all'): DiaryTemplate[] {
     if (category === 'all') {
       return this.getDefaultTemplates();
     }
@@ -311,7 +313,11 @@ export class DiaryTemplateService {
   /**
    * 创建自定义模板
    */
-  static createCustomTemplate(name: string, content: string, category: string = 'custom'): DiaryTemplate {
+  static createCustomTemplate(
+    name: string,
+    content: string,
+    category: TemplateCategory = 'custom'
+  ): DiaryTemplate {
     // 提取占位符
     const placeholders = this.extractPlaceholders(content);
 
@@ -319,7 +325,7 @@ export class DiaryTemplateService {
       id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
       description: `自定义模板 - ${name}`,
-      category: category as any,
+      category,
       content,
       placeholders,
       createdAt: new Date(),
@@ -391,12 +397,14 @@ export class DiaryTemplateService {
     try {
       const stored = localStorage.getItem('diary-custom-templates');
       if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed.map((t: any) => ({
-          ...t,
-          createdAt: new Date(t.createdAt),
-          updatedAt: new Date(t.updatedAt)
-        }));
+        const parsed: unknown = JSON.parse(stored);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+
+        return parsed
+          .map((template) => this.normalizeTemplate(template))
+          .filter((template): template is DiaryTemplate => template !== null);
       }
     } catch (error) {
       console.error('加载自定义模板失败:', error);
@@ -450,5 +458,33 @@ export class DiaryTemplateService {
     const defaultTemplates = this.getDefaultTemplates();
     const customTemplates = this.loadCustomTemplates();
     return [...defaultTemplates, ...customTemplates];
+  }
+
+  private static normalizeTemplate(template: unknown): DiaryTemplate | null {
+    if (!template || typeof template !== 'object') {
+      return null;
+    }
+
+    const data = template as Partial<DiaryTemplate>;
+    const category = this.normalizeCategory(data.category);
+
+    return {
+      id: typeof data.id === 'string' ? data.id : `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: typeof data.name === 'string' ? data.name : '未命名模板',
+      description: typeof data.description === 'string' ? data.description : '自定义模板',
+      category,
+      content: typeof data.content === 'string' ? data.content : '',
+      placeholders: Array.isArray(data.placeholders)
+        ? data.placeholders.filter((placeholder): placeholder is string => typeof placeholder === 'string')
+        : [],
+      createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+      updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
+      isPublic: Boolean(data.isPublic)
+    };
+  }
+
+  private static normalizeCategory(category: unknown): TemplateCategory {
+    const allowedCategories: TemplateCategory[] = ['travel', 'work', 'study', 'life', 'health', 'creative', 'custom'];
+    return allowedCategories.includes(category as TemplateCategory) ? (category as TemplateCategory) : 'custom';
   }
 }

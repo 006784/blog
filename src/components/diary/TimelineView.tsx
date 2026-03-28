@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Diary } from '@/lib/supabase';
 import { StatePanel } from '@/components/ui/StatePanel';
+import { extractDiaryEditorState } from '@/lib/diary-editor';
 
 const MOOD_DOT_SIZE: Record<string, number> = {
   '难过': 6, '平静': 7, '还好': 8, '开心': 9, '很棒': 10,
@@ -72,6 +73,9 @@ export function TimelineView({ diaries, onOpen }: Props) {
               const date = new Date(diary.diary_date);
               const dotSize = MOOD_DOT_SIZE[diary.mood || ''] || 8;
               const images = diary.images?.filter(Boolean) || [];
+              const attachments = extractDiaryEditorState(diary).attachments;
+              const audioCount = attachments.filter((attachment) => attachment.type === 'audio').length;
+              const videoCount = attachments.filter((attachment) => attachment.type === 'video').length;
 
               return (
                 <div key={diary.id} className="flex gap-4 mb-5 relative">
@@ -143,6 +147,16 @@ export function TimelineView({ diaries, onOpen }: Props) {
                       {diary.weather && (
                         <span className="text-[10px]" style={{ color: 'var(--d-ink-3)' }}>
                           {diary.weather}
+                        </span>
+                      )}
+                      {audioCount > 0 && (
+                        <span className="text-[10px]" style={{ color: 'var(--d-ink-3)' }}>
+                          🎙 {audioCount}
+                        </span>
+                      )}
+                      {videoCount > 0 && (
+                        <span className="text-[10px]" style={{ color: 'var(--d-ink-3)' }}>
+                          🎬 {videoCount}
                         </span>
                       )}
                       <span className="text-[10px]" style={{ color: 'var(--d-ink-3)' }}>

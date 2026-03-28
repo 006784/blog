@@ -20,6 +20,9 @@ function getMoodScore(diary: Diary): number {
 }
 
 export function MoodReport({ diaries, year, month }: Props) {
+  void year;
+  void month;
+
   const stats = useMemo(() => {
     if (!diaries.length) return null;
 

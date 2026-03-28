@@ -46,7 +46,7 @@ export function useDiaryAutoSave(
 
     setStatus('saving');
     try {
-      const res = await fetch(`/api/diary/${p.diary_date}`, {
+      const res = await fetch(`/api/diary/${p.diary_date}/`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

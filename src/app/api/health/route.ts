@@ -27,7 +27,7 @@ function updateHealthStatus() {
 // 定期更新健康状态
 setInterval(updateHealthStatus, 30000); // 每30秒更新一次
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 检查基本服务
     const checks = {

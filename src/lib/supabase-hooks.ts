@@ -264,8 +264,8 @@ export function useSubscribe() {
       await subscribe(email);
       setSuccess(true);
       return true;
-    } catch (err: any) {
-      setError(err.message || '订阅失败');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '订阅失败');
       return false;
     } finally {
       setLoading(false);

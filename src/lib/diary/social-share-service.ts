@@ -1,6 +1,8 @@
 // 社交分享服务
 // 提供日记分享、社交媒体集成等功能
 
+import type { Diary } from '../supabase';
+
 export interface ShareOptions {
   title: string;
   text: string;
@@ -21,6 +23,37 @@ export interface ShareStats {
   shareCount: number;
   platformShares: Record<string, number>;
   lastShared: Date | null;
+}
+
+interface ShareableDiary extends Diary {
+  author?: string;
+  avatar?: string;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  media?: unknown[];
+  createdAt?: string;
+  quote?: string;
+  image?: string;
+}
+
+interface TimelineEntry {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  avatar: string;
+  timestamp: Date;
+  likes: number;
+  comments: number;
+  shares: number;
+  tags: string[];
+  media: unknown[];
+}
+
+interface TimelineDay {
+  date: string;
+  entries: TimelineEntry[];
 }
 
 export class SocialShareService {
@@ -99,9 +132,7 @@ export class SocialShareService {
 
     if (platform === 'copy') {
       // 复制链接到剪贴板
-      navigator.clipboard.writeText(options.url).then(() => {
-        console.log('链接已复制到剪贴板');
-      }).catch(err => {
+      navigator.clipboard.writeText(options.url).catch(err => {
         console.error('复制链接失败:', err);
         // 如果无法复制到剪贴板，降级到提示用户
         alert('链接已生成，您可以手动复制:\n' + options.url);
@@ -121,7 +152,6 @@ export class SocialShareService {
    */
   static async webShare(options: ShareOptions): Promise<boolean> {
     if (!navigator.share) {
-      console.log('Web Share API 不受支持');
       return false;
     }
 
@@ -149,40 +179,28 @@ export class SocialShareService {
   /**
    * 生成朋友圈风格的时间线数据
    */
-  static generateTimelineData(diaries: any[]): Array<{ date: string; entries: Array<{
-    id: string;
-    title: string;
-    content: string;
-    author: string;
-    avatar: string;
-    timestamp: Date;
-    likes: number;
-    comments: number;
-    shares: number;
-    tags: string[];
-    media: any[];
-  }> }>
-  {
+  static generateTimelineData(diaries: ShareableDiary[]): TimelineDay[] {
     // 按日期分组日记
-    const groupedByDate = diaries.reduce((acc: Record<string, any[]>, diary: any) => {
-      const date = new Date(diary.createdAt).toDateString();
+    const groupedByDate = diaries.reduce((acc: Record<string, ShareableDiary[]>, diary) => {
+      const createdAt = diary.createdAt || diary.created_at;
+      const date = new Date(createdAt).toDateString();
       if (!acc[date]) {
         acc[date] = [];
       }
       acc[date].push(diary);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, ShareableDiary[]>);
     
     // 转换为时间线格式
     return Object.entries(groupedByDate).map(([date, dayDiaries]) => ({
       date,
-      entries: dayDiaries.map((diary: any) => ({
+      entries: dayDiaries.map((diary) => ({
         id: diary.id,
-        title: diary.title,
+        title: diary.title || '未命名日记',
         content: diary.content.substring(0, 200) + (diary.content.length > 200 ? '...' : ''),
         author: diary.author || '匿名用户',
         avatar: diary.avatar || '/api/placeholder/40/40',
-        timestamp: new Date(diary.createdAt),
+        timestamp: new Date(diary.createdAt || diary.created_at),
         likes: diary.likes || 0,
         comments: diary.comments || 0,
         shares: diary.shares || 0,
@@ -195,7 +213,7 @@ export class SocialShareService {
   /**
    * 生成分享预览数据
    */
-  static generateSharePreview(diary: any): ShareOptions {
+  static generateSharePreview(diary: ShareableDiary): ShareOptions {
     const title = diary.title || '日记分享';
     const text = diary.content?.substring(0, 100) + (diary.content?.length > 100 ? '...' : '') || '分享一篇有趣的日记';
     const url = this.generatePublicLink(diary.id);
@@ -248,13 +266,13 @@ export class SocialShareService {
   /**
    * 创建分享摘要
    */
-  static createShareSummary(diaries: any[]): string {
+  static createShareSummary(diaries: ShareableDiary[]): string {
     const total = diaries.length;
     const today = diaries.filter(d => 
-      new Date(d.createdAt).toDateString() === new Date().toDateString()
+      new Date(d.createdAt || d.created_at).toDateString() === new Date().toDateString()
     ).length;
     const weekly = diaries.filter(d => {
-      const diaryDate = new Date(d.createdAt);
+      const diaryDate = new Date(d.createdAt || d.created_at);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return diaryDate >= weekAgo;
@@ -273,7 +291,7 @@ export class SocialShareService {
   /**
    * 生成社交媒体优化的元数据
    */
-  static generateSocialMetadata(diary: any): Record<string, string> {
+  static generateSocialMetadata(diary: ShareableDiary): Record<string, string> {
     return {
       'og:title': diary.title || '日记分享',
       'og:description': diary.content?.substring(0, 160) + (diary.content?.length > 160 ? '...' : '') || '分享一篇有趣的日记',

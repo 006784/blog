@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Share2, Twitter, Link2, Copy, Check } from 'lucide-react';
+import { Share2, Twitter, Link2, Check } from 'lucide-react';
 import { useState } from 'react';
 import { APPLE_SPRING_GENTLE, HOVER_BUTTON, TAP_BUTTON } from './Animations';
 
@@ -24,8 +24,8 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
-        console.log('分享取消', err);
+      } catch {
+        // 用户取消分享时不需要额外提示
       }
     } else {
       // 降级到复制链接

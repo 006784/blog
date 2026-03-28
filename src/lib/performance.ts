@@ -16,6 +16,28 @@ export type PreloadResource = {
   crossOrigin?: string;
 };
 
+type PerformanceMemory = {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+};
+
+type PerformanceWithExtensions = Performance & {
+  memory?: PerformanceMemory;
+  timing?: PerformanceTiming;
+};
+
+type NavigatorConnection = {
+  effectiveType?: string;
+  downlink?: number;
+  addEventListener?: (type: 'change', listener: () => void) => void;
+  removeEventListener?: (type: 'change', listener: () => void) => void;
+};
+
+type NavigatorWithConnection = Navigator & {
+  connection?: NavigatorConnection;
+};
+
 // 懒加载图片组件
 export function useLazyImage(src: string, placeholder?: string) {
   const [imageSrc, setImageSrc] = useState(placeholder || '');
@@ -121,10 +143,9 @@ export function useMemoryMonitor() {
 
   useEffect(() => {
     const updateMemory = () => {
-      // @ts-ignore - 浏览器特定API
-      if (performance.memory) {
-        // @ts-ignore
-        const { usedJSHeapSize, totalJSHeapSize } = performance.memory;
+      const perf = performance as PerformanceWithExtensions;
+      if (perf.memory) {
+        const { usedJSHeapSize, totalJSHeapSize } = perf.memory;
         setMemoryInfo({
           used: Math.round(usedJSHeapSize / 1048576), // MB
           total: Math.round(totalJSHeapSize / 1048576), // MB
@@ -151,10 +172,9 @@ export function useNetworkStatus() {
 
   useEffect(() => {
     const updateNetworkStatus = () => {
-      // @ts-ignore - 浏览器特定API
-      if (navigator.connection) {
-        // @ts-ignore
-        const { effectiveType, downlink } = navigator.connection;
+      const browserNavigator = navigator as NavigatorWithConnection;
+      if (browserNavigator.connection) {
+        const { effectiveType, downlink } = browserNavigator.connection;
         setNetworkStatus({
           online: navigator.onLine,
           effectiveType: effectiveType || '4g',
@@ -175,20 +195,17 @@ export function useNetworkStatus() {
       window.addEventListener('online', updateNetworkStatus);
       window.addEventListener('offline', updateNetworkStatus);
       
-      // @ts-ignore
-      if (navigator.connection) {
-        // @ts-ignore
-        navigator.connection.addEventListener('change', updateNetworkStatus);
+      const browserNavigator = navigator as NavigatorWithConnection;
+      if (browserNavigator.connection?.addEventListener) {
+        browserNavigator.connection.addEventListener('change', updateNetworkStatus);
       }
 
       return () => {
         window.removeEventListener('online', updateNetworkStatus);
         window.removeEventListener('offline', updateNetworkStatus);
         
-        // @ts-ignore
-        if (navigator.connection) {
-          // @ts-ignore
-          navigator.connection.removeEventListener('change', updateNetworkStatus);
+        if (browserNavigator.connection?.removeEventListener) {
+          browserNavigator.connection.removeEventListener('change', updateNetworkStatus);
         }
       };
     }
@@ -217,15 +234,21 @@ export function useDebounce<T>(value: T, delay: number): T {
 // 节流优化
 export function useThrottle<T>(value: T, limit: number): T {
   const [throttledValue, setThrottledValue] = useState(value);
-  const lastRan = useRef(Date.now());
+  const lastRan = useRef(0);
 
   useEffect(() => {
+    if (lastRan.current === 0) {
+      lastRan.current = Date.now();
+      return;
+    }
+
+    const elapsed = Date.now() - lastRan.current;
     const handler = setTimeout(() => {
       if (Date.now() - lastRan.current >= limit) {
         setThrottledValue(value);
         lastRan.current = Date.now();
       }
-    }, limit - (Date.now() - lastRan.current));
+    }, Math.max(limit - elapsed, 0));
 
     return () => {
       clearTimeout(handler);
@@ -275,32 +298,28 @@ export function useIntersectionObserver(
 export class BundleAnalyzer {
   static analyze() {
     if (typeof window === 'undefined') return null;
+    const perf = performance as PerformanceWithExtensions;
     
     return {
       userAgent: navigator.userAgent,
       language: navigator.language,
       cookiesEnabled: navigator.cookieEnabled,
       online: navigator.onLine,
-      // @ts-ignore
-      memory: performance.memory ? {
-        // @ts-ignore
-        used: performance.memory.usedJSHeapSize,
-        // @ts-ignore
-        total: performance.memory.totalJSHeapSize,
-        // @ts-ignore
-        limit: performance.memory.jsHeapSizeLimit
+      memory: perf.memory ? {
+        used: perf.memory.usedJSHeapSize,
+        total: perf.memory.totalJSHeapSize,
+        limit: perf.memory.jsHeapSizeLimit
       } : null,
-      timing: performance.timing ? {
-        navigationStart: performance.timing.navigationStart,
-        domContentLoaded: performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
-        loadEvent: performance.timing.loadEventEnd - performance.timing.navigationStart
+      timing: perf.timing ? {
+        navigationStart: perf.timing.navigationStart,
+        domContentLoaded: perf.timing.domContentLoadedEventEnd - perf.timing.navigationStart,
+        loadEvent: perf.timing.loadEventEnd - perf.timing.navigationStart
       } : null
     };
   }
 
-  static sendToAnalytics(data: any) {
-    // 这里可以集成到你的分析服务
-    console.log('Bundle Analysis:', data);
+  static sendToAnalytics(data: unknown) {
+    // 这里可以集成到你的分析服务。
+    void data;
   }
 }
-

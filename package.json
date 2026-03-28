@@ -22,6 +22,8 @@
     "@monaco-editor/react": "^4.7.0",
     "@sentry/integrations": "^7.114.0",
     "@sentry/nextjs": "^10.37.0",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.0",
     "@supabase/supabase-js": "^2.89.0",
     "@types/prismjs": "^1.26.5",
     "@types/qrcode": "^1.5.6",

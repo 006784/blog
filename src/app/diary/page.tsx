@@ -11,6 +11,7 @@ import { CalendarView } from '@/components/diary/CalendarView';
 import { TimelineView } from '@/components/diary/TimelineView';
 import { MoodReport } from '@/components/diary/MoodReport';
 import { ExportModal } from '@/components/diary/ExportModal';
+import { extractDiaryEditorState, getDiaryLocationLabel } from '@/lib/diary-editor';
 
 // ── Helpers ────────────────────────────────────────────────────
 function getSavedTheme(): DiaryTheme {
@@ -30,30 +31,6 @@ function getNextDate(date: string): string {
   const [year, month, day] = date.split('-').map(Number);
   const nextDate = new Date(year, month - 1, day + 1);
   return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
-}
-
-function getDiaryEditorMeta(diary: Diary | null) {
-  const environmentData =
-    diary?.environment_data &&
-    typeof diary.environment_data === 'object' &&
-    !Array.isArray(diary.environment_data)
-      ? diary.environment_data as Record<string, unknown>
-      : null;
-
-  const editor =
-    environmentData?.editor &&
-    typeof environmentData.editor === 'object' &&
-    !Array.isArray(environmentData.editor)
-      ? environmentData.editor as Record<string, unknown>
-      : null;
-
-  return {
-    mood_score: typeof editor?.mood_score === 'number' ? editor.mood_score : undefined,
-    mood_tags: Array.isArray(editor?.mood_tags)
-      ? editor.mood_tags.filter((item): item is string => typeof item === 'string')
-      : diary?.tags || [],
-    drawing_url: typeof editor?.drawing_url === 'string' ? editor.drawing_url : undefined,
-  };
 }
 
 function upsertDiaryEntries(entries: Diary[], nextDiary: Diary): Diary[] {
@@ -105,7 +82,7 @@ export default function DiaryPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/diary?year=${calYear}&month=${calMonth}&view=calendar`, {
+      const res = await fetch(`/api/diary/?year=${calYear}&month=${calMonth}&view=calendar`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('failed');
@@ -125,7 +102,7 @@ export default function DiaryPage() {
   const [allDiaries, setAllDiaries] = useState<Diary[]>([]);
   useEffect(() => {
     if (view !== 'report' && view !== 'timeline') return;
-    fetch(`/api/diary?year=${calYear}`, { credentials: 'include' })
+    fetch(`/api/diary/?year=${calYear}`, { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => setAllDiaries(Array.isArray(d.diaries) ? d.diaries : []))
       .catch(() => {});
@@ -134,7 +111,7 @@ export default function DiaryPage() {
   // ── Load diary for selected date ──────────────────────────
   const loadDiaryForDate = useCallback(async (date: string) => {
     try {
-      const res = await fetch(`/api/diaries?startDate=${date}&endDate=${getNextDate(date)}&limit=50`, {
+      const res = await fetch(`/api/diaries/?startDate=${date}&endDate=${getNextDate(date)}&limit=50`, {
         credentials: 'include',
       });
       if (!res.ok) return null;
@@ -221,7 +198,7 @@ export default function DiaryPage() {
 
   const selectedDateObj = selectedDate ? new Date(selectedDate) : today;
   const epigraph = editingDiary?.content?.replace(/\s+/g, ' ').slice(-40) || '此刻，时光静止。';
-  const editorMeta = getDiaryEditorMeta(editingDiary);
+  const editorMeta = extractDiaryEditorState(editingDiary);
   const pageNumber = editingDiary
     ? diaries.findIndex((d) => d.id === editingDiary.id) + 1
     : diaries.findIndex((d) => d.diary_date === selectedDate) + 1;
@@ -406,8 +383,10 @@ export default function DiaryPage() {
                       mood_score: editorMeta.mood_score,
                       mood_tags: editorMeta.mood_tags,
                       weather: null,
-                      location: editingDiary.location,
+                      location: getDiaryLocationLabel(editorMeta.locationMeta, editingDiary.location),
+                      location_meta: editorMeta.locationMeta,
                       drawing_url: editorMeta.drawing_url,
+                      attachments: editorMeta.attachments,
                     } : undefined}
                     onSaved={(savedDiary) => {
                       setEditingDiary(savedDiary);
@@ -418,7 +397,7 @@ export default function DiaryPage() {
                         [savedDiary.diary_date]: {
                           mood: savedDiary.mood,
                           hasContent: Boolean(savedDiary.content),
-                          mood_score: getDiaryEditorMeta(savedDiary).mood_score,
+                          mood_score: extractDiaryEditorState(savedDiary).mood_score,
                         },
                       }));
                       void loadData();

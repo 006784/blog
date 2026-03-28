@@ -30,6 +30,8 @@ const ALLOWED_TYPES: Record<string, { ext: string; category: string }> = {
   'image/gif': { ext: 'gif', category: 'images' },
   'image/webp': { ext: 'webp', category: 'images' },
   'image/svg+xml': { ext: 'svg', category: 'images' },
+  'image/heic': { ext: 'heic', category: 'images' },
+  'image/heif': { ext: 'heif', category: 'images' },
   // 音频
   'audio/mpeg': { ext: 'mp3', category: 'audio' },
   'audio/mp3': { ext: 'mp3', category: 'audio' },
@@ -40,6 +42,8 @@ const ALLOWED_TYPES: Record<string, { ext: string; category: string }> = {
   'audio/x-m4a': { ext: 'm4a', category: 'audio' },
   'audio/aac': { ext: 'aac', category: 'audio' },
   'audio/ogg': { ext: 'ogg', category: 'audio' },
+  'audio/webm': { ext: 'webm', category: 'audio' },
+  'audio/mp4': { ext: 'm4a', category: 'audio' },
   // 视频
   'video/mp4': { ext: 'mp4', category: 'video' },
   'video/webm': { ext: 'webm', category: 'video' },

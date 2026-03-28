@@ -122,7 +122,7 @@ export class ScheduleManager {
   }
 
   // 获取下次执行时间（简化版）
-  getNextRunTime(cronExpression: string): Date {
+  getNextRunTime(): Date {
     // 这里应该使用真正的cron解析库
     // 现在返回明天的相同时间作为示例
     const now = new Date();

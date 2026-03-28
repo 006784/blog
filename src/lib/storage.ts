@@ -9,7 +9,7 @@ export async function uploadFile(
     formData.append('file', file);
     formData.append('folder', folder || bucket);
 
-    const response = await fetch('/api/upload', {
+    const response = await fetch('/api/upload/', {
       method: 'POST',
       body: formData,
     });
@@ -45,11 +45,10 @@ export async function uploadFiles(
 
 // 删除 R2 文件
 export async function deleteFile(
-  path: string,
-  bucket: string = 'uploads'
+  path: string
 ): Promise<boolean> {
   try {
-    const response = await fetch('/api/upload', {
+    const response = await fetch('/api/upload/', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path }),
@@ -64,7 +63,7 @@ export async function deleteFile(
 }
 
 // 获取文件公开URL
-export function getPublicUrl(path: string, bucket: string = 'uploads'): string {
+export function getPublicUrl(path: string): string {
   // R2 URL 由 API 返回，这里直接返回 path
   return path;
 }

@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { 
   sanitizeInput, 
   isValidURL, 
   csrfProtection,
-  createSecureResponse,
-  validateInput
+  createSecureResponse
 } from '@/lib/security';
 import { logger } from '@/lib/logger';
 
@@ -155,7 +154,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // 对于GET请求，返回API信息
   return createSecureResponse({
     success: true,

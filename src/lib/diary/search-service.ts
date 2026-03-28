@@ -1,6 +1,8 @@
 // 日记搜索和过滤服务
 // 提供全文搜索、高级筛选和结果高亮功能
 
+import type { Diary } from '../supabase';
+
 export interface SearchOptions {
   query?: string;
   dateFrom?: string;
@@ -36,11 +38,16 @@ export interface Highlight {
   matched: boolean;
 }
 
+interface SearchDiaryEntry extends Diary {
+  activity?: string;
+  _searchScore?: number;
+}
+
 export class DiarySearchService {
   /**
    * 全文搜索日记
    */
-  static searchDiaries(diaries: any[], options: SearchOptions): SearchResult[] {
+  static searchDiaries(diaries: SearchDiaryEntry[], options: SearchOptions): SearchResult[] {
     let results = [...diaries];
 
     // 应用过滤条件
@@ -61,7 +68,7 @@ export class DiarySearchService {
   /**
    * 应用各种过滤条件
    */
-  private static applyFilters(diaries: any[], options: SearchOptions): any[] {
+  private static applyFilters(diaries: SearchDiaryEntry[], options: SearchOptions): SearchDiaryEntry[] {
     return diaries.filter(diary => {
       // 日期过滤
       if (options.dateFrom || options.dateTo) {
@@ -105,7 +112,7 @@ export class DiarySearchService {
   /**
    * 执行文本搜索
    */
-  private static performTextSearch(diaries: any[], query: string): any[] {
+  private static performTextSearch(diaries: SearchDiaryEntry[], query: string): SearchDiaryEntry[] {
     const normalizedQuery = query.toLowerCase().trim();
     const queryTerms = normalizedQuery.split(/\s+/).filter(term => term.length > 0);
 
@@ -121,7 +128,7 @@ export class DiarySearchService {
   /**
    * 计算相关性分数
    */
-  private static calculateRelevanceScore(diary: any, queryTerms: string[]): number {
+  private static calculateRelevanceScore(diary: SearchDiaryEntry, queryTerms: string[]): number {
     let score = 0;
     const title = (diary.title || '').toLowerCase();
     const content = (diary.content || '').toLowerCase();
@@ -146,7 +153,7 @@ export class DiarySearchService {
   /**
    * 排序结果
    */
-  private static sortResults(diaries: any[], options: SearchOptions): any[] {
+  private static sortResults(diaries: SearchDiaryEntry[], options: SearchOptions): SearchDiaryEntry[] {
     const sortBy = options.sortBy || 'date';
     const sortOrder = options.sortOrder || 'desc';
 
@@ -172,7 +179,7 @@ export class DiarySearchService {
   /**
    * 创建搜索结果对象
    */
-  private static createSearchResult(diary: any, query: string): SearchResult {
+  private static createSearchResult(diary: SearchDiaryEntry, query: string): SearchResult {
     const highlights = this.generateHighlights(diary, query);
     const excerpt = this.generateExcerpt(diary.content || '', query);
 
@@ -196,7 +203,7 @@ export class DiarySearchService {
   /**
    * 生成高亮文本
    */
-  private static generateHighlights(diary: any, query: string): Highlight[] {
+  private static generateHighlights(diary: SearchDiaryEntry, query: string): Highlight[] {
     if (!query.trim()) return [];
 
     const highlights: Highlight[] = [];
@@ -304,7 +311,7 @@ export class DiarySearchService {
   /**
    * 获取搜索建议
    */
-  static getSuggestions(diaries: any[], query: string): string[] {
+  static getSuggestions(diaries: SearchDiaryEntry[], query: string): string[] {
     if (!query.trim() || diaries.length === 0) return [];
 
     const suggestions = new Set<string>();
@@ -338,7 +345,7 @@ export class DiarySearchService {
   /**
    * 获取搜索统计信息
    */
-  static getSearchStats(diaries: any[], options: SearchOptions): {
+  static getSearchStats(diaries: SearchDiaryEntry[], options: SearchOptions): {
     totalResults: number;
     dateRange: { min: string; max: string } | null;
     emotionDistribution: Record<string, number>;

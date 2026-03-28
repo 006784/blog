@@ -4,8 +4,14 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
+  browserSupportsWebAuthn,
+  platformAuthenticatorIsAvailable,
+  startAuthentication,
+} from '@simplewebauthn/browser';
+import {
   AlertCircle,
   ArrowLeft,
+  Fingerprint,
   KeyRound,
   Loader2,
   Mail,
@@ -25,7 +31,10 @@ function LoginForm() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [retryAfter, setRetryAfter] = useState(0);
+  const [supportsPasskey, setSupportsPasskey] = useState(false);
+  const [platformPasskeyAvailable, setPlatformPasskeyAvailable] = useState(false);
 
   useEffect(() => {
     if (retryAfter <= 0) return;
@@ -33,13 +42,23 @@ function LoginForm() {
     return () => clearInterval(timer);
   }, [retryAfter]);
 
+  useEffect(() => {
+    const supported = browserSupportsWebAuthn();
+    setSupportsPasskey(supported);
+    if (supported) {
+      platformAuthenticatorIsAvailable()
+        .then(setPlatformPasskeyAvailable)
+        .catch(() => setPlatformPasskeyAvailable(false));
+    }
+  }, []);
+
   async function requestCode() {
     if (retryAfter > 0) return;
     setLoading(true);
     setError('');
 
     try {
-      const res = await fetch('/api/auth/email/request', {
+      const res = await fetch('/api/auth/email/request/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -81,7 +100,7 @@ function LoginForm() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/email/verify', {
+      const res = await fetch('/api/auth/email/verify/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code }),
@@ -105,6 +124,43 @@ function LoginForm() {
       setError('网络错误，请稍后重试');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePasskeyLogin() {
+    setPasskeyLoading(true);
+    setError('');
+
+    try {
+      const optionsRes = await fetch('/api/auth/passkey/authenticate/options/', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const optionsData = await optionsRes.json().catch(() => null);
+      if (!optionsRes.ok) {
+        throw new Error(optionsData?.error || '暂时无法使用通行密钥登录');
+      }
+
+      const response = await startAuthentication({
+        optionsJSON: optionsData.data.options,
+      });
+
+      const verifyRes = await fetch('/api/auth/passkey/authenticate/verify/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ response }),
+      });
+      const verifyData = await verifyRes.json().catch(() => null);
+      if (!verifyRes.ok) {
+        throw new Error(verifyData?.error || '通行密钥登录失败');
+      }
+
+      router.replace(redirect);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '通行密钥登录失败');
+    } finally {
+      setPasskeyLoading(false);
     }
   }
 
@@ -140,6 +196,28 @@ function LoginForm() {
           </p>
         </div>
 
+        {supportsPasskey && step === 'email' ? (
+          <div className="mb-5 space-y-3">
+            <button
+              type="button"
+              onClick={() => void handlePasskeyLogin()}
+              disabled={passkeyLoading}
+              className="w-full py-4 rounded-2xl border border-border bg-background/80 text-foreground font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            >
+              {passkeyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
+              使用通行密钥
+            </button>
+            <p className="text-center text-xs text-muted-foreground">
+              {platformPasskeyAvailable ? '当前设备支持指纹 / Face ID / 系统解锁' : '浏览器支持通行密钥，可尝试用系统解锁登录'}
+            </p>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
+              <span>或者使用邮箱验证码</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          </div>
+        ) : null}
+
         {step === 'email' && (
           <form onSubmit={handleEmailSubmit} className="space-y-4">
             <div className="relative">
@@ -168,7 +246,7 @@ function LoginForm() {
 
             <button
               type="submit"
-              disabled={loading || retryAfter > 0 || !email}
+              disabled={loading || passkeyLoading || retryAfter > 0 || !email}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -205,7 +283,7 @@ function LoginForm() {
 
             <button
               type="submit"
-              disabled={loading || code.length !== 6}
+              disabled={loading || passkeyLoading || code.length !== 6}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}

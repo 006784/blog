@@ -23,7 +23,7 @@ const eslintConfig = defineConfig([
   {
     files: ["src/**/*.{js,jsx,ts,tsx}"],
     rules: {
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": ["error", { allow: ["warn", "error"] }],
     },
   },
 ]);

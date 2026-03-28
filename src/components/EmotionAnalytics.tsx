@@ -70,7 +70,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
         <div className="flex items-center gap-2">
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value as any)}
+            onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
             className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
           >
             <option value="weekly">周报</option>

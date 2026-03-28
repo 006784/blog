@@ -8,7 +8,7 @@ import {
   Calendar, Folder, Trash2, ZoomIn, ChevronLeft, ChevronRight,
   Grid3X3, LayoutGrid, Sparkles, Upload, Shield, Edit2, Save
 } from 'lucide-react';
-import { ImageUploader } from '@/components/ImageUploader';
+import { MultiImageUploader } from '@/components/ImageUploader';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -86,7 +86,7 @@ export default function GalleryPage() {
   async function handleDeletePhoto(id: string) {
     if (!confirm('确定删除这张照片吗？')) return;
     try {
-      const res = await fetch(`/api/gallery/photos/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/gallery/photos/${id}/`, { method: 'DELETE' });
       if (!res.ok) throw new Error('删除失败');
       setPhotos((current) => current.filter((p) => p.id !== id));
     } catch (error) {
@@ -96,7 +96,7 @@ export default function GalleryPage() {
 
   async function handleUpdatePhoto(id: string, updates: Partial<Photo>) {
     try {
-      const res = await fetch(`/api/gallery/photos/${id}`, {
+      const res = await fetch(`/api/gallery/photos/${id}/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -315,15 +315,15 @@ export default function GalleryPage() {
             <AddPhotoModal
               albums={albums}
               onClose={() => setShowAddModal(false)}
-              onAdd={async (photo) => {
-                const res = await fetch('/api/gallery/photos', {
+              onAdd={async (photoBatch) => {
+                const res = await fetch('/api/gallery/photos/', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(photo),
+                  body: JSON.stringify({ photos: photoBatch }),
                 });
                 if (!res.ok) throw new Error('添加失败');
-                const { photo: newPhoto } = await res.json();
-                setPhotos((current) => [newPhoto, ...current]);
+                const { photos: newPhotos } = await res.json();
+                setPhotos((current) => [...(newPhotos || []), ...current]);
                 setShowAddModal(false);
               }}
             />
@@ -734,10 +734,10 @@ function AddPhotoModal({
 }: { 
   albums: Album[];
   onClose: () => void;
-  onAdd: (photo: Partial<Photo>) => Promise<void>;
+  onAdd: (photos: Partial<Photo>[]) => Promise<void>;
 }) {
   const [formData, setFormData] = useState({
-    url: '',
+    urls: [] as string[],
     title: '',
     description: '',
     location: '',
@@ -748,15 +748,24 @@ function AddPhotoModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.url) return;
+    if (formData.urls.length === 0) return;
     
     setLoading(true);
     try {
-      await onAdd({
-        ...formData,
+      const payload = formData.urls.map((url, index) => ({
+        url,
+        title:
+          formData.title.trim().length > 0
+            ? formData.urls.length > 1
+              ? `${formData.title.trim()} ${index + 1}`
+              : formData.title.trim()
+            : undefined,
+        description: formData.description.trim() || undefined,
+        location: formData.location.trim() || undefined,
         album_id: formData.album_id || undefined,
         taken_at: formData.taken_at || undefined,
-      });
+      }));
+      await onAdd(payload);
     } finally {
       setLoading(false);
     }
@@ -796,13 +805,15 @@ function AddPhotoModal({
           {/* 图片上传 */}
           <div>
             <label className="block text-sm font-medium mb-2">选择图片 *</label>
-            <ImageUploader
-              onUpload={(url) => setFormData({ ...formData, url })}
+            <MultiImageUploader
+              images={formData.urls}
+              onImagesChange={(urls) => setFormData((current) => ({ ...current, urls }))}
               folder="photos"
-              aspectRatio="video"
-              placeholder="点击或拖拽上传照片"
-              preview={formData.url}
+              maxCount={60}
             />
+            <p className="mt-2 text-xs text-[var(--color-neutral-500)]">
+              支持一次上传最多 60 张照片，标题、描述、地点、相册和日期会批量应用到本次所有图片。
+            </p>
           </div>
 
           <div>
@@ -872,10 +883,10 @@ function AddPhotoModal({
           <Button
             onClick={handleSubmit}
             loading={loading}
-            disabled={!formData.url}
+            disabled={formData.urls.length === 0}
           >
             {!loading ? <Upload className="w-4 h-4" /> : null}
-            保存照片
+            保存 {formData.urls.length > 0 ? `${formData.urls.length} 张照片` : '照片'}
           </Button>
         </div>
       </motion.div>

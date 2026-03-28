@@ -24,12 +24,28 @@ export interface SyncStatus {
 export interface SyncConflict {
   id: string;
   type: 'create' | 'update' | 'delete';
-  localVersion: any;
-  remoteVersion: any;
+  localVersion: SyncChange;
+  remoteVersion: SyncChange;
   timestamp: string;
   resolved: boolean;
   resolution: 'keep_local' | 'keep_remote' | 'merge' | 'discard' | null;
 }
+
+export type SyncChange = {
+  id?: string;
+  [key: string]: unknown;
+};
+
+interface OfflineQueueItem {
+  id: string;
+  change: SyncChange;
+  action: 'create' | 'update' | 'delete';
+  timestamp: string;
+}
+
+type NavigatorWithHardwareConcurrency = Navigator & {
+  hardwareConcurrency?: number;
+};
 
 export interface SyncHistory {
   id: string;
@@ -233,7 +249,7 @@ export class DeviceSyncService {
   /**
    * 处理离线更改
    */
-  static async handleOfflineChange(change: any, action: 'create' | 'update' | 'delete'): Promise<void> {
+  static async handleOfflineChange(change: SyncChange, action: 'create' | 'update' | 'delete'): Promise<void> {
     const config = await this.getSyncConfig();
     if (!config.offlineSupport) {
       return;
@@ -265,12 +281,7 @@ export class DeviceSyncService {
   /**
    * 获取离线更改队列
    */
-  static async getOfflineQueue(): Promise<Array<{
-    id: string;
-    change: any;
-    action: 'create' | 'update' | 'delete';
-    timestamp: string;
-  }>> {
+  static async getOfflineQueue(): Promise<OfflineQueueItem[]> {
     if (typeof window === 'undefined') {
       return [];
     }
@@ -303,7 +314,10 @@ export class DeviceSyncService {
   /**
    * 检测冲突
    */
-  static async detectConflicts(localData: any, remoteData: any): Promise<SyncConflict[]> {
+  static async detectConflicts(
+    localData: SyncChange | null | undefined,
+    remoteData: SyncChange | null | undefined
+  ): Promise<SyncConflict[]> {
     const conflicts: SyncConflict[] = [];
     
     // 简化的冲突检测逻辑
@@ -501,7 +515,8 @@ export class DeviceSyncService {
     // 基于用户代理和其他信息生成唯一标识
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
-    const hardwareConcurrency = (navigator as any).hardwareConcurrency || 'unknown';
+    const hardwareConcurrency =
+      (navigator as NavigatorWithHardwareConcurrency).hardwareConcurrency || 'unknown';
     
     const combined = userAgent + platform + hardwareConcurrency + Date.now();
     return btoa(combined).substring(0, 16);

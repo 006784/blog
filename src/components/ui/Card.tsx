@@ -12,10 +12,14 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const variantClasses: Record<CardVariant, string> = {
-  default: 'border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]',
-  elevated: 'border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-lg)]',
-  bordered: 'border border-[color:var(--border-strong)] bg-[var(--surface-base)] shadow-none',
-  glass: 'border border-white/10 bg-[var(--surface-glass)] backdrop-blur-xl shadow-[var(--shadow-md)]',
+  default:
+    'border border-[color:var(--border-default)] bg-[linear-gradient(180deg,var(--surface-card-start),var(--surface-card-end))] shadow-[0_18px_36px_-28px_var(--surface-card-shadow-strong),0_10px_18px_-16px_var(--surface-card-shadow)]',
+  elevated:
+    'border border-[color:var(--border-strong)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--surface-card-start)_94%,white),var(--surface-card-end))] shadow-[0_26px_52px_-34px_var(--surface-card-shadow-strong),0_14px_24px_-18px_var(--surface-card-shadow)]',
+  bordered:
+    'border border-[color:var(--border-strong)] bg-[linear-gradient(180deg,var(--surface-base),var(--surface-raised))] shadow-[inset_0_1px_0_var(--surface-card-highlight)]',
+  glass:
+    'border border-white/20 bg-[linear-gradient(180deg,var(--surface-panel),var(--surface-glass))] backdrop-blur-xl shadow-[0_20px_40px_-28px_var(--surface-card-shadow-strong)]',
 };
 
 const paddingClasses: Record<CardPadding, string> = {
@@ -33,7 +37,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-[var(--radius-xl)] text-[var(--color-neutral-900)] dark:text-[var(--color-neutral-900)]',
+        'relative isolate overflow-hidden rounded-[var(--radius-xl)] text-[var(--color-neutral-900)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-20 before:bg-[linear-gradient(180deg,var(--surface-card-highlight),transparent)] before:content-[\'\'] dark:text-[var(--color-neutral-900)]',
         variantClasses[variant],
         paddingClasses[padding],
         className
