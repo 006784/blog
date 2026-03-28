@@ -99,7 +99,8 @@ export async function resetLoginFailures(ip: string): Promise<void> {
 
 async function sendBanAlert(ip: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAILS?.split(/[,\n;]+/).map((value) => value.trim()).find(Boolean)
+    || process.env.ADMIN_EMAIL;
   if (!apiKey || !adminEmail) return;
 
   try {

@@ -33,7 +33,7 @@ const JWT_SECRET = new TextEncoder().encode(RAW_SECRET);
 
 const ACCESS_EXPIRY_S  = 60 * 60;
 const REFRESH_EXPIRY_S = 7 * 24 * 60 * 60;
-const IDLE_TIMEOUT_MS  = 30 * 60 * 1000;
+const EMAIL_LOGIN_EXPIRY_S = 10 * 60;
 
 function cookieOpts(maxAgeSeconds: number) {
   return {
@@ -58,6 +58,7 @@ export async function signRefreshToken(sessionId: string): Promise<string> {
 // ─── TOTP 激活流程：用签名 JWT Cookie 传递 pending secret ─────────────────────
 
 const COOKIE_TOTP_PENDING = 'admin_totp_pending';
+const COOKIE_EMAIL_LOGIN_PENDING = 'admin_email_login_pending';
 
 export async function signTotpPendingCookie(secret: string): Promise<string> {
   return new SignJWT({ totpSecret: secret })
@@ -77,6 +78,42 @@ export async function verifyTotpPendingCookie(token: string): Promise<string | n
 }
 
 export { COOKIE_TOTP_PENDING };
+
+export async function signEmailLoginCookie(email: string, code: string): Promise<string> {
+  return new SignJWT({
+    type: 'email_login',
+    email,
+    codeHash: hashValue(code),
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(`${EMAIL_LOGIN_EXPIRY_S}s`)
+    .sign(JWT_SECRET);
+}
+
+export async function verifyEmailLoginCookie(
+  token: string
+): Promise<{ email: string; codeHash: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    if (payload.type !== 'email_login') return null;
+    const email = typeof payload.email === 'string' ? payload.email : null;
+    const codeHash = typeof payload.codeHash === 'string' ? payload.codeHash : null;
+    if (!email || !codeHash) return null;
+    return { email, codeHash };
+  } catch {
+    return null;
+  }
+}
+
+export function isEmailLoginCodeValid(inputCode: string, codeHash: string): boolean {
+  const incoming = Buffer.from(hashValue(inputCode));
+  const stored = Buffer.from(codeHash);
+  if (incoming.length !== stored.length) return false;
+  return crypto.timingSafeEqual(incoming, stored);
+}
+
+export { COOKIE_EMAIL_LOGIN_PENDING, EMAIL_LOGIN_EXPIRY_S };
 
 export async function signTotpStepToken(ip: string): Promise<string> {
   return new SignJWT({ step: 'totp', ip })
@@ -125,6 +162,7 @@ export function clearAuthCookies(res: NextResponse): void {
   res.cookies.delete(COOKIE_ACCESS);
   res.cookies.delete(COOKIE_REFRESH);
   res.cookies.delete(COOKIE_TOTP_STEP);
+  res.cookies.delete(COOKIE_EMAIL_LOGIN_PENDING);
 }
 
 // ─── 角色鉴权（API Route 中使用）─────────────────────────────────────────────

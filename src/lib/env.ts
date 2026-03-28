@@ -22,7 +22,10 @@ const publicEnvSchema = z.object({
 
 const serverEnvSchema = z.object({
   ADMIN_PASSWORD: z.string().min(8, 'ADMIN_PASSWORD 至少需要 8 个字符'),
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_EMAILS: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM: z.string().optional(),
   TURNSTILE_SECRET_KEY: z.string().optional(),
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
@@ -63,6 +66,8 @@ interface EnvConfig {
   
   // 管理员密码
   adminPassword: string;
+  adminEmail?: string;
+  adminEmails?: string;
   
   // 网站配置
   siteUrl: string;
@@ -78,6 +83,7 @@ interface EnvConfig {
   
   // Resend (可选)
   resendApiKey?: string;
+  resendFrom?: string;
   
   // Turnstile (可选)
   turnstileSiteKey?: string;
@@ -184,6 +190,8 @@ export function getEnvConfig(includeServerOnly = false): EnvConfig {
     
     // 管理员密码 (仅在服务端可用)
     adminPassword: includeServerOnly ? adminPassword : '',
+    adminEmail: process.env.ADMIN_EMAIL,
+    adminEmails: process.env.ADMIN_EMAILS,
     
     // 网站配置
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
@@ -199,6 +207,7 @@ export function getEnvConfig(includeServerOnly = false): EnvConfig {
     
     // Resend (可选)
     resendApiKey: process.env.RESEND_API_KEY,
+    resendFrom: process.env.RESEND_FROM,
     
     // Turnstile (可选)
     turnstileSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
@@ -263,7 +272,6 @@ export function validateEnvOnStartup(): void {
     try {
       // 在服务端验证所有变量（包括服务端专用变量）
       getEnvConfig(true);
-      console.log('✅ 环境变量验证通过');
     } catch (error) {
       if (error instanceof EnvValidationError) {
         console.error('❌ 环境变量验证失败:', error.message);
