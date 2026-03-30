@@ -934,12 +934,13 @@ export async function toggleSongFavorite(id: string, isFavorite: boolean) {
 
 // ============ 相册操作 ============
 
-export async function getAlbums() {
-  const { data, error } = await supabase
-    .from('albums')
-    .select('*')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false });
+export async function getAlbums(opts?: { limit?: number; offset?: number; all?: boolean }) {
+  let query = supabase.from('albums').select('*');
+  if (!opts?.all) query = query.eq('is_public', true);
+  query = query.order('created_at', { ascending: false });
+  if (opts?.limit) query = query.limit(opts.limit);
+  if (opts?.offset) query = query.range(opts.offset, opts.offset + (opts.limit ?? 50) - 1);
+  const { data, error } = await query;
   if (error) throw error;
   return data as Album[];
 }
@@ -992,11 +993,14 @@ export async function getPhotos(albumId?: string) {
   return data as Photo[];
 }
 
-export async function getAllPhotos() {
-  const { data, error } = await supabase
+export async function getAllPhotos(opts?: { limit?: number; offset?: number }) {
+  let query = supabase
     .from('photos')
     .select('*')
     .order('created_at', { ascending: false });
+  if (opts?.limit) query = query.limit(opts.limit);
+  if (opts?.offset) query = query.range(opts.offset, opts.offset + (opts.limit ?? 50) - 1);
+  const { data, error } = await query;
   if (error) throw error;
   return data as Photo[];
 }
@@ -1039,12 +1043,15 @@ export async function deletePhoto(id: string) {
 
 // ============ 日记操作 ============
 
-export async function getDiaries(onlyPublic = true) {
+export async function getDiaries(onlyPublic = true, opts?: { limit?: number; offset?: number }) {
   let query = supabase.from('diaries').select('*');
   if (onlyPublic) {
     query = query.eq('is_public', true);
   }
-  const { data, error } = await query.order('diary_date', { ascending: false });
+  query = query.order('diary_date', { ascending: false });
+  if (opts?.limit) query = query.limit(opts.limit);
+  if (opts?.offset) query = query.range(opts.offset, opts.offset + (opts.limit ?? 50) - 1);
+  const { data, error } = await query;
   if (error) throw error;
   return data as Diary[];
 }

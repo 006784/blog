@@ -28,6 +28,8 @@ import { useAdmin } from '@/components/AdminProvider';
 import { decodeAdminToken } from '@/lib/admin-token';
 import { filterRenderablePosts, getSamplePosts, toPublicCatalogPosts, type PublicCatalogPost } from '@/lib/sample-posts';
 import { Collection, deletePost, getCollections, getPublishedPosts, Post } from '@/lib/supabase';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 const categoryList = [
   { id: 'all', name: '全部' },
@@ -86,7 +88,7 @@ function BlogPageContent() {
     const target = posts.find((item) => item.slug === slug);
     if (!target || target.is_demo) return;
 
-    const confirmed = window.confirm(`确定删除《${target.title}》吗？`);
+    const confirmed = await showConfirm({ title: '删除文章', description: `确定删除《${target.title}》吗？此操作不可恢复。`, confirmText: '删除', danger: true });
     if (!confirmed) return;
 
     try {
@@ -100,7 +102,7 @@ function BlogPageContent() {
   }
 
   async function handleNotifyPost(post: Post) {
-    const confirmed = window.confirm(`确定向订阅者推送《${post.title}》吗？`);
+    const confirmed = await showConfirm({ title: '推送文章', description: `确定向订阅者推送《${post.title}》吗？`, confirmText: '推送' });
     if (!confirmed) return;
 
     setNotifyingSlug(post.slug);

@@ -26,7 +26,7 @@ import { useAdmin } from '@/components/AdminProvider';
 function GallerySkeleton({ viewMode }: { viewMode: 'grid' | 'masonry' }) {
   if (viewMode === 'masonry') {
     return (
-      <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
+      <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <Skeleton
             key={i}

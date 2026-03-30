@@ -13,7 +13,9 @@ import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CommandPalette } from "@/components/search/CommandPalette";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { Toaster } from "sonner";
 import { generateWebsiteSchema } from "@/lib/seo";
 import { siteConfig, siteUrls } from "@/lib/site-config";
 
@@ -150,6 +152,25 @@ export default function RootLayout({
             <Footer />
           </main>
           
+          {/* 全局 Toast 通知 */}
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            toastOptions={{
+              style: {
+                fontFamily: 'var(--font-inter)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border-default)',
+                background: 'var(--surface-panel)',
+                color: 'var(--ink)',
+                backdropFilter: 'blur(12px)',
+              },
+            }}
+          />
+          {/* 全局确认弹窗 */}
+          <ConfirmDialog />
+
           {/* Service Worker 注册 */}
           <Script id="sw-register" strategy="afterInteractive">
             {`

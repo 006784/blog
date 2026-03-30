@@ -30,6 +30,8 @@ import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { Textarea } from '@/components/ui/Textarea';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface FriendLink {
   id: string;
@@ -582,7 +584,7 @@ export default function LinksPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('确认删除这个友链吗？')) return;
+    if (!(await showConfirm({ description: '确认删除这个友链吗？', danger: true }))) return;
 
     try {
       const res = await fetch(`/api/links/${id}`, {
@@ -592,7 +594,7 @@ export default function LinksPage() {
       if (!res.ok) throw new Error('failed');
       setLinks((current) => current.filter((link) => link.id !== id));
     } catch {
-      alert('删除失败，请稍后重试');
+      showToast.error('删除失败，请稍后重试');
     }
   }
 

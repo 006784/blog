@@ -1,6 +1,19 @@
 'use client';
 
 import { isValidElement, type ReactNode, useEffect, useMemo, useState } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-yaml';
 import Link from 'next/link';
 import Image from 'next/image';
 import Script from 'next/script';
@@ -33,6 +46,29 @@ import { siteConfig } from '@/lib/site-config';
 
 interface BlogPostPageClientProps {
   slug: string;
+}
+
+function CodeBlock({ lang, highlighted, raw }: { lang: string; highlighted: string; raw: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(raw).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="article-pre-wrapper" data-lang={lang || 'code'}>
+      <button type="button" className="article-copy-btn" onClick={handleCopy} aria-label="复制代码">
+        {copied ? '已复制' : '复制'}
+      </button>
+      <pre className="article-pre">
+        {/* eslint-disable-next-line react/no-danger */}
+        <code className={`language-${lang}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
+      </pre>
+    </div>
+  );
 }
 
 function headingToId(text: string): string {
@@ -197,12 +233,14 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         );
       }
 
+      const lang = className.replace('language-', '');
+      const grammar = Prism.languages[lang];
+      const highlighted = grammar
+        ? Prism.highlight(code, grammar, lang)
+        : code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
       return (
-        <pre className="article-pre">
-          <code className={className} {...props}>
-            {code}
-          </code>
-        </pre>
+        <CodeBlock lang={lang} highlighted={highlighted} raw={code} />
       );
     },
     img: ({ src, alt }) => {

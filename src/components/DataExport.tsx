@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { Download, HardDrive, Cloud, Settings, History, Eye, Archive } from 'lucide-react';
 import { DataExportService, type ExportFormat, type BackupConfig, type VersionHistory } from '@/lib/diary/data-export-service';
 import type { Diary } from '@/lib/supabase';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface DataExportProps {
   diaries: Diary[];
@@ -56,7 +58,7 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
   // 处理导出
   const handleExport = async () => {
     if (diaries.length === 0) {
-      alert('没有日记可以导出');
+      showToast.info('没有日记可以导出');
       return;
     }
 
@@ -102,7 +104,7 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
       setTimeout(() => setExportProgress(0), 1000);
     } catch (error) {
       console.error('导出失败:', error);
-      alert('导出失败: ' + (error as Error).message);
+      showToast.error(`导出失败: ${(error as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
       setShowSettings(false);
     } catch (error) {
       console.error('保存配置失败:', error);
-      alert('保存配置失败: ' + (error as Error).message);
+      showToast.error(`保存配置失败: ${(error as Error).message}`);
     }
   };
 
@@ -126,15 +128,15 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
     try {
       const success = await DataExportService.triggerAutoBackup(diaries);
       if (success) {
-        alert('备份成功！');
+        showToast.success('备份成功！');
         const history = await DataExportService.getVersionHistory();
         setVersionHistory(history);
       } else {
-        alert('备份未启用或失败');
+        showToast.error('备份未启用或失败');
       }
     } catch (error) {
       console.error('手动备份失败:', error);
-      alert('手动备份失败: ' + (error as Error).message);
+      showToast.error(`手动备份失败: ${(error as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -160,15 +162,15 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
 
   // 清理旧备份
   const handleCleanup = async () => {
-    if (window.confirm(`确定要删除 ${backupConfig.retentionDays} 天前的备份记录吗？`)) {
+    if (await showConfirm({ description: `确定要删除 ${backupConfig.retentionDays} 天前的备份记录吗？`, danger: true })) {
       try {
         const deletedCount = await DataExportService.cleanupOldBackups(backupConfig.retentionDays);
-        alert(`已清理 ${deletedCount} 条旧备份记录`);
+        showToast.info(`已清理 ${deletedCount} 条旧备份记录`);
         const history = await DataExportService.getVersionHistory();
         setVersionHistory(history);
       } catch (error) {
         console.error('清理失败:', error);
-        alert('清理失败: ' + (error as Error).message);
+        showToast.error(`清理失败: ${(error as Error).message}`);
       }
     }
   };

@@ -9,6 +9,8 @@ import {
 import { uploadFile, compressImage } from '@/lib/storage';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface MobileEditorProps {
   value: string;
@@ -83,7 +85,7 @@ export function MobileEditor({ value, onChange, placeholder }: MobileEditorProps
       }
     } catch (error) {
       console.error('上传失败:', error);
-      alert('图片上传失败');
+      showToast.error('图片上传失败');
     } finally {
       setUploading(false);
     }

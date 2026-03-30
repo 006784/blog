@@ -20,6 +20,8 @@ import {
   getDefaultCiyuanProviderId,
   getDefaultModelId,
 } from '@/lib/ciyuan-providers';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface RichEditorProps {
   value: string;
@@ -704,7 +706,7 @@ console.log('Hello World');
       }
     } catch (error) {
       console.error('上传失败:', error);
-      alert('图片上传失败，请重试');
+      showToast.error('图片上传失败，请重试');
     } finally {
       setUploading(false);
       setShowImageModal(false);

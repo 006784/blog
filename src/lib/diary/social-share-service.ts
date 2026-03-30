@@ -134,8 +134,8 @@ export class SocialShareService {
       // 复制链接到剪贴板
       navigator.clipboard.writeText(options.url).catch(err => {
         console.error('复制链接失败:', err);
-        // 如果无法复制到剪贴板，降级到提示用户
-        alert('链接已生成，您可以手动复制:\n' + options.url);
+        // 如果无法复制到剪贴板，降级到控制台输出
+        console.warn('复制链接失败，链接地址:', options.url);
       });
     } else {
       // 在新窗口打开分享页面

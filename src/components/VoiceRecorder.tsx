@@ -4,6 +4,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { MultimediaService, type AudioRecording } from '@/lib/diary/multimedia-service';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface VoiceRecorderProps {
   onRecordingComplete: (recording: AudioRecording) => void;
@@ -30,7 +32,7 @@ export function VoiceRecorder({ onRecordingComplete, className = '' }: VoiceReco
 
   const startRecording = async () => {
     if (!(await MultimediaService.startRecording())) {
-      alert('无法启动录音，请检查麦克风权限');
+      showToast.info('无法启动录音，请检查麦克风权限');
       return;
     }
 

@@ -4,6 +4,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { Image as ImageIcon, Video, FileText, X, Download, Upload, Play, Pause } from 'lucide-react';
 import { MultimediaService, type MediaAttachment } from '@/lib/diary/multimedia-service';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface AttachmentManagerProps {
   onAttachmentsChange: (attachments: MediaAttachment[]) => void;
@@ -27,7 +29,7 @@ export function AttachmentManager({ onAttachmentsChange, className = '' }: Attac
         const validation = MultimediaService.validateFile(file);
         
         if (!validation.isValid) {
-          alert(`文件 "${file.name}" ${validation.error}`);
+          showToast.info(`文件 "${file.name}" ${validation.error}`);
           continue;
         }
       }
@@ -38,7 +40,7 @@ export function AttachmentManager({ onAttachmentsChange, className = '' }: Attac
       onAttachmentsChange(newAttachments);
     } catch (error) {
       console.error('处理文件失败:', error);
-      alert('处理文件时出现错误');
+      showToast.error('处理文件时出现错误');
     } finally {
       setUploading(false);
     }

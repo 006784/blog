@@ -12,6 +12,7 @@ import { TimelineView } from '@/components/diary/TimelineView';
 import { MoodReport } from '@/components/diary/MoodReport';
 import { ExportModal } from '@/components/diary/ExportModal';
 import { extractDiaryEditorState, getDiaryLocationLabel } from '@/lib/diary-editor';
+import { DiarySearchService, type SearchOptions } from '@/lib/diary/search-service';
 
 // ── Helpers ────────────────────────────────────────────────────
 function getSavedTheme(): DiaryTheme {
@@ -19,12 +20,13 @@ function getSavedTheme(): DiaryTheme {
   return (localStorage.getItem('diary-theme') as DiaryTheme) || 'kraft';
 }
 
-type View = 'calendar' | 'timeline' | 'editor' | 'report';
+type View = 'calendar' | 'timeline' | 'editor' | 'report' | 'search';
 const VIEW_LABELS: Record<View, string> = {
   calendar: '日历',
   timeline: '时间轴',
   editor: '写作',
   report: '报告',
+  search: '搜索',
 };
 
 function getNextDate(date: string): string {
@@ -387,6 +389,7 @@ export default function DiaryPage() {
                       location_meta: editorMeta.locationMeta,
                       drawing_url: editorMeta.drawing_url,
                       attachments: editorMeta.attachments,
+                      is_public: editingDiary.is_public ?? false,
                     } : undefined}
                     onSaved={(savedDiary) => {
                       setEditingDiary(savedDiary);
@@ -413,6 +416,12 @@ export default function DiaryPage() {
                     year={calYear}
                     month={calMonth}
                   />
+                </motion.div>
+              )}
+
+              {view === 'search' && (
+                <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <DiarySearchView diaries={allDiaries.length ? allDiaries : diaries} onOpen={(d) => { setEditingDiary(d); setSelectedDate(d.diary_date); setView('editor'); }} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -450,6 +459,76 @@ export default function DiaryPage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Diary Search View ────────────────────────────────────────────────────────
+
+function DiarySearchView({ diaries, onOpen }: { diaries: Diary[]; onOpen: (d: Diary) => void }) {
+  const [query, setQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SearchOptions['sortBy']>('date');
+  const results = DiarySearchService.searchDiaries(diaries as Parameters<typeof DiarySearchService.searchDiaries>[0], { query, sortBy });
+
+  return (
+    <div className="p-6" style={{ fontFamily: 'var(--d-font-body)' }}>
+      {/* Search input */}
+      <div className="flex items-center gap-3 mb-6">
+        <input
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="搜索日记标题或内容…"
+          autoFocus
+          className="flex-1 rounded-xl border px-4 py-2.5 text-sm outline-none transition-all focus:ring-2"
+          style={{
+            background: 'var(--d-bg)',
+            borderColor: 'var(--d-border)',
+            color: 'var(--d-ink)',
+          }}
+        />
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as SearchOptions['sortBy'])}
+          className="rounded-xl border px-3 py-2.5 text-xs outline-none"
+          style={{ background: 'var(--d-bg)', borderColor: 'var(--d-border)', color: 'var(--d-ink-2)' }}
+        >
+          <option value="date">按日期</option>
+          <option value="relevance">按相关性</option>
+          <option value="title">按标题</option>
+        </select>
+      </div>
+
+      {/* Results */}
+      {query && results.length === 0 ? (
+        <p className="text-sm py-8 text-center" style={{ color: 'var(--d-ink-3)' }}>未找到匹配的日记</p>
+      ) : (
+        <div className="space-y-2">
+          {(query ? results : []).map(r => {
+            const diary = diaries.find(d => d.id === r.id);
+            if (!diary) return null;
+            return (
+              <button
+                key={r.id}
+                onClick={() => onOpen(diary)}
+                className="w-full text-left rounded-xl border px-4 py-3 transition-all hover:shadow-sm"
+                style={{ background: 'var(--d-bg)', borderColor: 'var(--d-border)' }}
+              >
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-sm font-medium" style={{ color: 'var(--d-ink)' }}>
+                    {r.title || '无标题'}
+                  </span>
+                  <span className="text-[10px] shrink-0" style={{ color: 'var(--d-ink-3)' }}>{r.date}</span>
+                </div>
+                <p className="text-xs line-clamp-2" style={{ color: 'var(--d-ink-2)' }}>{r.excerpt}</p>
+              </button>
+            );
+          })}
+          {!query && (
+            <p className="text-sm py-8 text-center" style={{ color: 'var(--d-ink-3)' }}>输入关键词开始搜索</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

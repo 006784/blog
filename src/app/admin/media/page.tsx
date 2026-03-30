@@ -29,6 +29,8 @@ import { Input } from '@/components/ui/Input';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { Textarea } from '@/components/ui/Textarea';
 import { MediaItem } from '@/lib/supabase';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 const TYPES = [
   { value: 'book', label: '📚 书', icon: BookOpen },
@@ -301,28 +303,28 @@ export default function AdminMediaPage() {
   }
 
   async function handleSeed() {
-    if (!confirm('将写入约 70 条示例书影音数据，确认？')) return;
+    if (!(await showConfirm({ description: '将写入约 70 条示例书影音数据，确认？', danger: true }))) return;
 
     setSeeding(true);
     try {
       const response = await fetch('/api/admin/seed-media', { method: 'POST', credentials: 'include' });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.error || '写入失败');
+        showToast.error(data.error || '写入失败');
         return;
       }
-      alert(data.message);
+      showToast.success(data.message);
       const refreshed = await fetch('/api/media').then((res) => res.json());
       setItems(refreshed);
     } catch (error) {
-      alert(`请求失败：${String(error)}`);
+      showToast.error(`请求失败：${String(error)}`);
     } finally {
       setSeeding(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('确认删除？')) return;
+    if (!(await showConfirm({ description: '确认删除？', danger: true }))) return;
 
     setDeleting(id);
     try {

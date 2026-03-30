@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Plus, Trash2, Loader2, Save } from 'lucide-react';
 import { TestCaseManager } from './TestCaseManager';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface Problem {
   id?: string;
@@ -68,7 +70,7 @@ export function ProblemFormModal({ problem, onClose, onSave }: Props) {
       if (res.ok) onSave();
       else {
         const data = await res.json();
-        alert('保存失败: ' + data.error);
+        showToast.error(`保存失败: ${String(data.error)}`);
       }
     } finally {
       setSaving(false);

@@ -25,6 +25,8 @@ import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { Textarea } from '@/components/ui/Textarea';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface Message {
   id: string;
@@ -111,11 +113,11 @@ export default function GuestbookPage() {
         setContent('');
         await fetchMessages();
       } else {
-        alert(data.error || '发布失败');
+        showToast.error(data.error || '发布失败');
       }
     } catch (error) {
       console.error('Submit error:', error);
-      alert('发布失败');
+      showToast.error('发布失败');
     } finally {
       setSubmitting(false);
     }
@@ -141,7 +143,7 @@ export default function GuestbookPage() {
         setReplyContent('');
         await fetchMessages();
       } else {
-        alert(data.error || '回复失败');
+        showToast.error(data.error || '回复失败');
       }
     } catch (error) {
       console.error('Reply error:', error);
@@ -165,7 +167,7 @@ export default function GuestbookPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这条留言吗？')) return;
+    if (!(await showConfirm({ description: '确定要删除这条留言吗？', danger: true }))) return;
     
     try {
       await fetch('/api/guestbook', {

@@ -15,6 +15,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { DiaryTemplateService, type DiaryTemplate } from '@/lib/diary/template-service';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 interface DiaryTemplateSelectorProps {
   onSelect: (template: DiaryTemplate, variables: Record<string, string>) => void;
@@ -127,14 +129,14 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
   // 创建自定义模板
   const handleCreateCustomTemplate = () => {
     if (!customTemplateName.trim() || !customTemplateContent.trim()) {
-      alert('请输入模板名称和内容');
+      showToast.info('请输入模板名称和内容');
       return;
     }
 
     try {
       const validation = DiaryTemplateService.validateTemplateContent(customTemplateContent);
       if (!validation.isValid) {
-        alert(validation.errors.join('\n'));
+        showToast.error(validation.errors.join(' / '));
         return;
       }
 
@@ -154,16 +156,16 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
       setCustomTemplateContent('');
       setShowCustomForm(false);
       
-      alert('自定义模板创建成功！');
+      showToast.success('自定义模板创建成功！');
     } catch (error) {
       console.error('创建自定义模板失败:', error);
-      alert('创建自定义模板失败');
+      showToast.error('创建自定义模板失败');
     }
   };
 
   // 删除自定义模板
-  const handleDeleteTemplate = (templateId: string) => {
-    if (!confirm('确定要删除这个自定义模板吗？')) return;
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (!(await showConfirm({ description: '确定要删除这个自定义模板吗？', danger: true }))) return;
 
     if (DiaryTemplateService.deleteCustomTemplate(templateId)) {
       setTemplates(templates.filter(t => t.id !== templateId));
@@ -171,9 +173,9 @@ export function DiaryTemplateSelector({ onSelect, currentContent }: DiaryTemplat
         setSelectedTemplate(null);
         setTemplateVariables({});
       }
-      alert('模板删除成功！');
+      showToast.success('模板删除成功！');
     } else {
-      alert('模板删除失败');
+      showToast.error('模板删除失败');
     }
   };
 

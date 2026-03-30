@@ -43,7 +43,7 @@ const categories = [
 ];
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -381,6 +381,7 @@ function WritePageContent() {
     );
   }
 
+  if (isMobile === null) return null; // avoid hydration flash
   if (isMobile) return <MobileWritePage />;
 
   if (loading) {

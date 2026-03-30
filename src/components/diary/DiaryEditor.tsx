@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Globe,
   ImagePlus,
+  Lock,
   Loader2,
   LocateFixed,
   MapPin,
@@ -46,6 +48,7 @@ interface DiaryData {
   location_meta?: DiaryLocationMeta | null;
   drawing_url?: string;
   attachments?: DiaryAttachmentMeta[];
+  is_public?: boolean;
 }
 
 interface Props {
@@ -113,6 +116,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
   const [attachments, setAttachments] = useState<DiaryAttachmentMeta[]>(
     initial?.attachments || []
   );
+  const [isPublic, setIsPublic] = useState(initial?.is_public ?? false);
   const [uploadingAttachments, setUploadingAttachments] = useState(false);
   const [attachmentError, setAttachmentError] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -380,6 +384,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
     location_meta: locationMeta,
     attachments,
     drawing_url: drawingUrl || undefined,
+    is_public: isPublic,
   };
 
   const { status, statusLabel, save } = useDiaryAutoSave(payload, { onSaved });
@@ -466,6 +471,17 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
         </button>
 
         <ThemeSwitcher current={theme} onChange={onThemeChange} />
+
+        <button
+          type="button"
+          onClick={() => setIsPublic((prev) => !prev)}
+          title={isPublic ? '当前公开，点击设为私密' : '当前私密，点击设为公开'}
+          className="flex items-center gap-1 text-[11px] transition-opacity hover:opacity-70"
+          style={{ color: isPublic ? 'var(--d-accent)' : 'var(--d-ink-3)', letterSpacing: '.08em' }}
+        >
+          {isPublic ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+          {isPublic ? '公开' : '私密'}
+        </button>
       </div>
 
       {showDrawing ? (

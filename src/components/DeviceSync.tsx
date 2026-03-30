@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { DeviceSyncService, type SyncConfig, type SyncConflict, type SyncHistory, type SyncStatus } from '@/lib/diary/device-sync-service';
 import type { Diary } from '@/lib/supabase';
+import { showToast } from '@/lib/toast';
+import { showConfirm } from '@/lib/confirm';
 
 type DeviceInfo = ReturnType<typeof DeviceSyncService.getDeviceInfo>;
 
@@ -114,7 +116,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
       setShowSettings(false);
     } catch (error) {
       console.error('保存配置失败:', error);
-      alert('保存配置失败: ' + (error as Error).message);
+      showToast.error(`保存配置失败: ${(error as Error).message}`);
     }
   };
 
@@ -124,13 +126,13 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
     try {
       const success = await DeviceSyncService.forceSync();
       if (success) {
-        alert('同步成功！');
+        showToast.success('同步成功！');
       } else {
-        alert('同步失败，请检查网络连接');
+        showToast.error('同步失败，请检查网络连接');
       }
     } catch (error) {
       console.error('强制同步失败:', error);
-      alert('同步失败: ' + (error as Error).message);
+      showToast.error(`同步失败: ${(error as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -144,24 +146,24 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
         // 重新加载冲突列表
         const updatedConflicts = await DeviceSyncService.getSyncConflicts();
         setConflicts(updatedConflicts);
-        alert('冲突已解决');
+        showToast.info('冲突已解决');
       }
     } catch (error) {
       console.error('解决冲突失败:', error);
-      alert('解决冲突失败: ' + (error as Error).message);
+      showToast.error(`解决冲突失败: ${(error as Error).message}`);
     }
   };
 
   // 清空离线队列
   const handleClearOfflineQueue = async () => {
-    if (window.confirm('确定要清空离线更改队列吗？此操作不可逆。')) {
+    if (await showConfirm({ description: '确定要清空离线更改队列吗？此操作不可逆。', danger: true })) {
       try {
         await DeviceSyncService.clearOfflineQueue();
-        alert('离线队列已清空');
+        showToast.info('离线队列已清空');
         updateSyncStatus();
       } catch (error) {
         console.error('清空离线队列失败:', error);
-        alert('清空失败: ' + (error as Error).message);
+        showToast.error(`清空失败: ${(error as Error).message}`);
       }
     }
   };
