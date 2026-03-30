@@ -462,7 +462,7 @@ function WritePageContent() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Left metadata sidebar (260px) ────────────────── */}
-        <aside className="w-[260px] flex-none border-r border-[var(--line)] overflow-y-auto flex flex-col hidden md:flex">
+        <aside className="w-[260px] flex-none border-r border-[var(--line)] overflow-y-auto flex flex-col">
           <div className="flex-1 p-4 space-y-6">
 
             {/* Cover image */}

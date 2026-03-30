@@ -73,8 +73,6 @@ function isRenderablePostRecord(post: Partial<Post> | null | undefined): post is
       post.slug.trim() &&
       typeof post.title === 'string' &&
       post.title.trim() &&
-      typeof post.description === 'string' &&
-      post.description.trim() &&
       typeof post.created_at === 'string' &&
       typeof post.updated_at === 'string'
   );
