@@ -631,6 +631,15 @@ function Lightbox({
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // Reset loading state when photo changes
+  useEffect(() => {
+    setImgLoaded(false);
+    setImgError(false);
+  }, [photo.id]);
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
@@ -641,87 +650,121 @@ function Lightbox({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, onPrev, onNext]);
 
+  const hasInfo = photo.title || photo.description || photo.location || photo.taken_at;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
+      className="fixed inset-0 z-50 flex flex-col bg-black"
       onClick={onClose}
     >
-      {/* Top Actions */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-        {isAdmin && onEdit && (
+      {/* Top bar */}
+      <div className="flex-none flex items-center justify-between px-4 py-3 z-10" onClick={e => e.stopPropagation()}>
+        <span className="text-white/50 text-sm select-none">
+          {photo.title || '照片预览'}
+        </span>
+        <div className="flex items-center gap-2">
+          {isAdmin && onEdit && (
+            <button
+              onClick={onEdit}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              title="编辑"
+            >
+              <Edit2 className="w-4 h-4 text-white" />
+            </button>
+          )}
+          {isAdmin && onDelete && (
+            <button
+              onClick={onDelete}
+              className="p-2 rounded-lg bg-white/10 hover:bg-red-500/60 transition-colors"
+              title="删除"
+            >
+              <Trash2 className="w-4 h-4 text-white" />
+            </button>
+          )}
           <button
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="p-3 rounded-full bg-white/10 hover:bg-primary/60 transition-colors"
+            onClick={onClose}
+            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            title="关闭 (Esc)"
           >
-            <Edit2 className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
+        </div>
+      </div>
+
+      {/* Image area */}
+      <div className="flex-1 flex items-center justify-center relative min-h-0 px-14" onClick={onClose}>
+        {/* Loading spinner */}
+        {!imgLoaded && !imgError && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+          </div>
         )}
-        {isAdmin && onDelete && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="p-3 rounded-full bg-white/10 hover:bg-red-500/60 transition-colors"
-          >
-            <Trash2 className="w-5 h-5 text-white" />
-          </button>
+
+        {/* Error state */}
+        {imgError && (
+          <div className="flex flex-col items-center gap-3 text-white/40">
+            <ImageIcon className="w-12 h-12" />
+            <p className="text-sm">图片加载失败</p>
+          </div>
         )}
+
+        {/* Image */}
+        <motion.img
+          key={photo.id}
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: imgLoaded ? 1 : 0, scale: imgLoaded ? 1 : 0.96 }}
+          transition={{ duration: 0.25 }}
+          src={photo.url}
+          alt={photo.title || '照片'}
+          className="max-w-full max-h-full w-auto h-auto object-contain rounded select-none"
+          style={{ maxHeight: hasInfo ? 'calc(100vh - 160px)' : 'calc(100vh - 100px)' }}
+          onClick={e => e.stopPropagation()}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => { setImgError(true); setImgLoaded(true); }}
+          draggable={false}
+        />
+
+        {/* Prev/Next buttons — outside image, inside px-14 padding */}
         <button
-          onClick={onClose}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          onClick={(e) => { e.stopPropagation(); onPrev(); }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
+          title="上一张 (←)"
         >
-          <X className="w-6 h-6 text-white" />
+          <ChevronLeft className="w-6 h-6 text-white" />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
+          title="下一张 (→)"
+        >
+          <ChevronRight className="w-6 h-6 text-white" />
         </button>
       </div>
 
-      {/* Navigation */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onPrev(); }}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
-      >
-        <ChevronLeft className="w-8 h-8 text-white" />
-      </button>
-      <button
-        onClick={(e) => { e.stopPropagation(); onNext(); }}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
-      >
-        <ChevronRight className="w-8 h-8 text-white" />
-      </button>
-
-      {/* Image */}
-      <motion.img
-        key={photo.id}
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        src={photo.url}
-        alt={photo.title || '照片'}
-        className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
-        onClick={e => e.stopPropagation()}
-      />
-
-      {/* Info */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
-        <div className="max-w-3xl mx-auto text-center text-white">
-          {photo.title && <h3 className="text-xl font-medium mb-2">{photo.title}</h3>}
-          {photo.description && <p className="text-white/70 mb-2">{photo.description}</p>}
-          <div className="flex items-center justify-center gap-4 text-sm text-white/60">
-            {photo.location && (
-              <span className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
-                {photo.location}
-              </span>
-            )}
-            {photo.taken_at && (
-              <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                {formatDate(photo.taken_at)}
-              </span>
-            )}
-          </div>
+      {/* Bottom info */}
+      {hasInfo && (
+        <div className="flex-none px-6 py-4 text-center z-10" onClick={e => e.stopPropagation()}>
+          {photo.title && <p className="text-white font-medium">{photo.title}</p>}
+          {photo.description && <p className="text-white/55 text-sm mt-1">{photo.description}</p>}
+          {(photo.location || photo.taken_at) && (
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-white/40">
+              {photo.location && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />{photo.location}
+                </span>
+              )}
+              {photo.taken_at && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />{formatDate(photo.taken_at)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </motion.div>
   );
 }

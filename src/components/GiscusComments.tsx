@@ -87,10 +87,21 @@ export function Comments() {
   if (!repo || !repoId || !categoryId) {
     return (
       <div className="mt-12 pt-8 border-t border-border">
-        <h3 className="text-xl font-semibold mb-6">评论</h3>
-        <div className="text-center py-8 text-muted-foreground">
-          <p>评论功能未配置</p>
-          <p className="text-sm mt-2">请在环境变量中配置 Giscus</p>
+        <h3 className="text-xl font-semibold mb-4">评论</h3>
+        <div className="rounded-xl border border-dashed border-border bg-muted/30 px-6 py-8 text-center text-sm text-muted-foreground">
+          <p className="font-medium text-foreground mb-2">评论功能未启用</p>
+          <p className="mb-4">评论基于 GitHub Discussions（Giscus），需要简单配置一次：</p>
+          <ol className="text-left inline-block space-y-1 mb-4">
+            <li>1. 在你的 GitHub 仓库中开启 Discussions 功能</li>
+            <li>2. 访问 <a href="https://giscus.app/zh-CN" target="_blank" rel="noreferrer" className="underline hover:text-foreground">giscus.app</a> 生成配置参数</li>
+            <li>3. 在 Vercel/服务器环境变量中设置以下值：</li>
+          </ol>
+          <div className="text-left bg-background border border-border rounded-lg p-4 text-xs font-mono space-y-1 max-w-md mx-auto">
+            <p>NEXT_PUBLIC_GISCUS_REPO=<span className="text-muted-foreground">你的用户名/仓库名</span></p>
+            <p>NEXT_PUBLIC_GISCUS_REPO_ID=<span className="text-muted-foreground">仓库 ID</span></p>
+            <p>NEXT_PUBLIC_GISCUS_CATEGORY=<span className="text-muted-foreground">General</span></p>
+            <p>NEXT_PUBLIC_GISCUS_CATEGORY_ID=<span className="text-muted-foreground">分类 ID</span></p>
+          </div>
         </div>
       </div>
     );

@@ -363,8 +363,6 @@ export function isRenderablePublicPost(post: Partial<PublicCatalogPost> | null |
       post.slug.trim() &&
       typeof post.title === 'string' &&
       post.title.trim() &&
-      typeof post.description === 'string' &&
-      post.description.trim() &&
       typeof post.created_at === 'string' &&
       typeof post.updated_at === 'string'
   );
