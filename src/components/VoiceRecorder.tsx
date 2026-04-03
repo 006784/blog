@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { MultimediaService, type AudioRecording } from '@/lib/diary/multimedia-service';
 import { showToast } from '@/lib/toast';
-import { showConfirm } from '@/lib/confirm';
 
 interface VoiceRecorderProps {
   onRecordingComplete: (recording: AudioRecording) => void;

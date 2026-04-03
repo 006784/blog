@@ -21,7 +21,6 @@ import {
   getDefaultModelId,
 } from '@/lib/ciyuan-providers';
 import { showToast } from '@/lib/toast';
-import { showConfirm } from '@/lib/confirm';
 
 interface RichEditorProps {
   value: string;

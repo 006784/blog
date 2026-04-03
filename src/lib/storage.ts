@@ -11,6 +11,7 @@ export async function uploadFile(
 
     const response = await fetch('/api/upload/', {
       method: 'POST',
+      credentials: 'include',
       body: formData,
     });
 
@@ -50,6 +51,7 @@ export async function deleteFile(
   try {
     const response = await fetch('/api/upload/', {
       method: 'DELETE',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path }),
     });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest, refreshAccessTokenOnResponse } from '@/lib/auth-edge';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // ─── CSP ─────────────────────────────────────────────────────────────────────
 
@@ -33,6 +34,17 @@ function applySecurityHeaders(res: NextResponse): void {
 
 function isAdminPath(pathname: string): boolean {
   return pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+}
+
+async function hasActiveAdminSession(sessionId: string): Promise<boolean> {
+  const { data, error } = await supabaseAdmin
+    .from('admin_sessions')
+    .select('id')
+    .eq('id', sessionId)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+
+  return !error && !!data;
 }
 
 /** 对搜索引擎屏蔽的路径（后台所有路径） */
@@ -90,6 +102,18 @@ export async function proxy(request: NextRequest) {
 
   if (!session) {
     // API 路由返回 401；页面跳转到登录页
+    if (path.startsWith('/api/')) {
+      return NextResponse.json(
+        { success: false, error: '未登录或会话已过期', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+    const loginUrl = new URL('/admin/login', request.url);
+    loginUrl.searchParams.set('redirect', path);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (!await hasActiveAdminSession(session.sessionId)) {
     if (path.startsWith('/api/')) {
       return NextResponse.json(
         { success: false, error: '未登录或会话已过期', code: 'UNAUTHORIZED' },

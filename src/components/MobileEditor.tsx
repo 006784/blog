@@ -10,7 +10,6 @@ import { uploadFile, compressImage } from '@/lib/storage';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { showToast } from '@/lib/toast';
-import { showConfirm } from '@/lib/confirm';
 
 interface MobileEditorProps {
   value: string;

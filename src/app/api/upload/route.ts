@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
+import { requireAdminSession } from '@/lib/auth-server';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -58,6 +59,10 @@ const ALLOWED_TYPES: Record<string, { ext: string; category: string }> = {
 // POST - 上传文件到 R2
 export async function POST(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
+    }
+
     const contentType = request.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
       return NextResponse.json({ success: false, error: '请求格式错误，请使用 multipart/form-data' }, { status: 400 });
@@ -121,6 +126,10 @@ export async function POST(request: NextRequest) {
 // DELETE - 删除 R2 文件
 export async function DELETE(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return NextResponse.json({ success: false, error: '未授权访问' }, { status: 401 });
+    }
+
     const { path } = await request.json();
     
     if (!path) {

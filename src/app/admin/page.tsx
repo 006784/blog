@@ -7,7 +7,7 @@ import {
   Plus, Edit2, Trash2, X, Loader2, Save,
   Eye, EyeOff, TrendingUp, LogOut, Lock,
   ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2,
-  Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck, ShieldOff
+  Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck
 } from 'lucide-react';
 import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
 import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
@@ -83,7 +83,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error('删除失败');
       setPosts(posts.filter(p => p.id !== id));
       showToast.success('文章已删除');
-    } catch (error) {
+    } catch {
       showToast.error('删除失败，请稍后再试');
     }
   }
@@ -96,7 +96,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error('删除失败');
       setPhotos(photos.filter(p => p.id !== id));
       showToast.success('照片已删除');
-    } catch (error) {
+    } catch {
       showToast.error('删除失败，请稍后再试');
     }
   }
@@ -109,7 +109,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error('删除失败');
       setDiaries(diaries.filter(d => d.id !== id));
       showToast.success('日记已删除');
-    } catch (error) {
+    } catch {
       showToast.error('删除失败，请稍后再试');
     }
   }
@@ -122,7 +122,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error('删除失败');
       setAlbums(albums.filter(a => a.id !== id));
       showToast.success('相册已删除');
-    } catch (error) {
+    } catch {
       showToast.error('删除失败，请稍后再试');
     }
   }
@@ -618,6 +618,7 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
           </div>
         )}
       </Card>
+      <Paginator total={posts.length} page={page} setPage={setPage} />
     </motion.div>
   );
 }

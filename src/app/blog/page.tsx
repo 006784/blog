@@ -25,10 +25,8 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { APPLE_EASE, HOVER_BUTTON, TAP_BUTTON, APPLE_SPRING_GENTLE } from '@/components/Animations';
 import { useAdmin } from '@/components/AdminProvider';
-import { decodeAdminToken } from '@/lib/admin-token';
 import { filterRenderablePosts, getSamplePosts, toPublicCatalogPosts, type PublicCatalogPost } from '@/lib/sample-posts';
 import { Collection, deletePost, getCollections, getPublishedPosts, Post } from '@/lib/supabase';
-import { showToast } from '@/lib/toast';
 import { showConfirm } from '@/lib/confirm';
 
 const categoryList = [
@@ -108,14 +106,11 @@ function BlogPageContent() {
     setNotifyingSlug(post.slug);
 
     try {
-      const adminToken = localStorage.getItem('admin-token');
-      const password = adminToken ? (decodeAdminToken(adminToken) || '') : '';
-
       const response = await fetch('/api/notify', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
         },
         body: JSON.stringify({
           postSlug: post.slug,
@@ -128,6 +123,9 @@ function BlogPageContent() {
       const result = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('当前登录已失效，请重新登录后再推送');
+        }
         throw new Error(result.error || '推送失败');
       }
 

@@ -37,6 +37,20 @@ const envRemotePatterns = [
 const nextConfig: NextConfig = {
   // distDir: 'out',  // 注释掉自定义输出目录以适配Vercel
   trailingSlash: true,
+  webpack: (config) => {
+    // This repo runs in a tight local disk environment; disable filesystem cache
+    // to avoid noisy ENOSPC warnings during production builds.
+    config.cache = false;
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      {
+        module: /@prisma\/instrumentation/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ];
+
+    return config;
+  },
   images: {
     // 启用图片优化：WebP/AVIF 自动转换、响应式尺寸生成
     formats: ['image/avif', 'image/webp'],

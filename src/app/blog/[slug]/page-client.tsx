@@ -64,7 +64,6 @@ function CodeBlock({ lang, highlighted, raw }: { lang: string; highlighted: stri
         {copied ? '已复制' : '复制'}
       </button>
       <pre className="article-pre">
-        {/* eslint-disable-next-line react/no-danger */}
         <code className={`language-${lang}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
       </pre>
     </div>

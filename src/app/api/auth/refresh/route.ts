@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { ok, err } from '@/lib/api';
 import {
   verifyRefreshToken,
-  validateDbSession,
+  rotateDbSession,
   setAuthCookies,
   COOKIE_REFRESH,
 } from '@/lib/auth-server';
@@ -21,11 +21,10 @@ export async function POST(request: NextRequest) {
   const payload = await verifyRefreshToken(refreshToken);
   if (!payload) return err('刷新令牌无效或已过期', 401);
 
-  // 检查 DB session 是否仍然存在
-  const valid = await validateDbSession(payload.sessionId);
-  if (!valid) return err('会话已失效，请重新登录', 401);
+  const nextSessionId = await rotateDbSession(payload.sessionId);
+  if (!nextSessionId) return err('会话已失效，请重新登录', 401);
 
   const res = ok({ refreshed: true });
-  await setAuthCookies(res, payload.sessionId);
+  await setAuthCookies(res, nextSessionId);
   return res;
 }

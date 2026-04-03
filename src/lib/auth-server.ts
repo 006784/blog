@@ -227,6 +227,7 @@ export async function requireAdminSession(
   const payload = await verifyAccessToken(token);
   if (!payload) return null;
   if (isIdleExpired(payload.lastActivity)) return null;
+  if (!await validateDbSession(payload.sessionId)) return null;
   if (ROLE_LEVEL[payload.role] < ROLE_LEVEL[minRole]) return null;
   return payload;
 }
@@ -268,6 +269,37 @@ export async function updateSessionActivity(sessionId: string): Promise<void> {
     .from('admin_sessions')
     .update({ last_activity: new Date().toISOString() })
     .eq('id', sessionId);
+}
+
+export async function rotateDbSession(sessionId: string): Promise<string | null> {
+  const { data, error } = await supabaseAdmin
+    .from('admin_sessions')
+    .select('ip_address, user_agent')
+    .eq('id', sessionId)
+    .single();
+
+  if (error || !data) return null;
+
+  const nextSessionId = crypto.randomUUID();
+  const created = await createDbSession(
+    nextSessionId,
+    data.ip_address ?? 'unknown',
+    data.user_agent ?? 'unknown'
+  );
+
+  if (!created) return null;
+
+  const { error: deleteError } = await supabaseAdmin
+    .from('admin_sessions')
+    .delete()
+    .eq('id', sessionId);
+
+  if (deleteError) {
+    await supabaseAdmin.from('admin_sessions').delete().eq('id', nextSessionId);
+    return null;
+  }
+
+  return nextSessionId;
 }
 
 export async function deleteDbSession(sessionId: string): Promise<void> {

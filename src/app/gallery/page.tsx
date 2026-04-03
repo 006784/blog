@@ -346,6 +346,7 @@ export default function GalleryPage() {
         <AnimatePresence>
           {lightboxPhoto && (
             <Lightbox
+              key={lightboxPhoto.id}
               photo={lightboxPhoto}
               onClose={() => setLightboxPhoto(null)}
               onPrev={handlePrevPhoto}
@@ -633,12 +634,6 @@ function Lightbox({
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-
-  // Reset loading state when photo changes
-  useEffect(() => {
-    setImgLoaded(false);
-    setImgError(false);
-  }, [photo.id]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

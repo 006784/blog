@@ -57,7 +57,11 @@ export async function POST(request: NextRequest) {
     // 颁发完整 session
     const sessionId = crypto.randomUUID();
     const ua = request.headers.get('user-agent') ?? 'unknown';
-    await createDbSession(sessionId, ip, ua);
+    const created = await createDbSession(sessionId, ip, ua);
+    if (!created) {
+      logger.error('管理员 TOTP 登录失败：会话创建失败', { module: 'auth', ip });
+      return err('登录失败，请稍后重试', 500, 'SESSION_CREATE_FAILED');
+    }
 
     logger.info('管理员 TOTP 登录成功', { module: 'auth', ip });
 

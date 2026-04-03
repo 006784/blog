@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { X, Plus, Trash2, Loader2, Save } from 'lucide-react';
 import { TestCaseManager } from './TestCaseManager';
 import { showToast } from '@/lib/toast';
-import { showConfirm } from '@/lib/confirm';
 
 interface Problem {
   id?: string;

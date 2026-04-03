@@ -274,6 +274,7 @@ export class MultimediaService {
 
       const response = await fetch('/api/upload/', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
 

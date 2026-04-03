@@ -5,7 +5,6 @@ import { useState, useRef, useCallback } from 'react';
 import { Image as ImageIcon, Video, FileText, X, Download, Upload, Play, Pause } from 'lucide-react';
 import { MultimediaService, type MediaAttachment } from '@/lib/diary/multimedia-service';
 import { showToast } from '@/lib/toast';
-import { showConfirm } from '@/lib/confirm';
 
 interface AttachmentManagerProps {
   onAttachmentsChange: (attachments: MediaAttachment[]) => void;
