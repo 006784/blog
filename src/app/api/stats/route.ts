@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 
@@ -77,6 +78,10 @@ export async function POST(request: NextRequest) {
 // GET - 获取统计数据（仅管理员）
 export async function GET(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return NextResponse.json({ success: false, error: '未登录或会话已过期' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type') || 'overview';
     const days = parseInt(searchParams.get('days') || '30');

@@ -39,6 +39,7 @@ export function useAdmin() {
 
 const IDLE_MS = 30 * 60 * 1000;
 const IDLE_EVENTS = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'] as const;
+const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -49,25 +50,61 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logoutFnRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
-  // ── 检查登录状态（调用 /api/auth/me，不读 localStorage）──
-  const checkSession = useCallback(async () => {
+  const clearSessionState = useCallback(() => {
+    setIsAdmin(false);
+    setRole(null);
+  }, []);
+
+  const fetchSession = useCallback(async (): Promise<{ role?: string } | null> => {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!res.ok) return null;
+
+    const { data } = await res.json();
+    return data ?? null;
+  }, []);
+
+  const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
-      if (res.ok) {
-        const { data } = await res.json();
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // ── 检查登录状态（必要时用 refresh cookie 自动续签）──
+  const checkSession = useCallback(async (background = false) => {
+    if (!background) {
+      setLoading(true);
+    }
+
+    try {
+      let data = await fetchSession();
+
+      if (!data) {
+        const refreshed = await refreshSession();
+        if (refreshed) {
+          data = await fetchSession();
+        }
+      }
+
+      if (data) {
         setIsAdmin(true);
         setRole(data.role ?? 'super_admin');
       } else {
-        setIsAdmin(false);
-        setRole(null);
+        clearSessionState();
       }
     } catch {
-      setIsAdmin(false);
-      setRole(null);
+      clearSessionState();
     } finally {
-      setLoading(false);
+      if (!background) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [clearSessionState, fetchSession, refreshSession]);
 
   // ── 登出 ──────────────────────────────────────────────────────────────────
   const logout = useCallback(async (all = false) => {
@@ -77,9 +114,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ all }),
       credentials: 'include',
     });
-    setIsAdmin(false);
-    setRole(null);
-  }, []);
+    clearSessionState();
+  }, [clearSessionState]);
 
   logoutFnRef.current = logout;
 
@@ -94,7 +130,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    checkSession();
+    void checkSession();
   }, [checkSession]);
 
   useEffect(() => {
@@ -107,28 +143,26 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     resetIdleTimer();
     IDLE_EVENTS.forEach((ev) => window.addEventListener(ev, resetIdleTimer, { passive: true }));
 
-    // 定期刷新 access token（每 50 分钟）
+    // 定期刷新 access token，保证活跃会话不会先于空闲阈值过期
     const refreshInterval = setInterval(async () => {
-      const res = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        setIsAdmin(false);
-        setRole(null);
+      const refreshed = await refreshSession();
+      if (!refreshed) {
+        clearSessionState();
       }
-    }, 50 * 60 * 1000);
+    }, REFRESH_INTERVAL_MS);
 
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
       IDLE_EVENTS.forEach((ev) => window.removeEventListener(ev, resetIdleTimer));
       clearInterval(refreshInterval);
     };
-  }, [isAdmin, resetIdleTimer]);
+  }, [clearSessionState, isAdmin, refreshSession, resetIdleTimer]);
 
   // ── 跨标签同步：其他标签登出时同步状态 ──────────────────────────────────
   useEffect(() => {
-    const onFocus = () => checkSession();
+    const onFocus = () => {
+      void checkSession(true);
+    };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, [checkSession]);

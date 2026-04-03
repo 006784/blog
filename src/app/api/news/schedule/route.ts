@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { NewsCollectionService } from '@/lib/news/news-collection-service';
 import { ScheduleManager } from '@/lib/news/schedule-config';
 import { logger } from '@/lib/logger';
@@ -14,8 +15,15 @@ export const revalidate = 0;
  * DELETE /api/news/schedule - 删除定时任务
  * PUT /api/news/schedule/run - 立即执行定时任务
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const scheduleManager = ScheduleManager.getInstance();
     const schedules = scheduleManager.getAllSchedules();
     
@@ -60,6 +68,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { 
       scheduleId = 'default',
@@ -121,6 +136,13 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
     
@@ -203,6 +225,13 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const scheduleId = searchParams.get('id') || 'default';
     

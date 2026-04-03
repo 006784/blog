@@ -1,5 +1,6 @@
 // 简化测试版本 - 避免复杂对象序列化问题
 import { NextRequest } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 
 // 配置静态导出
@@ -8,6 +9,13 @@ export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { recipientEmail } = body;
     

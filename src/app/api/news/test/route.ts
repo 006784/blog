@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { NewsCollectionService } from '@/lib/news/news-collection-service';
 import { logger } from '@/lib/logger';
 
@@ -12,6 +13,13 @@ export const revalidate = 0;
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const testMode = searchParams.get('test') === 'true';
     
@@ -91,6 +99,13 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { 
       recipientEmail,

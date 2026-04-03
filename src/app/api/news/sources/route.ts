@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { NewsCollectionService } from '@/lib/news/news-collection-service';
 import { logger } from '@/lib/logger';
 
@@ -11,8 +12,15 @@ export const revalidate = 0;
  * GET /api/news/sources - 获取新闻源列表
  * POST /api/news/sources - 测试特定新闻源
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const newsService = new NewsCollectionService();
     const sourcesStatus = newsService.getSourcesStatus();
     
@@ -43,6 +51,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!await requireAdminSession(request)) {
+      return Response.json({
+        success: false,
+        error: '未登录或会话已过期'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { sourceId } = body;
     

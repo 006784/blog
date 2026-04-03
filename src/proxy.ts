@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionFromRequest, refreshAccessTokenOnResponse } from '@/lib/auth-edge';
+import {
+  COOKIE_REFRESH,
+  getSessionFromRequest,
+  refreshAccessTokenOnResponse,
+} from '@/lib/auth-edge';
 import { supabaseAdmin } from '@/lib/supabase';
 
 // ─── CSP ─────────────────────────────────────────────────────────────────────
@@ -33,7 +37,14 @@ function applySecurityHeaders(res: NextResponse): void {
 // ─── 需要管理员权限的路径 ──────────────────────────────────────────────────────
 
 function isAdminPath(pathname: string): boolean {
-  return pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  return (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/diary') ||
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/write')
+  );
 }
 
 async function hasActiveAdminSession(sessionId: string): Promise<boolean> {
@@ -52,6 +63,7 @@ function isNoIndexPath(pathname: string): boolean {
   return (
     pathname.startsWith('/admin') ||
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/diary') ||
     pathname.startsWith('/profile') ||
     pathname.startsWith('/write')
   );
@@ -77,7 +89,7 @@ export async function proxy(request: NextRequest) {
 
   // 生产环境屏蔽调试端点
   if (process.env.NODE_ENV === 'production') {
-    const debugRoutes = ['/api/test-logs', '/api/news/test', '/api/news/test-simple'];
+    const debugRoutes = ['/api/test-logs'];
     if (debugRoutes.some((r) => pathname.startsWith(r))) {
       const adminKey = request.headers.get('x-admin-key');
       if (adminKey !== process.env.ADMIN_SECRET) {
@@ -88,6 +100,7 @@ export async function proxy(request: NextRequest) {
 
   const res = NextResponse.next();
   applySecurityHeaders(res);
+  const hasRefreshCookie = !!request.cookies.get(COOKIE_REFRESH)?.value;
 
   // ── 反收录：admin / dashboard / profile / write 路径 ──
   if (isNoIndexPath(path)) {
@@ -101,6 +114,10 @@ export async function proxy(request: NextRequest) {
   const session = await getSessionFromRequest(request);
 
   if (!session) {
+    if (!path.startsWith('/api/') && hasRefreshCookie) {
+      return res;
+    }
+
     // API 路由返回 401；页面跳转到登录页
     if (path.startsWith('/api/')) {
       return NextResponse.json(

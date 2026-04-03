@@ -4,7 +4,6 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z, type ZodSchema } from 'zod';
-import { verifyAdminPassword } from './env';
 import { requireAdminSession } from './auth-server';
 export type { AdminRole } from './auth-edge';
 
@@ -40,24 +39,8 @@ export function err(
 // ——— 鉴权辅助 ———
 
 /**
- * 验证请求体中的 adminPassword 字段（旧式兼容，逐步废弃）
- */
-export function requireAdmin(
-  adminPassword: unknown
-): NextResponse<ApiError> | null {
-  if (typeof adminPassword !== 'string' || !verifyAdminPassword(adminPassword)) {
-    return err('未授权访问', 401, 'UNAUTHORIZED');
-  }
-  return null;
-}
-
-/**
- * 基于 httpOnly cookie + JWT 的鉴权（新式，推荐）
+ * 基于 httpOnly cookie + JWT 的鉴权
  * 用于所有管理员 API Route
- *
- * @example
- * const authErr = await checkAdminSession(request);
- * if (authErr) return authErr;
  */
 export async function checkAdminSession(
   request: NextRequest,
@@ -127,7 +110,6 @@ export async function parseBody<T>(
 export const schemas = {
   email: z.string().email('请输入有效的邮箱地址'),
   slug: z.string().regex(/^[a-z0-9-]+$/, '只能包含小写字母、数字和连字符'),
-  adminPassword: z.string().min(1, '管理员密码不能为空'),
   pagination: z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(20),

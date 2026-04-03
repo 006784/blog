@@ -1,12 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+async function hasDebugAccess(request: NextRequest): Promise<boolean> {
+  const adminSecret = process.env.ADMIN_SECRET;
+  const adminKey = request.headers.get('x-admin-key');
+
+  if (adminSecret && adminKey === adminSecret) {
+    return true;
+  }
+
+  return !!(await requireAdminSession(request));
+}
+
 export async function GET(request: NextRequest) {
   try {
+    if (!await hasDebugAccess(request)) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    }
+
     logger.info('收到测试日志API请求', {
       method: request.method,
       url: request.url,
@@ -56,6 +73,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!await hasDebugAccess(request)) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    }
+
     const body = await request.json();
     logger.info('收到POST测试请求', { body: body.data || '无数据' });
     

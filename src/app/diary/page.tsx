@@ -46,7 +46,7 @@ function upsertDiaryEntries(entries: Diary[], nextDiary: Diary): Diary[] {
 
 // ── Page ───────────────────────────────────────────────────────
 export default function DiaryPage() {
-  const { isAdmin, showLoginModal } = useAdmin();
+  const { isAdmin, loading: adminLoading, showLoginModal } = useAdmin();
   const shellRef = useRef<HTMLDivElement>(null);
 
   const [theme, setTheme] = useState<DiaryTheme>('kraft');
@@ -82,6 +82,11 @@ export default function DiaryPage() {
 
   // ── Load diary data ───────────────────────────────────────
   const loadData = useCallback(async () => {
+    if (adminLoading || !isAdmin) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`/api/diary/?year=${calYear}&month=${calMonth}&view=calendar`, {
@@ -96,19 +101,23 @@ export default function DiaryPage() {
     } finally {
       setLoading(false);
     }
-  }, [calYear, calMonth]);
+  }, [adminLoading, isAdmin, calYear, calMonth]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    if (adminLoading || !isAdmin) return;
+    void loadData();
+  }, [adminLoading, isAdmin, loadData]);
 
   // ── Load all diaries for report / timeline ─────────────────
   const [allDiaries, setAllDiaries] = useState<Diary[]>([]);
   useEffect(() => {
+    if (adminLoading || !isAdmin) return;
     if (view !== 'report' && view !== 'timeline') return;
     fetch(`/api/diary/?year=${calYear}`, { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => setAllDiaries(Array.isArray(d.diaries) ? d.diaries : []))
       .catch(() => {});
-  }, [view, calYear]);
+  }, [adminLoading, isAdmin, view, calYear]);
 
   // ── Load diary for selected date ──────────────────────────
   const loadDiaryForDate = useCallback(async (date: string) => {
@@ -176,6 +185,21 @@ export default function DiaryPage() {
   );
 
   // ── Non-admin gate ─────────────────────────────────────────
+  if (adminLoading) {
+    return (
+      <div
+        ref={shellRef}
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--d-bg)', fontFamily: 'var(--d-font-title)' }}
+      >
+        <div className="text-center p-8">
+          <p className="text-2xl mb-2" style={{ color: 'var(--d-ink)' }}>日记本</p>
+          <p className="text-sm" style={{ color: 'var(--d-ink-3)', letterSpacing: '.1em' }}>正在恢复登录状态…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <div

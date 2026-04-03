@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   AlertCircle,
   Calendar,
@@ -37,10 +38,13 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { StatePanel } from '@/components/ui/StatePanel';
+import { useAdmin } from '@/components/AdminProvider';
 
 type TabType = 'all' | 'published' | 'drafts';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { isAdmin, loading: authLoading } = useAdmin();
   const [posts, setPosts] = useState<BlogPost[]>(() => getAllPosts());
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,6 +119,28 @@ export default function DashboardPage() {
     { id: 'published', label: '已发布', icon: Send, count: stats.published },
     { id: 'drafts', label: '草稿', icon: FileEdit, count: stats.drafts },
   ];
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAdmin) {
+      router.replace('/admin/login?redirect=/dashboard');
+    }
+  }, [authLoading, isAdmin, router]);
+
+  if (authLoading || !isAdmin) {
+    return (
+      <div className="min-h-screen px-6 py-20">
+        <div className="mx-auto max-w-2xl">
+          <StatePanel
+            tone="loading"
+            title={authLoading ? '正在验证管理员身份' : '正在跳转登录页'}
+            description="仪表盘需要管理员会话，验证完成后会自动继续。"
+            icon={<LayoutDashboard className="h-6 w-6" />}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 py-12 sm:px-6 lg:px-8">

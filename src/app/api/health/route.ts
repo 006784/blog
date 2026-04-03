@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminSession } from '@/lib/auth-server';
 import { logger } from '@/lib/logger';
 
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+function hasHealthToken(request: NextRequest): boolean {
+  const authHeader = request.headers.get('authorization');
+  const token = process.env.HEALTH_CHECK_TOKEN;
+  return !!token && authHeader === `Bearer ${token}`;
+}
+
 // 健康检查状态
 let healthStatus = {
   status: 'healthy',
@@ -27,7 +35,7 @@ function updateHealthStatus() {
 // 定期更新健康状态
 setInterval(updateHealthStatus, 30000); // 每30秒更新一次
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // 检查基本服务
     const checks = {
@@ -40,23 +48,26 @@ export async function GET() {
     // 计算总体健康状态
     const isHealthy = Object.values(checks).every(check => check === true);
     const status = isHealthy ? 'healthy' : 'degraded';
-    
+
+    const isPrivileged = hasHealthToken(request) || !!(await requireAdminSession(request));
     const response = {
       status,
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
       version: healthStatus.version,
-      checks,
-      system: {
-        memory: {
-          heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
-          heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB',
-          external: Math.round(process.memoryUsage().external / 1024 / 1024) + ' MB'
-        },
-        cpu: process.cpuUsage(),
-        platform: process.platform,
-        nodeVersion: process.version
-      }
+      ...(isPrivileged ? {
+        uptime: process.uptime(),
+        checks,
+        system: {
+          memory: {
+            heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+            heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB',
+            external: Math.round(process.memoryUsage().external / 1024 / 1024) + ' MB'
+          },
+          cpu: process.cpuUsage(),
+          platform: process.platform,
+          nodeVersion: process.version
+        }
+      } : {})
     };
 
     logger.info('健康检查完成', { status, checks });
