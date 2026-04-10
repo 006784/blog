@@ -61,6 +61,21 @@ function getCategoryLabel(category: string): string {
   return categoryLabels[normalized] || category;
 }
 
+function extractReadingMinutes(readingTime: string): number | null {
+  const matched = readingTime.match(/\d+/);
+  if (!matched) return null;
+
+  const value = Number(matched[0]);
+  return Number.isFinite(value) ? value : null;
+}
+
+function formatIssueDate(date: string): string {
+  const parsed = new Date(date);
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${month}.${day}`;
+}
+
 function normalizePost(post: SupabasePost & { is_demo?: boolean }, index: number): HomePost {
   const image = post.cover_image || post.image || fallbackImages[index % fallbackImages.length];
 
@@ -105,6 +120,8 @@ function ProgressiveImage({
         fill
         sizes={sizes}
         priority={priority}
+        loading={priority ? 'eager' : undefined}
+        fetchPriority={priority ? 'high' : undefined}
         className="atelier-image"
         onLoad={() => setLoaded(true)}
       />
@@ -161,13 +178,15 @@ function EditorialFeatureCard({
         <h2>{post.title}</h2>
         <p>{post.description}</p>
 
-        <div className="atelier-tag-row">
-          {post.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} variant="soft" className="atelier-tag bg-[var(--surface-glass)] text-[var(--color-neutral-900)] dark:text-[var(--color-neutral-900)]">
-              {tag}
-            </Badge>
-          ))}
-        </div>
+        {post.tags.length > 0 && (
+          <div className="atelier-tag-row">
+            {post.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="soft" className="atelier-tag bg-[var(--surface-glass)] text-[var(--color-neutral-900)] dark:text-[var(--color-neutral-900)]">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -256,6 +275,44 @@ function EditorialFeedCard({
         </div>
       </Link>
     </motion.article>
+  );
+}
+
+function EditorialMemoCard({
+  kicker,
+  title,
+  description,
+  items,
+  href,
+  hrefLabel,
+}: {
+  kicker: string;
+  title: string;
+  description: string;
+  items: Array<{ label: string; value: string }>;
+  href: string;
+  hrefLabel: string;
+}) {
+  return (
+    <article className="atelier-note-card">
+      <p className="atelier-panel-kicker">{kicker}</p>
+      <h3>{title}</h3>
+      <p className="atelier-note-description">{description}</p>
+
+      <div className="atelier-note-list">
+        {items.map((item) => (
+          <div key={item.label} className="atelier-note-row">
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <Link href={href} className="atelier-note-link">
+        {hrefLabel}
+        <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+      </Link>
+    </article>
   );
 }
 
@@ -386,9 +443,55 @@ export default function HomePageClient({
       .slice(0, 4);
   }, [activePosts]);
 
-  const totalTags = useMemo(() => {
-    return new Set(activePosts.flatMap((post) => post.tags)).size;
+  const averageReadingMinutes = useMemo(() => {
+    const values = activePosts
+      .map((post) => extractReadingMinutes(post.readingTime))
+      .filter((value): value is number => typeof value === 'number');
+
+    if (values.length === 0) return null;
+    return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
   }, [activePosts]);
+
+  const averageReadingLabel = averageReadingMinutes ? `${averageReadingMinutes} min` : '慢阅读';
+  const leadCategory = topCategories[0]?.[0] || heroPost.category;
+  const leadTopics = topCategories.slice(0, 2).map(([name]) => name).join(' · ') || '技术 · 设计';
+  const curationNotes = useMemo(
+    () => [
+      {
+        kicker: 'EDITORIAL NOTE',
+        title: '本期导读',
+        description: `先从《${heroPost.title}》进入，会更容易摸到这座内容站这段时间真正关心的主题与写作节奏。`,
+        items: [
+          { label: '本期焦点', value: leadCategory },
+          { label: '最近刊期', value: formatIssueDate(heroPost.date) },
+          { label: '平均阅读', value: averageReadingLabel },
+        ],
+        href: `/blog/${heroPost.slug}`,
+        hrefLabel: '阅读封面文章',
+      },
+      {
+        kicker: 'ARCHIVE MAP',
+        title: '第一次来可以这样逛',
+        description: '先扫一遍文章档案，再按分类和时间线往下走，会更像在翻一本文字杂志，而不是刷一条信息流。',
+        items: [
+          { label: '主线主题', value: leadTopics },
+          { label: '当前存档', value: `${activePosts.length} 篇` },
+          { label: '章节数量', value: `${topCategories.length} 类` },
+        ],
+        href: '/blog',
+        hrefLabel: '进入文章档案',
+      },
+    ],
+    [activePosts.length, averageReadingLabel, heroPost.date, heroPost.slug, heroPost.title, leadCategory, leadTopics, topCategories.length]
+  );
+
+  const feedGridStyle = useMemo(
+    () =>
+      ({
+        '--atelier-feed-columns': visiblePosts.length >= 3 ? 3 : Math.max(visiblePosts.length, 1),
+      }) as CSSProperties,
+    [visiblePosts.length]
+  );
 
   const navStyle = useMemo(
     () =>
@@ -417,7 +520,7 @@ export default function HomePageClient({
 
           <nav className="atelier-nav-links" aria-label="主导航">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className="atelier-nav-link">
+              <Link key={item.href} href={item.href} className={clsx('atelier-nav-link', item.href === '/' && 'is-active')}>
                 {item.name}
               </Link>
             ))}
@@ -480,14 +583,14 @@ export default function HomePageClient({
                     <small>持续整理与更新</small>
                   </div>
                   <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
+                    <span>平均阅读</span>
+                    <strong>{averageReadingLabel}</strong>
+                    <small>保留一点慢阅读的节奏</small>
+                  </div>
+                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
                     <span>主题章节</span>
                     <strong>{topCategories.length}</strong>
                     <small>技术、设计、生活与思考</small>
-                  </div>
-                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
-                    <span>标签索引</span>
-                    <strong>{totalTags}</strong>
-                    <small>便于持续回看与关联阅读</small>
                   </div>
                 </div>
               </motion.div>
@@ -516,7 +619,7 @@ export default function HomePageClient({
               </p>
             </div>
 
-            <div className="atelier-curation-grid">
+            <div className="atelier-curation-layout">
               <Card variant="glass" className="atelier-category-panel rounded-[var(--radius-2xl)]">
                 <p className="atelier-panel-kicker">TOP&ensp;·&ensp;CATEGORIES</p>
                 <h3>这个博客最近在写什么</h3>
@@ -530,9 +633,22 @@ export default function HomePageClient({
                 </div>
               </Card>
 
-              {curatedPosts.map((post, index) => (
-                <EditorialStoryCard key={post.slug} post={post} index={index} />
-              ))}
+              <div className="atelier-story-grid">
+                {curatedPosts.map((post, index) => (
+                  <EditorialStoryCard key={post.slug} post={post} index={index} />
+                ))}
+                {curationNotes.map((note) => (
+                  <EditorialMemoCard
+                    key={note.title}
+                    kicker={note.kicker}
+                    title={note.title}
+                    description={note.description}
+                    items={note.items}
+                    href={note.href}
+                    hrefLabel={note.hrefLabel}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -570,9 +686,17 @@ export default function HomePageClient({
             ) : (
               <>
                 {visiblePosts.length > 0 ? (
-                  <div className="atelier-feed-grid">
+                  <div
+                    className={clsx('atelier-feed-grid', visiblePosts.length === 1 && 'is-single')}
+                    style={feedGridStyle}
+                  >
                     {visiblePosts.map((post, index) => (
-                      <EditorialFeedCard key={post.slug} post={post} index={index} emphasized={index === 0} />
+                      <EditorialFeedCard
+                        key={post.slug}
+                        post={post}
+                        index={index}
+                        emphasized={visiblePosts.length >= 3 && index === 0}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -609,6 +733,11 @@ export default function HomePageClient({
                 <p>
                   不追求高频打扰，只在真正有新内容、新专题或值得收藏的更新时再发给你。
                 </p>
+                <div className="atelier-subscribe-benefits">
+                  <span>低频更新</span>
+                  <span>新文与专题提醒</span>
+                  <span>可随时退订</span>
+                </div>
               </div>
 
               <div className="atelier-subscribe-form">

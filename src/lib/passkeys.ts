@@ -6,6 +6,7 @@ import type {
   CredentialDeviceType,
   WebAuthnCredential,
 } from '@simplewebauthn/server';
+import { getAdminLoginEmail } from '@/lib/admin-email-login';
 import { logger } from '@/lib/logger';
 import { defaultProfile, normalizeProfile } from '@/lib/profile';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -192,9 +193,7 @@ export async function getAdminPasskeyUserIdentity(): Promise<{
   userDisplayName: string;
   userIdSeed: string;
 }> {
-  const fallbackEmail = process.env.ADMIN_EMAILS?.split(/[,\n;]+/).map((value) => value.trim()).find(Boolean)
-    || process.env.ADMIN_EMAIL?.trim()
-    || 'admin@localhost';
+  const fallbackEmail = (await getAdminLoginEmail()) || 'admin@localhost';
 
   try {
     const { data, error } = await supabaseAdmin
@@ -207,9 +206,9 @@ export async function getAdminPasskeyUserIdentity(): Promise<{
 
     const profile = normalizeProfile(data?.value ?? defaultProfile);
     return {
-      userName: profile.email || fallbackEmail,
+      userName: fallbackEmail,
       userDisplayName: profile.nickname || '管理员',
-      userIdSeed: profile.email || fallbackEmail,
+      userIdSeed: fallbackEmail,
     };
   } catch {
     return {

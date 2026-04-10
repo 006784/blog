@@ -3763,19 +3763,60 @@ textarea:focus {
 
 /* ── Home wrapper ── */
 .atelier-home {
-  --atelier-paper: var(--paper);
-  --atelier-paper-strong: var(--paper-warm);
+  --atelier-paper: color-mix(in srgb, var(--paper) 94%, white 6%);
+  --atelier-paper-strong: color-mix(in srgb, var(--paper-warm) 92%, white 8%);
   --atelier-ink: var(--ink);
   --atelier-soft: var(--ink-secondary);
-  --atelier-line: var(--line);
+  --atelier-line: color-mix(in srgb, var(--line) 84%, white 16%);
   --atelier-accent: var(--gold);
   --atelier-accent-strong: var(--gold);
   --atelier-accent-soft: var(--gold-light);
+  --atelier-accent-copper: #b8784c;
+  --atelier-accent-sage: #74846b;
+  --atelier-accent-slate: #71879b;
+  --atelier-accent-claret: #97685e;
+  --atelier-wash-copper: rgba(195, 135, 98, 0.18);
+  --atelier-wash-sage: rgba(120, 144, 112, 0.16);
+  --atelier-wash-slate: rgba(111, 134, 154, 0.15);
+  --atelier-wash-claret: rgba(154, 108, 98, 0.12);
+  --atelier-cloud: #fffaf6;
   position: relative;
   min-height: 100vh;
   color: var(--ink);
-  background: var(--paper);
+  background:
+    radial-gradient(circle at 0% 0%, var(--atelier-wash-copper) 0%, transparent 26%),
+    radial-gradient(circle at 100% 10%, var(--atelier-wash-slate) 0%, transparent 28%),
+    radial-gradient(circle at 16% 76%, var(--atelier-wash-sage) 0%, transparent 22%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--atelier-cloud) 88%, var(--atelier-paper)) 0%,
+      color-mix(in srgb, var(--atelier-paper) 94%, white 6%) 42%,
+      color-mix(in srgb, var(--atelier-paper-strong) 92%, var(--atelier-wash-copper)) 100%
+    );
   isolation: isolate;
+}
+
+.atelier-home::before,
+.atelier-home::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.atelier-home::before {
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 18%, transparent 34%, rgba(113, 135, 155, 0.06) 58%, transparent 74%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 18%);
+  opacity: 0.7;
+}
+
+.atelier-home::after {
+  background:
+    radial-gradient(circle at 82% 88%, rgba(112, 134, 154, 0.08), transparent 24%),
+    radial-gradient(circle at 20% 36%, rgba(186, 126, 88, 0.07), transparent 28%);
+  mix-blend-mode: multiply;
+  opacity: 0.68;
 }
 
 /* Orbs removed — magazine is flat */
@@ -3799,15 +3840,17 @@ textarea:focus {
   top: 0;
   z-index: 60;
   height: 72px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(250, 248, 245, 0.92);
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 82%, var(--atelier-accent-slate) 18%);
+  background:
+    linear-gradient(90deg, rgba(255, 252, 248, 0.88) 0%, rgba(252, 248, 243, 0.92) 42%, rgba(247, 240, 234, 0.88) 100%);
   backdrop-filter: blur(var(--atelier-nav-blur, 12px)) saturate(110%);
   -webkit-backdrop-filter: blur(var(--atelier-nav-blur, 12px)) saturate(110%);
   transition: background 0.3s ease;
 }
 
 .dark .atelier-nav {
-  background: rgba(26, 26, 24, 0.92);
+  background:
+    linear-gradient(90deg, rgba(22, 18, 18, 0.9) 0%, rgba(28, 22, 21, 0.92) 45%, rgba(24, 27, 31, 0.9) 100%);
 }
 
 .atelier-nav-row {
@@ -3853,7 +3896,10 @@ textarea:focus {
   font-size: 0.7rem;
   font-style: italic;
   letter-spacing: 0.12em;
-  color: var(--gold);
+  background: linear-gradient(90deg, var(--atelier-accent-copper), var(--atelier-accent-slate));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .atelier-nav-links {
@@ -3880,7 +3926,7 @@ textarea:focus {
   bottom: -4px;
   width: 0;
   height: 1px;
-  background: var(--gold);
+  background: linear-gradient(90deg, var(--atelier-accent-copper), var(--atelier-accent-slate));
   transition: width 0.3s ease;
 }
 
@@ -3889,8 +3935,13 @@ textarea:focus {
   color: var(--ink);
 }
 
+.atelier-nav-link.is-active {
+  color: var(--ink);
+}
+
 .atelier-nav-link:hover::after,
-.atelier-nav-link:focus-visible::after {
+.atelier-nav-link:focus-visible::after,
+.atelier-nav-link.is-active::after {
   width: 100%;
 }
 
@@ -3908,22 +3959,27 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 0;
+  border-radius: 999px;
   text-decoration: none;
-  transition: color 0.3s ease, border-color 0.3s ease;
-  box-shadow: none;
+  transition: transform 0.25s ease, color 0.3s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 16px 36px -26px var(--surface-card-shadow-strong);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .atelier-icon-button {
-  width: 2.4rem;
-  height: 2.4rem;
-  border: 1px solid var(--line);
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-slate) 22%, var(--atelier-line));
   color: var(--ink);
-  background: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-glass) 86%, var(--atelier-wash-slate)) 100%);
   cursor: pointer;
 }
 
-.atelier-icon-button:hover { border-color: var(--ink-muted); }
+.atelier-icon-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+}
 
 .atelier-ghost-button {
   font-family: var(--font-garamond), serif;
@@ -3931,28 +3987,37 @@ textarea:focus {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--ink-muted);
-  border: none;
-  background: none;
-  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-sage) 18%, var(--atelier-line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, white 10%) 0%, color-mix(in srgb, var(--surface-glass) 86%, var(--atelier-wash-sage)) 100%);
+  padding: 0.76rem 1.12rem;
   cursor: pointer;
 }
 
-.atelier-ghost-button:hover { color: var(--ink); }
+.atelier-ghost-button:hover {
+  transform: translateY(-1px);
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
 
 .atelier-primary-button {
   font-family: var(--font-garamond), serif;
   font-size: 0.76rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--ink);
-  border: none;
-  border-bottom: 1px solid var(--gold);
-  padding: 0 0 2px;
-  background: none;
+  color: #241915;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-copper) 52%, white);
+  padding: 0.8rem 1.28rem;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--atelier-accent-copper) 82%, white 18%) 0%, color-mix(in srgb, var(--atelier-accent-claret) 72%, var(--atelier-accent-copper)) 100%);
   cursor: pointer;
+  box-shadow: 0 24px 40px -28px color-mix(in srgb, var(--atelier-accent-claret) 52%, transparent);
 }
 
-.atelier-primary-button:hover { color: var(--ink-secondary); }
+.atelier-primary-button:hover {
+  transform: translateY(-1px);
+  color: #1f1714;
+  box-shadow: 0 28px 48px -28px color-mix(in srgb, var(--atelier-accent-copper) 62%, transparent);
+}
 
 .atelier-secondary-button {
   font-family: var(--font-garamond), serif;
@@ -3960,14 +4025,15 @@ textarea:focus {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-muted);
-  border: 1px solid var(--line);
-  padding: 0.7rem 1.4rem;
-  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-slate) 15%, var(--atelier-line));
+  padding: 0.76rem 1.16rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 88%, white 12%) 0%, color-mix(in srgb, var(--surface-glass) 84%, var(--atelier-wash-slate)) 100%);
   cursor: pointer;
 }
 
 .atelier-secondary-button:hover {
-  border-color: var(--ink-muted);
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
   color: var(--ink);
 }
 
@@ -3978,7 +4044,7 @@ textarea:focus {
 
 .atelier-hero {
   padding: 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-slate) 16%);
 }
 
 .atelier-hero-grid {
@@ -3991,10 +4057,12 @@ textarea:focus {
 
 .atelier-hero-copy {
   padding: clamp(2.5rem, 6vw, 6.25rem) clamp(1.5rem, 4vw, 3.75rem);
-  border-right: 1px solid var(--line);
+  border-right: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-slate) 16%);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--atelier-paper) 96%, white 4%) 0%, color-mix(in srgb, var(--atelier-paper-strong) 92%, var(--atelier-wash-copper)) 100%);
 }
 
 .atelier-kicker,
@@ -4007,7 +4075,7 @@ textarea:focus {
   font-style: italic;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--atelier-accent-slate) 68%, var(--ink-muted));
 }
 
 .atelier-hero-copy h1 {
@@ -4039,22 +4107,47 @@ textarea:focus {
 }
 
 .atelier-metrics {
-  display: flex;
-  gap: 2.5rem;
-  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2.75rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line-light);
 }
 
 .atelier-metric-card {
+  --atelier-metric-accent: var(--atelier-accent-copper);
+  --atelier-metric-wash: var(--atelier-wash-copper);
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  background: none;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
+  gap: 0.35rem;
+  padding: 1.1rem 1.15rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-glass) 84%, var(--atelier-metric-wash)) 100%);
+  border: 1px solid color-mix(in srgb, var(--atelier-metric-accent) 18%, var(--atelier-line));
+  box-shadow: 0 18px 38px -30px var(--surface-card-shadow-strong), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  border-radius: 1.25rem;
+}
+
+.atelier-metric-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--atelier-metric-accent), transparent 82%);
+  opacity: 0.7;
+}
+
+.atelier-metric-card:nth-child(2) {
+  --atelier-metric-accent: var(--atelier-accent-slate);
+  --atelier-metric-wash: var(--atelier-wash-slate);
+}
+
+.atelier-metric-card:nth-child(3) {
+  --atelier-metric-accent: var(--atelier-accent-sage);
+  --atelier-metric-wash: var(--atelier-wash-sage);
 }
 
 .atelier-metric-card span,
@@ -4089,8 +4182,18 @@ textarea:focus {
 
 .atelier-feature-wrap {
   position: relative;
-  background: var(--paper-deep);
+  background: linear-gradient(145deg, #201916 0%, #171618 46%, #1e2429 100%);
   overflow: hidden;
+}
+
+.atelier-feature-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 14% 20%, rgba(116, 141, 160, 0.28), transparent 28%),
+    radial-gradient(circle at 84% 86%, rgba(194, 137, 98, 0.2), transparent 24%);
+  pointer-events: none;
 }
 
 .atelier-feature-card {
@@ -4127,20 +4230,22 @@ textarea:focus {
 .atelier-feature-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(26, 26, 24, 0.6) 100%);
+  background:
+    linear-gradient(180deg, rgba(16, 16, 18, 0.05) 8%, rgba(17, 17, 20, 0.18) 36%, rgba(17, 18, 22, 0.78) 100%),
+    linear-gradient(135deg, transparent 44%, rgba(112, 134, 154, 0.18) 100%);
 }
 
 .atelier-pill {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--line);
-  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-slate) 24%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 78%, var(--atelier-wash-slate));
   padding: 0.2rem 0.6rem;
   font-family: var(--font-garamond), serif;
   font-size: 0.65rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--atelier-accent-slate) 80%, var(--ink));
   border-radius: 0;
 }
 
@@ -4149,9 +4254,9 @@ textarea:focus {
   top: 1.5rem;
   left: 1.5rem;
   z-index: 2;
-  background: rgba(250, 248, 245, 0.9);
-  border-color: var(--gold);
-  color: var(--gold);
+  background: rgba(255, 248, 241, 0.84);
+  border-color: color-mix(in srgb, var(--atelier-accent-copper) 65%, white);
+  color: var(--atelier-accent-copper);
 }
 
 .atelier-feature-body {
@@ -4211,7 +4316,7 @@ textarea:focus {
   font-family: var(--font-garamond), serif;
   font-size: 0.65rem;
   letter-spacing: 0.15em;
-  color: rgba(240, 237, 232, 0.6);
+  color: rgba(246, 241, 236, 0.72);
   text-transform: uppercase;
   background: none;
   border: none;
@@ -4222,16 +4327,21 @@ textarea:focus {
 /* ── Section Layout ── */
 .atelier-curation {
   padding: clamp(2.5rem, 5vw, 4rem) 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-sage) 16%);
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--atelier-paper) 88%, var(--atelier-wash-sage)) 100%);
 }
 
 .atelier-feed-section {
   padding: clamp(2.5rem, 5vw, 4rem) 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-slate) 16%);
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--atelier-paper) 90%, var(--atelier-wash-slate)) 100%);
 }
 
 .atelier-subscribe-section {
   padding: clamp(3rem, 6vw, 5rem) 0;
+  background:
+    radial-gradient(circle at 10% 50%, rgba(194, 137, 98, 0.12), transparent 26%),
+    radial-gradient(circle at 86% 20%, rgba(112, 134, 154, 0.12), transparent 22%);
 }
 
 .atelier-section-head {
@@ -4241,7 +4351,7 @@ textarea:focus {
   gap: 2rem;
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--line-light);
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 72%, white 28%);
 }
 
 .atelier-section-head h2,
@@ -4271,25 +4381,34 @@ textarea:focus {
 }
 
 /* ── Magazine Grid ── */
-.atelier-curation-grid {
+.atelier-curation-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  grid-template-columns: minmax(18rem, 0.95fr) minmax(0, 1.4fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.atelier-story-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
 }
 
 .atelier-category-panel {
-  padding: 2.5rem;
-  background: var(--paper);
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
-  transition: background 0.35s ease;
+  --atelier-card-accent: var(--atelier-accent-sage);
+  --atelier-card-wash: var(--atelier-wash-sage);
+  padding: 2rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, white 10%) 0%, color-mix(in srgb, var(--surface-raised) 82%, var(--atelier-card-wash)) 100%);
+  border-radius: 1.75rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-card-accent) 20%, var(--atelier-line));
+  box-shadow: 0 24px 40px -34px var(--surface-card-shadow-strong), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: background 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
 }
 
 .atelier-category-panel:hover {
-  background: var(--paper-warm);
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 86%, white 14%) 0%, color-mix(in srgb, var(--surface-raised) 86%, var(--atelier-card-wash)) 100%);
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 32%, var(--atelier-line));
 }
 
 .atelier-category-panel h3 {
@@ -4298,6 +4417,7 @@ textarea:focus {
   font-weight: 700;
   letter-spacing: 0.04em;
   margin-top: 0.5rem;
+  color: color-mix(in srgb, var(--ink) 92%, var(--atelier-card-accent));
 }
 
 .atelier-category-list {
@@ -4322,7 +4442,27 @@ textarea:focus {
 .atelier-category-row strong {
   font-family: var(--font-garamond), serif;
   font-size: 1rem;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--atelier-card-accent) 72%, var(--ink));
+}
+
+.atelier-story-grid > :nth-child(4n + 1) {
+  --atelier-card-accent: var(--atelier-accent-copper);
+  --atelier-card-wash: var(--atelier-wash-copper);
+}
+
+.atelier-story-grid > :nth-child(4n + 2) {
+  --atelier-card-accent: var(--atelier-accent-slate);
+  --atelier-card-wash: var(--atelier-wash-slate);
+}
+
+.atelier-story-grid > :nth-child(4n + 3) {
+  --atelier-card-accent: var(--atelier-accent-claret);
+  --atelier-card-wash: var(--atelier-wash-claret);
+}
+
+.atelier-story-grid > :nth-child(4n + 4) {
+  --atelier-card-accent: var(--atelier-accent-sage);
+  --atelier-card-wash: var(--atelier-wash-sage);
 }
 
 .atelier-story-link {
@@ -4331,13 +4471,21 @@ textarea:focus {
   justify-content: space-between;
   gap: 1rem;
   min-height: 100%;
-  padding: 1.35rem;
+  padding: 1.45rem;
   color: inherit;
   text-decoration: none;
+  border-radius: 1.6rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-copper)) 18%, var(--atelier-line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-raised) 82%, var(--atelier-card-wash, var(--atelier-wash-copper))) 100%);
+  box-shadow: 0 20px 38px -32px var(--surface-card-shadow-strong);
+}
+
+.atelier-story-link:hover {
+  border-color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-copper)) 30%, var(--atelier-line));
 }
 
 .atelier-story-category {
-  color: var(--atelier-accent-strong);
+  color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-copper)) 88%, var(--ink));
   font-size: 0.76rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -4368,7 +4516,7 @@ textarea:focus {
 }
 
 .atelier-story-arrow {
-  color: var(--ink-ghost);
+  color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-copper)) 54%, var(--ink-ghost));
   flex-shrink: 0;
   transition: color 0.3s ease, transform 0.3s ease;
   width: auto;
@@ -4379,25 +4527,65 @@ textarea:focus {
 
 /* ── Feed Grid ── */
 .atelier-feed-grid {
+  --atelier-feed-columns: 3;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  grid-template-columns: repeat(var(--atelier-feed-columns), minmax(0, 1fr));
+  gap: 1.25rem;
+  background: transparent;
+  border: none;
   margin-top: 0;
 }
 
-.atelier-feed-card {
-  background: var(--paper);
-  padding: 2.5rem;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  overflow: hidden;
-  transition: background 0.35s ease;
+.atelier-feed-grid.is-single {
+  max-width: 64rem;
+  margin-inline: auto;
 }
 
-.atelier-feed-card:hover { background: var(--paper-warm); }
+.atelier-feed-grid.is-single .atelier-feed-link {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: stretch;
+  gap: 1.3rem;
+}
+
+.atelier-feed-grid.is-single .atelier-feed-thumb {
+  aspect-ratio: auto;
+  min-height: 18rem;
+  height: 100%;
+}
+
+.atelier-feed-card {
+  --atelier-card-accent: var(--atelier-accent-copper);
+  --atelier-card-wash: var(--atelier-wash-copper);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-raised) 84%, var(--atelier-card-wash)) 100%);
+  padding: 1.35rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-card-accent) 18%, var(--atelier-line));
+  box-shadow: 0 24px 40px -34px var(--surface-card-shadow-strong);
+  border-radius: 1.75rem;
+  overflow: hidden;
+  transition: background 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
+}
+
+.atelier-feed-card:nth-child(4n + 2) {
+  --atelier-card-accent: var(--atelier-accent-slate);
+  --atelier-card-wash: var(--atelier-wash-slate);
+}
+
+.atelier-feed-card:nth-child(4n + 3) {
+  --atelier-card-accent: var(--atelier-accent-sage);
+  --atelier-card-wash: var(--atelier-wash-sage);
+}
+
+.atelier-feed-card:nth-child(4n + 4) {
+  --atelier-card-accent: var(--atelier-accent-claret);
+  --atelier-card-wash: var(--atelier-wash-claret);
+}
+
+.atelier-feed-card:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 88%, white 12%) 0%, color-mix(in srgb, var(--surface-raised) 86%, var(--atelier-card-wash)) 100%);
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 30%, var(--atelier-line));
+}
 
 .atelier-feed-card.is-emphasized {
   grid-column: span 2;
@@ -4415,7 +4603,8 @@ textarea:focus {
 .atelier-feed-thumb {
   aspect-ratio: 16/9;
   overflow: hidden;
-  background: var(--paper-deep);
+  background: color-mix(in srgb, var(--paper-deep) 82%, var(--atelier-card-accent));
+  border-radius: 1.1rem;
 }
 
 .atelier-image-shell {
@@ -4465,7 +4654,7 @@ textarea:focus {
   font-family: var(--font-garamond), serif;
   font-size: 0.65rem;
   letter-spacing: 0.18em;
-  color: var(--ink-ghost);
+  color: color-mix(in srgb, var(--atelier-card-accent) 52%, var(--ink-ghost));
   text-transform: uppercase;
 }
 
@@ -4510,12 +4699,18 @@ textarea:focus {
 }
 
 .atelier-feed-card:hover .atelier-feed-cta {
-  color: var(--gold);
+  color: color-mix(in srgb, var(--atelier-card-accent) 82%, var(--ink));
+}
+
+.atelier-feed-card .atelier-pill {
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 28%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 82%, var(--atelier-card-wash));
+  color: color-mix(in srgb, var(--atelier-card-accent) 84%, var(--ink));
 }
 
 .atelier-feed-skeleton {
   min-height: 280px;
-  background: var(--paper-warm);
+  background: color-mix(in srgb, var(--paper-warm) 92%, white 8%);
   animation: paper-pulse 1.8s ease-in-out infinite;
 }
 
@@ -4533,18 +4728,160 @@ textarea:focus {
 /* ── Subscribe Card ── */
 .atelier-subscribe-card {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
   gap: clamp(2rem, 4vw, 4rem);
-  align-items: center;
+  align-items: start;
   padding: clamp(2rem, 4vw, 3.75rem);
-  border: 1px solid var(--line);
-  background: var(--paper-warm);
-  border-radius: 0;
-  box-shadow: none;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-claret) 16%, var(--atelier-line));
+  background:
+    linear-gradient(125deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-raised) 82%, var(--atelier-wash-copper)) 44%, color-mix(in srgb, var(--surface-raised) 82%, var(--atelier-wash-slate)) 100%);
+  border-radius: 2rem;
+  box-shadow: 0 28px 56px -40px var(--surface-card-shadow-strong);
+  overflow: hidden;
+  position: relative;
+}
+
+.atelier-subscribe-card::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 28%);
+}
+
+.atelier-subscribe-copy,
+.atelier-subscribe-form {
+  position: relative;
+  z-index: 1;
 }
 
 .atelier-subscribe-form {
   align-self: center;
+  padding: 1.2rem;
+  border-radius: 1.6rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-slate) 16%, var(--atelier-line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, white 10%) 0%, color-mix(in srgb, var(--surface-glass) 84%, var(--atelier-wash-slate)) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.atelier-subscribe-form .editorial-subscribe-panel {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.atelier-subscribe-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.atelier-subscribe-benefits span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-copper) 24%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 84%, var(--atelier-wash-copper));
+  font-family: var(--font-garamond), serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--atelier-accent-copper) 82%, var(--ink));
+}
+
+.atelier-subscribe-benefits span:nth-child(2) {
+  border-color: color-mix(in srgb, var(--atelier-accent-slate) 24%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 84%, var(--atelier-wash-slate));
+  color: color-mix(in srgb, var(--atelier-accent-slate) 82%, var(--ink));
+}
+
+.atelier-subscribe-benefits span:nth-child(3) {
+  border-color: color-mix(in srgb, var(--atelier-accent-sage) 24%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 84%, var(--atelier-wash-sage));
+  color: color-mix(in srgb, var(--atelier-accent-sage) 82%, var(--ink));
+}
+
+.atelier-note-card {
+  --atelier-card-accent: var(--atelier-accent-copper);
+  --atelier-card-wash: var(--atelier-wash-copper);
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  padding: 1.7rem;
+  border-radius: 1.75rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-card-accent) 18%, var(--atelier-line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-raised) 84%, var(--atelier-card-wash)) 100%);
+  box-shadow: 0 24px 40px -34px var(--surface-card-shadow-strong);
+  transition: transform 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+}
+
+.atelier-note-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 30%, var(--atelier-line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 88%, white 12%) 0%, color-mix(in srgb, var(--surface-raised) 88%, var(--atelier-card-wash)) 100%);
+}
+
+.atelier-note-card h3 {
+  margin-top: 0.5rem;
+  font-family: var(--font-mincho), serif;
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.atelier-note-description {
+  margin-top: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: var(--ink-muted);
+}
+
+.atelier-note-list {
+  margin-top: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--line-light);
+}
+
+.atelier-note-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.atelier-note-row span {
+  font-size: 0.78rem;
+  color: var(--ink-ghost);
+  letter-spacing: 0.08em;
+}
+
+.atelier-note-row strong {
+  font-family: var(--font-garamond), serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--atelier-card-accent) 82%, var(--ink));
+  text-transform: uppercase;
+}
+
+.atelier-note-link {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-top: 1.15rem;
+  font-family: var(--font-garamond), serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--atelier-card-accent) 84%, var(--ink));
+  text-decoration: none;
 }
 
 .journal-page {
@@ -4854,7 +5191,7 @@ textarea:focus {
 @media (max-width: 1100px) {
   .atelier-hero-grid,
   .atelier-section-head,
-  .atelier-curation-grid,
+  .atelier-curation-layout,
   .journal-hero-grid,
   .journal-layout,
   .journal-spotlight-grid,
@@ -4862,6 +5199,7 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .atelier-story-grid,
   .atelier-feed-grid,
   .journal-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4899,6 +5237,7 @@ textarea:focus {
   }
 
   .atelier-metrics,
+  .atelier-story-grid,
   .atelier-feed-grid,
   .journal-card-grid {
     grid-template-columns: 1fr;
@@ -4920,16 +5259,24 @@ textarea:focus {
     flex-direction: column;
   }
 
-  .atelier-curation-grid {
-    gap: 0;
-  }
-
   .atelier-feature-body {
     padding: 1.25rem;
   }
 
   .atelier-subscribe-card {
     padding: 2rem 1.25rem;
+  }
+
+  .atelier-feed-grid.is-single {
+    max-width: none;
+  }
+
+  .atelier-feed-grid.is-single .atelier-feed-link {
+    grid-template-columns: 1fr;
+  }
+
+  .atelier-feed-grid.is-single .atelier-feed-thumb {
+    min-height: 12rem;
   }
 }
 
@@ -4941,45 +5288,95 @@ textarea:focus {
 
 /* ── Dark Mode Overrides ── */
 .dark .atelier-home {
-  --atelier-paper: var(--paper);
-  --atelier-paper-strong: var(--paper-warm);
+  --atelier-paper: #171312;
+  --atelier-paper-strong: #211a18;
   --atelier-ink: var(--ink);
-  --atelier-soft: var(--ink-secondary);
-  --atelier-line: var(--line);
+  --atelier-soft: #c6b8ad;
+  --atelier-line: rgba(244, 233, 223, 0.1);
   --atelier-accent: var(--gold);
   --atelier-accent-strong: var(--gold);
-  background: var(--paper);
+  --atelier-accent-copper: #d1a07c;
+  --atelier-accent-sage: #97aa8a;
+  --atelier-accent-slate: #94a8bb;
+  --atelier-accent-claret: #c19488;
+  --atelier-wash-copper: rgba(168, 107, 72, 0.18);
+  --atelier-wash-sage: rgba(115, 138, 102, 0.15);
+  --atelier-wash-slate: rgba(99, 126, 154, 0.16);
+  --atelier-wash-claret: rgba(139, 97, 93, 0.14);
+  --atelier-cloud: #231c19;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(169, 110, 75, 0.2) 0%, transparent 26%),
+    radial-gradient(circle at 100% 8%, rgba(89, 112, 136, 0.2) 0%, transparent 28%),
+    radial-gradient(circle at 12% 72%, rgba(92, 112, 85, 0.15) 0%, transparent 24%),
+    linear-gradient(180deg, #141110 0%, #1a1514 38%, #15191d 100%);
 }
 
-.dark .atelier-curation-grid,
-.dark .atelier-feed-grid {
-  background: var(--line);
+.dark .atelier-home::before {
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 18%, transparent 34%, rgba(106, 132, 158, 0.08) 58%, transparent 74%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%);
+  opacity: 0.82;
+}
+
+.dark .atelier-home::after {
+  background:
+    radial-gradient(circle at 82% 88%, rgba(86, 110, 135, 0.18), transparent 24%),
+    radial-gradient(circle at 22% 34%, rgba(150, 103, 71, 0.16), transparent 28%);
+  mix-blend-mode: screen;
+  opacity: 0.32;
+}
+
+.dark .atelier-hero-copy {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, rgba(255, 255, 255, 0.02)) 0%, color-mix(in srgb, var(--surface-overlay) 82%, var(--atelier-wash-copper)) 100%);
 }
 
 .dark .atelier-category-panel,
-.dark .atelier-story-card,
+.dark .atelier-story-link,
+.dark .atelier-note-card,
 .dark .atelier-feed-card {
-  background: var(--paper) !important;
-  border: none !important;
-  box-shadow: none !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, rgba(255, 255, 255, 0.02)) 0%, color-mix(in srgb, var(--surface-overlay) 84%, var(--atelier-card-wash, var(--atelier-wash-copper))) 100%) !important;
+  border-color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-copper)) 18%, var(--atelier-line)) !important;
+  box-shadow: 0 28px 52px -38px var(--surface-card-shadow-strong) !important;
 }
 
 .dark .atelier-category-panel:hover,
-.dark .atelier-story-card:hover,
+.dark .atelier-story-link:hover,
+.dark .atelier-note-card:hover,
 .dark .atelier-feed-card:hover {
-  background: var(--paper-warm) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, rgba(255, 255, 255, 0.04)) 0%, color-mix(in srgb, var(--surface-overlay) 88%, var(--atelier-card-wash, var(--atelier-wash-copper))) 100%) !important;
 }
 
 .dark .atelier-subscribe-card {
-  background: var(--paper-warm) !important;
-  border-color: var(--line) !important;
-  box-shadow: none !important;
+  background:
+    linear-gradient(125deg, color-mix(in srgb, var(--surface-panel) 92%, rgba(255, 255, 255, 0.03)) 0%, color-mix(in srgb, var(--surface-overlay) 84%, var(--atelier-wash-copper)) 44%, color-mix(in srgb, var(--surface-overlay) 84%, var(--atelier-wash-slate)) 100%) !important;
+  border-color: color-mix(in srgb, var(--atelier-accent-claret) 18%, var(--atelier-line)) !important;
+  box-shadow: 0 32px 60px -40px var(--surface-card-shadow-strong) !important;
+}
+
+.dark .atelier-subscribe-form {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, rgba(255, 255, 255, 0.03)) 0%, color-mix(in srgb, var(--surface-overlay) 80%, var(--atelier-wash-slate)) 100%);
+  border-color: color-mix(in srgb, var(--atelier-accent-slate) 16%, var(--atelier-line));
+}
+
+.dark .atelier-icon-button,
+.dark .atelier-ghost-button,
+.dark .atelier-secondary-button {
+  color: var(--ink);
 }
 
 .dark .atelier-pill {
-  background: transparent;
-  border-color: var(--line);
-  color: var(--ink-muted);
+  background: color-mix(in srgb, var(--surface-panel) 68%, var(--atelier-card-wash, var(--atelier-wash-slate)));
+  border-color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-slate)) 22%, var(--atelier-line));
+  color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-slate)) 74%, var(--ink));
+}
+
+.dark .atelier-primary-button {
+  color: #241c18;
+}
+
+.dark .atelier-category-panel h3 {
+  color: color-mix(in srgb, var(--ink) 92%, var(--atelier-accent-sage));
 }
 
 .dark .editorial-subscribe-success {

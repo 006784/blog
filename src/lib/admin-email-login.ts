@@ -1,10 +1,5 @@
 import { randomInt } from 'crypto';
 import { Resend } from 'resend';
-import { logger } from '@/lib/logger';
-import { defaultProfile, normalizeProfile } from '@/lib/profile';
-import { supabaseAdmin } from '@/lib/supabase';
-
-const PROFILE_KEY = 'profile';
 const LOGIN_CODE_TTL_MINUTES = 10;
 
 export function normalizeAdminEmail(email: string): string {
@@ -40,29 +35,7 @@ function collectConfiguredAdminEmails(): string[] {
 }
 
 export async function getAdminLoginEmails(): Promise<string[]> {
-  const normalized = new Set<string>(collectConfiguredAdminEmails());
-
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('site_settings')
-      .select('value')
-      .eq('key', PROFILE_KEY)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    const profile = normalizeProfile(data?.value ?? defaultProfile);
-    if (profile.email) {
-      normalized.add(normalizeAdminEmail(profile.email));
-    }
-  } catch (error) {
-    logger.error('读取管理员邮箱失败', {
-      module: 'auth',
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-  return Array.from(normalized);
+  return collectConfiguredAdminEmails();
 }
 
 export async function getAdminLoginEmail(): Promise<string | null> {
