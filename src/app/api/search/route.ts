@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ results, query: q });
   } catch (error) {
-    console.error('Search error:', error);
+    logger.error('Search error:', error);
     return NextResponse.json({ results: [], query: q }, { status: 500 });
   }
 }

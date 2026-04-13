@@ -191,15 +191,16 @@ html {
 body {
   background:
     radial-gradient(circle at 10% 8%, color-mix(in srgb, var(--color-accent-peach) 44%, transparent), transparent 32%),
-    radial-gradient(circle at 82% 10%, color-mix(in srgb, var(--color-accent-lilac) 34%, transparent), transparent 28%),
-    radial-gradient(circle at 88% 88%, color-mix(in srgb, var(--color-accent-mint) 24%, transparent), transparent 26%),
+    radial-gradient(circle at 82% 10%, rgba(116, 132, 107, 0.16), transparent 28%),
+    radial-gradient(circle at 88% 88%, rgba(195, 135, 98, 0.10), transparent 26%),
     linear-gradient(180deg, color-mix(in srgb, white 82%, var(--paper)) 0%, var(--paper) 38%, var(--paper-warm) 100%);
   color: var(--ink);
   font-family: var(--font-jp-serif), 'Noto Serif SC', 'Hiragino Mincho Pro', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  line-height: 1.6;
+  line-height: 1.6; /* UI 组件默认行高 */
+  /* 文章正文单独在 .article-content 设置更大行高以优化阅读 */
   /* 防止 iOS 旋转时字号自动放大 */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -356,18 +357,19 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em; /* 收紧大标题间距 */
 }
 
 h2 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 600;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.015em; /* 中等标题轻微收紧 */
 }
 
 h3 {
   font-size: clamp(1.25rem, 3vw, 1.75rem);
   font-weight: 600;
+  letter-spacing: 0.005em; /* 小标题 nearly neutral */
 }
 
 /* 段落优化 */
@@ -635,103 +637,226 @@ textarea:focus {
 }
 
 
-/* Prose styles for blog content */
+/* ─────────── 文章内容排版系统 ─────────── */
+.article-content,
 .prose {
   max-width: 65ch;
   color: var(--foreground);
+  font-size: 1.0625rem; /* 略大于正文便于阅读 */
+  line-height: 1.9; /* 中文阅读适合更大行高 */
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  color: var(--foreground);
+.article-content h1,
+.prose h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 2.5em;
+  margin-bottom: 0.75em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.2;
+}
+
+.article-content h2,
+.prose h2 {
+  font-size: 1.375rem;
   font-weight: 600;
+  margin-top: 2.25em;
+  margin-bottom: 0.6em;
+  padding-left: 0.75em;
+  border-left: 3px solid var(--primary);
   line-height: 1.3;
-  margin-top: 2em;
-  margin-bottom: 0.5em;
 }
 
-.prose h1 { font-size: 2.25rem; }
-.prose h2 { font-size: 1.875rem; }
-.prose h3 { font-size: 1.5rem; }
+.article-content h3,
+.prose h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
 
+.article-content h4,
+.prose h4,
+.article-content h5,
+.prose h5,
+.article-content h6,
+.prose h6 {
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.4em;
+  line-height: 1.4;
+}
+
+.article-content p,
 .prose p {
   margin-bottom: 1.25em;
-  line-height: 1.8;
+  margin-top: 0;
 }
 
+.article-content a,
 .prose a {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 2px;
-  transition: all 0.2s ease;
+  transition: color 0.1s ease; /* 快速响应 */
 }
 
+.article-content a:hover,
 .prose a:hover {
-  text-decoration-color: var(--gradient-end);
+  color: var(--gradient-end);
 }
 
+/* ─────────── 代码块样式（服务端高亮兼容） ─────────── */
+.article-content code,
 .prose code {
+  padding: 0.2em 0.45em;
+  border-radius: 6px;
   background: var(--secondary);
-  padding: 0.25em 0.5em;
-  border-radius: 8px;
-  font-size: 0.875em;
+  border: 1px solid var(--border);
+  font-size: 0.88em;
   font-family: var(--font-mono);
-  border: 1px solid var(--border);
+  color: var(--primary);
+  transition: all 0.1s ease;
 }
 
+.dark .article-content code,
+.dark .prose code {
+  color: var(--color-primary-500);
+}
+
+/* 代码块容器 */
+.article-content pre,
 .prose pre {
-  background: var(--secondary);
-  padding: 1.5em;
-  border-radius: 16px;
-  overflow-x: auto;
-  margin: 1.5em 0;
-  border: 1px solid var(--border);
   position: relative;
+  margin: 1.5em 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  font-size: 0.875em;
+  line-height: 1.7;
+  background: var(--secondary);
 }
 
+.article-content pre code,
 .prose pre code {
   background: transparent;
-  padding: 0;
+  padding: 1.25rem 1.5rem;
   border: none;
   font-size: 0.9em;
-  line-height: 1.7;
+  display: block;
+  overflow-x: auto;
 }
 
-/* 代码块容器样式 */
+/* 代码块顶部语言标签 */
+.article-pre::before,
+.article-content pre::before,
+.prose pre::before {
+  content: attr(data-lang);
+  display: block;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--ink-muted);
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* 代码块容器包装 */
+.article-content div:has(> pre),
 .prose div:has(> pre) {
   position: relative;
   margin: 1.5em 0;
 }
 
+.article-content div:has(> pre) pre,
 .prose div:has(> pre) pre {
   margin: 0;
 }
 
+/* 引用块 */
+.article-content blockquote,
 .prose blockquote {
-  border-left: 4px solid var(--primary);
-  padding-left: 1.25em;
   margin: 1.5em 0;
-  color: var(--muted-foreground);
-  font-style: italic;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--primary);
   background: var(--secondary);
-  padding: 1em 1.25em;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--muted-foreground);
 }
 
-.prose ul, .prose ol {
+/* 列表 */
+.article-content ul,
+.article-content ol,
+.prose ul,
+.prose ol {
   margin: 1em 0;
   padding-left: 1.5em;
 }
 
+.article-content li,
 .prose li {
   margin: 0.5em 0;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
+/* 嵌套列表 */
+.article-content li > ul,
+.article-content li > ol,
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.4em;
+  margin-bottom: 0;
+}
+
+/* 图片 */
+.article-content img,
 .prose img {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   margin: 2em 0;
+  max-width: 100%;
+  height: auto;
   box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.2);
+}
+
+/* 表格 */
+.article-content table,
+.prose table {
+  margin: 1.5em 0;
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.article-content th,
+.prose th {
+  background: var(--secondary);
+  padding: 0.75em 1em;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+}
+
+.article-content td,
+.prose td {
+  padding: 0.75em 1em;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 分割线 */
+.article-content hr,
+.prose hr {
+  margin: 2.5em 0;
+  border: none;
+  border-top: 1px solid var(--border);
 }
 
 /* Animation keyframes */
@@ -923,7 +1048,7 @@ textarea:focus {
   font-weight: 600;
   background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
   color: white;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.1s cubic-bezier(0.34, 1.56, 0.64, 1); /* 优化响应感 */
   box-shadow: 0 4px 15px -3px var(--surface-button-shadow);
 }
 
@@ -1248,7 +1373,7 @@ textarea:focus {
   pointer-events: none;
   transform: translate(-50%, -50%);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.1s ease; /* 快速淡入淡出 */
 }
 
 .cursor-glow:hover::before {
@@ -3785,7 +3910,7 @@ textarea:focus {
   color: var(--ink);
   background:
     radial-gradient(circle at 0% 0%, var(--atelier-wash-copper) 0%, transparent 26%),
-    radial-gradient(circle at 100% 10%, var(--atelier-wash-slate) 0%, transparent 28%),
+    radial-gradient(circle at 100% 10%, var(--atelier-wash-claret) 0%, transparent 28%),
     radial-gradient(circle at 16% 76%, var(--atelier-wash-sage) 0%, transparent 22%),
     linear-gradient(
       180deg,
@@ -3850,7 +3975,7 @@ textarea:focus {
 
 .dark .atelier-nav {
   background:
-    linear-gradient(90deg, rgba(22, 18, 18, 0.9) 0%, rgba(28, 22, 21, 0.92) 45%, rgba(24, 27, 31, 0.9) 100%);
+    linear-gradient(90deg, rgba(22, 18, 17, 0.9) 0%, rgba(28, 22, 20, 0.92) 45%, rgba(26, 21, 18, 0.9) 100%);
 }
 
 .atelier-nav-row {
@@ -4182,7 +4307,7 @@ textarea:focus {
 
 .atelier-feature-wrap {
   position: relative;
-  background: linear-gradient(145deg, #201916 0%, #171618 46%, #1e2429 100%);
+  background: linear-gradient(145deg, #201916 0%, #171614 46%, #1c1814 100%);
   overflow: hidden;
 }
 
@@ -4191,8 +4316,8 @@ textarea:focus {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 14% 20%, rgba(116, 141, 160, 0.28), transparent 28%),
-    radial-gradient(circle at 84% 86%, rgba(194, 137, 98, 0.2), transparent 24%);
+    radial-gradient(circle at 14% 20%, rgba(195, 135, 98, 0.16), transparent 28%),
+    radial-gradient(circle at 84% 86%, rgba(194, 137, 98, 0.18), transparent 24%);
   pointer-events: none;
 }
 
@@ -4231,8 +4356,8 @@ textarea:focus {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(16, 16, 18, 0.05) 8%, rgba(17, 17, 20, 0.18) 36%, rgba(17, 18, 22, 0.78) 100%),
-    linear-gradient(135deg, transparent 44%, rgba(112, 134, 154, 0.18) 100%);
+    linear-gradient(180deg, rgba(16, 14, 12, 0.05) 8%, rgba(18, 15, 13, 0.18) 36%, rgba(20, 16, 14, 0.78) 100%),
+    linear-gradient(135deg, transparent 44%, rgba(116, 132, 107, 0.14) 100%);
 }
 
 .atelier-pill {
@@ -4333,15 +4458,15 @@ textarea:focus {
 
 .atelier-feed-section {
   padding: clamp(2.5rem, 5vw, 4rem) 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-slate) 16%);
-  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--atelier-paper) 90%, var(--atelier-wash-slate)) 100%);
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-claret) 16%);
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--atelier-paper) 90%, var(--atelier-wash-claret)) 100%);
 }
 
 .atelier-subscribe-section {
   padding: clamp(3rem, 6vw, 5rem) 0;
   background:
     radial-gradient(circle at 10% 50%, rgba(194, 137, 98, 0.12), transparent 26%),
-    radial-gradient(circle at 86% 20%, rgba(112, 134, 154, 0.12), transparent 22%);
+    radial-gradient(circle at 86% 20%, rgba(116, 132, 107, 0.10), transparent 22%);
 }
 
 .atelier-section-head {
@@ -4899,8 +5024,8 @@ textarea:focus {
 .journal-hero.surface-hero {
   border-radius: 2rem !important;
   background:
-    radial-gradient(420px circle at 90% 10%, rgba(79, 152, 176, 0.16), transparent 44%),
-    radial-gradient(360px circle at 10% 100%, rgba(223, 138, 78, 0.18), transparent 44%),
+    radial-gradient(420px circle at 90% 10%, rgba(195, 135, 98, 0.14), transparent 44%),
+    radial-gradient(360px circle at 10% 100%, rgba(116, 132, 107, 0.12), transparent 44%),
     linear-gradient(180deg, rgba(255, 251, 244, 0.94) 0%, rgba(255, 246, 235, 0.82) 100%) !important;
 }
 
@@ -5306,21 +5431,21 @@ textarea:focus {
   --atelier-cloud: #231c19;
   background:
     radial-gradient(circle at 0% 0%, rgba(169, 110, 75, 0.2) 0%, transparent 26%),
-    radial-gradient(circle at 100% 8%, rgba(89, 112, 136, 0.2) 0%, transparent 28%),
-    radial-gradient(circle at 12% 72%, rgba(92, 112, 85, 0.15) 0%, transparent 24%),
-    linear-gradient(180deg, #141110 0%, #1a1514 38%, #15191d 100%);
+    radial-gradient(circle at 100% 8%, rgba(154, 108, 98, 0.14) 0%, transparent 28%),
+    radial-gradient(circle at 12% 72%, rgba(92, 112, 85, 0.13) 0%, transparent 24%),
+    linear-gradient(180deg, #141110 0%, #1a1514 38%, #1a1512 100%);
 }
 
 .dark .atelier-home::before {
   background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 18%, transparent 34%, rgba(106, 132, 158, 0.08) 58%, transparent 74%),
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 18%, transparent 34%, rgba(195, 135, 98, 0.06) 58%, transparent 74%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%);
   opacity: 0.82;
 }
 
 .dark .atelier-home::after {
   background:
-    radial-gradient(circle at 82% 88%, rgba(86, 110, 135, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 88%, rgba(154, 108, 98, 0.16), transparent 24%),
     radial-gradient(circle at 22% 34%, rgba(150, 103, 71, 0.16), transparent 28%);
   mix-blend-mode: screen;
   opacity: 0.32;
@@ -5591,7 +5716,7 @@ textarea:focus {
 .surface-hero {
   background:
     radial-gradient(circle at 16% 12%, color-mix(in srgb, var(--color-accent-peach) 28%, transparent), transparent 34%),
-    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--color-accent-lilac) 20%, transparent), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(116, 132, 107, 0.14), transparent 28%),
     linear-gradient(180deg, color-mix(in srgb, white 88%, var(--paper)) 0%, color-mix(in srgb, var(--paper-warm) 92%, white) 100%) !important;
   border-radius: 2rem !important;
   box-shadow:
@@ -5614,8 +5739,8 @@ textarea:focus {
 
 .dark .surface-hero {
   background:
-    radial-gradient(circle at 16% 12%, color-mix(in srgb, var(--color-accent-peach) 16%, transparent), transparent 34%),
-    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--color-accent-lilac) 16%, transparent), transparent 28%),
+    radial-gradient(circle at 16% 12%, color-mix(in srgb, var(--color-accent-peach) 14%, transparent), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgba(116, 132, 107, 0.10), transparent 28%),
     linear-gradient(180deg, color-mix(in srgb, var(--paper-warm) 96%, white 4%) 0%, var(--paper-warm) 100%) !important;
 }
 
@@ -5776,6 +5901,13 @@ textarea:focus {
   border-color: var(--line) !important;
 }
 
+/* ── Blog Post Page: article h1 typography ── */
+.site-main header h1 {
+  font-family: var(--font-mincho), 'Noto Serif SC', serif !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.25 !important;
+}
+
 /* ── Blog Post Page: flatten all rounded containers ── */
 .site-main header.rounded-3xl,
 .site-main header.rounded-2xl,
@@ -5870,6 +6002,9 @@ textarea:focus {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.72) inset,
     0 24px 46px -34px rgba(53, 34, 18, 0.28);
+  transition:
+    transform 0.32s var(--ease-default, cubic-bezier(0.25, 0.1, 0.25, 1)),
+    box-shadow 0.32s var(--ease-default, cubic-bezier(0.25, 0.1, 0.25, 1));
 }
 
 .dark .ground-news-card {
@@ -6084,7 +6219,7 @@ textarea:focus {
 
 .ground-news-card-footer-cell.is-primary {
   color: #ffffff;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--blog-card-accent) 86%, #1d4ed8) 0%, var(--blog-card-accent) 100%);
+  background: linear-gradient(90deg, var(--blog-card-accent-deep) 0%, var(--blog-card-accent) 100%);
 }
 
 .ground-news-card-footer-cell.is-secondary {
@@ -6136,15 +6271,17 @@ textarea:focus {
 }
 
 .ground-news-card:hover {
+  transform: translateY(-5px);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--blog-card-accent) 18%, white) inset,
-    0 30px 54px -34px rgba(53, 34, 18, 0.34);
+    0 36px 64px -34px rgba(53, 34, 18, 0.38);
 }
 
 .dark .ground-news-card:hover {
+  transform: translateY(-5px);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-    0 30px 54px -34px rgba(0, 0, 0, 0.68);
+    0 36px 64px -34px rgba(0, 0, 0, 0.72);
 }
 
 @media (max-width: 1100px) {

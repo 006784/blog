@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
 import { requireAdminSession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       type: file.type,
     });
   } catch (error) {
-    console.error('Upload error:', error);
+    logger.error('Upload error:', error);
     return NextResponse.json({ success: false, error: '上传失败' }, { status: 500 });
   }
 }
@@ -143,7 +144,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete error:', error);
+    logger.error('Delete error:', error);
     return NextResponse.json({ success: false, error: '删除失败' }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { requireAdminSession } from '@/lib/auth-server';
 import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
         ContentType: file.type,
       }));
     } catch (uploadError) {
-      console.error('R2 upload error:', uploadError);
+      logger.error('R2 upload error:', uploadError);
       return NextResponse.json({ success: false, error: '文件上传到R2失败' }, { status: 500 });
     }
 
@@ -173,15 +174,15 @@ export async function POST(request: NextRequest) {
       try {
         await R2.send(new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: filePath }));
       } catch (e) {
-        console.error('Failed to rollback R2 file:', e);
+        logger.error('Failed to rollback R2 file:', e);
       }
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json({ success: false, error: '保存资源信息失败' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, resource });
   } catch (error) {
-    console.error('Upload error:', error);
+    logger.error('Upload error:', error);
     return NextResponse.json({ success: false, error: '服务器内部错误' }, { status: 500 });
   }
 }
@@ -212,13 +213,13 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Query error:', error);
+      logger.error('Query error:', error);
       return NextResponse.json({ resources: [], error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ resources: data || [], total: count || 0, page, limit });
   } catch (error) {
-    console.error('GET error:', error);
+    logger.error('GET error:', error);
     return NextResponse.json({ resources: [], error: '获取资源列表失败' }, { status: 500 });
   }
 }
@@ -252,7 +253,7 @@ export async function DELETE(request: NextRequest) {
       try {
         await R2.send(new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: urlParts }));
       } catch (e) {
-        console.error('Failed to delete R2 file:', e);
+        logger.error('Failed to delete R2 file:', e);
       }
     }
 
@@ -263,13 +264,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Delete error:', deleteError);
+      logger.error('Delete error:', deleteError);
       return NextResponse.json({ success: false, error: '删除失败' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete error:', error);
+    logger.error('Delete error:', error);
     return NextResponse.json({ success: false, error: '服务器内部错误' }, { status: 500 });
   }
 }

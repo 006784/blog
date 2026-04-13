@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendNewPostNotification } from '@/lib/email';
 import { requireAdminSession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true);
 
     if (subError) {
-      console.error('获取订阅者失败:', subError);
+      logger.error('获取订阅者失败:', subError);
       return NextResponse.json({ error: '获取订阅者列表失败' }, { status: 500 });
     }
 
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
       }]);
     } catch (err) {
-      console.error('记录推送日志失败:', err);
+      logger.error('记录推送日志失败:', err);
     }
 
     return NextResponse.json({
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       ...result,
     });
   } catch (error) {
-    console.error('发送通知失败:', error);
+    logger.error('发送通知失败:', error);
     return NextResponse.json({ error: '发送通知失败' }, { status: 500 });
   }
 }

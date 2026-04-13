@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { parseBody, ok, err, z } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
   }]);
 
   if (error) {
-    console.error('Supabase error:', error);
+    logger.error('Supabase error:', error);
     return err('保存消息失败，请稍后重试', 500);
   }
 

@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { requireAdminSession } from '@/lib/auth-server';
 import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
       category: category,
     });
   } catch (error) {
-    console.error('Presign error:', error);
+    logger.error('Presign error:', error);
     return NextResponse.json({ success: false, error: '生成上传链接失败' }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
     if (err instanceof Error && err.name === 'AbortError') {
       return NextResponse.json({ error: '执行超时（15秒）', stdout: '', stderr: '执行超时', code: -1 }, { status: 200 });
     }
-    console.error('Piston error:', err);
+    logger.error('Piston error:', err);
     return NextResponse.json({ error: '执行失败，请稍后重试' }, { status: 500 });
   }
 }

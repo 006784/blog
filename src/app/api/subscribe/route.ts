@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendSubscriptionConfirmation } from '@/lib/email';
 import { ok, err } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export const revalidate = 0;
 async function verifyTurnstile(token: string): Promise<boolean> {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
   if (!secretKey) {
-    console.warn('Turnstile secret key not configured, skipping verification');
+    logger.warn('Turnstile secret key not configured, skipping verification');
     return true; // 未配置则跳过验证
   }
 
@@ -28,7 +29,7 @@ async function verifyTurnstile(token: string): Promise<boolean> {
     const data = await res.json();
     return data.success === true;
   } catch (error) {
-    console.error('Turnstile verification failed:', error);
+    logger.error('Turnstile verification failed:', error);
     return false;
   }
 }
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
         .eq('email', email);
 
       if (error) {
-        console.error('Supabase error:', error);
+        logger.error('Supabase error:', error);
         return err('订阅失败，请稍后重试', 500);
       }
       isReactivated = true;
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
         }]);
 
       if (error) {
-        console.error('Supabase error:', error);
+        logger.error('Supabase error:', error);
         return err('订阅失败，请稍后重试', 500);
       }
       isNewSubscriber = true;
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
 
         await sendSubscriptionConfirmation(email, undefined, posts ?? []);
       } catch (emailError) {
-        console.error('发送订阅确认邮件失败:', emailError);
+        logger.error('发送订阅确认邮件失败:', emailError);
         // 邮件发送失败不影响订阅成功
       }
     }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       emailSent: !!process.env.RESEND_API_KEY,
     });
   } catch (error) {
-    console.error('Subscribe API error:', error);
+    logger.error('Subscribe API error:', error);
     return err('服务器错误，请稍后重试', 500);
   }
 }
@@ -135,13 +136,13 @@ export async function DELETE(request: NextRequest) {
       .eq('email', email);
 
     if (error) {
-      console.error('Supabase error:', error);
+      logger.error('Supabase error:', error);
       return err('取消订阅失败', 500);
     }
 
     return ok({ message: '已取消订阅' });
   } catch (error) {
-    console.error('Unsubscribe API error:', error);
+    logger.error('Unsubscribe API error:', error);
     return err('服务器错误', 500);
   }
 }

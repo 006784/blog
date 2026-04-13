@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdminSession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -56,13 +57,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json({ success: false, error: '保存资源信息失败' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, resource });
   } catch (error) {
-    console.error('Save error:', error);
+    logger.error('Save error:', error);
     return NextResponse.json({ success: false, error: '服务器内部错误' }, { status: 500 });
   }
 }

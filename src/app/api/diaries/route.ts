@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { Diary } from '@/lib/supabase';
 import { requireAdminSession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('获取日记列表失败:', error);
+    logger.error('获取日记列表失败:', error);
     return Response.json(
       { success: false, error: '获取日记列表失败' },
       { status: 500 }
@@ -185,7 +186,7 @@ export async function POST(request: NextRequest) {
       data: data as Diary,
     });
   } catch (error) {
-    console.error('创建日记失败:', error);
+    logger.error('创建日记失败:', error);
     return Response.json(
       { success: false, error: '创建日记失败' },
       { status: 500 }

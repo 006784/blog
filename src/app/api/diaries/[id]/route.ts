@@ -53,7 +53,7 @@ export async function GET(
       data: data as Diary,
     });
   } catch (error) {
-    console.error('获取日记详情失败:', error);
+    logger.error('获取日记详情失败:', error);
     return Response.json(
       { success: false, error: '获取日记详情失败' },
       { status: 500 }
@@ -158,7 +158,7 @@ export async function PUT(
       data: data as Diary,
     });
   } catch (error) {
-    console.error('更新日记失败:', error);
+    logger.error('更新日记失败:', error);
     return Response.json(
       { success: false, error: '更新日记失败' },
       { status: 500 }
@@ -198,7 +198,7 @@ export async function DELETE(
       message: '日记删除成功',
     });
   } catch (error) {
-    console.error('删除日记失败:', error);
+    logger.error('删除日记失败:', error);
     return Response.json(
       { success: false, error: '删除日记失败' },
       { status: 500 }

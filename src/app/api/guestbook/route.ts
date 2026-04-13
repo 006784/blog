@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
     
     if (error) {
-      console.error('Query error:', error);
+      logger.error('Query error:', error);
       return NextResponse.json({ messages: [], error: error.message }, { status: 500 });
     }
     
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ messages: safeData || [], total: count || 0, page, limit });
   } catch (error) {
-    console.error('GET error:', error);
+    logger.error('GET error:', error);
     return NextResponse.json({ messages: [], error: '服务器错误' }, { status: 500 });
   }
 }
@@ -108,13 +108,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Insert error:', error);
+      logger.error('Insert error:', error);
       return err('发布失败', 500);
     }
 
     return ok(data, 201);
   } catch (error) {
-    console.error('POST error:', error);
+    logger.error('POST error:', error);
     return err('服务器错误', 500);
   }
 }
@@ -149,14 +149,14 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Update error:', error);
+      logger.error('Update error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
     logger.info('留言管理操作成功', { module: 'guestbook', action: 'put', id, fields: Object.keys(updateData) });
     return NextResponse.json({ success: true, message: data });
   } catch (error) {
-    console.error('PUT error:', error);
+    logger.error('PUT error:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }
@@ -181,14 +181,14 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Delete error:', error);
+      logger.error('Delete error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
     logger.info('留言删除成功', { module: 'guestbook', action: 'delete', id });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('DELETE error:', error);
+    logger.error('DELETE error:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

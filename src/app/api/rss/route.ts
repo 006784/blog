@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
@@ -61,7 +62,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('RSS generation error:', error);
+    logger.error('RSS generation error:', error);
     return new Response('Error generating RSS feed', { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminSession } from '@/lib/auth-server';
 import { supabase } from '@/lib/supabase';
 import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true, visitorId });
   } catch (error) {
-    console.error('Track error:', error);
+    logger.error('Track error:', error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
@@ -217,7 +218,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ success: false, error: '未知类型' }, { status: 400 });
   } catch (error) {
-    console.error('Stats error:', error);
+    logger.error('Stats error:', error);
     return NextResponse.json({ success: false, error: '获取统计失败' }, { status: 500 });
   }
 }

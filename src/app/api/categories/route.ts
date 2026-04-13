@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdminSession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 
 // 配置静态导出
@@ -22,7 +23,7 @@ export async function GET() {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      console.error('Query error:', error);
+      logger.error('Query error:', error);
       return NextResponse.json({ categories: [], error: error.message }, { status: 500 });
     }
 
@@ -31,7 +32,7 @@ export async function GET() {
       { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
     );
   } catch (error) {
-    console.error('GET error:', error);
+    logger.error('GET error:', error);
     return NextResponse.json({ categories: [], error: '服务器错误' }, { status: 500 });
   }
 }
@@ -78,13 +79,13 @@ export async function POST(request: NextRequest) {
       if (error.code === '23505') {
         return NextResponse.json({ success: false, error: '分类名称或标识符已存在' }, { status: 400 });
       }
-      console.error('Insert error:', error);
+      logger.error('Insert error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, category: data });
   } catch (error) {
-    console.error('POST error:', error);
+    logger.error('POST error:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }
@@ -123,13 +124,13 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Update error:', error);
+      logger.error('Update error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, category: data });
   } catch (error) {
-    console.error('PUT error:', error);
+    logger.error('PUT error:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }
@@ -165,13 +166,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Delete error:', error);
+      logger.error('Delete error:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('DELETE error:', error);
+    logger.error('DELETE error:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

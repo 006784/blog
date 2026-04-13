@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { parseBody, ok, err, z } from '@/lib/api';
 import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
       return ok({ action: 'added', visitorId });
     }
   } catch (error) {
-    console.error('Interaction error:', error);
+    logger.error('Interaction error:', error);
     return err('操作失败', 500);
   }
 }
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest) {
       userBookmarked: interactions?.some(i => i.interaction_type === 'bookmark') || false,
     });
   } catch (error) {
-    console.error('Get interaction error:', error);
+    logger.error('Get interaction error:', error);
     return err('获取失败', 500);
   }
 }

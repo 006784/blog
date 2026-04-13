@@ -3,6 +3,7 @@ import { err, ok } from '@/lib/api';
 import { requireAdminSession } from '@/lib/auth-server';
 import { defaultProfile, normalizeProfile } from '@/lib/profile';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,7 @@ export async function GET() {
 
     return ok(normalizeProfile(data?.value ?? defaultProfile));
   } catch (error) {
-    console.error('读取个人资料失败:', error);
+    logger.error('读取个人资料失败:', error);
     return err('读取个人资料失败');
   }
 }
@@ -62,7 +63,7 @@ export async function PUT(request: NextRequest) {
 
     return ok(normalizeProfile(data?.value ?? profile));
   } catch (error) {
-    console.error('保存个人资料失败:', error);
+    logger.error('保存个人资料失败:', error);
     return err('保存个人资料失败');
   }
 }

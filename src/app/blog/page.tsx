@@ -217,8 +217,8 @@ function BlogPageContent() {
 
       <div className="journal-shell">
         <section className="journal-hero surface-hero relative overflow-hidden p-6 md:p-10">
-          <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 rounded-full bg-[radial-gradient(circle,_rgba(56,189,248,0.22)_0%,_rgba(56,189,248,0)_70%)]" />
-          <div className="pointer-events-none absolute -bottom-10 left-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,_rgba(244,114,182,0.18)_0%,_rgba(244,114,182,0)_72%)]" />
+          <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(195,135,98,0.18)_0%,rgba(195,135,98,0)_68%)]" />
+          <div className="pointer-events-none absolute -bottom-10 left-0 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(116,132,107,0.13)_0%,rgba(116,132,107,0)_72%)]" />
 
           <div className="journal-hero-grid">
             <div className="journal-hero-copy">
@@ -361,7 +361,7 @@ function BlogPageContent() {
                 {/* 精选文章骨架 */}
                 <div className="surface-card overflow-hidden rounded-2xl">
                   <div className="grid sm:grid-cols-2 gap-0">
-                    <Skeleton className="min-h-[260px] rounded-none" />
+                    <Skeleton className="min-h-65 rounded-none" />
                     <div className="p-8 space-y-4">
                       <Skeleton className="h-4 w-20 rounded-full" />
                       <Skeleton className="h-6 w-3/4" />
@@ -373,7 +373,7 @@ function BlogPageContent() {
                 {/* 文章列表骨架 */}
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="surface-card p-5 rounded-2xl flex gap-4">
-                    <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-xl" />
+                    <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-xl" />
                     <div className="flex-1 space-y-3 py-1">
                       <Skeleton className="h-3 w-16 rounded-full" />
                       <Skeleton className="h-5 w-3/4" />

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
 import { requireAdminSession } from '@/lib/auth-server';
+import { logger } from '@/lib/logger';
 
 // 配置静态导出
 export const dynamic = "force-dynamic";
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
       size: file.size,
     });
   } catch (error) {
-    console.error('上传错误:', error);
+    logger.error('上传错误:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }
