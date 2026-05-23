@@ -8,7 +8,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, Clock3, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
-import AdminFloatButton from '@/components/AdminFloatButton';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -139,7 +138,7 @@ function EditorialFeatureCard({
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="atelier-feature-card group overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xl)] transition-transform duration-[var(--duration-normal)] hover:-translate-y-1"
+      className="atelier-feature-card group overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xl) transition-transform duration-(--duration-normal) hover:-translate-y-1"
     >
       <div className="atelier-feature-media">
         <ProgressiveImage
@@ -181,7 +180,7 @@ function EditorialFeatureCard({
         {post.tags.length > 0 && (
           <div className="atelier-tag-row">
             {post.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="soft" className="atelier-tag bg-[var(--surface-glass)] text-[var(--color-neutral-900)] dark:text-[var(--color-neutral-900)]">
+              <Badge key={tag} variant="soft" className="atelier-tag bg-(--surface-glass) text-neutral-900 dark:text-neutral-900">
                 {tag}
               </Badge>
             ))}
@@ -203,7 +202,7 @@ function EditorialStoryCard({ post, index }: { post: HomePost; index: number }) 
     >
       <Link
         href={`/blog/${post.slug}`}
-        className="atelier-story-link rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+        className="atelier-story-link rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) transition-all duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
       >
         <div className="atelier-story-copy">
           <p className="atelier-story-category">{post.category}</p>
@@ -241,7 +240,7 @@ function EditorialFeedCard({
     >
       <Link
         href={`/blog/${post.slug}`}
-        className="atelier-feed-link rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+        className="atelier-feed-link rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) transition-all duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
       >
         <ProgressiveImage
           src={post.image}
@@ -529,14 +528,14 @@ export default function HomePageClient({
           <div className="atelier-nav-actions">
             <Link
               href="/blog?search=1"
-              className="atelier-icon-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]"
+              className="atelier-icon-button rounded-full border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)"
               aria-label="搜索文章"
             >
               <Search strokeWidth={1.5} className="h-4 w-4" />
             </Link>
             <Link
               href="/blog"
-              className="atelier-ghost-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+              className="atelier-ghost-button rounded-full border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-md)"
             >
               浏览文章
             </Link>
@@ -563,31 +562,31 @@ export default function HomePageClient({
                 <div className="atelier-action-row">
                   <Link
                     href={`/blog/${heroPost.slug}`}
-                    className="atelier-primary-button rounded-full shadow-[var(--shadow-lg)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5"
+                    className="atelier-primary-button rounded-full shadow-(--shadow-lg) transition-all duration-(--duration-fast) hover:-translate-y-0.5"
                   >
                     阅读最新文章
                     <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/about"
-                    className="atelier-secondary-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5"
+                    className="atelier-secondary-button rounded-full border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5"
                   >
                     认识作者
                   </Link>
                 </div>
 
                 <div className="atelier-metrics">
-                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
+                  <div className="atelier-metric-card rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm)">
                     <span>文章存档</span>
                     <strong>{activePosts.length}</strong>
                     <small>持续整理与更新</small>
                   </div>
-                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
+                  <div className="atelier-metric-card rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm)">
                     <span>平均阅读</span>
                     <strong>{averageReadingLabel}</strong>
                     <small>保留一点慢阅读的节奏</small>
                   </div>
-                  <div className="atelier-metric-card rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)]">
+                  <div className="atelier-metric-card rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm)">
                     <span>主题章节</span>
                     <strong>{topCategories.length}</strong>
                     <small>技术、设计、生活与思考</small>
@@ -620,7 +619,7 @@ export default function HomePageClient({
             </div>
 
             <div className="atelier-curation-layout">
-              <Card variant="glass" className="atelier-category-panel rounded-[var(--radius-2xl)]">
+              <Card variant="glass" className="atelier-category-panel rounded-2xl">
                 <p className="atelier-panel-kicker">TOP&ensp;·&ensp;CATEGORIES</p>
                 <h3>这个博客最近在写什么</h3>
                 <div className="atelier-category-list">
@@ -668,9 +667,9 @@ export default function HomePageClient({
                 {[1, 2, 3, 4].map((item) => (
                   <div
                     key={item}
-                    className={clsx('atelier-feed-card atelier-feed-skeleton rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4', item === 1 && 'is-emphasized')}
+                    className={clsx('atelier-feed-card atelier-feed-skeleton rounded-xl border border-(--border-default) bg-(--surface-panel) p-4', item === 1 && 'is-emphasized')}
                   >
-                    <Skeleton className="h-56 w-full rounded-[var(--radius-lg)]" />
+                    <Skeleton className="h-56 w-full rounded-lg" />
                     <div className="space-y-3 pt-4">
                       <div className="flex items-center gap-2">
                         <Skeleton className="h-6 w-16 rounded-full" />
@@ -713,7 +712,7 @@ export default function HomePageClient({
                     <button
                       type="button"
                       onClick={() => setVisibleCount((count) => count + 3)}
-                      className="atelier-secondary-button rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5"
+                      className="atelier-secondary-button rounded-full border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5"
                     >
                       加载更多文章
                     </button>
@@ -748,7 +747,6 @@ export default function HomePageClient({
         </section>
       </main>
 
-      <AdminFloatButton />
     </div>
   );
 }

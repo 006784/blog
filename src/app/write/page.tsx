@@ -31,7 +31,9 @@ const RichEditor = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex-1 bg-[var(--paper)] animate-pulse" aria-label="编辑器加载中" />
+      <div className="flex-1 flex items-center justify-center bg-(--paper)" aria-label="编辑器加载中">
+        <Loader2 className="w-6 h-6 text-(--gold) animate-spin" />
+      </div>
     ),
   }
 );
@@ -62,7 +64,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative w-10 h-5 rounded-full transition-colors ${checked ? 'bg-[var(--gold)]' : 'bg-[var(--line)]'}`}
+      className={`relative w-10 h-5 rounded-full transition-colors ${checked ? 'bg-(--gold)' : 'bg-(--line)'}`}
     >
       <span
         className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`}
@@ -354,7 +356,7 @@ function WritePageContent() {
   if (adminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[var(--gold)] animate-spin" />
+        <Loader2 className="w-8 h-8 text-(--gold) animate-spin" />
       </div>
     );
   }
@@ -363,50 +365,54 @@ function WritePageContent() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-6 border border-[var(--line)] flex items-center justify-center">
-            <Shield className="w-8 h-8 text-[var(--gold)]" />
+          <div className="w-16 h-16 mx-auto mb-6 border border-(--line) flex items-center justify-center">
+            <Shield className="w-8 h-8 text-(--gold)" />
           </div>
-          <h1 className="font-[var(--font-mincho)] text-2xl mb-2 text-[var(--ink)]">需要管理员权限</h1>
-          <p className="text-sm text-[var(--ink)]/50 mb-6">只有管理员可以发布文章</p>
+          <h1 className="font-(--font-mincho) text-2xl mb-2 text-(--ink)">需要管理员权限</h1>
+          <p className="text-sm text-(--ink)/50 mb-6">只有管理员可以发布文章</p>
           <button
             onClick={() => showLoginModal()}
-            className="px-8 py-2.5 border border-[var(--gold)] text-[var(--gold)] text-sm hover:bg-[var(--gold)] hover:text-[var(--paper)] transition-colors mb-4"
+            className="px-8 py-2.5 border border-(--gold) text-(--gold) text-sm hover:bg-(--gold) hover:text-(--paper) transition-colors mb-4"
           >
             管理员登录
           </button>
           <div>
-            <Link href="/blog" className="text-xs text-[var(--ink)]/40 hover:text-[var(--gold)] transition-colors">返回博客</Link>
+            <Link href="/blog" className="text-xs text-(--ink)/40 hover:text-(--gold) transition-colors">返回博客</Link>
           </div>
         </div>
       </div>
     );
   }
 
-  if (isMobile === null) return null; // avoid hydration flash
+  if (isMobile === null) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="w-8 h-8 text-(--gold) animate-spin" />
+    </div>
+  );
   if (isMobile) return <MobileWritePage />;
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[var(--gold)] animate-spin" />
+        <Loader2 className="w-8 h-8 text-(--gold) animate-spin" />
       </div>
     );
   }
 
   // ── 3-column editor layout ───────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[var(--paper)]" style={{ fontFamily: 'var(--font-jp-serif)' }}>
+    <div className="fixed inset-0 z-50 flex flex-col bg-(--paper)" style={{ fontFamily: 'var(--font-jp-serif)' }}>
 
       {/* ── Top toolbar (48px) ─────────────────────────────── */}
-      <header className="h-12 flex-none flex items-center border-b border-[var(--line)] px-4 gap-4">
-        <Link href="/blog" className="flex items-center gap-1.5 text-[var(--ink)]/50 hover:text-[var(--gold)] transition-colors text-sm">
+      <header className="h-12 flex-none flex items-center border-b border-(--line) px-4 gap-4">
+        <Link href="/blog" className="flex items-center gap-1.5 text-(--ink)/50 hover:text-(--gold) transition-colors text-sm">
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">返回</span>
         </Link>
 
-        <div className="w-px h-5 bg-[var(--line)]" />
+        <div className="w-px h-5 bg-(--line)" />
 
-        <span className="font-[var(--font-mincho)] text-sm text-[var(--ink)]">
+        <span className="font-(--font-mincho) text-sm text-(--ink)">
           {editId ? '編集' : '新稿'}
         </span>
 
@@ -417,14 +423,14 @@ function WritePageContent() {
           {isSaving && (
             <motion.span
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="flex items-center gap-1 text-xs text-[var(--ink)]/40"
+              className="flex items-center gap-1 text-xs text-(--ink)/40"
             >
               <Loader2 className="w-3 h-3 animate-spin" />保存中
             </motion.span>
           )}
         </AnimatePresence>
         {lastSaved && !isSaving && (
-          <span className="text-xs text-[var(--ink)]/30 hidden md:block">
+          <span className="text-xs text-(--ink)/30 hidden md:block">
             {lastSaved.toLocaleTimeString()} 已保存
           </span>
         )}
@@ -432,7 +438,7 @@ function WritePageContent() {
         {/* preview toggle (md only — xl has dedicated pane) */}
         <button
           onClick={() => setShowPreviewPane(!showPreviewPane)}
-          className={`xl:hidden p-1.5 border border-[var(--line)] text-xs flex items-center gap-1 transition-colors ${showPreviewPane ? 'border-[var(--gold)] text-[var(--gold)]' : 'text-[var(--ink)]/50 hover:text-[var(--gold)]'}`}
+          className={`xl:hidden p-1.5 border border-(--line) text-xs flex items-center gap-1 transition-colors ${showPreviewPane ? 'border-(--gold) text-(--gold)' : 'text-(--ink)/50 hover:text-(--gold)'}`}
         >
           <Eye className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">预览</span>
@@ -442,7 +448,7 @@ function WritePageContent() {
         <button
           onClick={handleSaveDraft}
           disabled={isSaving}
-          className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--line)] text-sm text-[var(--ink)]/70 hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-(--line) text-sm text-(--ink)/70 hover:border-(--gold) hover:text-(--gold) transition-colors disabled:opacity-40"
         >
           <Save className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">草稿</span>
@@ -452,7 +458,7 @@ function WritePageContent() {
         <button
           onClick={handlePublish}
           disabled={isPublishing}
-          className="flex items-center gap-1.5 px-4 py-1.5 bg-[var(--gold)] text-[var(--paper)] text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+          className="flex items-center gap-1.5 px-4 py-1.5 bg-(--gold) text-(--paper) text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
         >
           {isPublishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
           <span className="hidden sm:inline">发布</span>
@@ -463,14 +469,14 @@ function WritePageContent() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Left metadata sidebar (260px) ────────────────── */}
-        <aside className="w-[260px] flex-none border-r border-[var(--line)] overflow-y-auto flex flex-col">
+        <aside className="w-[260px] flex-none border-r border-(--line) bg-(--surface-raised) overflow-y-auto flex flex-col">
           <div className="flex-1 p-4 space-y-6">
 
             {/* Cover image */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Cover</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Cover</p>
               {coverImage ? (
-                <div className="relative aspect-video overflow-hidden border border-[var(--line)]">
+                <div className="relative aspect-video overflow-hidden border border-(--line)">
                   <Image src={coverImage} alt="封面" fill sizes="260px" className="object-cover" />
                   <button
                     onClick={() => setCoverImage('')}
@@ -482,37 +488,37 @@ function WritePageContent() {
               ) : (
                 <ImageUploader onUpload={setCoverImage} folder="covers" aspectRatio="video" placeholder="点击上传封面" preview="" />
               )}
-              <p className="text-[10px] text-[var(--ink)]/30 mt-1">建议 1200×630</p>
+              <p className="text-[10px] text-(--ink)/30 mt-1">建议 1200×630</p>
             </section>
 
             {/* Title */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Title</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Title</p>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="文章标题"
-                className="w-full bg-transparent border-b border-[var(--line)] focus:border-[var(--gold)] outline-none text-sm text-[var(--ink)] placeholder:text-[var(--ink)]/30 pb-1.5 transition-colors"
+                className="w-full bg-transparent border-b border-(--line) focus:border-(--gold) outline-none text-sm text-(--ink) placeholder:text-(--ink)/30 pb-1.5 transition-colors"
                 style={{ fontFamily: 'var(--font-mincho)' }}
               />
             </section>
 
             {/* Description */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Description</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Description</p>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="一句话摘要"
                 rows={2}
-                className="w-full bg-transparent border-b border-[var(--line)] focus:border-[var(--gold)] outline-none text-xs text-[var(--ink)] placeholder:text-[var(--ink)]/30 pb-1.5 resize-none transition-colors leading-relaxed"
+                className="w-full bg-transparent border-b border-(--line) focus:border-(--gold) outline-none text-xs text-(--ink) placeholder:text-(--ink)/30 pb-1.5 resize-none transition-colors leading-relaxed"
               />
             </section>
 
             {/* Category */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Category</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Category</p>
               <div className="grid grid-cols-2 gap-1.5">
                 {categories.map((cat) => (
                   <button
@@ -520,11 +526,11 @@ function WritePageContent() {
                     onClick={() => setCategory(cat.value)}
                     className={`flex items-center gap-2 px-2 py-1.5 border text-xs transition-colors ${
                       category === cat.value
-                        ? 'border-[var(--gold)] text-[var(--gold)]'
-                        : 'border-[var(--line)] text-[var(--ink)]/50 hover:border-[var(--gold)]/50 hover:text-[var(--ink)]'
+                        ? 'border-(--gold) text-(--gold)'
+                        : 'border-(--line) text-(--ink)/50 hover:border-(--gold)/50 hover:text-(--ink)'
                     }`}
                   >
-                    <span className="text-[10px] font-[var(--font-mincho)] opacity-60">{cat.kana}</span>
+                    <span className="text-[10px] font-(--font-mincho) opacity-60">{cat.kana}</span>
                     <span>{cat.label}</span>
                   </button>
                 ))}
@@ -533,18 +539,18 @@ function WritePageContent() {
 
             {/* Tags */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Tags</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Tags</p>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {tags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 border border-[var(--gold)]/50 text-[10px] text-[var(--gold)]">
+                  <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 border border-(--gold)/50 text-[10px] text-(--gold)">
                     {tag}
                     <button onClick={() => removeTag(tag)} className="hover:opacity-60"><X className="w-2.5 h-2.5" /></button>
                   </span>
                 ))}
               </div>
               {tags.length < 5 && (
-                <div className="flex items-center gap-1 border-b border-[var(--line)] focus-within:border-[var(--gold)] transition-colors">
-                  <Tag className="w-3 h-3 text-[var(--ink)]/30 flex-none" />
+                <div className="flex items-center gap-1 border-b border-(--line) focus-within:border-(--gold) transition-colors">
+                  <Tag className="w-3 h-3 text-(--ink)/30 flex-none" />
                   <input
                     type="text"
                     value={tagInput}
@@ -552,7 +558,7 @@ function WritePageContent() {
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
                     onBlur={addTag}
                     placeholder="Enter 添加标签"
-                    className="flex-1 bg-transparent outline-none text-xs text-[var(--ink)] placeholder:text-[var(--ink)]/30 py-1"
+                    className="flex-1 bg-transparent outline-none text-xs text-(--ink) placeholder:text-(--ink)/30 py-1"
                   />
                 </div>
               )}
@@ -560,11 +566,11 @@ function WritePageContent() {
 
             {/* Collection */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Collection</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-2" style={{ fontFamily: 'var(--font-garamond)' }}>Collection</p>
               <div className="space-y-1">
                 <button
                   onClick={() => setCollectionId(null)}
-                  className={`w-full flex items-center gap-2 px-2 py-1.5 border text-xs transition-colors ${!collectionId ? 'border-[var(--gold)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--ink)]/50 hover:border-[var(--gold)]/50'}`}
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 border text-xs transition-colors ${!collectionId ? 'border-(--gold) text-(--gold)' : 'border-(--line) text-(--ink)/50 hover:border-(--gold)/50'}`}
                 >
                   <Folder className="w-3 h-3" />
                   <span>不归入集合</span>
@@ -574,7 +580,7 @@ function WritePageContent() {
                   <button
                     key={col.id}
                     onClick={() => setCollectionId(col.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 border text-xs transition-colors ${collectionId === col.id ? 'border-[var(--gold)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--ink)]/50 hover:border-[var(--gold)]/50'}`}
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 border text-xs transition-colors ${collectionId === col.id ? 'border-(--gold) text-(--gold)' : 'border-(--line) text-(--ink)/50 hover:border-(--gold)/50'}`}
                   >
                     <div className="w-2 h-2 rounded-full flex-none" style={{ background: col.color || '#c4a96d' }} />
                     <span className="flex-1 text-left truncate">{col.name}</span>
@@ -590,23 +596,23 @@ function WritePageContent() {
                       onChange={(e) => setNewCollectionName(e.target.value)}
                       placeholder="集合名称"
                       autoFocus
-                      className="flex-1 px-2 py-1 border border-[var(--line)] focus:border-[var(--gold)] bg-transparent outline-none text-xs text-[var(--ink)]"
+                      className="flex-1 px-2 py-1 border border-(--line) focus:border-(--gold) bg-transparent outline-none text-xs text-(--ink)"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && newCollectionName.trim()) handleCreateCollection();
                         if (e.key === 'Escape') { setShowNewCollection(false); setNewCollectionName(''); }
                       }}
                     />
-                    <button onClick={handleCreateCollection} disabled={!newCollectionName.trim() || creatingCollection} className="px-2 border border-[var(--gold)] text-[var(--gold)] disabled:opacity-40">
+                    <button onClick={handleCreateCollection} disabled={!newCollectionName.trim() || creatingCollection} className="px-2 border border-(--gold) text-(--gold) disabled:opacity-40">
                       {creatingCollection ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
                     </button>
-                    <button onClick={() => { setShowNewCollection(false); setNewCollectionName(''); }} className="px-2 border border-[var(--line)] text-[var(--ink)]/50">
+                    <button onClick={() => { setShowNewCollection(false); setNewCollectionName(''); }} className="px-2 border border-(--line) text-(--ink)/50">
                       <X className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setShowNewCollection(true)}
-                    className="w-full flex items-center justify-center gap-1 px-2 py-1.5 border border-dashed border-[var(--line)] text-xs text-[var(--ink)]/40 hover:border-[var(--gold)]/50 hover:text-[var(--gold)] transition-colors"
+                    className="w-full flex items-center justify-center gap-1 px-2 py-1.5 border border-dashed border-(--line) text-xs text-(--ink)/40 hover:border-(--gold)/50 hover:text-(--gold) transition-colors"
                   >
                     <Plus className="w-3 h-3" />新建集合
                   </button>
@@ -616,10 +622,10 @@ function WritePageContent() {
 
             {/* Publish settings */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-3" style={{ fontFamily: 'var(--font-garamond)' }}>Publish</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-3" style={{ fontFamily: 'var(--font-garamond)' }}>Publish</p>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-[var(--ink)]/60">
+                  <div className="flex items-center gap-2 text-xs text-(--ink)/60">
                     <Pin className="w-3.5 h-3.5" />首页置顶
                   </div>
                   <Toggle checked={isPinned} onChange={(v) => {
@@ -629,7 +635,7 @@ function WritePageContent() {
                   }} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-[var(--ink)]/60">
+                  <div className="flex items-center gap-2 text-xs text-(--ink)/60">
                     <Bell className="w-3.5 h-3.5" />通知订阅者
                   </div>
                   <Toggle checked={notifySubscribers} onChange={setNotifySubscribers} />
@@ -639,29 +645,29 @@ function WritePageContent() {
 
             {/* SEO */}
             <section>
-              <p className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40 mb-3" style={{ fontFamily: 'var(--font-garamond)' }}>SEO</p>
+              <p className="text-[10px] uppercase tracking-widest text-(--ink)/65 mb-3" style={{ fontFamily: 'var(--font-garamond)' }}>SEO</p>
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] text-[var(--ink)]/40 block mb-1">Meta 标题</label>
+                  <label className="text-[10px] text-(--ink)/40 block mb-1">Meta 标题</label>
                   <input
                     type="text"
                     value={metaTitle}
                     onChange={(e) => setMetaTitle(e.target.value)}
                     placeholder={title || '文章标题'}
-                    className="w-full bg-transparent border-b border-[var(--line)] focus:border-[var(--gold)] outline-none text-xs text-[var(--ink)] placeholder:text-[var(--ink)]/30 pb-1 transition-colors"
+                    className="w-full bg-transparent border-b border-(--line) focus:border-(--gold) outline-none text-xs text-(--ink) placeholder:text-(--ink)/30 pb-1 transition-colors"
                   />
-                  <p className="text-[10px] text-[var(--ink)]/25 mt-0.5">{(metaTitle || title || '').length}/60</p>
+                  <p className="text-[10px] text-(--ink)/25 mt-0.5">{(metaTitle || title || '').length}/60</p>
                 </div>
                 <div>
-                  <label className="text-[10px] text-[var(--ink)]/40 block mb-1">Meta 描述</label>
+                  <label className="text-[10px] text-(--ink)/40 block mb-1">Meta 描述</label>
                   <textarea
                     value={metaDescription}
                     onChange={(e) => setMetaDescription(e.target.value)}
                     placeholder={description || '文章描述'}
                     rows={2}
-                    className="w-full bg-transparent border-b border-[var(--line)] focus:border-[var(--gold)] outline-none text-xs text-[var(--ink)] placeholder:text-[var(--ink)]/30 pb-1 resize-none transition-colors"
+                    className="w-full bg-transparent border-b border-(--line) focus:border-(--gold) outline-none text-xs text-(--ink) placeholder:text-(--ink)/30 pb-1 resize-none transition-colors"
                   />
-                  <p className="text-[10px] text-[var(--ink)]/25 mt-0.5">{(metaDescription || description || '').length}/160</p>
+                  <p className="text-[10px] text-(--ink)/25 mt-0.5">{(metaDescription || description || '').length}/160</p>
                 </div>
               </div>
             </section>
@@ -688,10 +694,10 @@ function WritePageContent() {
         </div>
 
         {/* ── Right preview (xl+) or toggled preview ───────── */}
-        <div className={`w-[320px] flex-none border-l border-[var(--line)] overflow-y-auto ${showPreviewPane ? 'flex xl:flex flex-col' : 'hidden xl:flex xl:flex-col'}`}>
-          <div className="flex-none flex items-center justify-between px-4 py-2 border-b border-[var(--line)]">
-            <span className="text-[9px] uppercase tracking-widest text-[var(--ink)]/40" style={{ fontFamily: 'var(--font-garamond)' }}>Preview</span>
-            <button onClick={() => setShowPreviewPane(false)} className="xl:hidden text-[var(--ink)]/40 hover:text-[var(--gold)]">
+        <div className={`w-[320px] flex-none border-l border-(--line) overflow-y-auto ${showPreviewPane ? 'flex xl:flex flex-col' : 'hidden xl:flex xl:flex-col'}`}>
+          <div className="flex-none flex items-center justify-between px-4 py-2 border-b border-(--line)">
+            <span className="text-[10px] uppercase tracking-widest text-(--ink)/65" style={{ fontFamily: 'var(--font-garamond)' }}>Preview</span>
+            <button onClick={() => setShowPreviewPane(false)} className="xl:hidden text-(--ink)/40 hover:text-(--gold)">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -722,18 +728,18 @@ function WritePageContent() {
       </div>
 
       {/* ── Bottom status bar (32px) ─────────────────────────── */}
-      <footer className="h-8 flex-none border-t border-[var(--line)] flex items-center px-4 gap-4">
-        <div className="flex items-center gap-1 text-[10px] text-[var(--ink)]/35">
+      <footer className="h-8 flex-none border-t border-(--line) flex items-center px-4 gap-4">
+        <div className="flex items-center gap-1 text-[10px] text-(--ink)/35">
           <BookOpen className="w-3 h-3" />
           {wordCount.toLocaleString()} 字
         </div>
-        <div className="w-px h-3 bg-[var(--line)]" />
-        <span className="text-[10px] text-[var(--ink)]/35">约 {readingMin} 分钟</span>
+        <div className="w-px h-3 bg-(--line)" />
+        <span className="text-[10px] text-(--ink)/35">约 {readingMin} 分钟</span>
         <div className="flex-1" />
         {lastSaved && (
-          <span className="text-[10px] text-[var(--ink)]/25">{lastSaved.toLocaleTimeString()} 保存</span>
+          <span className="text-[10px] text-(--ink)/25">{lastSaved.toLocaleTimeString()} 保存</span>
         )}
-        <div className="flex items-center gap-1 text-[10px] text-[var(--ink)]/35">
+        <div className="flex items-center gap-1 text-[10px] text-(--ink)/35">
           <FolderOpen className="w-3 h-3" />
           {collections.find(c => c.id === collectionId)?.name || '无集合'}
         </div>
@@ -748,7 +754,7 @@ function WritePageContent() {
             exit={{ opacity: 0, y: 20 }}
             className={`fixed bottom-10 right-6 px-4 py-2.5 flex items-center gap-2 text-sm z-[60] ${
               notification.type === 'success'
-                ? 'bg-[var(--gold)] text-[var(--paper)]'
+                ? 'bg-(--gold) text-(--paper)'
                 : 'bg-red-500 text-white'
             }`}
           >
@@ -765,7 +771,7 @@ export default function WritePage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[var(--gold)] animate-spin" />
+        <Loader2 className="w-8 h-8 text-(--gold) animate-spin" />
       </div>
     }>
       <WritePageContent />

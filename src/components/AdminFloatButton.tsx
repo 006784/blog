@@ -18,7 +18,6 @@ export default function AdminFloatButton() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // 点击外部关闭
   useEffect(() => {
     if (!open || !isAdmin) return;
     function onDown(e: MouseEvent) {
@@ -37,28 +36,65 @@ export default function AdminFloatButton() {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    <div className="fixed top-3 right-3 z-50 md:hidden flex flex-col items-end gap-2">
+      {/* 触发按钮 — 顶部右侧 */}
+      <motion.button
+        type="button"
+        onClick={() => {
+          if (!isAdmin) { showLoginModal(); return; }
+          setOpen(v => !v);
+        }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.94 }}
+        className={`admin-float-trigger relative w-10 h-10 rounded-full flex items-center justify-center shadow-lg overflow-hidden border border-white/30 dark:border-white/10 ${
+          isAdmin ? 'bg-emerald-500' : 'bg-zinc-500'
+        }`}
+        aria-label={isAdmin ? '打开管理员菜单' : '管理员登录'}
+        title={isAdmin ? '管理员菜单' : '管理员登录'}
+      >
+        {profile.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={profile.avatar} alt={profile.nickname} className="h-full w-full object-cover" />
+        ) : (
+          <span className="admin-float-initial">
+            {(profile.nickname || 'L').charAt(0)}
+          </span>
+        )}
+
+        <span
+          className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white/60 bg-black/70 backdrop-blur"
+          aria-hidden="true"
+        >
+          {isAdmin
+            ? <Unlock className="w-2 h-2 text-emerald-300" strokeWidth={2} />
+            : <Lock className="w-2 h-2 text-white" strokeWidth={2} />
+          }
+        </span>
+      </motion.button>
+
+      {/* 下拉面板 */}
       <AnimatePresence>
         {open && isAdmin && (
           <motion.div
             ref={panelRef}
-            initial={{ opacity: 0, scale: 0.92, y: 8 }}
+            initial={{ opacity: 0, scale: 0.92, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 8 }}
+            exit={{ opacity: 0, scale: 0.92, y: -8 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="mb-1 w-56 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/80 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-xl shadow-black/10 overflow-hidden"
+            className="w-52 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/80 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-xl shadow-black/10 overflow-hidden"
           >
             <div className="py-1.5">
               <div className="flex items-center justify-between px-4 py-2">
                 <p className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase">
                   管理员
                 </p>
-                <button type="button" onClick={() => setOpen(false)} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+                <button type="button" title="关闭" onClick={() => setOpen(false)} className="text-zinc-400 hover:text-zinc-600 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               {adminLinks.map(({ href, icon: Icon, label }) => (
                 <button
+                  type="button"
                   key={href}
                   onClick={() => { setOpen(false); router.push(href); }}
                   className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
@@ -71,58 +107,6 @@ export default function AdminFloatButton() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* 触发按钮 */}
-      <motion.button
-        type="button"
-        onClick={() => {
-          if (!isAdmin) {
-            showLoginModal();
-            return;
-          }
-          setOpen(v => !v);
-        }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.94 }}
-        className="relative w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-black/15 transition-colors overflow-hidden border border-white/30 dark:border-white/10"
-        style={{
-          background: isAdmin
-            ? 'linear-gradient(135deg, #10b981, #059669)'
-            : 'linear-gradient(135deg, #71717a, #52525b)',
-        }}
-        aria-label="管理员入口"
-        title={isAdmin ? '打开管理员菜单' : '管理员登录'}
-      >
-        {profile.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.avatar}
-            alt={profile.nickname}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span
-            style={{
-              fontFamily: 'var(--font-mincho)',
-              fontSize: 18,
-              color: 'white',
-              fontWeight: 700,
-            }}
-          >
-            {(profile.nickname || 'L').charAt(0)}
-          </span>
-        )}
-
-        <span
-          className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-white/60 bg-black/70 backdrop-blur"
-          aria-hidden="true"
-        >
-          {isAdmin
-            ? <Unlock className="w-2.5 h-2.5 text-emerald-300" strokeWidth={2} />
-            : <Lock className="w-2.5 h-2.5 text-white" strokeWidth={2} />
-          }
-        </span>
-      </motion.button>
     </div>
   );
 }

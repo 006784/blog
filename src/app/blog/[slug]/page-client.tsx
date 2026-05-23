@@ -1,6 +1,6 @@
 'use client';
 
-import { isValidElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { isValidElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-javascript';
@@ -109,26 +109,10 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState('');
-  const progressBarRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setShareUrl(window.location.href);
     }
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const el = document.documentElement;
-      const scrollTop = el.scrollTop || document.body.scrollTop;
-      const scrollHeight = el.scrollHeight - el.clientHeight;
-      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-      if (progressBarRef.current) {
-        progressBarRef.current.style.width = `${pct}%`;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -342,11 +326,6 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
   return (
     <div className="px-3 py-10 md:px-6 md:py-14">
-      {/* 阅读进度条 */}
-      <div className="fixed left-0 right-0 top-0 z-50 h-0.5 bg-(--surface-raised)" aria-hidden>
-        <div ref={progressBarRef} className="reading-progress-fill" />
-      </div>
-
       {/* 阅读位置记忆 */}
       <PostReadingMemory slug={slug} />
 

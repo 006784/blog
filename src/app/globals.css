@@ -6327,6 +6327,18 @@ textarea:focus {
   color: var(--color-primary-500);
 }
 
+/* 管理员浮动按钮 */
+.admin-float-trigger {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-float-initial {
+  font-family: var(--font-mincho);
+  font-size: 16px;
+  color: white;
+  font-weight: 700;
+}
+
 /* 阅读进度条 */
 .reading-progress-fill {
   height: 100%;

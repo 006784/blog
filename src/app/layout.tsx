@@ -13,6 +13,7 @@ import { PerformanceOptimizer } from "@/components/PerformanceOptimizer";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CommandPalette } from "@/components/search/CommandPalette";
+import AdminFloatButton from "@/components/AdminFloatButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Toaster } from "sonner";
@@ -127,6 +128,9 @@ export default function RootLayout({
           {/* 全局搜索 Cmd+K */}
           <CommandPalette />
 
+          {/* 移动端管理员快捷入口（桌面端侧边栏已有） */}
+          <AdminFloatButton />
+
           {/* 性能优化 */}
           <PerformanceOptimizer />
           
@@ -137,7 +141,7 @@ export default function RootLayout({
           <Sidebar />
           
           {/* 主内容区 */}
-          <main className="site-main md:ml-[var(--sidebar-width,52px)] min-h-screen pb-[calc(72px+env(safe-area-inset-bottom,0px))] md:pb-0">
+          <main className="site-main md:ml-(--sidebar-width,52px) min-h-screen pb-[calc(72px+env(safe-area-inset-bottom,0px))] md:pb-0">
             <ErrorBoundary>{children}</ErrorBoundary>
             <Footer />
           </main>
