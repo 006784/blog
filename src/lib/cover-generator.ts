@@ -1,7 +1,8 @@
 /**
  * 封面自动生成
- * 流程：DeepSeek 从中文标题提取英文搜图关键词 → Unsplash 搜索高清图 → 返回稳定 CDN URL
+ * 优先从相册随机取一张照片，没有相册照片时回退到 Unsplash 搜图
  */
+import { supabaseAdmin } from '@/lib/supabase';
 
 const CATEGORY_KEYWORDS: Record<string, string> = {
   tech:        'technology programming computer code',
@@ -15,10 +16,27 @@ const CATEGORY_KEYWORDS: Record<string, string> = {
   default:     'minimal desk workspace clean',
 };
 
+async function pickFromGallery(): Promise<string | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('photos')
+      .select('url')
+      .not('url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error || !data || data.length === 0) return null;
+
+    const pick = data[Math.floor(Math.random() * data.length)];
+    return (pick.url as string) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function extractKeywords(title: string, description?: string): Promise<string> {
   const key = process.env.DEEPSEEK_API_KEY;
   if (!key) return '';
-
   try {
     const res = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
@@ -28,14 +46,8 @@ async function extractKeywords(title: string, description?: string): Promise<str
         temperature: 0.3,
         max_tokens: 30,
         messages: [
-          {
-            role: 'system',
-            content: 'Return 3-5 English Unsplash photo search keywords, comma-separated, no explanation. Focus on concrete visual themes.',
-          },
-          {
-            role: 'user',
-            content: `Title: ${title}${description ? `\nDescription: ${description}` : ''}`,
-          },
+          { role: 'system', content: 'Return 3-5 English Unsplash photo search keywords, comma-separated, no explanation. Focus on concrete visual themes.' },
+          { role: 'user',   content: `Title: ${title}${description ? `\nDescription: ${description}` : ''}` },
         ],
       }),
     });
@@ -47,36 +59,38 @@ async function extractKeywords(title: string, description?: string): Promise<str
   }
 }
 
+async function pickFromUnsplash(title: string, description?: string, tags: string[] = [], category?: string): Promise<string | null> {
+  const aiKeywords  = await extractKeywords(title, description);
+  const englishTags = tags.filter(t => /^[a-zA-Z]/.test(t)).join(',');
+  const catKeywords = CATEGORY_KEYWORDS[category ?? ''] ?? CATEGORY_KEYWORDS.default;
+  const query = [aiKeywords, englishTags, catKeywords].filter(Boolean).join(',');
+
+  try {
+    const res = await fetch(
+      `https://source.unsplash.com/featured/1920x1080/?${encodeURIComponent(query)}`,
+      { redirect: 'follow' },
+    );
+    if (!res.ok) return null;
+    const finalUrl = res.url.split('?')[0];
+    if (!finalUrl.includes('images.unsplash.com')) return null;
+    return `${finalUrl}?w=1920&q=85&fit=crop&auto=format`;
+  } catch {
+    return null;
+  }
+}
+
 export async function generateCoverImage(options: {
   title: string;
   description?: string;
   tags?: string[];
   category?: string;
 }): Promise<string | null> {
-  const { title, description, tags = [], category } = options;
+  const { title, description, tags, category } = options;
 
-  const aiKeywords   = await extractKeywords(title, description);
-  const englishTags  = tags.filter(t => /^[a-zA-Z]/.test(t)).join(',');
-  const catKeywords  = CATEGORY_KEYWORDS[category ?? ''] ?? CATEGORY_KEYWORDS.default;
+  // 1. 优先用相册里的照片
+  const galleryUrl = await pickFromGallery();
+  if (galleryUrl) return galleryUrl;
 
-  const query = [aiKeywords, englishTags, catKeywords]
-    .filter(Boolean)
-    .join(',');
-
-  const sourceUrl = `https://source.unsplash.com/featured/1920x1080/?${encodeURIComponent(query)}`;
-
-  try {
-    const res = await fetch(sourceUrl, { redirect: 'follow' });
-    if (!res.ok) return null;
-
-    // 最终 URL 形如 https://images.unsplash.com/photo-xxx?...
-    // 去掉 query string，只保留干净的图片路径
-    const finalUrl = res.url.split('?')[0];
-    if (!finalUrl.includes('images.unsplash.com')) return null;
-
-    // 附加高清参数
-    return `${finalUrl}?w=1920&q=85&fit=crop&auto=format`;
-  } catch {
-    return null;
-  }
+  // 2. 回退：Unsplash 搜图
+  return pickFromUnsplash(title, description, tags, category);
 }
