@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
-import { ArrowRight, CalendarDays, Clock3, Search } from 'lucide-react';
+import { ArrowRight, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { Badge } from '@/components/ui/Badge';
@@ -723,6 +723,9 @@ export default function HomePageClient({
           </div>
         </section>
 
+        {/* ── 每日简报预览 ── */}
+        <TodayBriefingSection />
+
         <section className="atelier-subscribe-section">
           <div className="atelier-shell">
             <div className="atelier-subscribe-card">
@@ -748,5 +751,75 @@ export default function HomePageClient({
       </main>
 
     </div>
+  );
+}
+
+// ── 首页简报预览组件 ──────────────────────────────────────────────
+interface HomeBriefing {
+  id: string; date: string; title: string; content: string;
+  mood?: string | null; weather?: string | null;
+  links: { title: string; url: string; comment?: string }[];
+}
+
+function TodayBriefingSection() {
+  const [briefing, setBriefing] = useState<HomeBriefing | null | undefined>(undefined);
+
+  useEffect(() => {
+    fetch('/api/briefings?today=1')
+      .then((r) => r.json())
+      .then((d: { briefing: HomeBriefing | null }) => setBriefing(d.briefing))
+      .catch(() => setBriefing(null));
+  }, []);
+
+  if (briefing === null) return null;
+
+  const today = new Date();
+  const dateLabel = today.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+
+  return (
+    <section className="atelier-shell pt-12 pb-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="rounded-2xl border border-(--border-default) bg-(--surface-panel) backdrop-blur-xl p-5 sm:p-6 shadow-(--shadow-sm)"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-gold" />
+            <span className="text-xs uppercase tracking-widest text-ink-muted">Daily Briefing</span>
+            <span className="text-xs text-ink-ghost">·&ensp;{dateLabel}</span>
+          </div>
+          <Link href="/briefing" className="flex items-center gap-1 text-xs text-ink-ghost hover:text-gold transition-colors">
+            查看全部 <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+
+        {briefing === undefined ? (
+          <div className="space-y-2">
+            <div className="h-4 rounded bg-(--surface-overlay) animate-pulse w-3/4" />
+            <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-full" />
+            <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-5/6" />
+          </div>
+        ) : (
+          <>
+            {briefing.title && <h3 className="font-semibold text-ink mb-2">{briefing.title}</h3>}
+            <p className="text-sm text-ink-muted leading-relaxed line-clamp-3">
+              {briefing.content.replace(/#+\s/g, '').replace(/\*\*/g, '')}
+            </p>
+            <div className="flex items-center gap-4 mt-3 flex-wrap">
+              {briefing.mood && <span className="text-xs text-ink-ghost">心情：{briefing.mood}</span>}
+              {briefing.weather && <span className="text-xs text-ink-ghost">天气：{briefing.weather}</span>}
+              {briefing.links.length > 0 && (
+                <span className="flex items-center gap-1 text-xs text-ink-ghost">
+                  <ExternalLink className="h-3 w-3" />{briefing.links.length} 个链接
+                </span>
+              )}
+              <Link href="/briefing" className="ml-auto text-xs text-gold hover:underline">阅读全文 →</Link>
+            </div>
+          </>
+        )}
+      </motion.div>
+    </section>
   );
 }

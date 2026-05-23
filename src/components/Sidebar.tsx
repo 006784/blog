@@ -8,6 +8,7 @@ import {
   Archive,
   BookMarked,
   BookOpen,
+  CalendarDays,
   Camera,
   Clock,
   Code2,
@@ -78,6 +79,7 @@ const group3: NavItem[] = [
 ];
 
 const group4: NavItem[] = [
+  { key: 'briefing', href: '/briefing', icon: CalendarDays, label: '简报', kana: '报' },
   { key: 'now',     href: '/now',     icon: Sparkles, label: '此刻', kana: '今' },
   { key: 'about',   href: '/about',   icon: User,     label: '关于', kana: '我' },
   { key: 'contact', href: '/contact', icon: Mail,     label: '联系', kana: '信' },
