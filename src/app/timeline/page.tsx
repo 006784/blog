@@ -11,7 +11,7 @@ import { StatePanel } from '@/components/ui/StatePanel';
 import { type TimelineEvent } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 
-// ── 分类颜色 ──────────────────────────────────────────────
+// ── 分类配置 ──────────────────────────────────────────────
 
 const CATEGORY_COLOR: Record<string, string> = {
   work:        'bg-blue-500',
@@ -86,10 +86,8 @@ export default function TimelinePage() {
     void loadTimeline();
   }, [loadTimeline]);
 
-  // 分类列表
   const categories = ['all', ...Array.from(new Set(events.map((e) => e.category)))];
 
-  // 按年分组 + 分类筛选
   const filtered = activeCategory === 'all'
     ? events
     : events.filter((e) => e.category === activeCategory);
@@ -116,21 +114,21 @@ export default function TimelinePage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
                 时间线
               </h1>
-              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+              <p className="text-sm leading-7 text-ink-secondary sm:text-base">
                 把成长中的关键节点按时间串起来，记录重要的变化、选择和那些值得记住的时刻。
               </p>
             </div>
             <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-teal-500">
                   <Milestone className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Timeline Events</p>
-                  <p className="text-2xl font-semibold text-neutral-900">{events.length}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">Timeline Events</p>
+                  <p className="text-2xl font-semibold text-ink">{events.length}</p>
                 </div>
               </div>
             </Card>
@@ -143,11 +141,12 @@ export default function TimelinePage() {
               {categories.map((cat) => (
                 <button
                   key={cat}
+                  type="button"
                   onClick={() => setActiveCategory(cat)}
                   className={`rounded-full border px-3.5 py-2 text-sm transition ${
                     activeCategory === cat
-                      ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
-                      : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
+                      ? 'border-teal-500 bg-teal-500 text-white shadow-(--shadow-sm)'
+                      : 'border-(--border-default) bg-(--surface-base) text-ink-secondary hover:border-teal-300 hover:text-teal-600'
                   }`}
                 >
                   {cat === 'all' ? '全部' : (CATEGORY_LABEL[cat] ?? cat)}
@@ -168,7 +167,7 @@ export default function TimelinePage() {
             action={
               <button
                 onClick={() => void loadTimeline()}
-                className="inline-flex items-center gap-2 rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
+                className="inline-flex items-center gap-2 rounded-full bg-teal-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-600"
               >
                 <RefreshCw className="h-4 w-4" />
                 重新加载
@@ -183,7 +182,7 @@ export default function TimelinePage() {
             action={!authLoading && isAdmin ? (
               <Link
                 href="/admin/timeline"
-                className="inline-flex items-center justify-center rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
+                className="inline-flex items-center justify-center rounded-full bg-teal-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-600"
               >
                 去后台配置时间线
               </Link>
@@ -193,20 +192,33 @@ export default function TimelinePage() {
           <div className="space-y-12">
             {years.map((year, yi) => (
               <div key={year}>
+                {/* Year separator */}
                 <motion.div
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: yi * 0.05 }}
-                  className="mb-6 flex items-center gap-3"
+                  className="mb-6 flex items-center gap-4"
                 >
-                  <span className="text-2xl font-bold tabular-nums text-neutral-400">
+                  <span
+                    className="shrink-0 rounded-full px-4 py-1.5 text-sm font-bold tabular-nums"
+                    style={{
+                      background: 'var(--surface-overlay)',
+                      color: 'var(--color-teal-500)',
+                      boxShadow: 'var(--neu-inset)',
+                    }}
+                  >
                     {year}
                   </span>
                   <div className="h-px flex-1 bg-(--border-default)" />
                 </motion.div>
 
-                <div className="relative space-y-6 pl-6">
-                  <div className="absolute bottom-0 left-[9px] top-0 w-px bg-(--border-default)" />
+                {/* Events */}
+                <div className="relative space-y-5 pl-6">
+                  {/* Vertical connector line */}
+                  <div
+                    className="absolute bottom-0 left-2.25 top-0 w-px"
+                    style={{ background: 'var(--border-default)' }}
+                  />
 
                   {byYear[year].map((event, ei) => (
                     <motion.div
@@ -216,22 +228,40 @@ export default function TimelinePage() {
                       transition={{ delay: yi * 0.05 + ei * 0.04 }}
                       className="relative flex gap-4"
                     >
+                      {/* Dot marker */}
                       <div
-                        className={`absolute -left-[calc(24px-9px)] mt-1.5 h-3 w-3 shrink-0 rounded-full border-2 border-(--surface-base) ${getCategoryColor(event.category)} ${
-                          event.is_milestone ? 'scale-125' : ''
+                        className={`absolute -left-3.75 shrink-0 rounded-full ${getCategoryColor(event.category)} ${
+                          event.is_milestone ? 'mt-2 h-4 w-4' : 'mt-2.5 h-3 w-3'
                         }`}
+                        style={{
+                          border: '2px solid var(--surface-base)',
+                          ...(event.is_milestone
+                            ? { boxShadow: '0 0 0 2px var(--color-orange-400)' }
+                            : {}),
+                        }}
                       />
 
-                      <Card
-                        variant={event.is_milestone ? 'bordered' : 'glass'}
-                        className={`flex-1 rounded-2xl ${
-                          event.is_milestone ? 'border-amber-400/30 bg-amber-500/10' : ''
+                      {/* Event card */}
+                      <div
+                        className={`flex-1 rounded-2xl p-5 transition-shadow duration-200 ${
+                          event.is_milestone ? 'border-l-[3px]' : ''
                         }`}
+                        style={{
+                          background: event.is_milestone
+                            ? 'color-mix(in srgb, var(--surface-raised) 88%, var(--color-orange-500) 12%)'
+                            : 'var(--surface-raised)',
+                          boxShadow: 'var(--neu-shadow-sm)',
+                          ...(event.is_milestone
+                            ? { borderLeftColor: 'var(--color-orange-500)' }
+                            : {}),
+                        }}
                       >
                         <div className="mb-2 flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            {event.icon ? <span className="text-base">{event.icon}</span> : null}
-                            <h3 className={`font-semibold ${event.is_milestone ? 'text-amber-700 dark:text-amber-200' : 'text-neutral-900'}`}>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {event.icon ? (
+                              <span className="text-base">{event.icon}</span>
+                            ) : null}
+                            <h3 className="font-semibold text-ink">
                               {event.title}
                             </h3>
                             {event.is_milestone ? (
@@ -240,13 +270,13 @@ export default function TimelinePage() {
                               </Badge>
                             ) : null}
                           </div>
-                          <span className="shrink-0 text-xs text-neutral-500">
+                          <span className="shrink-0 text-xs text-ink-muted">
                             {event.date.slice(5).replace('-', '/')}
                           </span>
                         </div>
 
                         {event.description ? (
-                          <p className="mt-1 text-sm leading-7 text-neutral-600">
+                          <p className="mt-1 text-sm leading-7 text-ink-secondary">
                             {event.description}
                           </p>
                         ) : null}
@@ -256,12 +286,12 @@ export default function TimelinePage() {
                             href={event.link}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-3 inline-flex text-xs font-medium text-(--color-primary-600) transition hover:underline"
+                            className="mt-3 inline-flex text-xs font-medium text-teal-600 transition hover:underline"
                           >
                             了解更多 →
                           </a>
                         ) : null}
-                      </Card>
+                      </div>
                     </motion.div>
                   ))}
                 </div>

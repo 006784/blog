@@ -103,10 +103,10 @@ export default function ComputerPage() {
               Desktop Wallpapers
             </Badge>
             <div className="max-w-3xl space-y-4">
-              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl">
                 电脑专区
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-neutral-600 sm:text-base">
+              <p className="max-w-2xl text-sm leading-7 text-ink-secondary sm:text-base">
                 收集适合电脑桌面的壁纸：从安静的自然风景到深色工作台，按屏幕比例、氛围和使用场景快速挑选。
               </p>
             </div>
@@ -123,10 +123,10 @@ export default function ComputerPage() {
             {collections.map((item) => (
               <Card key={item.label} variant="glass" padding="sm">
                 <item.icon className="h-5 w-5 text-(--color-primary-600)" />
-                <p className="mt-4 text-lg font-semibold text-neutral-900">
+                <p className="mt-4 text-lg font-semibold text-ink">
                   {item.count}
                 </p>
-                <p className="text-sm text-neutral-600">{item.label}</p>
+                <p className="text-sm text-ink-secondary">{item.label}</p>
               </Card>
             ))}
           </div>
@@ -159,23 +159,23 @@ export default function ComputerPage() {
                   本周推荐
                 </Badge>
                 <div>
-                  <h2 className="text-3xl font-semibold tracking-tight text-neutral-900">
+                  <h2 className="text-3xl font-semibold tracking-tight text-ink">
                     {featured.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-neutral-600">
+                  <p className="mt-3 text-sm leading-7 text-ink-secondary">
                     {featured.mood}。{featured.accent}，画面中部留有充足空间，适合放置桌面组件和常用文件夹。
                   </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Card variant="bordered" padding="sm">
-                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
+                  <p className="text-xs uppercase tracking-[0.18em] text-ink-muted">
                     Ratio
                   </p>
                   <p className="mt-2 text-xl font-semibold">{featured.ratio}</p>
                 </Card>
                 <Card variant="bordered" padding="sm">
-                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
+                  <p className="text-xs uppercase tracking-[0.18em] text-ink-muted">
                     Quality
                   </p>
                   <p className="mt-2 text-xl font-semibold">{featured.resolution}</p>
@@ -188,10 +188,10 @@ export default function ComputerPage() {
         <section className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-neutral-900">
+              <h2 className="text-2xl font-semibold text-ink">
                 精选壁纸
               </h2>
-              <p className="mt-2 text-sm text-neutral-600">
+              <p className="mt-2 text-sm text-ink-secondary">
                 点击下载会打开原图来源，后续可以接入后台上传和分类管理。
               </p>
             </div>
@@ -226,10 +226,10 @@ export default function ComputerPage() {
                 </div>
                 <div className="space-y-4 p-5">
                   <div>
-                    <h3 className="text-lg font-semibold text-neutral-900">
+                    <h3 className="text-lg font-semibold text-ink">
                       {wallpaper.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-neutral-600">
+                    <p className="mt-2 text-sm leading-6 text-ink-secondary">
                       {wallpaper.mood}
                     </p>
                   </div>
@@ -244,7 +244,7 @@ export default function ComputerPage() {
                     href={wallpaper.image}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-(--border-default) bg-(--surface-base) px-4 text-sm font-medium text-neutral-800 transition hover:border-(--color-primary-300) hover:text-(--color-primary-600)"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-(--border-default) bg-(--surface-base) px-4 text-sm font-medium text-ink transition hover:border-teal-300 hover:text-teal-600"
                   >
                     <ArrowDownToLine className="h-4 w-4" />
                     下载壁纸

@@ -101,10 +101,10 @@ export default function UsesPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
                 工具箱
               </h1>
-              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+              <p className="text-sm leading-7 text-ink-secondary sm:text-base">
                 我每天在用的硬件、软件和在线服务，从效率工具到开发环境都整理在这里。
               </p>
             </div>
@@ -114,8 +114,8 @@ export default function UsesPage() {
                   <Boxes className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Tool Entries</p>
-                  <p className="text-2xl font-semibold text-neutral-900">{items.length}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">Tool Entries</p>
+                  <p className="text-2xl font-semibold text-ink">{items.length}</p>
                 </div>
               </div>
             </Card>
@@ -160,7 +160,7 @@ export default function UsesPage() {
                   <div className="mb-5 flex items-center gap-3">
                     <span className="text-lg">{meta.icon}</span>
                     <div className="flex items-center gap-3">
-                      <h2 className="text-lg font-semibold text-neutral-900">
+                      <h2 className="text-lg font-semibold text-ink">
                         {meta.label}
                       </h2>
                       <Badge variant="soft">{grouped[category].length}</Badge>
