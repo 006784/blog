@@ -1,6 +1,6 @@
 'use client';
 
-import { isValidElement, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { isValidElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-javascript';
@@ -109,11 +109,26 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState('');
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setShareUrl(window.location.href);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = document.documentElement;
+      const scrollTop = el.scrollTop || document.body.scrollTop;
+      const scrollHeight = el.scrollHeight - el.clientHeight;
+      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${pct}%`;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -242,6 +257,11 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         <CodeBlock lang={lang} highlighted={highlighted} raw={code} />
       );
     },
+    table: ({ children, ...props }) => (
+      <div className="article-table-wrapper">
+        <table {...props}>{children}</table>
+      </div>
+    ),
     img: ({ src, alt }) => {
       if (!src || typeof src !== 'string') return null;
       return (
@@ -262,7 +282,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
     return (
       <div className="min-h-screen px-6 py-24">
         <div className="mx-auto max-w-4xl">
-          <Card variant="elevated" padding="lg" className="space-y-6 rounded-[var(--radius-2xl)]">
+          <Card variant="elevated" padding="lg" className="space-y-6 rounded-2xl">
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
               <p className="text-sm text-muted-foreground">正在加载文章...</p>
@@ -270,7 +290,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
             <Skeleton className="h-8 w-2/3" />
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-4/5" />
-            <Skeleton className="h-[24rem] w-full rounded-[var(--radius-xl)]" />
+            <Skeleton className="h-[24rem] w-full rounded-xl" />
           </Card>
         </div>
       </div>
@@ -321,7 +341,12 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
   const articleDate = post.published_at || post.created_at;
 
   return (
-    <div className="px-6 py-10 md:py-14">
+    <div className="px-3 py-10 md:px-6 md:py-14">
+      {/* 阅读进度条 */}
+      <div className="fixed left-0 right-0 top-0 z-50 h-0.5 bg-(--surface-raised)" aria-hidden>
+        <div ref={progressBarRef} className="reading-progress-fill" />
+      </div>
+
       {/* 阅读位置记忆 */}
       <PostReadingMemory slug={slug} />
 
@@ -334,7 +359,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
       <div className="mx-auto max-w-6xl">
         <Link
           href="/blog"
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-2 text-sm text-muted-foreground shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:text-foreground"
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-(--border-default) bg-(--surface-panel) px-4 py-2 text-sm text-muted-foreground shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
           返回文章列表
@@ -344,7 +369,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-lg)] backdrop-blur md:p-10"
+          className="rounded-2xl border border-(--border-default) bg-(--surface-panel) p-6 shadow-(--shadow-lg) backdrop-blur md:p-10"
         >
           <Badge className="mb-4 px-3 py-1">
             {categoryLabel(post.category)}
@@ -360,11 +385,11 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
             <Badge variant="outline" className="px-3 py-1.5 font-normal">
               {post.author || siteConfig.name}
             </Badge>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-3 py-1.5 shadow-[var(--shadow-xs)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-(--border-default) bg-(--surface-raised) px-3 py-1.5 shadow-(--shadow-xs)">
               <Calendar className="h-4 w-4" />
               {formatDate(articleDate)}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-3 py-1.5 shadow-[var(--shadow-xs)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-(--border-default) bg-(--surface-raised) px-3 py-1.5 shadow-(--shadow-xs)">
               <Clock className="h-4 w-4" />
               {post.reading_time || '约 5 分钟'}
             </span>
@@ -381,7 +406,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           )}
 
           {coverImage && (
-            <div className="relative mt-8 overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-secondary/50 shadow-[var(--shadow-sm)]">
+            <div className="relative mt-8 overflow-hidden rounded-xl border border-(--border-default) bg-secondary/50 shadow-(--shadow-sm)">
               <Image
                 src={coverImage}
                 alt={post.title}
@@ -394,7 +419,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           )}
         </motion.header>
 
-        <Card variant="default" className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-xl)] px-5 py-4">
+        <Card variant="default" className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl px-5 py-4">
           <PostInteractions postId={post.id} />
           <ShareButtons
             url={shareUrl || `/blog/${post.slug}`}
@@ -404,7 +429,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         </Card>
 
         <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1fr)_280px]">
-          <Card variant="elevated" className="article-content rounded-[var(--radius-2xl)] md:p-10">
+          <Card variant="elevated" padding="sm" className="article-content rounded-2xl sm:p-6 xl:p-10">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {post.content || ''}
             </ReactMarkdown>
@@ -415,7 +440,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           </aside>
         </div>
 
-        <Card variant="elevated" className="mt-14 rounded-[var(--radius-2xl)] md:p-8">
+        <Card variant="elevated" className="mt-14 rounded-2xl md:p-8">
           <h2 className="text-2xl font-semibold">评论区</h2>
           <p className="mt-2 text-sm text-muted-foreground">欢迎分享你的观点或补充你的实践经验。</p>
           <Comments />
@@ -442,14 +467,14 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-40px' }}
                     transition={{ delay: index * 0.08 }}
-                    className="overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                    className="overflow-hidden rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) transition-all duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
                   >
                     <Link href={`/blog/${item.slug}`}>
                       <div className="relative h-40 w-full bg-secondary/60">
                         {itemImage ? (
                           <Image src={itemImage} alt={item.title} fill className="object-cover" />
                         ) : (
-                          <div className="h-full w-full bg-gradient-to-br from-secondary to-secondary/60" />
+                          <div className="h-full w-full bg-linear-to-br from-secondary to-secondary/60" />
                         )}
                       </div>
 

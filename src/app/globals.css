@@ -6327,6 +6327,39 @@ textarea:focus {
   color: var(--color-primary-500);
 }
 
+/* 阅读进度条 */
+.reading-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  transition: width 0.1s linear;
+}
+
+/* 表格横向滚动容器 */
+.article-table-wrapper {
+  overflow-x: auto;
+  margin: 1.25rem 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+}
+
+.article-table-wrapper table {
+  margin: 0;
+  border: none;
+  min-width: 500px;
+}
+
+/* 移动端代码块：始终显示复制按钮，平滑横向滚动 */
+@media (max-width: 768px) {
+  .article-copy-btn {
+    opacity: 1;
+  }
+
+  .article-content {
+    font-size: 1rem;
+  }
+}
+
 /* Prism 语法高亮 — 暖色调，与设计系统一致 */
 code[class*="language-"],
 pre[class*="language-"] {
