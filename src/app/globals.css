@@ -1341,8 +1341,8 @@ textarea:focus {
 }
 
 .alert-info {
-  border-left: 4px solid #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
+  border-left: 4px solid var(--color-teal-500);
+  background: color-mix(in srgb, var(--color-teal-500) 6%, transparent);
 }
 
 .alert-success {
@@ -2251,8 +2251,8 @@ textarea:focus {
   --apple-border: rgba(136, 144, 165, 0.28);
   --apple-text: #10131a;
   --apple-text-soft: #4b5567;
-  --apple-accent: #0a84ff;
-  --apple-accent-strong: #0066d6;
+  --apple-accent: var(--color-teal-500);
+  --apple-accent-strong: var(--color-primary-700);
   --apple-shadow-soft: 0 16px 38px -24px rgba(18, 24, 40, 0.28);
   --apple-shadow-float: 0 28px 58px -34px rgba(18, 24, 40, 0.35);
   --apple-overlay: rgba(8, 10, 18, 0.46);
@@ -2265,8 +2265,8 @@ textarea:focus {
   --apple-border: rgba(98, 108, 133, 0.38);
   --apple-text: #eef2fb;
   --apple-text-soft: #c4ccdd;
-  --apple-accent: #58a6ff;
-  --apple-accent-strong: #2f86ff;
+  --apple-accent: var(--color-teal-500);
+  --apple-accent-strong: var(--color-primary-600);
   --apple-shadow-soft: 0 22px 48px -30px rgba(0, 0, 0, 0.72);
   --apple-shadow-float: 0 30px 62px -34px rgba(0, 0, 0, 0.84);
   --apple-overlay: rgba(2, 4, 10, 0.58);
@@ -2337,14 +2337,14 @@ textarea:focus {
 }
 
 .btn-primary {
-  border: 1px solid rgba(19, 96, 188, 0.36) !important;
-  background: linear-gradient(160deg, #2e93ff 0%, #0a84ff 52%, #0068dc 100%) !important;
+  border: 1px solid color-mix(in srgb, var(--color-teal-500) 36%, transparent) !important;
+  background: linear-gradient(160deg, var(--color-primary-400, #5ecbb8) 0%, var(--color-teal-500) 52%, var(--color-primary-700) 100%) !important;
   color: #ffffff !important;
-  box-shadow: 0 18px 34px -22px rgba(0, 105, 217, 0.62) !important;
+  box-shadow: 0 18px 34px -22px color-mix(in srgb, var(--color-teal-500) 62%, transparent) !important;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 24px 44px -24px rgba(0, 105, 217, 0.66) !important;
+  box-shadow: 0 24px 44px -24px color-mix(in srgb, var(--color-teal-500) 66%, transparent) !important;
 }
 
 .btn-secondary {
@@ -2600,8 +2600,8 @@ textarea:focus {
   --premium-fill-strong: rgba(255, 255, 255, 0.88);
   --premium-text: #10131b;
   --premium-text-soft: #566073;
-  --premium-accent: #007aff;
-  --premium-accent-strong: #005fc2;
+  --premium-accent: var(--color-teal-500);
+  --premium-accent-strong: var(--color-primary-700);
   --premium-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.35);
   --premium-shadow-hover: 0 30px 56px -34px rgba(15, 23, 42, 0.42);
 }
@@ -2612,8 +2612,8 @@ textarea:focus {
   --premium-fill-strong: rgba(17, 22, 34, 0.88);
   --premium-text: #ecf2ff;
   --premium-text-soft: #b9c4d8;
-  --premium-accent: #4a9cff;
-  --premium-accent-strong: #2f86ff;
+  --premium-accent: var(--color-teal-500);
+  --premium-accent-strong: var(--color-primary-600);
   --premium-shadow: 0 24px 48px -32px rgba(0, 0, 0, 0.72);
   --premium-shadow-hover: 0 30px 62px -34px rgba(0, 0, 0, 0.84);
 }
@@ -5287,7 +5287,7 @@ textarea:focus {
 
 .premium-fab {
   background: var(--ink);
-  border-radius: 0 !important;
+  border-radius: var(--radius-full) !important;
 }
 
 @media (max-width: 1100px) {
@@ -5866,6 +5866,16 @@ textarea:focus {
   color: var(--gold) !important;
 }
 
+.dark .chip-filter {
+  background: color-mix(in srgb, var(--surface-raised) 92%, var(--color-teal-500) 8%) !important;
+  border-color: var(--border-default) !important;
+}
+
+.dark .chip-filter:hover {
+  border-color: var(--gold) !important;
+  background: color-mix(in srgb, var(--surface-raised) 80%, var(--color-teal-500) 20%) !important;
+}
+
 /* ── ParticleBackground disable for magazine ── */
 .particle-bg-canvas {
   display: none !important;
@@ -5876,12 +5886,13 @@ textarea:focus {
   display: none !important;
 }
 
-/* ── metric-tile magazine flat ── */
+/* ── metric-tile ── */
 .metric-tile {
-  border-radius: 0 !important;
-  background: transparent !important;
-  border: 1px solid var(--line) !important;
-  box-shadow: none !important;
+  border-radius: 0.75rem !important;
+  background: var(--surface-raised) !important;
+  border: 1px solid var(--border-default) !important;
+  box-shadow: var(--neu-shadow-sm) !important;
+  padding: 0.875rem 1rem !important;
 }
 
 /* ── Back link on blog post ── */
@@ -5898,14 +5909,35 @@ textarea:focus {
   line-height: 1.25 !important;
 }
 
-/* ── Blog Post Page: flatten all rounded containers ── */
+/* ── Blog Post Page: refined rounded containers ── */
 .site-main header.rounded-3xl,
-.site-main header.rounded-2xl,
+.site-main header.rounded-2xl {
+  border-radius: var(--radius-xl) !important;
+  background: var(--paper) !important;
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 .site-main section.rounded-3xl,
-.site-main section.rounded-2xl,
-.site-main .article-content,
+.site-main section.rounded-2xl {
+  border-radius: var(--radius-lg) !important;
+  background: var(--paper) !important;
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.site-main .article-content {
+  border-radius: var(--radius-xl) !important;
+  background: var(--paper) !important;
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 .site-main .mt-8.flex.flex-wrap {
-  border-radius: 0 !important;
+  border-radius: var(--radius-lg) !important;
   background: var(--paper) !important;
   border-color: var(--line) !important;
   box-shadow: none !important;
@@ -5914,7 +5946,7 @@ textarea:focus {
 
 /* Post category badge */
 .site-main .rounded-full.bg-primary\/10 {
-  border-radius: 0 !important;
+  border-radius: 0.25rem !important;
   background: transparent !important;
   border: 1px solid var(--gold) !important;
   color: var(--gold) !important;
@@ -5926,21 +5958,21 @@ textarea:focus {
 
 /* Cover image container */
 .site-main .rounded-2xl.border.border-border\/60 {
-  border-radius: 0 !important;
+  border-radius: var(--radius-lg) !important;
   border-color: var(--line) !important;
   background: var(--paper-deep) !important;
 }
 
 /* Related post cards */
 .site-main .overflow-hidden.rounded-2xl {
-  border-radius: 0 !important;
+  border-radius: var(--radius-lg) !important;
   border-color: var(--line) !important;
 }
 
-/* About page: interest icons → ink */
+/* About page: interest icons → teal */
 .about-interest-icon {
-  background: var(--ink) !important;
-  border-radius: 0 !important;
+  background: var(--color-teal-500) !important;
+  border-radius: var(--radius-sm) !important;
 }
 
 /* About page: avatar container */
