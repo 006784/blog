@@ -2378,8 +2378,8 @@ textarea:focus {
 }
 
 .input-modern:focus {
-  border-color: rgba(10, 132, 255, 0.6) !important;
-  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.14) !important;
+  border-color: color-mix(in srgb, var(--color-teal-500) 60%, transparent) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-teal-500) 14%, transparent) !important;
 }
 
 .chip-filter {
@@ -2397,8 +2397,8 @@ textarea:focus {
 }
 
 .nav-chip-active {
-  border-color: rgba(10, 132, 255, 0.34) !important;
-  background: rgba(10, 132, 255, 0.14) !important;
+  border-color: color-mix(in srgb, var(--color-teal-500) 34%, transparent) !important;
+  background: color-mix(in srgb, var(--color-teal-500) 14%, transparent) !important;
 }
 
 .ios-modal-overlay {
@@ -2680,13 +2680,13 @@ textarea:focus {
 }
 
 .btn-primary {
-  border-color: rgba(0, 101, 209, 0.42) !important;
-  background: linear-gradient(158deg, #3792ff 0%, #007aff 58%, #005dc1 100%) !important;
-  box-shadow: 0 14px 30px -20px rgba(0, 122, 255, 0.5) !important;
+  border-color: color-mix(in srgb, var(--color-teal-600) 42%, transparent) !important;
+  background: linear-gradient(158deg, var(--color-teal-400) 0%, var(--color-teal-500) 58%, var(--color-teal-700) 100%) !important;
+  box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--color-teal-500) 50%, transparent) !important;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 20px 36px -22px rgba(0, 122, 255, 0.56) !important;
+  box-shadow: 0 20px 36px -22px color-mix(in srgb, var(--color-teal-500) 56%, transparent) !important;
 }
 
 .btn-secondary {
@@ -2715,8 +2715,8 @@ textarea:focus {
 }
 
 .input-modern:focus {
-  border-color: rgba(0, 122, 255, 0.58) !important;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12) !important;
+  border-color: color-mix(in srgb, var(--color-teal-500) 58%, transparent) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-teal-500) 12%, transparent) !important;
 }
 
 .guestbook-field {
@@ -3080,12 +3080,13 @@ textarea:focus {
     border-color var(--duration-fast) var(--ease-default),
     transform var(--duration-fast) var(--ease-default);
 }
-.sidebar-mobile-sheet-link:hover,
-.sidebar-mobile-sheet-link.active {
-  background: rgba(255, 255, 255, 0.05);
+.sidebar-mobile-sheet-link:hover {
+  background: color-mix(in srgb, var(--color-teal-500) 6%, var(--surface-raised));
   border-color: var(--border-default);
 }
 .sidebar-mobile-sheet-link.active {
+  background: color-mix(in srgb, var(--color-teal-500) 10%, var(--surface-raised));
+  border-color: color-mix(in srgb, var(--color-teal-500) 28%, var(--border-default));
   transform: translateX(2px);
 }
 
@@ -3138,13 +3139,13 @@ textarea:focus {
 }
 
 .premium-search-item:hover {
-  border-color: rgba(0, 122, 255, 0.18);
-  background: rgba(0, 122, 255, 0.06);
+  border-color: color-mix(in srgb, var(--color-teal-500) 18%, transparent);
+  background: color-mix(in srgb, var(--color-teal-500) 6%, transparent);
 }
 
 .premium-search-item-active {
-  border-color: rgba(0, 122, 255, 0.34);
-  background: rgba(0, 122, 255, 0.12);
+  border-color: color-mix(in srgb, var(--color-teal-500) 34%, transparent);
+  background: color-mix(in srgb, var(--color-teal-500) 12%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
@@ -3158,12 +3159,7 @@ textarea:focus {
   background: rgba(17, 22, 34, 0.72);
 }
 
-.premium-blog-card {
-  border-color: var(--premium-line) !important;
-}
-
 .premium-blog-card:hover {
-  border-color: rgba(0, 122, 255, 0.28) !important;
   box-shadow: var(--premium-shadow-hover) !important;
 }
 
@@ -4993,6 +4989,23 @@ textarea:focus {
     linear-gradient(180deg, rgba(255, 251, 244, 0.94) 0%, rgba(255, 246, 235, 0.82) 100%) !important;
 }
 
+.dark .journal-hero.surface-hero {
+  background:
+    radial-gradient(420px circle at 90% 10%, rgba(195, 135, 98, 0.07), transparent 44%),
+    radial-gradient(360px circle at 10% 100%, rgba(116, 132, 107, 0.06), transparent 44%),
+    linear-gradient(180deg, var(--surface-raised) 0%, var(--surface-overlay) 100%) !important;
+}
+
+.journal-page {
+  --journal-soft-dark: #a89480;
+}
+
+.dark .journal-page {
+  --journal-ink: var(--color-neutral-900);
+  --journal-soft: #a89480;
+  --journal-line: rgba(200, 175, 150, 0.1);
+}
+
 .journal-hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
@@ -5805,6 +5818,19 @@ textarea:focus {
   outline: 2px solid color-mix(in srgb, var(--gold) 42%, white) !important;
 }
 
+.dark .premium-blog-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 20px 36px -30px var(--surface-card-shadow) !important;
+}
+
+.dark .premium-blog-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 28px 44px -30px var(--surface-card-shadow-strong) !important;
+  outline: 2px solid color-mix(in srgb, var(--gold) 28%, transparent) !important;
+}
+
 .interactive-card:hover {
   transform: translateY(-8px) scale(1.01) !important;
   box-shadow:
@@ -6034,6 +6060,11 @@ textarea:focus {
   background: color-mix(in srgb, var(--blog-card-chip) 88%, white);
 }
 
+.dark .ground-news-card-kicker {
+  color: color-mix(in srgb, var(--blog-card-accent) 82%, white);
+  background: color-mix(in srgb, var(--blog-card-chip) 32%, transparent);
+}
+
 .ground-news-card-topline-right {
   display: flex;
   align-items: center;
@@ -6131,6 +6162,10 @@ textarea:focus {
   background: color-mix(in srgb, var(--blog-card-accent-soft) 64%, white);
 }
 
+.dark .ground-news-card-view {
+  background: color-mix(in srgb, var(--blog-card-accent-soft) 30%, transparent);
+}
+
 .ground-news-card-description {
   margin: 0;
   display: -webkit-box;
@@ -6162,6 +6197,12 @@ textarea:focus {
   color: #4a3826;
 }
 
+.dark .ground-news-card-tag {
+  border-color: color-mix(in srgb, var(--blog-card-accent) 22%, transparent);
+  background: color-mix(in srgb, var(--blog-card-chip) 28%, transparent);
+  color: color-mix(in srgb, var(--blog-card-accent) 80%, white);
+}
+
 .ground-news-card-footer {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6191,6 +6232,11 @@ textarea:focus {
   background: color-mix(in srgb, var(--blog-card-accent-soft) 92%, white);
 }
 
+.dark .ground-news-card-footer-cell.is-secondary {
+  color: color-mix(in srgb, var(--blog-card-accent) 88%, white);
+  background: color-mix(in srgb, var(--blog-card-accent-soft) 36%, transparent);
+}
+
 .ground-news-card-cta {
   display: inline-flex;
   align-items: center;
@@ -6201,6 +6247,10 @@ textarea:focus {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--blog-card-accent-deep);
+}
+
+.dark .ground-news-card-cta {
+  color: color-mix(in srgb, var(--blog-card-accent) 90%, white);
 }
 
 .ground-news-card-cta svg {
