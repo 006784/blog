@@ -12,10 +12,11 @@ interface Props {
 }
 
 const INK_COLOR: Record<DiaryTheme, string> = {
-  kraft: '#3a2010',
-  washi: '#5a4838',
+  neu:      '#141412',
+  kraft:    '#3a2010',
+  washi:    '#5a4838',
   literary: '#c4a96d',
-  minimal: '#1a1a1a',
+  minimal:  '#1a1a1a',
 };
 
 export function DrawingCanvas({ theme, onSave, onClose }: Props) {

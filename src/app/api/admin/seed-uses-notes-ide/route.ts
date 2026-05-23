@@ -4,6 +4,10 @@ import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
+const DEV_ONLY_GUARD = process.env.NODE_ENV !== 'development'
+  ? () => Response.json({ error: '仅开发环境可用' }, { status: 403 })
+  : null;
+
 const DATA = [
   // ── 笔记工具 ─────────────────────────────────────────────
   { category: 'notes', name: 'Obsidian',        description: 'Markdown 双向链接本地笔记，知识图谱可视化',       icon_url: 'https://obsidian.md/favicon.ico',                   link: 'https://obsidian.md',              sort_order: 1 },
@@ -69,6 +73,7 @@ const DATA = [
 ];
 
 export async function POST(req: NextRequest) {
+  if (DEV_ONLY_GUARD) return DEV_ONLY_GUARD();
   const session = await requireAdminSession(req);
   if (!session) return NextResponse.json({ error: '未授权' }, { status: 401 });
 

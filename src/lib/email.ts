@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 // 发送新文章通知给所有订阅者
 export async function sendNewPostNotification(
@@ -18,7 +20,7 @@ export async function sendNewPostNotification(
 
   const results = await Promise.allSettled(
     subscribers.map(async (subscriber) => {
-      return resend.emails.send({
+      return getResend().emails.send({
         from: 'Lumen <noreply@artchain.icu>',
         to: subscriber.email,
         subject: `新文章发布: ${post.title}`,
@@ -115,7 +117,7 @@ export async function sendSubscriptionConfirmation(
     ? '\n\n精选文章推荐:\n' + recentPosts.map(post => `- ${post.title}: ${siteUrl}/blog/${post.slug}`).join('\n')
     : '';
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'Lumen <noreply@artchain.icu>',
     to: email,
     subject: '感谢订阅Lumen',

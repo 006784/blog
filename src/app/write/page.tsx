@@ -16,6 +16,7 @@ import remarkGfm from 'remark-gfm';
 import { ImageUploader } from '@/components/ImageUploader';
 import { Collection, getPostById, getPostBySlug } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
+import { useProfile } from '@/components/ProfileProvider';
 import MobileWritePage from './mobile/page';
 import { apiCreatePost, apiUpdatePost } from '@/lib/post-api-client';
 
@@ -76,6 +77,8 @@ function WritePageContent() {
   const editId = searchParams.get('edit');
   const isMobile = useIsMobile();
   const { isAdmin, loading: adminLoading, showLoginModal } = useAdmin();
+  const { profile } = useProfile();
+  const authorName = profile.nickname || 'Lumen';
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -130,8 +133,8 @@ function WritePageContent() {
           showNotification('success', '已恢复本地草稿');
         }
       }
-    } catch (e) {
-      console.error('加载本地草稿失败:', e);
+    } catch {
+      // 本地草稿解析失败，静默忽略
     }
   });
 
@@ -142,8 +145,8 @@ function WritePageContent() {
         const { collections } = await res.json();
         setCollections(collections);
       }
-    } catch (error) {
-      console.error('加载集合失败:', error);
+    } catch {
+      // 合集加载失败不影响写作，静默忽略
     }
   });
 
@@ -165,9 +168,8 @@ function WritePageContent() {
         setPinnedAt(post.pinned_at || null);
         setCurrentPostId(post.id);
       }
-    } catch (error) {
-      console.error('加载文章失败:', error);
-      showNotification('error', '加载文章失败');
+    } catch {
+      showNotification('error', '加载文章失败，请刷新重试');
     } finally {
       setLoading(false);
     }
@@ -183,7 +185,7 @@ function WritePageContent() {
         slug: currentPostId ? undefined : generateSlug(title || '未命名草稿'),
         description, content, category, tags,
         image: coverImage, cover_image: coverImage,
-        author: 'Lumen', reading_time: estimateReadingTime(content),
+        author: authorName, reading_time: estimateReadingTime(content),
         status: 'draft' as const, meta_title: metaTitle, meta_description: metaDescription,
         is_pinned: isPinned, pinned_at: resolvedPinnedAt, collection_id: collectionId || undefined,
       };
@@ -194,8 +196,8 @@ function WritePageContent() {
         setCurrentPostId(newPost.id);
       }
       setLastSaved(new Date());
-    } catch (error) {
-      console.error('自动保存失败:', error);
+    } catch {
+      // 自动保存失败静默忽略，不打断用户写作
     }
   });
 
@@ -245,8 +247,7 @@ function WritePageContent() {
       setShowNewCollection(false);
       setNewCollectionName('');
       showNotification('success', `集合「${newCol.name}」创建成功`);
-    } catch (error) {
-      console.error('创建集合失败:', error);
+    } catch {
       showNotification('error', '创建集合失败');
     } finally {
       setCreatingCollection(false);
@@ -272,7 +273,7 @@ function WritePageContent() {
         title, slug: currentPostId ? undefined : generateSlug(title),
         description, content, category, tags,
         image: coverImage, cover_image: coverImage,
-        author: 'Lumen', reading_time: estimateReadingTime(content),
+        author: authorName, reading_time: estimateReadingTime(content),
         status: 'draft' as const, meta_title: metaTitle, meta_description: metaDescription,
         is_pinned: isPinned, pinned_at: resolvedPinnedAt, collection_id: collectionId || undefined,
       };
@@ -286,7 +287,7 @@ function WritePageContent() {
       setLastSaved(new Date());
       showNotification('success', '草稿已保存');
     } catch (error) {
-      console.error('保存失败:', error);
+      // error already shown via showNotification
       showNotification('error', error instanceof Error ? error.message : '保存失败');
     } finally {
       setIsSaving(false);
@@ -304,7 +305,7 @@ function WritePageContent() {
       const postData = {
         title, slug, description, content, category, tags,
         image: coverImage, cover_image: coverImage,
-        author: 'Lumen', reading_time: estimateReadingTime(content),
+        author: authorName, reading_time: estimateReadingTime(content),
         status: 'published' as const, meta_title: metaTitle, meta_description: metaDescription,
         is_pinned: isPinned, pinned_at: resolvedPinnedAt,
         published_at: new Date().toISOString(), collection_id: collectionId || undefined,
@@ -326,13 +327,13 @@ function WritePageContent() {
           });
           const data = await res.json();
           if (res.ok && data.successful > 0) showNotification('success', `已通知 ${data.successful} 位订阅者`);
-        } catch (notifyError) {
-          console.error('发送通知失败:', notifyError);
+        } catch {
+          // 发布成功，通知失败不阻塞
         }
       }
       setTimeout(() => router.push('/blog'), 1500);
     } catch (error) {
-      console.error('发布失败:', error);
+      // error already shown via showNotification
       showNotification('error', error instanceof Error ? error.message : '发布失败');
     } finally {
       setIsPublishing(false);
@@ -368,7 +369,7 @@ function WritePageContent() {
           <h1 className="font-[var(--font-mincho)] text-2xl mb-2 text-[var(--ink)]">需要管理员权限</h1>
           <p className="text-sm text-[var(--ink)]/50 mb-6">只有管理员可以发布文章</p>
           <button
-            onClick={() => showLoginModal(() => window.location.reload())}
+            onClick={() => showLoginModal()}
             className="px-8 py-2.5 border border-[var(--gold)] text-[var(--gold)] text-sm hover:bg-[var(--gold)] hover:text-[var(--paper)] transition-colors mb-4"
           >
             管理员登录
@@ -454,7 +455,7 @@ function WritePageContent() {
           className="flex items-center gap-1.5 px-4 py-1.5 bg-[var(--gold)] text-[var(--paper)] text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
         >
           {isPublishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">発布</span>
+          <span className="hidden sm:inline">发布</span>
         </button>
       </header>
 

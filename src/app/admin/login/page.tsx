@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   browserSupportsWebAuthn,
@@ -21,7 +21,6 @@ import {
 type Step = 'email' | 'code';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/admin';
 
@@ -35,6 +34,7 @@ function LoginForm() {
   const [retryAfter, setRetryAfter] = useState(0);
   const [supportsPasskey, setSupportsPasskey] = useState(false);
   const [platformPasskeyAvailable, setPlatformPasskeyAvailable] = useState(false);
+  const [passkeyConfigured, setPasskeyConfigured] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (retryAfter <= 0) return;
@@ -49,6 +49,11 @@ function LoginForm() {
       platformAuthenticatorIsAvailable()
         .then(setPlatformPasskeyAvailable)
         .catch(() => setPlatformPasskeyAvailable(false));
+
+      // 检查服务端是否已配置通行密钥
+      fetch('/api/auth/passkey/authenticate/options/', { method: 'POST', credentials: 'include' })
+        .then((res) => setPasskeyConfigured(res.status !== 404))
+        .catch(() => setPasskeyConfigured(false));
     }
   }, []);
 
@@ -119,7 +124,8 @@ function LoginForm() {
         return;
       }
 
-      router.replace(redirect);
+      // 全页刷新确保 httpOnly cookie 立刻生效，防止 Next.js 客户端导航丢 cookie
+      window.location.href = redirect;
     } catch {
       setError('网络错误，请稍后重试');
     } finally {
@@ -156,7 +162,7 @@ function LoginForm() {
         throw new Error(verifyData?.error || '通行密钥登录失败');
       }
 
-      router.replace(redirect);
+      window.location.href = redirect;
     } catch (error) {
       setError(error instanceof Error ? error.message : '通行密钥登录失败');
     } finally {
@@ -196,7 +202,7 @@ function LoginForm() {
           </p>
         </div>
 
-        {supportsPasskey && step === 'email' ? (
+        {supportsPasskey && passkeyConfigured && step === 'email' ? (
           <div className="mb-5 space-y-3">
             <button
               type="button"
@@ -205,10 +211,10 @@ function LoginForm() {
               className="w-full py-4 rounded-2xl border border-border bg-background/80 text-foreground font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {passkeyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fingerprint className="w-4 h-4" />}
-              使用通行密钥
+              {passkeyLoading ? '正在验证…' : '使用通行密钥'}
             </button>
             <p className="text-center text-xs text-muted-foreground">
-              {platformPasskeyAvailable ? '当前设备支持指纹 / Face ID / 系统解锁' : '浏览器支持通行密钥，可尝试用系统解锁登录'}
+              {platformPasskeyAvailable ? '指纹 / Face ID / 系统解锁' : '使用已注册的安全密钥'}
             </p>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <div className="h-px flex-1 bg-border" />

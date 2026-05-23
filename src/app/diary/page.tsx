@@ -16,8 +16,8 @@ import { DiarySearchService, type SearchOptions } from '@/lib/diary/search-servi
 
 // ── Helpers ────────────────────────────────────────────────────
 function getSavedTheme(): DiaryTheme {
-  if (typeof window === 'undefined') return 'kraft';
-  return (localStorage.getItem('diary-theme') as DiaryTheme) || 'kraft';
+  if (typeof window === 'undefined') return 'neu';
+  return (localStorage.getItem('diary-theme') as DiaryTheme) || 'neu';
 }
 
 type View = 'calendar' | 'timeline' | 'editor' | 'report' | 'search';
@@ -49,7 +49,7 @@ export default function DiaryPage() {
   const { isAdmin, loading: adminLoading, showLoginModal } = useAdmin();
   const shellRef = useRef<HTMLDivElement>(null);
 
-  const [theme, setTheme] = useState<DiaryTheme>('kraft');
+  const [theme, setTheme] = useState<DiaryTheme>('neu');
   const [view, setView] = useState<View>('calendar');
 
   // Data

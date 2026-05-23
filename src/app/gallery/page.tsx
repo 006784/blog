@@ -22,6 +22,8 @@ import {
   formatDate
 } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
+import { showConfirm } from '@/lib/confirm';
+import { showToast } from '@/lib/toast';
 
 function GallerySkeleton({ viewMode }: { viewMode: 'grid' | 'masonry' }) {
   if (viewMode === 'masonry') {
@@ -70,7 +72,7 @@ export default function GalleryPage() {
       setPhotos(photosData);
       setAlbums(albumsData);
     } catch (error) {
-      console.error('加载数据失败:', error);
+      console.error('加载相册数据失败:', error);
       setPhotos([]);
       setAlbums([]);
       setError(true);
@@ -84,13 +86,16 @@ export default function GalleryPage() {
   }, [loadData]);
 
   async function handleDeletePhoto(id: string) {
-    if (!confirm('确定删除这张照片吗？')) return;
+    const ok = await showConfirm({ title: '删除照片', description: '确定删除这张照片吗？此操作不可恢复。', confirmText: '删除', danger: true });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/gallery/photos/${id}/`, { method: 'DELETE' });
       if (!res.ok) throw new Error('删除失败');
       setPhotos((current) => current.filter((p) => p.id !== id));
+      showToast.success('照片已删除');
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error('删除照片失败:', error);
+      showToast.error('删除失败，请稍后重试');
     }
   }
 
@@ -105,8 +110,10 @@ export default function GalleryPage() {
       const { photo } = await res.json();
       setPhotos((current) => current.map((p) => p.id === id ? photo : p));
       setEditingPhoto(null);
+      showToast.success('已更新');
     } catch (error) {
-      console.error('更新失败:', error);
+      console.error('更新照片失败:', error);
+      showToast.error('更新失败，请稍后重试');
     }
   }
 
@@ -407,26 +414,25 @@ function PhotoCard({
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       
-      {/* Info */}
-      <div className="absolute bottom-0 left-0 right-0 translate-y-full p-4 transition-transform group-hover:translate-y-0">
-        {photo.title && (
-          <h3 className="font-medium text-white truncate">{photo.title}</h3>
-        )}
-        <div className="flex items-center gap-3 text-white/70 text-sm mt-1">
-          {photo.location && (
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {photo.location}
-            </span>
-          )}
-          {photo.taken_at && (
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {formatDate(photo.taken_at)}
-            </span>
-          )}
+      {/* Info — 只显示位置/日期，不显示文件名 */}
+      {(photo.location || photo.taken_at) && (
+        <div className="absolute bottom-0 left-0 right-0 translate-y-full p-3 transition-transform group-hover:translate-y-0">
+          <div className="flex items-center gap-3 text-white/85 text-xs">
+            {photo.location && (
+              <span className="flex items-center gap-1 drop-shadow">
+                <MapPin className="w-3 h-3" />
+                {photo.location}
+              </span>
+            )}
+            {photo.taken_at && (
+              <span className="flex items-center gap-1 drop-shadow">
+                <Calendar className="w-3 h-3" />
+                {formatDate(photo.taken_at)}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Actions - 只有管理员可见 */}
       <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">

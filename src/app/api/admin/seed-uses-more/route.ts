@@ -4,6 +4,10 @@ import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
+const DEV_ONLY_GUARD = process.env.NODE_ENV !== 'development'
+  ? () => Response.json({ error: '仅开发环境可用' }, { status: 403 })
+  : null;
+
 const MORE_DATA = [
   // ── 芯片 / CPU ──────────────────────────────────────────
   { category: 'chips', name: 'Apple M4 Pro',           description: '3nm 工艺，CPU/GPU/NPU 三合一，MacBook Pro 旗舰芯片',   icon_url: 'https://www.apple.com/favicon.ico',                          link: 'https://www.apple.com/newsroom/2024/10/apple-introduces-m4-pro-and-m4-max/', sort_order: 1 },
@@ -65,6 +69,7 @@ const MORE_DATA = [
 ];
 
 export async function POST(req: NextRequest) {
+  if (DEV_ONLY_GUARD) return DEV_ONLY_GUARD();
   const session = await requireAdminSession(req);
   if (!session) return NextResponse.json({ error: '未授权' }, { status: 401 });
 

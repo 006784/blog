@@ -4,6 +4,10 @@ import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
+const DEV_ONLY_GUARD = process.env.NODE_ENV !== 'development'
+  ? () => Response.json({ error: '仅开发环境可用' }, { status: 403 })
+  : null;
+
 const SEED_DATA = [
   {
     category: 'hardware',
@@ -56,6 +60,7 @@ const SEED_DATA = [
 ];
 
 export async function POST(req: NextRequest) {
+  if (DEV_ONLY_GUARD) return DEV_ONLY_GUARD();
   const session = await requireAdminSession(req);
   if (!session) return NextResponse.json({ error: '未授权' }, { status: 401 });
 

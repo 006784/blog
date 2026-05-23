@@ -21,6 +21,7 @@ import {
   LogOut,
   Mail,
   Menu,
+  Monitor,
   MessageCircle,
   Moon,
   Music,
@@ -59,6 +60,7 @@ const group1: NavItem[] = [
 const group2: NavItem[] = [
   { key: 'diary',       href: '/diary',       icon: BookOpen,      label: '日记',  kana: '記' },
   { key: 'gallery',     href: '/gallery',     icon: Camera,        label: '相册',  kana: '影' },
+  { key: 'computer',    href: '/computer',    icon: Monitor,       label: '电脑专区', kana: '屏' },
   { key: 'music',       href: '/music',       icon: Music,         label: '歌单',  kana: '音' },
   { key: 'collections', href: '/collections', icon: BookMarked,    label: '合集',  kana: '選' },
   { key: 'media',       href: '/media',       icon: Film,          label: '书影音', kana: '覧' },
@@ -418,6 +420,49 @@ export function Sidebar() {
                 <Moon style={{ width: 13, height: 13 }} strokeWidth={1.5} />
               )}
             </button>
+
+            {/* Admin shortcuts — 永远在 rail 里可见 */}
+            {isAdmin ? (
+              <>
+                <Link
+                  href="/write"
+                  className="rail-btn"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    background: 'var(--gold)',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  title="写文章"
+                  aria-label="写文章"
+                >
+                  <PenLine style={{ width: 13, height: 13, color: 'var(--paper)' }} strokeWidth={2} />
+                </Link>
+                <Link
+                  href="/admin"
+                  className="rail-btn"
+                  style={{ width: 30, height: 30 }}
+                  title="管理后台"
+                  aria-label="管理后台"
+                >
+                  <Shield style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                </Link>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => showLoginModal()}
+                className="rail-btn"
+                style={{ width: 30, height: 30, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                title="管理员登录"
+                aria-label="管理员登录"
+              >
+                <Shield style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -459,6 +504,64 @@ export function Sidebar() {
               </div>
             </Link>
 
+            {/* Admin actions — 移到顶部，展开即可见 */}
+            {isAdmin ? (
+              <div style={{ display: 'flex', gap: 6, marginBottom: 10, position: 'relative', zIndex: 1 }}>
+                <Link
+                  href="/write"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 5,
+                    padding: '6px 0',
+                    borderRadius: 8,
+                    background: 'var(--gold)',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <PenLine style={{ width: 11, height: 11, color: 'var(--paper)', flexShrink: 0 }} strokeWidth={2} />
+                  <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--paper)' }}>
+                    Write
+                  </span>
+                </Link>
+                <Link
+                  href="/admin"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 30,
+                    borderRadius: 8,
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--line)',
+                    textDecoration: 'none',
+                  }}
+                  title="管理后台"
+                >
+                  <Shield style={{ width: 11, height: 11, color: 'var(--ink-secondary)' }} strokeWidth={1.5} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 30,
+                    borderRadius: 8,
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--line)',
+                    cursor: 'pointer',
+                  }}
+                  title="退出登录"
+                >
+                  <LogOut style={{ width: 11, height: 11, color: 'var(--ink-secondary)' }} strokeWidth={1.5} />
+                </button>
+              </div>
+            ) : null}
+
             {/* Nav links */}
             <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
               {panelGroup.items.map(item => (
@@ -474,62 +577,6 @@ export function Sidebar() {
                   <span className="panel-link-text">{item.label}</span>
                 </Link>
               ))}
-            </div>
-
-            {/* Admin actions */}
-            <div
-              style={{
-                marginTop: 'auto',
-                paddingTop: 20,
-                borderTop: '1px solid var(--line)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                position: 'relative',
-                zIndex: 1,
-              }}
-            >
-              {isAdmin ? (
-                <>
-                  <Link href="/write">
-                    <span className="sidebar-text-link">
-                      <PenLine style={{ width: 11, height: 11 }} strokeWidth={1.5} />
-                      <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                        Write
-                      </span>
-                    </span>
-                  </Link>
-                  <Link href="/admin">
-                    <span className="sidebar-text-link">
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                        Dashboard
-                      </span>
-                    </span>
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className="sidebar-text-ghost"
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                  >
-                    <LogOut style={{ width: 11, height: 11 }} strokeWidth={1.5} />
-                    <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                      Logout
-                    </span>
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => showLoginModal()}
-                  className="sidebar-text-link"
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                >
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', border: '1px solid var(--ink-muted)', flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'var(--font-garamond)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                    Admin
-                  </span>
-                </button>
-              )}
             </div>
 
             {/* Kana decoration */}
@@ -567,7 +614,7 @@ export function Sidebar() {
           left: 0,
           right: 0,
           zIndex: 40,
-          background: 'rgba(15, 17, 23, 0.84)',
+          background: 'color-mix(in srgb, var(--surface-base) 88%, transparent)',
           backdropFilter: 'blur(18px) saturate(130%)',
           WebkitBackdropFilter: 'blur(18px) saturate(130%)',
           borderTop: '1px solid var(--line)',
@@ -655,7 +702,7 @@ export function Sidebar() {
                 zIndex: 50,
                 maxHeight: '82vh',
                 overflowY: 'auto',
-                background: 'linear-gradient(180deg, rgba(16, 17, 22, 0.98) 0%, rgba(24, 26, 33, 0.98) 100%)',
+                background: 'var(--surface-raised)',
                 borderTop: '1px solid var(--line)',
                 padding: '24px 0 0',
                 paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))',

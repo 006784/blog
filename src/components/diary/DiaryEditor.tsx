@@ -30,6 +30,7 @@ import { ThemeSwitcher } from './ThemeSwitcher';
 import { type WeatherData, WeatherPicker } from './WeatherPicker';
 
 const PLACEHOLDER: Record<DiaryTheme, string> = {
+  neu: '写点什么……',
   kraft: '今天……',
   washi: '今日の記録…',
   literary: '谨以此文，记录今日所思……',

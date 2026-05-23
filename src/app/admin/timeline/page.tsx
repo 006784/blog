@@ -59,6 +59,12 @@ export default function AdminTimelinePage() {
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [showAI, setShowAI] = useState(false);
+  const [aiDesc, setAiDesc] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiPreview, setAiPreview] = useState<Partial<TimelineEvent>[]>([]);
+  const [aiError, setAiError] = useState('');
+  const [importingAI, setImportingAI] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -79,6 +85,53 @@ export default function AdminTimelinePage() {
       })
       .finally(() => setLoading(false));
   }, [authLoading, isAdmin, router]);
+
+  async function handleAIGenerate() {
+    if (!aiDesc.trim()) return;
+    setAiGenerating(true);
+    setAiError('');
+    setAiPreview([]);
+    try {
+      const res = await fetch('/api/timeline/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ description: aiDesc }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '生成失败');
+      setAiPreview(data.events ?? []);
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : '生成失败，请重试');
+    } finally {
+      setAiGenerating(false);
+    }
+  }
+
+  async function handleAIImport(selected: Partial<TimelineEvent>[]) {
+    if (!selected.length) return;
+    setImportingAI(true);
+    try {
+      for (const ev of selected) {
+        await fetch('/api/timeline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(ev),
+        });
+      }
+      const res = await fetch('/api/timeline');
+      const data = await res.json();
+      setEvents(Array.isArray(data) ? data : []);
+      setShowAI(false);
+      setAiPreview([]);
+      setAiDesc('');
+    } catch {
+      setAiError('导入失败，请重试');
+    } finally {
+      setImportingAI(false);
+    }
+  }
 
   function openCreate() {
     setEditing(null);
@@ -195,6 +248,14 @@ export default function AdminTimelinePage() {
             <Button variant="secondary" onClick={handleSeedDefaults} disabled={seeding}>
               {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               初始化示例时间线
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setShowAI(true)}
+              style={{ background: 'color-mix(in srgb, var(--color-teal-500) 12%, var(--surface-raised))', color: 'var(--color-teal-700)', borderColor: 'var(--color-teal-300)' }}
+            >
+              <Sparkles className="h-4 w-4" />
+              AI 自动生成
             </Button>
             <Button onClick={openCreate} className="rounded-full px-5">
               <Plus className="h-4 w-4" />
@@ -384,6 +445,98 @@ export default function AdminTimelinePage() {
             </motion.div>
           </motion.div>
         ) : null}
+      </AnimatePresence>
+
+      {/* AI 生成弹窗 */}
+      <AnimatePresence>
+        {showAI && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+            onClick={(e) => e.target === e.currentTarget && setShowAI(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="w-full max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--surface-raised)] shadow-[var(--shadow-2xl)]"
+            >
+              <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-[var(--color-teal-500)]" />
+                  <h2 className="text-base font-semibold">DeepSeek AI 自动生成时间线</h2>
+                </div>
+                <button type="button" onClick={() => setShowAI(false)} className={iconButtonCls} aria-label="关闭">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4 px-6 py-5">
+                <p className="text-sm text-[var(--color-neutral-500)]">
+                  描述你的经历，AI 会自动提取关键时间节点。例如：&quot;2020年7月开始第一份工作，2022年考研成功，2023年旅行去了日本...&quot;
+                </p>
+                <Textarea
+                  value={aiDesc}
+                  onChange={(e) => setAiDesc(e.target.value)}
+                  placeholder="在这里描述你的成长经历，越详细越好..."
+                  rows={5}
+                />
+                {aiError && (
+                  <p className="text-sm text-red-500">{aiError}</p>
+                )}
+                <Button
+                  onClick={handleAIGenerate}
+                  disabled={aiGenerating || !aiDesc.trim()}
+                  loading={aiGenerating}
+                  className="w-full"
+                  style={{ background: 'var(--color-teal-500)', color: '#fff' }}
+                >
+                  {!aiGenerating && <Sparkles className="h-4 w-4" />}
+                  {aiGenerating ? '正在生成...' : '生成时间线'}
+                </Button>
+
+                {/* 预览生成结果 */}
+                {aiPreview.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-[var(--color-neutral-700)]">
+                        生成了 {aiPreview.length} 个事件，确认后全部导入：
+                      </p>
+                    </div>
+                    <div className="max-h-60 space-y-2 overflow-y-auto rounded-[var(--radius-xl)] bg-[var(--surface-base)] p-3">
+                      {aiPreview.map((ev, i) => (
+                        <div key={i} className="flex items-center gap-3 rounded-[var(--radius-lg)] bg-[var(--surface-raised)] p-3 text-sm shadow-[var(--shadow-xs)]">
+                          <span className="text-base">{ev.icon ?? '📌'}</span>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium truncate">{ev.title}</p>
+                            <p className="text-xs text-[var(--color-neutral-500)]">{ev.date} · {ev.category}</p>
+                          </div>
+                          {ev.is_milestone && (
+                            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">里程碑</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2 border-t border-[color:var(--border-default)]">
+                      <Button variant="secondary" onClick={() => setAiPreview([])}>重新生成</Button>
+                      <Button
+                        onClick={() => handleAIImport(aiPreview)}
+                        disabled={importingAI}
+                        loading={importingAI}
+                        style={{ background: 'var(--color-teal-500)', color: '#fff' }}
+                      >
+                        {!importingAI && <Plus className="h-4 w-4" />}
+                        全部导入 ({aiPreview.length})
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

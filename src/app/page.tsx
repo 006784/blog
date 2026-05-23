@@ -9,7 +9,7 @@ export const metadata = {
   title: `${siteConfig.name} - 分享技术与生活`,
   description: siteConfig.description,
   keywords: '前端开发,后端架构,技术博客,编程教程,个人成长',
-  authors: [{ name: '博主' }],
+  authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
   publisher: siteConfig.name,
   formatDetection: {

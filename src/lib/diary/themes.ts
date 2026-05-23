@@ -1,14 +1,26 @@
-export type DiaryTheme = 'kraft' | 'washi' | 'literary' | 'minimal';
+export type DiaryTheme = 'neu' | 'kraft' | 'washi' | 'literary' | 'minimal';
 
 export const DIARY_THEMES: Record<
   DiaryTheme,
-  {
-    name: string;
-    desc: string;
-    isDark?: boolean;
-    vars: Record<string, string>;
-  }
+  { name: string; desc: string; isDark?: boolean; vars: Record<string, string> }
 > = {
+  neu: {
+    name: '轻拟态',
+    desc: '现代轻拟态 · 绿白清透',
+    vars: {
+      '--d-bg':        '#EBEBEA',
+      '--d-bg-warm':   '#F5F5F4',
+      '--d-spine':     '#1b8272',
+      '--d-ink':       '#141412',
+      '--d-ink-2':     '#585856',
+      '--d-ink-3':     '#a0a09e',
+      '--d-accent':    '#1b8272',
+      '--d-border':    'rgba(0,0,0,0.07)',
+      '--d-line':      'rgba(0,0,0,0.04)',
+      '--d-font-body':  "'Plus Jakarta Sans', 'Inter', sans-serif",
+      '--d-font-title': "'Plus Jakarta Sans', 'Inter', sans-serif",
+    },
+  },
   kraft: {
     name: '牛皮纸',
     desc: '暖黄纸张 · 钢笔手写感',
@@ -74,8 +86,8 @@ export const DIARY_THEMES: Record<
       '--d-accent': '#1a1a1a',
       '--d-border': '#eeeeee',
       '--d-line': '#f5f5f5',
-      '--d-font-body': "'Noto Serif JP', serif",
-      '--d-font-title': "'Shippori Mincho', serif",
+      '--d-font-body': "'Plus Jakarta Sans', 'Inter', sans-serif",
+      '--d-font-title': "'Plus Jakarta Sans', 'Inter', sans-serif",
     },
   },
 };
@@ -87,8 +99,9 @@ export function applyThemeVars(theme: DiaryTheme, el: HTMLElement) {
 }
 
 export const THEME_PREVIEW_BG: Record<DiaryTheme, string> = {
-  kraft: '#f5e6c8',
-  washi: '#fdfaf6',
+  neu:      '#EBEBEA',
+  kraft:    '#f5e6c8',
+  washi:    '#fdfaf6',
   literary: '#1e1a14',
-  minimal: '#ffffff',
+  minimal:  '#ffffff',
 };

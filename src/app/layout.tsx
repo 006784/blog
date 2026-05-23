@@ -79,7 +79,7 @@ export default function RootLayout({
         <JsonLd data={generateWebsiteSchema()} />
         {/* PWA manifest */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#c4a96d" />
+        <meta name="theme-color" content="#1b8272" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         {/* black-translucent = 状态栏透明，内容延伸到刘海/Dynamic Island 下方 */}
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -91,32 +91,22 @@ export default function RootLayout({
         {/* RSS */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} RSS`} href="/feed.xml" />
         
-        {/* 加载优质中文字体 */}
+        {/* 字体加载 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Cormorant Garamond — 杂志英文衬线（含斜体） */}
+        {/* Plus Jakarta Sans — 现代无衬线，标题 + 正文主力 */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap"
-          rel="stylesheet"
-        />
-        {/* Shippori Mincho — 日系明朝体标题 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-        {/* Noto Serif JP — 日系衬线正文 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        {/* Noto Serif SC — 中文宋体回退 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap"
           rel="stylesheet"
         />
         {/* Inter — UI 数字 / 英文辅助 */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+          rel="stylesheet"
+        />
+        {/* JetBrains Mono — 代码 */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>

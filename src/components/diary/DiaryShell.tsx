@@ -26,6 +26,38 @@ export function DiaryShell({ theme, children, date, pageNumber, leftSlot, epigra
   const d = date || new Date();
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+  // ── neu (neumorphism) ──────────────────────────────────────────
+  if (theme === 'neu') {
+    return (
+      <div
+        ref={shellRef}
+        className="diary-shell flex flex-col min-h-screen"
+        style={{ background: 'var(--d-bg)', fontFamily: 'var(--d-font-body)', transition: 'background-color .3s' }}
+      >
+        {/* Teal top accent bar */}
+        <div style={{ height: 3, background: 'linear-gradient(90deg, var(--d-spine), color-mix(in srgb, var(--d-spine) 60%, transparent))' }} />
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left calendar sidebar */}
+          {leftSlot && (
+            <aside
+              className="hidden md:flex flex-col flex-none"
+              style={{
+                width: 220,
+                borderRight: '1px solid var(--d-border)',
+                background: 'var(--d-bg-warm)',
+                boxShadow: '2px 0 12px rgba(0,0,0,0.04)',
+              }}
+            >
+              {leftSlot}
+            </aside>
+          )}
+          <div className="flex-1 overflow-auto">{children}</div>
+        </div>
+      </div>
+    );
+  }
+
   // ── kraft ───────────────────────────────────────────────────────
   if (theme === 'kraft') {
     return (

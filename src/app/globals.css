@@ -2,7 +2,9 @@
 @import "../styles/tokens.css";
 
 :root {
-  /* ===== 日系杂志设计系统 ===== */
+  /* ===== Neumorphism × Teal × Orange 设计系统 ===== */
+
+  /* 语义别名 — 兼容旧代码 */
   --paper:         var(--surface-base);
   --paper-warm:    var(--surface-raised);
   --paper-deep:    var(--surface-overlay);
@@ -11,59 +13,60 @@
   --ink-secondary: var(--color-neutral-600);
   --ink-muted:     var(--color-neutral-500);
   --ink-ghost:     var(--color-neutral-400);
-  --line:          var(--color-neutral-300);
-  --line-light:    var(--surface-sunken);
-  --gold:          var(--color-primary-500);
-  --gold-light:    var(--color-primary-200);
+  --line:          var(--border-default);
+  --line-light:    var(--border-default);
+
+  /* 主色：teal 取代 gold */
+  --gold:          var(--color-teal-500);
+  --gold-light:    var(--color-teal-200);
   --kana-ghost:    var(--surface-overlay);
-  --font-mincho:   'Shippori Mincho', 'Noto Serif SC', serif;
-  --font-jp-serif: 'Noto Serif JP', 'Noto Serif SC', serif;
-  --font-garamond: 'Cormorant Garamond', 'Georgia', serif;
-  /* ============================= */
+
+  /* 新增：橙色强调 */
+  --accent-orange: var(--color-orange-500);
+  --accent-orange-light: var(--color-orange-200);
+
+  /* 字体 — 现代无衬线 */
+  --font-sans:     'Plus Jakarta Sans', 'Inter', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-display:  'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+  --font-inter:    'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, monospace;
+  /* 保留旧字体变量指向新字体，避免组件报错 */
+  --font-mincho:   'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-jp-serif: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-garamond: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  /* ================================================ */
 
   --background: var(--surface-base);
   --foreground: var(--color-neutral-900);
-  --card: var(--surface-base);
+  --card: var(--surface-raised);
   --card-foreground: var(--color-neutral-900);
-  --primary: var(--color-primary-500);
-  --primary-foreground: var(--color-primary-foreground);
+  --primary: var(--color-teal-500);
+  --primary-foreground: #ffffff;
   --secondary: var(--surface-raised);
-  --secondary-foreground: var(--color-neutral-900);
-  --muted: var(--color-neutral-500);
-  --muted-foreground: var(--color-neutral-600);
-  --accent: var(--surface-overlay);
-  --accent-foreground: var(--color-neutral-900);
+  --secondary-foreground: var(--color-neutral-700);
+  --muted: var(--color-neutral-400);
+  --muted-foreground: var(--color-neutral-500);
+  --accent: var(--color-orange-500);
+  --accent-foreground: #ffffff;
   --border: var(--border-default);
-  --ring: var(--color-primary-500);
-  
-  /* 统一的间距系统 */
+  --ring: var(--color-teal-500);
+
+  /* 间距 */
   --spacing-xs: var(--space-2);
   --spacing-sm: var(--space-4);
   --spacing-md: var(--space-6);
   --spacing-lg: var(--space-8);
   --spacing-xl: var(--space-12);
   --spacing-2xl: var(--space-16);
-  
-  /* 简化的配色系统 */
-  --color-primary: var(--color-primary-500);
-  --color-primary-dark: var(--color-primary-700);
-  --color-secondary: var(--surface-raised);
-  --color-accent: var(--color-primary-200);
-  
-  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
-  --gradient-start: var(--color-primary-500);
-  --gradient-end: var(--color-primary-700);
-  
-  /* 背景渐变 — 改为纸色调，与杂志纸底融合 */
-  --bg-gradient-1: var(--color-accent-peach);
-  --bg-gradient-2: var(--color-accent-lilac);
-  --bg-gradient-3: var(--color-accent-sky);
-  --bg-gradient-4: var(--color-accent-mint);
+
+  /* 渐变 */
+  --gradient-start: var(--color-teal-500);
+  --gradient-end:   var(--color-teal-700);
+  --gradient-accent-start: var(--color-orange-400);
+  --gradient-accent-end:   var(--color-orange-600);
 }
 
 .dark {
-  /* 日系杂志深色适配 */
   --paper:         var(--surface-base);
   --paper-warm:    var(--surface-raised);
   --paper-deep:    var(--surface-sunken);
@@ -73,37 +76,29 @@
   --ink-ghost:     var(--color-neutral-400);
   --line:          var(--border-default);
   --line-light:    var(--surface-overlay);
-  --kana-ghost:    var(--surface-overlay);
-
-  /* 背景渐变 — 深色纸色调 */
-  --bg-gradient-1: var(--color-accent-peach);
-  --bg-gradient-2: var(--color-accent-lilac);
-  --bg-gradient-3: var(--color-accent-sky);
-  --bg-gradient-4: var(--color-accent-mint);
+  --gold:          var(--color-teal-500);
+  --gold-light:    var(--color-teal-300);
+  --accent-orange: var(--color-orange-500);
 
   --background: var(--surface-base);
   --foreground: var(--color-neutral-900);
   --card: var(--surface-raised);
   --card-foreground: var(--color-neutral-900);
-  --primary: var(--color-primary-500);
-  --primary-foreground: var(--color-primary-foreground);
+  --primary: var(--color-teal-500);
+  --primary-foreground: #0c3e36;
   --secondary: var(--surface-raised);
   --secondary-foreground: var(--color-neutral-700);
   --muted: var(--color-neutral-400);
   --muted-foreground: var(--color-neutral-500);
-  --accent: var(--surface-overlay);
-  --accent-foreground: var(--color-neutral-900);
+  --accent: var(--color-orange-500);
+  --accent-foreground: #ffffff;
   --border: var(--border-default);
-  --ring: var(--color-primary-500);
-  
-  /* 暗色模式配色 */
-  --color-primary: var(--color-primary-500);
-  --color-primary-dark: var(--color-primary-700);
-  --color-secondary: var(--surface-raised);
-  --color-accent: var(--color-primary-200);
-  
-  --gradient-start: var(--color-primary-500);
-  --gradient-end: var(--color-primary-700);
+  --ring: var(--color-teal-500);
+
+  --gradient-start: var(--color-teal-500);
+  --gradient-end:   var(--color-teal-400);
+  --gradient-accent-start: var(--color-orange-500);
+  --gradient-accent-end:   var(--color-orange-400);
 }
 
 @theme inline {
@@ -124,7 +119,6 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-mono);
 
-  /* 日系杂志工具类映射 */
   --color-paper: var(--paper);
   --color-paper-warm: var(--paper-warm);
   --color-paper-deep: var(--paper-deep);
@@ -137,6 +131,8 @@
   --color-gold: var(--gold);
   --color-gold-light: var(--gold-light);
   --color-kana-ghost: var(--kana-ghost);
+  --color-accent-orange: var(--accent-orange);
+  --font-sans: var(--font-sans);
 }
 
 /* ── iOS / 安卓 移动端基础修复 ─────────────────────────────────── */
@@ -189,34 +185,31 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% 8%, color-mix(in srgb, var(--color-accent-peach) 44%, transparent), transparent 32%),
-    radial-gradient(circle at 82% 10%, rgba(116, 132, 107, 0.16), transparent 28%),
-    radial-gradient(circle at 88% 88%, rgba(195, 135, 98, 0.10), transparent 26%),
-    linear-gradient(180deg, color-mix(in srgb, white 82%, var(--paper)) 0%, var(--paper) 38%, var(--paper-warm) 100%);
+  background: var(--surface-base);
   color: var(--ink);
-  font-family: var(--font-jp-serif), 'Noto Serif SC', 'Hiragino Mincho Pro', serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  line-height: 1.6; /* UI 组件默认行高 */
-  /* 文章正文单独在 .article-content 设置更大行高以优化阅读 */
-  /* 防止 iOS 旋转时字号自动放大 */
+  line-height: 1.6;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
-/* 纸张噪点纹理 */
+/* 网格背景 */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.022;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
 }
 
+/* 多色彩光晕渐变背景 */
 body::after {
   content: '';
   position: fixed;
@@ -224,9 +217,21 @@ body::after {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, color-mix(in srgb, white 20%, transparent), transparent 22%),
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--surface-card-highlight) 88%, transparent), transparent 55%);
-  opacity: 0.45;
+    radial-gradient(ellipse 60% 50% at 8% 2%,  color-mix(in srgb, var(--color-teal-200)   55%, transparent), transparent),
+    radial-gradient(ellipse 50% 40% at 92% 8%,  color-mix(in srgb, var(--color-orange-200) 45%, transparent), transparent),
+    radial-gradient(ellipse 45% 35% at 75% 95%, color-mix(in srgb, var(--color-teal-100)   40%, transparent), transparent),
+    radial-gradient(ellipse 40% 30% at 20% 85%, color-mix(in srgb, #c4b5fd 30%, transparent), transparent),
+    radial-gradient(ellipse 35% 25% at 50% 50%, color-mix(in srgb, var(--color-orange-100) 20%, transparent), transparent);
+}
+
+/* 深色模式光晕 */
+.dark body::after,
+[data-theme="dark"] body::after {
+  background:
+    radial-gradient(ellipse 60% 50% at 8% 2%,  color-mix(in srgb, var(--color-teal-800)   40%, transparent), transparent),
+    radial-gradient(ellipse 50% 40% at 92% 8%,  color-mix(in srgb, var(--color-orange-800) 30%, transparent), transparent),
+    radial-gradient(ellipse 45% 35% at 75% 95%, color-mix(in srgb, var(--color-teal-900)   35%, transparent), transparent),
+    radial-gradient(ellipse 40% 30% at 20% 85%, color-mix(in srgb, #3b2d6e 40%, transparent), transparent);
 }
 
 .studio-grid {
@@ -345,11 +350,10 @@ body::after {
 .gap-lg { gap: var(--spacing-lg); }
 .gap-xl { gap: var(--spacing-xl); }
 
-/* 精美的标题排版 */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-mincho), 'Shippori Mincho', 'Noto Serif SC', serif;
+  font-family: var(--font-sans);
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   line-height: 1.25;
   text-wrap: balance;
 }
@@ -426,10 +430,9 @@ a {
   background: var(--ink-muted);
 }
 
-/* 文字选中 — 金色 */
 ::selection {
-  background: var(--gold);
-  color: var(--paper);
+  background: var(--color-teal-200);
+  color: var(--color-teal-900);
 }
 
 /* Glass morphism - 增强版 */
@@ -2761,9 +2764,10 @@ textarea:focus {
 }
 
 /* ── Rail Navigation ── */
+/* ── Rail Buttons (Neumorphism) ── */
 .rail-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2771,10 +2775,9 @@ textarea:focus {
   position: relative;
   transition:
     transform var(--duration-fast) var(--ease-default),
-    background var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default),
-    box-shadow var(--duration-fast) var(--ease-default);
-  border: 1px solid transparent;
+    box-shadow var(--duration-fast) var(--ease-default),
+    background var(--duration-fast) var(--ease-default);
+  border: none;
   background: transparent;
   padding: 0;
   flex-shrink: 0;
@@ -2782,118 +2785,114 @@ textarea:focus {
   color: var(--ink);
 }
 .rail-btn:hover {
-  background: var(--surface-panel);
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-xs);
+  background: var(--surface-raised);
+  box-shadow: var(--neu-shadow-sm);
   transform: translateY(-1px);
 }
 .rail-btn svg {
-  opacity: 0.55;
+  opacity: 0.45;
   transition:
     opacity var(--duration-fast) var(--ease-default),
     color var(--duration-fast) var(--ease-default);
   color: var(--ink);
 }
-.rail-btn:hover svg { opacity: 0.88; }
+.rail-btn:hover svg { opacity: 0.9; }
 .rail-btn.active,
 .rail-btn.panel-open {
-  background: var(--surface-panel);
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  background: var(--surface-raised);
+  box-shadow: var(--neu-inset);
 }
-.rail-btn.active svg { opacity: 0.9; }
+.rail-btn.active svg { opacity: 1; color: var(--color-teal-500); }
 .rail-btn.panel-open::before {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 7px;
-  bottom: 7px;
+  left: 3px;
+  top: 8px;
+  bottom: 8px;
   width: 3px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--color-primary-400), var(--gold));
+  background: linear-gradient(180deg, var(--color-teal-400), var(--color-teal-600));
 }
-.rail-btn.panel-open svg { opacity: 1; }
+.rail-btn.panel-open svg { opacity: 1; color: var(--color-teal-500); }
 .rail-avatar-btn:hover {
-  transform: translateY(-1px) scale(1.02);
+  transform: translateY(-1px) scale(1.04);
 }
 
 /* ── Expand Panel ── */
 .expand-panel {
   width: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--surface-panel) 0%, var(--surface-raised) 100%);
-  border-right: 1px solid var(--line);
-  transition: width 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  background: var(--surface-base);
+  border-right: 1px solid var(--border-default);
+  transition: width 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.06);
 }
-.expand-panel.open { width: 180px; }
+.expand-panel.open { width: 188px; }
 
 .expand-panel-inner {
-  width: 180px;
-  padding: 24px 18px;
+  width: 188px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   height: 100%;
   opacity: 0;
-  transition: opacity 0.2s ease 0.1s;
+  transition: opacity 0.18s ease 0.08s;
   position: relative;
   overflow: hidden;
 }
 .expand-panel.open .expand-panel-inner { opacity: 1; }
 
+/* ── Profile card ── */
 .sidebar-panel-profile-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding: 12px;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
   border-radius: var(--radius-xl);
-  border: 1px solid var(--border-default);
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--surface-raised);
+  box-shadow: var(--neu-shadow-sm);
   text-decoration: none;
-  box-shadow: var(--shadow-xs);
   transition:
     transform var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default),
     box-shadow var(--duration-fast) var(--ease-default);
 }
 .dark .sidebar-panel-profile-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-raised);
 }
 .sidebar-panel-profile-card:hover {
   transform: translateY(-1px);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--neu-shadow);
 }
 .sidebar-panel-profile-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 1px solid var(--border-default);
   background: var(--surface-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
-  font-family: var(--font-mincho);
+  color: var(--color-teal-600);
+  font-family: var(--font-sans);
   font-size: 13px;
+  font-weight: 600;
 }
 .sidebar-panel-profile-name {
   color: var(--ink);
-  font-family: var(--font-mincho);
+  font-family: var(--font-sans);
   font-size: 12px;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 .sidebar-panel-profile-signature {
   margin-top: 2px;
   color: var(--ink-muted);
   font-size: 10px;
-  line-height: 1.5;
-  letter-spacing: 0.04em;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -2904,162 +2903,143 @@ textarea:focus {
 .panel-link {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 9px 10px;
   cursor: pointer;
   transition:
     background var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default),
+    box-shadow var(--duration-fast) var(--ease-default),
     transform var(--duration-fast) var(--ease-default);
   text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
 }
 .panel-link:hover {
-  background: rgba(255, 255, 255, 0.38);
-  border-color: var(--border-default);
+  background: var(--surface-raised);
+  box-shadow: var(--neu-shadow-sm);
   transform: translateX(2px);
 }
-.dark .panel-link:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
+.dark .panel-link:hover { background: var(--surface-raised); }
 .panel-link.active {
-  background: rgba(255, 255, 255, 0.56);
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-xs);
+  background: color-mix(in srgb, var(--color-teal-500) 10%, var(--surface-raised));
+  box-shadow: var(--neu-inset);
 }
 .dark .panel-link.active {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--color-teal-500) 15%, var(--surface-raised));
 }
 .panel-link-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink-secondary);
-  opacity: 0.8;
+  color: var(--ink-muted);
 }
 .panel-link-dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--color-neutral-300);
   flex-shrink: 0;
   transition: background 0.2s;
 }
-.panel-link.active .panel-link-dot { background: var(--gold); }
-.panel-link:hover .panel-link-dot  { background: var(--ink-muted); }
+.panel-link.active .panel-link-dot { background: var(--color-teal-500); }
+.panel-link:hover .panel-link-dot  { background: var(--color-teal-400); }
 .panel-link-text {
-  font-family: var(--font-jp-serif);
-  font-size: 12px;
-  font-weight: 300;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 400;
   color: var(--ink-muted);
-  letter-spacing: 0.06em;
-  transition: color 0.2s;
+  transition: color 0.15s;
   white-space: nowrap;
 }
-.panel-link.active .panel-link-icon,
-.panel-link:hover .panel-link-icon { color: var(--ink); }
-.panel-link:hover .panel-link-text  { color: var(--ink); }
-.panel-link.active .panel-link-text { color: var(--ink); font-weight: 400; }
+.panel-link.active .panel-link-icon { color: var(--color-teal-500); }
+.panel-link:hover .panel-link-icon  { color: var(--ink); }
+.panel-link:hover .panel-link-text  { color: var(--ink); font-weight: 500; }
+.panel-link.active .panel-link-text { color: var(--color-teal-600); font-weight: 600; }
 
 /* ── Sidebar text utilities ── */
 .sidebar-text-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--radius-lg);
-  border: 1px solid transparent;
-  font-family: var(--font-jp-serif);
-  font-weight: 300;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11.5px;
   color: var(--ink-secondary);
   transition:
     color var(--duration-fast) var(--ease-default),
     background var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default);
+    box-shadow var(--duration-fast) var(--ease-default);
   cursor: pointer;
+  text-decoration: none;
 }
 .sidebar-text-link:hover {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.38);
-  border-color: var(--border-default);
-}
-.dark .sidebar-text-link:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-raised);
+  box-shadow: var(--neu-shadow-sm);
 }
 
 .sidebar-text-ghost {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--radius-lg);
-  border: 1px solid transparent;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 11.5px;
   color: var(--ink-ghost);
   transition:
     color var(--duration-fast) var(--ease-default),
-    background var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default);
+    background var(--duration-fast) var(--ease-default);
   cursor: pointer;
 }
 .sidebar-text-ghost:hover {
   color: var(--ink-secondary);
-  background: rgba(255, 255, 255, 0.26);
-  border-color: var(--border-default);
-}
-.dark .sidebar-text-ghost:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-raised);
 }
 
+/* ── Mobile Nav ── */
 .sidebar-mobile-nav-item {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  color: var(--ink);
-  opacity: 0.55;
+  border-radius: var(--radius-lg);
+  color: var(--ink-muted);
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
   transition:
-    opacity var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
     background var(--duration-fast) var(--ease-default),
-    border-color var(--duration-fast) var(--ease-default),
-    transform var(--duration-fast) var(--ease-default);
+    box-shadow var(--duration-fast) var(--ease-default);
 }
-.sidebar-mobile-nav-item:hover,
+.sidebar-mobile-nav-item:hover { color: var(--ink); }
 .sidebar-mobile-nav-item.active {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--border-default);
-}
-.sidebar-mobile-nav-item.active {
-  color: var(--gold);
-  box-shadow: var(--shadow-xs);
+  color: var(--color-teal-500);
+  background: color-mix(in srgb, var(--color-teal-500) 10%, var(--surface-raised));
+  box-shadow: var(--neu-shadow-sm);
 }
 
 .sidebar-mobile-fab {
-  width: 46px;
-  height: 46px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, var(--ink) 0%, var(--ink-secondary) 100%);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--color-teal-500) 0%, var(--color-teal-700) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -24px;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  box-shadow: var(--shadow-lg);
+  margin-top: -22px;
+  border: none;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-teal-500) 45%, transparent), var(--shadow-md);
   cursor: pointer;
   transition:
-    transform var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-spring),
     box-shadow var(--duration-fast) var(--ease-default);
 }
 .sidebar-mobile-fab:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-teal-500) 50%, transparent), var(--shadow-lg);
 }
 
 .sidebar-mobile-sheet-link {

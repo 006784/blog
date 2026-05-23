@@ -4,6 +4,10 @@ import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
+const DEV_ONLY_GUARD = process.env.NODE_ENV !== 'development'
+  ? () => Response.json({ error: '仅开发环境可用' }, { status: 403 })
+  : null;
+
 const BOOKS = [
   // ══ 武侠小说 — 金庸 ══════════════════════════════════════
   { type: 'book', title: '射雕英雄传', author: '金庸', status: 'done', rating: 9.5, review: '郭靖与黄蓉的故事，金庸最经典作品之一，侠之大者为国为民', external_link: 'https://book.douban.com/subject/1002299/' },
@@ -97,6 +101,7 @@ const BOOKS = [
 ];
 
 export async function POST(req: NextRequest) {
+  if (DEV_ONLY_GUARD) return DEV_ONLY_GUARD();
   const session = await requireAdminSession(req);
   if (!session) return NextResponse.json({ error: '未授权' }, { status: 401 });
 

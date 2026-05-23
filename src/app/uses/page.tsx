@@ -170,14 +170,15 @@ export default function UsesPage() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {grouped[category].map((item, ii) => {
-                      const cardClass = 'group block h-full';
-                      const inner = (
-                        <Card
-                          variant="glass"
-                          padding="sm"
-                          className="flex h-full items-start gap-4 rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                      const cardInner = (
+                        <div
+                          className="flex h-full items-start gap-3 rounded-[var(--radius-2xl)] p-4 transition-all duration-200 group-hover:-translate-y-1"
+                          style={{ background: 'var(--surface-raised)', boxShadow: 'var(--neu-shadow-sm)' }}
                         >
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)]">
+                          <div
+                            className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-xl)]"
+                            style={{ boxShadow: 'var(--neu-shadow-sm)', background: 'var(--surface-base)' }}
+                          >
                             {item.icon_url ? (
                               <UsesIcon
                                 key={`${item.id}:${item.icon_url ?? ''}:${item.link ?? ''}`}
@@ -186,52 +187,51 @@ export default function UsesPage() {
                                 name={item.name}
                                 fallback={meta.icon}
                                 wrapperClassName="flex h-full w-full items-center justify-center overflow-hidden"
-                                imgClassName="h-full w-full object-cover"
-                                fallbackClassName="text-lg"
+                                imgClassName="h-9 w-9 object-contain"
+                                fallbackClassName="text-xl"
                               />
                             ) : (
-                              <span className="text-lg">{meta.icon}</span>
+                              <span className="text-xl">{meta.icon}</span>
                             )}
                           </div>
-                          <div className="flex min-w-0 flex-1 flex-col gap-3">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <h3 className="truncate text-base font-semibold text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
-                                  {item.name}
-                                </h3>
-                                {item.link ? (
-                                  <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--color-neutral-500)] transition-colors group-hover:text-[var(--color-primary-600)]" />
-                                ) : null}
-                              </div>
-                              {item.description ? (
-                                <p className="line-clamp-3 text-sm leading-6 text-[var(--color-neutral-600)]">
-                                  {item.description}
-                                </p>
-                              ) : (
-                                <p className="text-sm leading-6 text-[var(--color-neutral-500)]">
-                                  {meta.label} 中的一项常用工具。
-                                </p>
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="truncate text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                                {item.name}
+                              </h3>
+                              {item.link && (
+                                <ExternalLink
+                                  className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                                  style={{ color: 'var(--color-teal-500)' }}
+                                />
                               )}
                             </div>
-                            <div className="text-xs text-[var(--color-neutral-500)]">
-                              {item.link ? '支持外部访问' : '本地记录'}
-                            </div>
+                            {item.description && (
+                              <p className="line-clamp-2 text-xs leading-5" style={{ color: 'var(--ink-muted)' }}>
+                                {item.description}
+                              </p>
+                            )}
+                            {item.link && (
+                              <p className="text-xs" style={{ color: 'var(--color-teal-500)', opacity: 0.7 }}>
+                                支持外部访问
+                              </p>
+                            )}
                           </div>
-                        </Card>
+                        </div>
                       );
                       return (
                         <motion.div
                           key={item.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: ci * 0.07 + ii * 0.03 }}
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: ci * 0.06 + ii * 0.03 }}
                         >
                           {item.link ? (
-                            <a href={item.link} className={cardClass}>
-                              {inner}
+                            <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block h-full">
+                              {cardInner}
                             </a>
                           ) : (
-                            <div className={cardClass}>{inner}</div>
+                            <div className="group block h-full">{cardInner}</div>
                           )}
                         </motion.div>
                       );

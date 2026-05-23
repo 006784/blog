@@ -43,6 +43,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { cn } from '@/lib/cn';
 import type { AudiusSearchTrack } from '@/lib/audius';
 import { getPlayableSongUrl } from '@/lib/music';
+import { parseMusicUrl } from '@/lib/music-embed';
 
 const MusicPlayer = dynamic(() => import('@/components/MusicPlayer'), {
   ssr: false,
@@ -487,217 +488,159 @@ function SongCard({
   const platform = getSongPlatformMeta(song);
   const mood = song.mood ? moods.find((item) => item.value === song.mood) : null;
   const hasAudio = Boolean(getPlayableSongUrl(song));
+  const [showEmbed, setShowEmbed] = useState(false);
+
+  const embedInfo = song.music_url ? parseMusicUrl(song.music_url) : null;
+  const hasEmbed = embedInfo?.embedUrl;
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ delay: index * 0.04 }}
     >
       <Card
-        variant={isPlaying ? 'elevated' : 'default'}
+        variant="default"
         className={cn(
-          'group overflow-hidden p-0 transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-xl)]',
-          isPlaying && 'ring-2 ring-[var(--color-primary-500)] ring-offset-2 ring-offset-[var(--surface-base)]'
+          'group overflow-hidden p-0 transition-all duration-300',
+          isPlaying
+            ? 'shadow-[var(--neu-inset)] ring-2 ring-[var(--color-teal-400)] ring-offset-2 ring-offset-[var(--surface-base)]'
+            : 'shadow-[var(--neu-shadow-sm)] hover:shadow-[var(--neu-shadow)] hover:-translate-y-1'
         )}
+        style={{ background: 'var(--surface-raised)' }}
       >
-        <div className="relative aspect-square overflow-hidden">
-          {song.cover_image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={song.cover_image}
-              alt={song.title}
-              className={cn(
-                'h-full w-full object-cover transition-transform duration-500',
-                isPlaying ? 'scale-105' : 'group-hover:scale-105'
-              )}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,var(--surface-overlay),var(--surface-base))]">
-              <Disc3
-                className={cn(
-                  'h-20 w-20 text-[var(--color-primary-600)]/40',
-                  isPlaying && 'animate-spin'
-                )}
-                style={{ animationDuration: '3s' }}
-              />
-            </div>
-          )}
-
-          <div
-            className={cn(
-              'absolute inset-0 bg-[linear-gradient(180deg,rgba(20,18,15,0.05)_0%,rgba(20,18,15,0.72)_100%)] transition-opacity duration-300',
-              isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        {/* 横版主体 */}
+        <div className="flex gap-4 p-4">
+          {/* cover */}
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl shadow-[var(--neu-shadow-sm)]">
+            {song.cover_image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={song.cover_image} alt={song.title} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center"
+                style={{ background: `linear-gradient(135deg, ${platform.color}22, ${platform.color}44)` }}>
+                <Disc3 className={cn('h-9 w-9', isPlaying && 'animate-spin')}
+                  style={{ color: platform.color, animationDuration: '3s' }} />
+              </div>
             )}
-          />
-
-          <div
-            className={cn(
-              'absolute inset-0 flex items-center justify-center transition-opacity duration-300',
-              isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            {/* 播放中波纹 */}
+            {isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl">
+                <Disc3 className="h-7 w-7 text-white animate-spin" style={{ animationDuration: '2s' }} />
+              </div>
             )}
-          >
-            <button
-              type="button"
-              onClick={() => onPlay(song)}
-              className="flex h-16 w-16 items-center justify-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-md transition-transform hover:scale-105"
-              aria-label={hasAudio ? `播放 ${song.title}` : `打开 ${song.title}`}
-            >
-              {isPlaying ? (
-                <Pause className="h-8 w-8" />
-              ) : hasAudio ? (
-                <Play className="h-8 w-8 fill-white" />
-              ) : (
-                <ExternalLink className="h-7 w-7" />
-              )}
-            </button>
           </div>
 
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-            {mood ? (
-              <Badge className="border-none bg-black/45 px-3 py-1.5 text-white backdrop-blur-md">
-                {mood.emoji} {mood.label}
-              </Badge>
-            ) : null}
-            {hasAudio ? (
-              <Badge className="border-none bg-[rgba(232,217,180,0.92)] px-3 py-1.5 text-[var(--color-primary-900)]">
-                <FileAudio className="mr-1 h-3.5 w-3.5" />
-                支持播放
-              </Badge>
-            ) : null}
-          </div>
-
-          <div className="absolute right-3 top-3 flex gap-2">
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                onToggleFavorite(song.id, song.is_favorite);
-              }}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-md transition-colors hover:bg-black/50"
-              aria-label={song.is_favorite ? '取消收藏' : '加入收藏'}
-            >
-              <Heart
-                className={cn(
-                  'h-5 w-5',
-                  song.is_favorite && 'fill-[var(--color-primary-500)] text-[var(--color-primary-500)]'
+          {/* 信息 */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-semibold" style={{ color: 'var(--ink)' }}>
+                  {song.title}
+                </h3>
+                <p className="truncate text-sm" style={{ color: 'var(--ink-muted)' }}>{song.artist}</p>
+                {song.album && (
+                  <p className="truncate text-xs mt-0.5" style={{ color: 'var(--ink-ghost)' }}>{song.album}</p>
                 )}
-              />
-            </button>
-          </div>
-
-          {isPlaying ? (
-            <div className="absolute bottom-3 left-3">
-              <Badge className="border-none bg-[var(--color-primary-600)] px-3 py-1.5 text-[var(--color-primary-foreground)]">
-                <Disc3 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                正在播放
-              </Badge>
+              </div>
+              {/* 收藏 */}
+              <button type="button"
+                onClick={e => { e.stopPropagation(); onToggleFavorite(song.id, song.is_favorite); }}
+                className="shrink-0 p-1.5 rounded-full transition-colors hover:bg-[var(--surface-overlay)]"
+                aria-label={song.is_favorite ? '取消收藏' : '收藏'}>
+                <Heart className={cn('h-4 w-4', song.is_favorite
+                  ? 'fill-[var(--color-orange-500)] text-[var(--color-orange-500)]'
+                  : 'text-[var(--ink-ghost)]')} />
+              </button>
             </div>
-          ) : null}
-        </div>
 
-        <div className="space-y-4 p-4">
-          <div className="space-y-1.5">
-            <h3 className="line-clamp-1 text-xl font-semibold text-[var(--color-neutral-900)]">
-              {song.title}
-            </h3>
-            <p className="line-clamp-1 text-sm text-[var(--color-neutral-600)]">
-              {song.artist}
-            </p>
-            {song.album ? (
-              <p className="line-clamp-1 text-xs text-[var(--color-neutral-500)]">
-                {song.album}
+            {/* 心情 + 平台 */}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {mood && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+                  style={{ background: 'var(--surface-overlay)', color: 'var(--ink-muted)' }}>
+                  {mood.emoji} {mood.label}
+                </span>
+              )}
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                style={{ background: `${platform.color}18`, color: platform.color }}>
+                {platform.name}
+              </span>
+              {hasAudio && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+                  style={{ background: 'color-mix(in srgb, var(--color-teal-500) 12%, transparent)', color: 'var(--color-teal-600)' }}>
+                  <FileAudio className="h-3 w-3" /> 可播放
+                </span>
+              )}
+            </div>
+
+            {song.note && (
+              <p className="mt-2 line-clamp-2 text-xs italic" style={{ color: 'var(--ink-muted)' }}>
+                &ldquo;{song.note}&rdquo;
               </p>
-            ) : null}
-          </div>
-
-          {song.note ? (
-            <p className="line-clamp-3 min-h-[4.25rem] text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
-              “{song.note}”
-            </p>
-          ) : (
-            <p className="min-h-[4.25rem] text-sm text-[var(--color-neutral-500)]">
-              这首歌暂时还没写下备注。
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant="soft"
-              className="px-3 py-1.5"
-              style={{
-                backgroundColor: `${platform.color}18`,
-                color: platform.color,
-              }}
-            >
-              {song.platform === 'local' ? '本地上传' : platform.name}
-            </Badge>
-            {song.lyrics ? (
-              <Badge variant="outline" className="px-3 py-1.5">
-                <FileText className="mr-1 h-3.5 w-3.5" />
-                附带歌词
-              </Badge>
-            ) : null}
-          </div>
-
-          <div className="flex items-center justify-between border-t border-[color:var(--border-default)] pt-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onPlay(song)}
-              className="text-[var(--color-neutral-700)]"
-            >
-              {hasAudio ? (
-                <>
-                  {isPlaying ? (
-                    <Pause className="h-4 w-4" />
-                  ) : (
-                    <Play className="h-4 w-4 fill-current" />
-                  )}
-                  {isPlaying ? '暂停中' : '立即播放'}
-                </>
-              ) : (
-                <>
-                  <ExternalLink className="h-4 w-4" />
-                  打开链接
-                </>
-              )}
-            </Button>
-
-            <div className="flex items-center gap-2">
-              {song.music_url ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-9 px-0"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    window.open(song.music_url, '_blank', 'noopener,noreferrer');
-                  }}
-                  aria-label="打开外部音乐链接"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              ) : null}
-              {isAdmin ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-9 px-0 text-red-500 hover:bg-red-500/10 hover:text-red-500"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onDelete(song.id);
-                  }}
-                  aria-label="删除歌曲"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              ) : null}
-            </div>
+            )}
           </div>
         </div>
+
+        {/* action bar */}
+        <div className="flex items-center gap-2 border-t px-4 py-2.5"
+          style={{ borderColor: 'var(--border-default)' }}>
+          {/* 播放 / 打开 */}
+          <button type="button" onClick={() => onPlay(song)}
+            className="flex h-9 w-9 items-center justify-center rounded-full transition-all"
+            style={{ background: isPlaying ? 'var(--color-teal-500)' : 'var(--surface-overlay)', color: isPlaying ? '#fff' : 'var(--ink)' }}
+            aria-label={hasAudio ? '播放' : '打开'}>
+            {isPlaying ? <Pause className="h-4 w-4" /> : hasAudio ? <Play className="h-4 w-4 fill-current" /> : <ExternalLink className="h-4 w-4" />}
+          </button>
+
+          {/* Embed 展开按钮（YouTube / Spotify / Bilibili / 网易云） */}
+          {hasEmbed && (
+            <button type="button" onClick={() => setShowEmbed(v => !v)}
+              className="flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all"
+              style={{
+                background: showEmbed ? `${embedInfo!.color}22` : 'var(--surface-overlay)',
+                color: showEmbed ? embedInfo!.color : 'var(--ink-muted)',
+              }}>
+              <Globe2 className="h-3.5 w-3.5" />
+              {showEmbed ? '收起' : embedInfo!.platform}
+            </button>
+          )}
+
+          {/* 外链 */}
+          {song.music_url && (
+            <button type="button"
+              onClick={e => { e.stopPropagation(); window.open(song.music_url, '_blank', 'noopener,noreferrer'); }}
+              className="ml-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+              style={{ color: 'var(--ink-muted)' }}
+              aria-label="外链">
+              <ExternalLink className="h-3.5 w-3.5" />
+            </button>
+          )}
+          {isAdmin && (
+            <button type="button"
+              onClick={e => { e.stopPropagation(); onDelete(song.id); }}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-red-400 transition-colors hover:bg-red-500/10"
+              aria-label="删除">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* embed area */}
+        {showEmbed && hasEmbed && (
+          <div className="border-t" style={{ borderColor: 'var(--border-default)' }}>
+            <iframe
+              src={embedInfo!.embedUrl}
+              className="w-full"
+              style={{ height: embedInfo!.type === 'spotify' ? 152 : embedInfo!.type === 'netease' ? 86 : 240, border: 'none' }}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              title={`${embedInfo!.platform} player`}
+            />
+          </div>
+        )}
       </Card>
     </motion.div>
   );

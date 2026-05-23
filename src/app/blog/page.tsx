@@ -94,7 +94,7 @@ function BlogPageContent() {
       setPosts((prev) => prev.filter((item) => item.slug !== slug));
       setNotification({ type: 'success', message: '文章已删除。' });
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error('删除文章失败:', error);
       setNotification({ type: 'error', message: '删除失败，请稍后再试。' });
     }
   }
@@ -135,7 +135,7 @@ function BlogPageContent() {
         message: successful > 0 ? `已通知 ${successful} 位订阅者。` : '当前暂无订阅者。',
       });
     } catch (error) {
-      console.error('推送失败:', error);
+      console.error('推送通知失败:', error);
       setNotification({ type: 'error', message: '推送失败，请稍后重试。' });
     } finally {
       setNotifyingSlug(null);

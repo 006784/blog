@@ -220,6 +220,13 @@ export async function requireAdminSession(
   request: NextRequest,
   minRole: AdminRole = 'editor'
 ): Promise<AccessPayload | null> {
+  // API Key 认证（供 Claude Code / 外部工具调用）
+  const { verifyApiKey } = await import('./api-key');
+  if (verifyApiKey(request)) {
+    return { sessionId: 'api-key', role: 'super_admin', lastActivity: Date.now() };
+  }
+
+  // Cookie 认证（浏览器正常登录）
   const token = request.cookies.get(COOKIE_ACCESS)?.value;
   if (!token) return null;
 

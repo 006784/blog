@@ -799,13 +799,10 @@ export default function ResourcesPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <h3 className="line-clamp-2 text-base font-semibold text-[var(--color-neutral-900)]" title={resource.name}>
+                    <div className="space-y-1">
+                      <h3 className="line-clamp-2 text-base font-semibold text-[var(--color-neutral-900)]">
                         {resource.name}
                       </h3>
-                      <p className="line-clamp-1 text-sm text-[var(--color-neutral-500)]">
-                        {resource.original_name}
-                      </p>
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--color-neutral-500)]">
@@ -896,7 +893,7 @@ export default function ResourcesPage() {
                             <EyeOff className="h-3.5 w-3.5 text-[var(--color-neutral-500)]" />
                           )}
                         </div>
-                        <p className="truncate text-sm text-[var(--color-neutral-500)]">{resource.original_name}</p>
+                        <p className="truncate text-sm text-[var(--color-neutral-500)]">{formatFileSize(resource.file_size)} · {formatDate(resource.created_at)}</p>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-neutral-500)] lg:min-w-[260px] lg:justify-end">
