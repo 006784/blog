@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminSession } from '@/lib/auth-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sanitizePostPayload, updatePostRecord, clearOtherPinnedPosts } from '@/lib/post-persistence';
+import { generateCoverImage } from '@/lib/cover-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +48,21 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
     }
 
     const post = await updatePostRecord(id, payload);
+
+    // 发布时若无封面，异步补图
+    if (!post.cover_image && post.status === 'published') {
+      generateCoverImage({
+        title:       post.title,
+        description: post.description ?? undefined,
+        tags:        Array.isArray(post.tags) ? post.tags as string[] : [],
+        category:    post.category ?? undefined,
+      }).then(url => {
+        if (url) {
+          supabaseAdmin.from('posts').update({ cover_image: url }).eq('id', post.id).then(() => {});
+        }
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ post });
   } catch (error) {
     const message = error instanceof Error ? error.message : '更新失败';

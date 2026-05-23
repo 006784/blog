@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminSession } from '@/lib/auth-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createPostRecord, sanitizePostPayload } from '@/lib/post-persistence';
+import { generateCoverImage } from '@/lib/cover-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const post = await createPostRecord(sanitizePostPayload(body, 'create'));
+    const payload = sanitizePostPayload(body, 'create');
+    const post = await createPostRecord(payload);
+
+    // 如果没有封面且文章已发布，异步生成封面（不阻塞响应）
+    if (!post.cover_image && post.status === 'published') {
+      generateCoverImage({
+        title:       post.title,
+        description: post.description ?? undefined,
+        tags:        Array.isArray(post.tags) ? post.tags as string[] : [],
+        category:    post.category ?? undefined,
+      }).then(url => {
+        if (url) {
+          supabaseAdmin.from('posts').update({ cover_image: url }).eq('id', post.id).then(() => {});
+        }
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : '创建文章失败';
