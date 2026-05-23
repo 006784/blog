@@ -360,7 +360,6 @@ function AddSongModal({ onClose, onAdd }: {
     const info = parseMusicUrl(trimmedUrl);
     const platform: Song['platform'] = info?.type === 'apple' ? 'apple'
       : info?.type === 'spotify' ? 'spotify'
-      : info?.type === 'youtube' ? 'youtube'
       : 'other';
 
     setLoading(true);
