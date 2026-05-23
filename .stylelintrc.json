@@ -1,0 +1,16 @@
+{
+  "extends": [],
+  "plugins": [],
+  "rules": {
+    "color-no-invalid-hex": true,
+    "unit-no-unknown": true,
+    "property-no-unknown": true,
+    "declaration-block-no-duplicate-properties": true,
+    "no-duplicate-selectors": true
+  },
+  "customSyntax": "postcss",
+  "ignoreFiles": [
+    "node_modules/**",
+    ".next/**"
+  ]
+}
