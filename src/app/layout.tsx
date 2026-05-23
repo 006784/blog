@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { I18nProvider } from "@/components/I18nProvider";
 import { FontProvider } from "@/components/FontProvider";
 import { AdminProvider } from "@/components/AdminProvider";
 import { ProfileProvider } from "@/components/ProfileProvider";
@@ -112,6 +113,7 @@ export default function RootLayout({
         />
       </head>
       <body className="app-body antialiased min-h-screen" suppressHydrationWarning>
+        <I18nProvider>
         <ThemeProvider>
           <FontProvider>
           <AdminProvider>
@@ -193,6 +195,7 @@ export default function RootLayout({
           </AdminProvider>
           </FontProvider>
         </ThemeProvider>
+        </I18nProvider>
       </body>
     </html>
   );

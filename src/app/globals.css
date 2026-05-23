@@ -2982,6 +2982,27 @@ textarea:focus {
   box-shadow: var(--neu-shadow-sm);
 }
 
+.sidebar-lang-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 2px 3px;
+  cursor: pointer;
+  font-family: var(--font-garamond);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  opacity: 0.45;
+  font-weight: 400;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.sidebar-lang-btn:hover { opacity: 0.75; }
+.sidebar-lang-btn.active {
+  opacity: 1;
+  font-weight: 600;
+  border-bottom-color: var(--gold);
+}
+
 .sidebar-text-ghost {
   display: inline-flex;
   align-items: center;

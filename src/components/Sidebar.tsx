@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LOCALES, type Locale } from '@/lib/i18n';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -168,9 +170,27 @@ export function Sidebar() {
   const { profile } = useProfile();
   const routeActiveIcon = getActiveIconKey(pathname);
 
+  const { t, i18n } = useTranslation();
+  const [lang, setLang] = useState<Locale>('zh');
   const [panelOpen,  setPanelOpen]  = useState(false);
   const [panelIcon, setPanelIcon] = useState<string | null>(routeActiveIcon);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Sync lang state with i18n on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('blog-lang') as Locale | null;
+    if (saved && ['zh', 'en', 'ko', 'ja'].includes(saved)) {
+      setLang(saved);
+      void i18n.changeLanguage(saved);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function switchLang(code: Locale) {
+    setLang(code);
+    localStorage.setItem('blog-lang', code);
+    void i18n.changeLanguage(code);
+  }
   const themeReady = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -576,7 +596,7 @@ export function Sidebar() {
                     <item.icon style={{ width: 13, height: 13 }} strokeWidth={1.5} />
                   </span>
                   <span className="panel-link-dot" />
-                  <span className="panel-link-text">{item.label}</span>
+                  <span className="panel-link-text">{t(`nav.${item.key}`, item.label)}</span>
                 </Link>
               ))}
             </div>
@@ -745,7 +765,7 @@ export function Sidebar() {
                       <item.icon style={{ width: 14, height: 14 }} strokeWidth={1.5} />
                       <span style={{ width: 4, height: 4, borderRadius: '50%', background: itemActive(pathname, item.href) ? 'var(--gold)' : 'var(--line)', flexShrink: 0 }} />
                       <span style={{ fontFamily: 'var(--font-jp-serif)', fontSize: 13, fontWeight: itemActive(pathname, item.href) ? 400 : 300, color: itemActive(pathname, item.href) ? 'var(--ink)' : 'var(--ink-secondary)', letterSpacing: '0.05em' }}>
-                        {item.label}
+                        {t(`nav.${item.key}`, item.label)}
                       </span>
                     </Link>
                   ))}
@@ -767,6 +787,24 @@ export function Sidebar() {
                     {resolvedTheme === 'dark' ? 'Light' : 'Dark'}
                   </span>
                 </button>
+
+                {/* 语言切换 */}
+                <div className="flex items-center flex-wrap gap-1">
+                  {LOCALES.map((locale) => (
+                    <button
+                      key={locale.code}
+                      type="button"
+                      onClick={() => switchLang(locale.code)}
+                      className={clsx(
+                        'sidebar-lang-btn',
+                        lang === locale.code && 'active'
+                      )}
+                      aria-label={`Switch to ${locale.name}`}
+                    >
+                      {locale.name}
+                    </button>
+                  ))}
+                </div>
 
                 {isAdmin && (
                   <>
