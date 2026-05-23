@@ -37,7 +37,7 @@ function UsesSkeleton() {
           <Skeleton className="mb-4 h-5 w-24 rounded-full" />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[1, 2, 3].map((j) => (
-              <Skeleton key={j} className="h-32 rounded-[var(--radius-2xl)]" />
+              <Skeleton key={j} className="h-32 rounded-2xl" />
             ))}
           </div>
         </div>
@@ -101,21 +101,21 @@ export default function UsesPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 工具箱
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 我每天在用的硬件、软件和在线服务，从效率工具到开发环境都整理在这里。
               </p>
             </div>
-            <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-[var(--radius-2xl)]">
+            <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                   <Boxes className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Tool Entries</p>
-                  <p className="text-2xl font-semibold text-[var(--color-neutral-900)]">{items.length}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Tool Entries</p>
+                  <p className="text-2xl font-semibold text-neutral-900">{items.length}</p>
                 </div>
               </div>
             </Card>
@@ -133,7 +133,7 @@ export default function UsesPage() {
             action={
               <button
                 onClick={() => void loadItems()}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
+                className="inline-flex items-center gap-2 rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
               >
                 <RefreshCw className="h-4 w-4" />
                 重新加载
@@ -160,23 +160,23 @@ export default function UsesPage() {
                   <div className="mb-5 flex items-center gap-3">
                     <span className="text-lg">{meta.icon}</span>
                     <div className="flex items-center gap-3">
-                      <h2 className="text-lg font-semibold text-[var(--color-neutral-900)]">
+                      <h2 className="text-lg font-semibold text-neutral-900">
                         {meta.label}
                       </h2>
                       <Badge variant="soft">{grouped[category].length}</Badge>
                     </div>
-                    <div className="h-px flex-1 bg-[var(--border-default)]" />
+                    <div className="h-px flex-1 bg-(--border-default)" />
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {grouped[category].map((item, ii) => {
                       const cardInner = (
                         <div
-                          className="flex h-full items-start gap-3 rounded-[var(--radius-2xl)] p-4 transition-all duration-200 group-hover:-translate-y-1"
+                          className="flex h-full items-start gap-3 rounded-2xl p-4 transition-all duration-200 group-hover:-translate-y-1"
                           style={{ background: 'var(--surface-raised)', boxShadow: 'var(--neu-shadow-sm)' }}
                         >
                           <div
-                            className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-xl)]"
+                            className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl"
                             style={{ boxShadow: 'var(--neu-shadow-sm)', background: 'var(--surface-base)' }}
                           >
                             {item.icon_url ? (

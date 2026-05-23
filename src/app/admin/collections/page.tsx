@@ -43,9 +43,9 @@ const EMPTY: Partial<Collection> = {
 
 const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
 const selectCls =
-  'w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-sm text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-base)]';
+  'w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-sm text-neutral-900 shadow-(--shadow-xs) transition-all duration-(--duration-fast) ease-(--ease-default) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface-base)';
 const iconButtonCls =
-  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-default) bg-(--surface-raised) text-neutral-700 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:border-(--border-strong) hover:text-neutral-900';
 
 export default function AdminCollectionsPage() {
   const { isAdmin, showLoginModal } = useAdmin();
@@ -136,7 +136,7 @@ export default function AdminCollectionsPage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <BookMarked className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -154,18 +154,18 @@ export default function AdminCollectionsPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">合集总数</p>
             <p className="mt-3 text-3xl font-semibold">{collections.length}</p>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">公开合集</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{publicCollections}</p>
               <Badge tone="success" variant="soft">对外可见</Badge>
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">私密合集</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{privateCollections}</p>
@@ -193,16 +193,16 @@ export default function AdminCollectionsPage() {
             }
           />
         ) : (
-          <Card variant="elevated" padding="sm" className="space-y-3 rounded-[var(--radius-2xl)]">
+          <Card variant="elevated" padding="sm" className="space-y-3 rounded-2xl">
             {collections.map((collection) => (
               <motion.div
                 key={collection.id}
                 layout
-                className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+                className="flex items-center gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-3 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-sm)"
               >
                 <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/60" />
 
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-overlay)]">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-(--border-default) bg-(--surface-overlay)">
                   {collection.cover_image ? (
                     <Image
                       src={collection.cover_image}
@@ -232,7 +232,7 @@ export default function AdminCollectionsPage() {
                     <span>{collection.post_count} 篇文章</span>
                     <span>排序 #{collection.sort_order}</span>
                     {collection.description ? (
-                      <span className="max-w-[22rem] truncate">{collection.description}</span>
+                      <span className="max-w-88 truncate">{collection.description}</span>
                     ) : null}
                   </div>
                 </div>
@@ -280,9 +280,9 @@ export default function AdminCollectionsPage() {
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
-              className="w-full max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
+              className="w-full max-w-xl overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-2xl)"
             >
-              <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex items-center justify-between border-b border-(--border-default) px-6 py-5">
                 <div>
                   <h2 className="text-lg font-semibold">{editing ? '编辑合集' : '新建合集'}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">维护合集名称、封面和显示顺序。</p>
@@ -329,7 +329,7 @@ export default function AdminCollectionsPage() {
                         type="color"
                         value={form.color || '#888888'}
                         onChange={(event) => setForm((current) => ({ ...current, color: event.target.value }))}
-                        className="h-11 w-11 cursor-pointer rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-1 shadow-[var(--shadow-xs)]"
+                        className="h-11 w-11 cursor-pointer rounded-lg border border-(--border-default) bg-(--surface-raised) p-1 shadow-(--shadow-xs)"
                       />
                       <Input
                         value={form.color || ''}
@@ -366,7 +366,7 @@ export default function AdminCollectionsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex justify-end gap-3 border-t border-(--border-default) px-6 py-5">
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
                   取消
                 </Button>

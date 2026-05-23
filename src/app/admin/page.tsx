@@ -170,7 +170,7 @@ export default function AdminPage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <Shield className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -211,15 +211,15 @@ export default function AdminPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                      : 'border border-[color:var(--border-default)] bg-[var(--surface-panel)] text-muted-foreground hover:bg-[var(--surface-overlay)]'
+                      ? 'bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                      : 'border border-(--border-default) bg-(--surface-panel) text-muted-foreground hover:bg-(--surface-overlay)'
                   }`}
                 >
                   <tab.icon className="h-3.5 w-3.5" />
                   {tab.label}
                   {tab.count !== undefined && (
                     <span className={`rounded-full px-1.5 py-0.5 text-xs leading-none ${
-                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[var(--surface-overlay)] text-muted-foreground'
+                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-(--surface-overlay) text-muted-foreground'
                     }`}>{tab.count}</span>
                   )}
                 </button>
@@ -227,22 +227,22 @@ export default function AdminPage() {
             </div>
 
             {/* desktop: vertical sidebar */}
-            <Card variant="default" padding="sm" className="hidden flex-col gap-1 rounded-[var(--radius-2xl)] lg:flex">
+            <Card variant="default" padding="sm" className="hidden flex-col gap-1 rounded-2xl lg:flex">
               {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex w-full items-center gap-3 rounded-[var(--radius-lg)] px-3 py-2.5 text-sm font-medium transition-all ${
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-xs)]'
-                      : 'text-muted-foreground hover:bg-[var(--surface-overlay)] hover:text-foreground'
+                      ? 'bg-(--color-primary-500) text-white shadow-(--shadow-xs)'
+                      : 'text-muted-foreground hover:bg-(--surface-overlay) hover:text-foreground'
                   }`}
                 >
                   <tab.icon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 text-left">{tab.label}</span>
                   {tab.count !== undefined && (
                     <span className={`rounded-full px-2 py-0.5 text-xs leading-none ${
-                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-[var(--surface-overlay)] text-muted-foreground'
+                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-(--surface-overlay) text-muted-foreground'
                     }`}>{tab.count}</span>
                   )}
                 </button>
@@ -368,10 +368,10 @@ export default function AdminPage() {
 }
 
 const adminLinkButtonCls =
-  'inline-flex items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-transparent bg-[var(--color-primary-500)] px-4 py-2.5 text-sm font-medium text-white shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:bg-[var(--color-primary-600)]';
+  'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-(--color-primary-500) px-4 py-2.5 text-sm font-medium text-white shadow-(--shadow-sm) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:bg-(--color-primary-600)';
 
 const adminIconButtonCls =
-  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-default) bg-(--surface-raised) text-neutral-700 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:border-(--border-strong) hover:text-neutral-900';
 
 function postStatusTone(status: string): 'success' | 'warning' {
   return status === 'published' ? 'success' : 'warning';
@@ -420,8 +420,8 @@ function OverviewTab({ posts, photos, diaries, albums }: {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card variant="default" className="relative overflow-hidden rounded-[var(--radius-2xl)]">
-              <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-10`} />
+            <Card variant="default" className="relative overflow-hidden rounded-2xl">
+              <div className={`absolute inset-0 bg-linear-to-br ${stat.color} opacity-10`} />
               <stat.icon className="mb-3 h-8 w-8 text-primary" />
               <div className="text-3xl font-semibold">{stat.value}</div>
               <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
@@ -436,7 +436,7 @@ function OverviewTab({ posts, photos, diaries, albums }: {
             <motion.div whileHover={{ scale: 1.01 }}>
               <Card
                 variant="default"
-                className="rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+                className="rounded-2xl border border-(--border-default) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-md)"
               >
                 <item.icon className="mb-3 h-8 w-8 text-primary" />
                 <h3 className="mb-1 font-semibold">{item.title}</h3>
@@ -448,7 +448,7 @@ function OverviewTab({ posts, photos, diaries, albums }: {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Card variant="elevated" className="rounded-[var(--radius-2xl)]">
+        <Card variant="elevated" className="rounded-2xl">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="flex items-center gap-2 font-semibold">
               <FileText className="h-5 w-5 text-primary" />
@@ -471,7 +471,7 @@ function OverviewTab({ posts, photos, diaries, albums }: {
               {recentPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-xs)]"
+                  className="flex items-center gap-3 rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-3 shadow-(--shadow-xs)"
                 >
                   <div className="min-w-0 flex-1">
                     <h4 className="truncate font-medium">{post.title}</h4>
@@ -493,18 +493,18 @@ function OverviewTab({ posts, photos, diaries, albums }: {
           )}
         </Card>
 
-        <Card variant="elevated" className="rounded-[var(--radius-2xl)]">
+        <Card variant="elevated" className="rounded-2xl">
           <h3 className="mb-4 flex items-center gap-2 font-semibold">
             <BookOpen className="h-5 w-5 text-primary" />
             日记统计
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
+            <div className="rounded-xl border border-(--border-default) bg-(--surface-panel) p-4">
               <Eye className="mb-3 h-6 w-6 text-green-500" />
               <div className="text-2xl font-semibold">{publicDiaries}</div>
               <div className="text-sm text-muted-foreground">公开日记</div>
             </div>
-            <div className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
+            <div className="rounded-xl border border-(--border-default) bg-(--surface-panel) p-4">
               <EyeOff className="mb-3 h-6 w-6 text-amber-500" />
               <div className="text-2xl font-semibold">{privateDiaries}</div>
               <div className="text-sm text-muted-foreground">私密日记</div>
@@ -528,7 +528,7 @@ function Paginator({ total, page, setPage }: { total: number; page: number; setP
           type="button"
           onClick={() => setPage(page - 1)}
           disabled={page === 0}
-          className="rounded-[var(--radius-md)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-3 py-1.5 disabled:opacity-40 hover:bg-[var(--surface-overlay)]"
+          className="rounded-md border border-(--border-default) bg-(--surface-panel) px-3 py-1.5 disabled:opacity-40 hover:bg-(--surface-overlay)"
         >
           上一页
         </button>
@@ -536,7 +536,7 @@ function Paginator({ total, page, setPage }: { total: number; page: number; setP
           type="button"
           onClick={() => setPage(page + 1)}
           disabled={page >= totalPages - 1}
-          className="rounded-[var(--radius-md)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-3 py-1.5 disabled:opacity-40 hover:bg-[var(--surface-overlay)]"
+          className="rounded-md border border-(--border-default) bg-(--surface-panel) px-3 py-1.5 disabled:opacity-40 hover:bg-(--surface-overlay)"
         >
           下一页
         </button>
@@ -564,7 +564,7 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
         </Link>
       </div>
 
-      <Card variant="elevated" padding="sm" className="overflow-hidden rounded-[var(--radius-2xl)]">
+      <Card variant="elevated" padding="sm" className="overflow-hidden rounded-2xl">
         {posts.length === 0 ? (
           <StatePanel
             tone="empty"
@@ -576,12 +576,12 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
             {paged.map((post) => (
               <div
                 key={post.id}
-                className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)]"
+                className="flex items-center gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) p-4 shadow-(--shadow-xs)"
               >
                 {post.cover_image ? (
-                  <Image src={post.cover_image} alt="" width={72} height={54} className="rounded-[var(--radius-lg)] object-cover" />
+                  <Image src={post.cover_image} alt="" width={72} height={54} className="rounded-lg object-cover" />
                 ) : (
-                  <div className="flex h-[54px] w-[72px] shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--surface-overlay)] text-muted-foreground">
+                  <div className="flex h-13.5 w-18 shrink-0 items-center justify-center rounded-lg bg-(--surface-overlay) text-muted-foreground">
                     <FileText className="h-4 w-4" />
                   </div>
                 )}
@@ -608,6 +608,7 @@ function PostsTab({ posts, onDelete }: { posts: Post[]; onDelete: (id: string) =
                   </Link>
                   <button
                     onClick={() => onDelete(post.id)}
+                    aria-label="删除文章"
                     className={`${adminIconButtonCls} hover:border-red-400 hover:text-red-500`}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -653,7 +654,7 @@ function PhotosTab({ photos, onDelete }: { photos: Photo[]; onDelete: (id: strin
           {paged.map((photo) => (
             <div
               key={photo.id}
-              className="group relative aspect-square overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]"
+              className="group relative aspect-square overflow-hidden rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)"
             >
               <Image
                 src={photo.thumbnail_url || photo.url}
@@ -665,13 +666,14 @@ function PhotosTab({ photos, onDelete }: { photos: Photo[]; onDelete: (id: strin
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                   onClick={() => onDelete(photo.id)}
+                  aria-label="删除照片"
                   className="rounded-full bg-red-500 p-2 text-white transition-colors hover:bg-red-600"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
               {photo.title && (
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 p-2 bg-linear-to-t from-black/60 to-transparent">
                   <p className="text-white text-xs truncate">{photo.title}</p>
                 </div>
               )}
@@ -703,7 +705,7 @@ function DiaryTab({ diaries, onDelete }: { diaries: Diary[]; onDelete: (id: stri
         </Link>
       </div>
 
-      <Card variant="elevated" padding="sm" className="overflow-hidden rounded-[var(--radius-2xl)]">
+      <Card variant="elevated" padding="sm" className="overflow-hidden rounded-2xl">
         {diaries.length === 0 ? (
           <StatePanel
             tone="empty"
@@ -715,7 +717,7 @@ function DiaryTab({ diaries, onDelete }: { diaries: Diary[]; onDelete: (id: stri
             {paged.map((diary) => (
               <div
                 key={diary.id}
-                className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)]"
+                className="flex items-center gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) p-4 shadow-(--shadow-xs)"
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="truncate font-medium">{diary.title || formatDate(diary.diary_date)}</h3>
@@ -735,6 +737,7 @@ function DiaryTab({ diaries, onDelete }: { diaries: Diary[]; onDelete: (id: stri
                   </Link>
                   <button
                     onClick={() => onDelete(diary.id)}
+                    aria-label="删除日记"
                     className={`${adminIconButtonCls} hover:border-red-400 hover:text-red-500`}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -787,12 +790,12 @@ function AlbumsTab({ albums, onDelete, onEdit, onAdd }: {
               key={album.id}
               variant="default"
               padding="sm"
-              className="group overflow-hidden rounded-[var(--radius-2xl)] p-0 transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+              className="group overflow-hidden rounded-2xl p-0 transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-md)"
             >
               {album.cover_image ? (
                 <Image src={album.cover_image} alt="" width={400} height={225} className="aspect-video w-full object-cover" />
               ) : (
-                <div className="flex aspect-video w-full items-center justify-center bg-[var(--surface-overlay)]">
+                <div className="flex aspect-video w-full items-center justify-center bg-(--surface-overlay)">
                   <Folder className="h-12 w-12 text-muted-foreground/40" />
                 </div>
               )}
@@ -806,12 +809,14 @@ function AlbumsTab({ albums, onDelete, onEdit, onAdd }: {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onEdit(album)}
+                      aria-label="编辑相册"
                       className={adminIconButtonCls}
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => onDelete(album.id)}
+                      aria-label="删除相册"
                       className={`${adminIconButtonCls} hover:border-red-400 hover:text-red-500`}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -865,10 +870,10 @@ function AlbumModal({ album, onClose, onSave }: {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
+        className="w-full max-w-md overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-2xl)"
         onClick={e => e.stopPropagation()}
       >
-        <div className="border-b border-[color:var(--border-default)] p-6">
+        <div className="border-b border-(--border-default) p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Folder className="w-5 h-5 text-primary" />
@@ -876,6 +881,7 @@ function AlbumModal({ album, onClose, onSave }: {
             </h2>
             <button
               onClick={onClose}
+              aria-label="关闭"
               className={adminIconButtonCls}
             >
               <X className="h-4 w-4" />
@@ -1014,8 +1020,8 @@ function SecurityTab() {
     } finally { setDeletingPasskeyId(null); }
   }
 
-  const cardCls = 'rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-xs)]';
-  const rowCls = 'flex items-start justify-between gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] p-3.5';
+  const cardCls = 'rounded-2xl border border-(--border-default) bg-(--surface-panel) p-5 shadow-(--shadow-xs)';
+  const rowCls = 'flex items-start justify-between gap-4 rounded-xl border border-(--border-default) bg-(--surface-base) p-3.5';
 
   return (
     <div className="space-y-6">

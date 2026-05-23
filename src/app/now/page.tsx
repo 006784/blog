@@ -31,7 +31,7 @@ function NowSkeleton() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <Skeleton key={i} className="h-32 rounded-[var(--radius-2xl)]" />
+        <Skeleton key={i} className="h-32 rounded-2xl" />
       ))}
     </div>
   );
@@ -94,26 +94,26 @@ export default function NowPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 此刻
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 用一页记录最近正在关注、在做、在想和在学习的东西，让站点保持当下感。
               </p>
               {lastUpdated ? (
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--color-neutral-500)]">
+                <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
                   最后更新于 {formatDate(lastUpdated)}
                 </p>
               ) : null}
             </div>
-            <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-[var(--radius-2xl)]">
+            <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                   <Compass className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Active Notes</p>
-                  <p className="text-2xl font-semibold text-[var(--color-neutral-900)]">{entries.length}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Active Notes</p>
+                  <p className="text-2xl font-semibold text-neutral-900">{entries.length}</p>
                 </div>
               </div>
             </Card>
@@ -131,7 +131,7 @@ export default function NowPage() {
             action={
               <button
                 onClick={() => void loadEntries()}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
+                className="inline-flex items-center gap-2 rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
               >
                 <RefreshCw className="h-4 w-4" />
                 重新加载
@@ -156,15 +156,15 @@ export default function NowPage() {
                   transition={{ delay: gi * 0.06 }}
                   className="h-full"
                 >
-                  <Card variant="glass" className="h-full rounded-[var(--radius-2xl)]">
+                  <Card variant="glass" className="h-full rounded-2xl">
                     <div className="mb-5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{meta.icon}</span>
                         <div>
-                          <p className="text-lg font-semibold text-[var(--color-neutral-900)]">
+                          <p className="text-lg font-semibold text-neutral-900">
                             {meta.label}
                           </p>
-                          <p className="text-sm text-[var(--color-neutral-500)]">
+                          <p className="text-sm text-neutral-500">
                             当前 {items.length} 条记录
                           </p>
                         </div>
@@ -176,20 +176,20 @@ export default function NowPage() {
                       {items.map((entry) => (
                         <li
                           key={entry.id}
-                          className="flex items-start gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] px-4 py-3"
+                          className="flex items-start gap-3 rounded-xl border border-(--border-default) bg-(--surface-base) px-4 py-3"
                         >
                           {entry.emoji ? (
                             <span className="mt-0.5 shrink-0 text-base">{entry.emoji}</span>
                           ) : (
-                            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--color-primary-500)]" />
+                            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-(--color-primary-500)" />
                           )}
-                          <span className="flex-1 text-sm leading-7 text-[var(--color-neutral-700)]">
+                          <span className="flex-1 text-sm leading-7 text-neutral-700">
                             {entry.link ? (
                               <a
                                 href={entry.link}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="underline underline-offset-4 transition-colors hover:text-[var(--color-primary-600)]"
+                                className="underline underline-offset-4 transition-colors hover:text-(--color-primary-600)"
                               >
                                 {entry.content}
                               </a>

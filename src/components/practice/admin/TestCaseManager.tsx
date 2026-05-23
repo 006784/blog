@@ -67,7 +67,7 @@ export function TestCaseManager({ problemId }: { problemId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium">测试用例</label>
-        <button onClick={handleAdd} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-[var(--gold)] text-white hover:bg-amber-500 transition-colors">
+        <button onClick={handleAdd} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-(--gold) text-white hover:bg-amber-500 transition-colors">
           <Plus className="w-3.5 h-3.5" /> 添加
         </button>
       </div>
@@ -77,7 +77,7 @@ export function TestCaseManager({ problemId }: { problemId: string }) {
       )}
 
       {cases.map((tc, i) => (
-        <div key={tc.id || i} className="rounded-lg border border-[var(--line)] p-3 space-y-2">
+        <div key={tc.id || i} className="rounded-lg border border-(--line) p-3 space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>用例 {i + 1}</span>
             <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export function TestCaseManager({ problemId }: { problemId: string }) {
                 value={tc.input}
                 onChange={e => update(tc.id, 'input', e.target.value)}
                 rows={2}
-                className="w-full text-xs font-mono px-2 py-1.5 rounded border border-[var(--line)] bg-muted focus:border-[var(--gold)] outline-none resize-none"
+                className="w-full text-xs font-mono px-2 py-1.5 rounded border border-(--line) bg-muted focus:border-(--gold) outline-none resize-none"
                 placeholder="每行一个输入"
               />
             </div>
@@ -122,7 +122,7 @@ export function TestCaseManager({ problemId }: { problemId: string }) {
                 value={tc.expected}
                 onChange={e => update(tc.id, 'expected', e.target.value)}
                 rows={2}
-                className="w-full text-xs font-mono px-2 py-1.5 rounded border border-[var(--line)] bg-muted focus:border-[var(--gold)] outline-none resize-none"
+                className="w-full text-xs font-mono px-2 py-1.5 rounded border border-(--line) bg-muted focus:border-(--gold) outline-none resize-none"
                 placeholder="程序应输出的内容"
               />
             </div>

@@ -69,15 +69,15 @@ const iconMap: Record<string, typeof File> = {
 
 // 颜色映射 — 杂志金墨配色
 const colorMap: Record<string, { color: string; bg: string }> = {
-  blue:   { color: 'text-[var(--ink)]',           bg: 'bg-[var(--paper-deep)]' },
-  purple: { color: 'text-[var(--ink-secondary)]',  bg: 'bg-[var(--paper-deep)]' },
-  green:  { color: 'text-[var(--gold)]',           bg: 'bg-[var(--paper-deep)]' },
-  orange: { color: 'text-[var(--gold)]',           bg: 'bg-[var(--paper-deep)]' },
-  pink:   { color: 'text-[var(--ink-secondary)]',  bg: 'bg-[var(--paper-deep)]' },
-  red:    { color: 'text-[var(--ink)]',            bg: 'bg-[var(--paper-deep)]' },
-  yellow: { color: 'text-[var(--gold)]',           bg: 'bg-[var(--paper-deep)]' },
-  cyan:   { color: 'text-[var(--ink-secondary)]',  bg: 'bg-[var(--paper-deep)]' },
-  gray:   { color: 'text-[var(--ink-muted)]',      bg: 'bg-[var(--paper-deep)]' },
+  blue:   { color: 'text-(--ink)',           bg: 'bg-(--paper-deep)' },
+  purple: { color: 'text-(--ink-secondary)',  bg: 'bg-(--paper-deep)' },
+  green:  { color: 'text-(--gold)',           bg: 'bg-(--paper-deep)' },
+  orange: { color: 'text-(--gold)',           bg: 'bg-(--paper-deep)' },
+  pink:   { color: 'text-(--ink-secondary)',  bg: 'bg-(--paper-deep)' },
+  red:    { color: 'text-(--ink)',            bg: 'bg-(--paper-deep)' },
+  yellow: { color: 'text-(--gold)',           bg: 'bg-(--paper-deep)' },
+  cyan:   { color: 'text-(--ink-secondary)',  bg: 'bg-(--paper-deep)' },
+  gray:   { color: 'text-(--ink-muted)',      bg: 'bg-(--paper-deep)' },
 };
 
 // 获取分类配置
@@ -107,7 +107,7 @@ function ResourceGridSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-        <Skeleton key={item} className="h-56 rounded-[var(--radius-2xl)]" />
+        <Skeleton key={item} className="h-56 rounded-2xl" />
       ))}
     </div>
   );
@@ -117,7 +117,7 @@ function ResourceListSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2, 3, 4, 5].map((item) => (
-        <Skeleton key={item} className="h-24 rounded-[var(--radius-2xl)]" />
+        <Skeleton key={item} className="h-24 rounded-2xl" />
       ))}
     </div>
   );
@@ -562,10 +562,10 @@ export default function ResourcesPage() {
             transition={{ duration: 0.32, ease: APPLE_EASE_SOFT }}
             className={`fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 border px-4 py-2 text-sm backdrop-blur-xl ${
               notice.type === 'success'
-                ? 'border-[var(--gold)] bg-[var(--ink)] text-[var(--paper)]'
+                ? 'border-(--gold) bg-(--ink) text-(--paper)'
                 : notice.type === 'error'
-                  ? 'border-[var(--line)] bg-[var(--paper-warm)] text-[var(--ink-secondary)]'
-                  : 'border-[var(--line)] bg-[var(--paper-warm)] text-[var(--ink)]'
+                  ? 'border-(--line) bg-(--paper-warm) text-(--ink-secondary)'
+                  : 'border-(--line) bg-(--paper-warm) text-(--ink)'
             }`}
           >
             {notice.type === 'success' ? (
@@ -593,55 +593,55 @@ export default function ResourcesPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 资源存储
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 集中管理文件、安装包、文档和媒体资源，支持公开分享与私有归档。
               </p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4 lg:max-w-4xl">
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                     <File className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">总文件数</p>
-                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{stats.total}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">总文件数</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{stats.total}</p>
                   </div>
                 </div>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-warning)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-warning)">
                     <Eye className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">公开资源</p>
-                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{stats.public}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">公开资源</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{stats.public}</p>
                   </div>
                 </div>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                     <HardDrive className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">总存储</p>
-                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{formatFileSize(stats.totalSize)}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">总存储</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{formatFileSize(stats.totalSize)}</p>
                   </div>
                 </div>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                     <Download className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">总下载</p>
-                    <p className="mt-1 text-2xl font-semibold text-[var(--color-neutral-900)]">{stats.totalDownloads}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">总下载</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{stats.totalDownloads}</p>
                   </div>
                 </div>
               </Card>
@@ -649,11 +649,11 @@ export default function ResourcesPage() {
           </div>
         </motion.div>
 
-        <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+        <Card variant="glass" className="rounded-2xl">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1 max-w-xl">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                 <Input
                   type="text"
                   placeholder="搜索资源..."
@@ -666,7 +666,7 @@ export default function ResourcesPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 sm:w-[190px]"
+                className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 sm:w-[190px]"
               >
                 <option value="all">全部分类</option>
                 {categories.map((cat) => (
@@ -690,7 +690,7 @@ export default function ResourcesPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-base)] p-1">
+              <div className="flex items-center gap-1 rounded-full border border-(--border-default) bg-(--surface-base) p-1">
                 <Button
                   variant={viewMode === 'grid' ? 'primary' : 'ghost'}
                   size="sm"
@@ -783,36 +783,36 @@ export default function ResourcesPage() {
                 >
                   <Card
                     variant="glass"
-                    className="h-full rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                    className="h-full rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
                   >
                     <div className="mb-4 flex items-start justify-between gap-3">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] ${config.bg}`}>
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.bg}`}>
                         <Icon className={`h-6 w-6 ${config.color}`} />
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="soft">{config.name}</Badge>
                         {resource.is_public ? (
-                          <Eye className="h-4 w-4 text-[var(--color-warning)]" />
+                          <Eye className="h-4 w-4 text-(--color-warning)" />
                         ) : (
-                          <EyeOff className="h-4 w-4 text-[var(--color-neutral-500)]" />
+                          <EyeOff className="h-4 w-4 text-neutral-500" />
                         )}
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <h3 className="line-clamp-2 text-base font-semibold text-[var(--color-neutral-900)]">
+                      <h3 className="line-clamp-2 text-base font-semibold text-neutral-900">
                         {resource.name}
                       </h3>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--color-neutral-500)]">
+                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
                       <span>{formatFileSize(resource.file_size)}</span>
                       <span>·</span>
                       <span>{formatDate(resource.created_at)}</span>
                       {resource.download_count > 10 ? (
                         <>
                           <span>·</span>
-                          <span className="inline-flex items-center gap-1 text-[var(--color-warning)]">
+                          <span className="inline-flex items-center gap-1 text-(--color-warning)">
                             <Star className="h-3 w-3" />
                             高频
                           </span>
@@ -837,7 +837,7 @@ export default function ResourcesPage() {
                         title="复制链接"
                       >
                         {copiedId === resource.id ? (
-                          <Check className="h-4 w-4 text-[var(--color-warning)]" />
+                          <Check className="h-4 w-4 text-(--color-warning)" />
                         ) : (
                           <Copy className="h-4 w-4" />
                         )}
@@ -875,32 +875,32 @@ export default function ResourcesPage() {
                   whileTap={{ scale: 0.995 }}
                   className="group"
                 >
-                  <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                  <Card variant="glass" padding="sm" className="rounded-2xl">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-xl)] ${config.bg}`}>
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${config.bg}`}>
                         <Icon className={`h-5 w-5 ${config.color}`} />
                       </div>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="truncate text-base font-semibold text-[var(--color-neutral-900)]">
+                          <h3 className="truncate text-base font-semibold text-neutral-900">
                             {resource.name}
                           </h3>
                           <Badge variant="soft">{config.name}</Badge>
                           {resource.is_public ? (
-                            <Eye className="h-3.5 w-3.5 text-[var(--color-warning)]" />
+                            <Eye className="h-3.5 w-3.5 text-(--color-warning)" />
                           ) : (
-                            <EyeOff className="h-3.5 w-3.5 text-[var(--color-neutral-500)]" />
+                            <EyeOff className="h-3.5 w-3.5 text-neutral-500" />
                           )}
                         </div>
-                        <p className="truncate text-sm text-[var(--color-neutral-500)]">{formatFileSize(resource.file_size)} · {formatDate(resource.created_at)}</p>
+                        <p className="truncate text-sm text-neutral-500">{formatFileSize(resource.file_size)} · {formatDate(resource.created_at)}</p>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-neutral-500)] lg:min-w-[260px] lg:justify-end">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 lg:min-w-[260px] lg:justify-end">
                         <span>{formatFileSize(resource.file_size)}</span>
                         <span>{formatDate(resource.created_at)}</span>
                         {resource.download_count > 10 ? (
-                          <span className="inline-flex items-center gap-1 text-[var(--color-warning)]">
+                          <span className="inline-flex items-center gap-1 text-(--color-warning)">
                             <Star className="h-3 w-3" />
                             高频
                           </span>
@@ -923,7 +923,7 @@ export default function ResourcesPage() {
                           title="复制链接"
                         >
                           {copiedId === resource.id ? (
-                            <Check className="h-4 w-4 text-[var(--color-warning)]" />
+                            <Check className="h-4 w-4 text-(--color-warning)" />
                           ) : (
                             <Copy className="h-4 w-4" />
                           )}
@@ -979,7 +979,7 @@ export default function ResourcesPage() {
                   </button>
                 </div>
 
-                <div className="p-4 rounded-xl border border-[var(--ui-line)] bg-secondary/30 mb-4">
+                <div className="p-4 rounded-xl border border-(--ui-line) bg-secondary/30 mb-4">
                   <p className="font-medium truncate">{downloadModal.name}</p>
                   <p className="text-sm text-muted-foreground">{formatFileSize(downloadModal.file_size)}</p>
                 </div>
@@ -1092,7 +1092,7 @@ export default function ResourcesPage() {
                     className={`rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
                       isDropActive
                         ? 'border-primary bg-primary/10'
-                        : 'border-[var(--ui-line)] bg-secondary/20 hover:border-primary/50'
+                        : 'border-(--ui-line) bg-secondary/20 hover:border-primary/50'
                     }`}
                   >
                     {uploadFile ? (
@@ -1137,7 +1137,7 @@ export default function ResourcesPage() {
                     <select
                       value={uploadCategory}
                       onChange={(e) => setUploadCategory(e.target.value)}
-                      className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
+                      className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
                     >
                       <option value="">自动检测</option>
                       {categories.map((cat) => (
@@ -1181,7 +1181,7 @@ export default function ResourcesPage() {
                   </label>
 
                   {/* 安全提示 */}
-                  <div className="flex items-start gap-2 p-3 border border-[var(--line)] bg-[var(--paper-deep)] text-[var(--ink-muted)] text-sm">
+                  <div className="flex items-start gap-2 p-3 border border-(--line) bg-(--paper-deep) text-(--ink-muted) text-sm">
                     <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <p>文件将经过安全检测，禁止上传可执行文件、脚本等危险文件</p>
                   </div>
@@ -1238,7 +1238,7 @@ export default function ResourcesPage() {
                 className="surface-card ios-modal-card flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden"
               >
                 {/* 头部 */}
-                <div className="flex items-center justify-between p-6 border-b border-[var(--ui-line)]">
+                <div className="flex items-center justify-between p-6 border-b border-(--ui-line)">
                   <h3 className="text-xl font-bold">分类管理</h3>
                   <button
                     onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
@@ -1251,7 +1251,7 @@ export default function ResourcesPage() {
                 {/* 内容 */}
                 <div className="p-6 overflow-y-auto flex-1">
                   {/* 添加/编辑表单 */}
-                  <div className="p-4 rounded-xl border border-[var(--ui-line)] bg-secondary/30 mb-6">
+                  <div className="p-4 rounded-xl border border-(--ui-line) bg-secondary/30 mb-6">
                     <h4 className="font-medium mb-4">
                       {editingCategory ? '编辑分类' : '添加新分类'}
                     </h4>
@@ -1289,7 +1289,7 @@ export default function ResourcesPage() {
                         <select
                           value={newCatIcon}
                           onChange={(e) => setNewCatIcon(e.target.value)}
-                          className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
+                          className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
                         >
                           {Object.keys(iconMap).map(icon => (
                             <option key={icon} value={icon}>{icon}</option>
@@ -1301,7 +1301,7 @@ export default function ResourcesPage() {
                         <select
                           value={newCatColor}
                           onChange={(e) => setNewCatColor(e.target.value)}
-                          className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
+                          className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
                         >
                           {Object.keys(colorMap).map(color => (
                             <option key={color} value={color}>{color}</option>
@@ -1337,7 +1337,7 @@ export default function ResourcesPage() {
                       return (
                         <div
                           key={cat.id}
-                          className="flex items-center justify-between p-3 rounded-xl border border-[var(--ui-line)] bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                          className="flex items-center justify-between p-3 rounded-xl border border-(--ui-line) bg-secondary/30 hover:bg-secondary/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-lg ${config.bg}`}>

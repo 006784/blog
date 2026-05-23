@@ -258,7 +258,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
 
       {/* 同步状态卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+        <div className="bg-linear-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-blue-800">连接状态</span>
             <div className={`w-3 h-3 rounded-full ${syncStatus?.isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -268,7 +268,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+        <div className="bg-linear-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-green-800">同步状态</span>
             <div className={`w-3 h-3 rounded-full ${syncStatus?.isSyncing ? 'bg-yellow-500 animate-pulse' : syncStatus?.lastSync ? 'bg-green-500' : 'bg-gray-500'}`}></div>
@@ -278,7 +278,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
+        <div className="bg-linear-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
           <div className="flex items-center gap-2 mb-2">
             <Activity className="w-4 h-4 text-amber-600" />
             <span className="text-sm font-medium text-amber-800">待同步</span>
@@ -286,7 +286,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
           <div className="text-lg font-bold text-amber-900">{syncStatus?.pendingChanges || 0}</div>
         </div>
         
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+        <div className="bg-linear-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-purple-600" />
             <span className="text-sm font-medium text-purple-800">上次同步</span>
@@ -302,7 +302,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
         <div className="mb-6">
           <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
             <div 
-              className="bg-gradient-to-r from-amber-400 to-amber-600 h-2 rounded-full transition-all duration-300"
+              className="bg-linear-to-r from-amber-400 to-amber-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${syncStatus.syncProgress}%` }}
             ></div>
           </div>

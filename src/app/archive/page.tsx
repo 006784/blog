@@ -104,7 +104,7 @@ export default function ArchivePage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 border border-[var(--line)] text-[var(--ink-muted)]" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.15em', fontSize: '0.72rem', textTransform: 'uppercase' }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 border border-(--line) text-(--ink-muted)" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.15em', fontSize: '0.72rem', textTransform: 'uppercase' }}>
             <Calendar className="w-4 h-4" />
             <span>文章归档</span>
           </div>
@@ -132,7 +132,7 @@ export default function ArchivePage() {
                 onClick={() => toggleYear(yearData.year)}
                 className="flex items-center gap-4 mb-4 group"
               >
-                <div className="relative z-10 w-12 h-12 flex items-center justify-center font-bold border border-[var(--line)]" style={{ background: 'var(--paper-deep)', color: 'var(--gold)' }}>
+                <div className="relative z-10 w-12 h-12 flex items-center justify-center font-bold border border-(--line)" style={{ background: 'var(--paper-deep)', color: 'var(--gold)' }}>
                   {expandedYears.includes(yearData.year) ? (
                     <ChevronDown className="w-6 h-6" />
                   ) : (
@@ -140,7 +140,7 @@ export default function ArchivePage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold group-hover:text-[var(--gold)] transition-colors">
+                  <h2 className="text-2xl font-bold group-hover:text-(--gold) transition-colors">
                     {yearData.year}
                   </h2>
                   <p className="text-sm text-muted-foreground">
@@ -159,7 +159,7 @@ export default function ArchivePage() {
                 >
                   {yearData.months.map((monthData) => (
                     <div key={monthData.month} className="mb-6">
-                      <h3 className="text-lg font-semibold mb-3 text-[var(--gold)]" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.1em' }}>
+                      <h3 className="text-lg font-semibold mb-3 text-(--gold)" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.1em' }}>
                         {monthNames[monthData.month - 1]}
                       </h3>
                       <div className="space-y-3">
@@ -171,11 +171,11 @@ export default function ArchivePage() {
                           >
                             <Link
                               href={`/blog/${post.slug}`}
-                              className="flex items-start gap-3 p-3 border border-transparent hover:border-[var(--line)] hover:bg-[var(--paper-warm)] transition-all"
+                              className="flex items-start gap-3 p-3 border border-transparent hover:border-(--line) hover:bg-(--paper-warm) transition-all"
                             >
                               <FileText className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-medium group-hover:text-[var(--gold)] transition-colors line-clamp-1">
+                                <h4 className="font-medium group-hover:text-(--gold) transition-colors line-clamp-1">
                                   {post.title}
                                 </h4>
                                 {post.description && (

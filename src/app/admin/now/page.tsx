@@ -51,9 +51,9 @@ const EMPTY: Partial<NowEntry> = {
 
 const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
 const selectCls =
-  'w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-sm text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-base)]';
+  'w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-sm text-neutral-900 shadow-(--shadow-xs) transition-all duration-(--duration-fast) ease-(--ease-default) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface-base)';
 const iconButtonCls =
-  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-default) bg-(--surface-raised) text-neutral-700 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:border-(--border-strong) hover:text-neutral-900';
 
 export default function AdminNowPage() {
   const { isAdmin, showLoginModal } = useAdmin();
@@ -144,7 +144,7 @@ export default function AdminNowPage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <Sparkles className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -162,18 +162,18 @@ export default function AdminNowPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">条目总数</p>
             <p className="mt-3 text-3xl font-semibold">{entries.length}</p>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">正在显示</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{activeCount}</p>
               <Badge tone="success" variant="soft">前台可见</Badge>
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">已隐藏</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{hiddenCount}</p>
@@ -201,24 +201,24 @@ export default function AdminNowPage() {
             }
           />
         ) : (
-          <Card variant="elevated" padding="sm" className="space-y-3 rounded-[var(--radius-2xl)]">
+          <Card variant="elevated" padding="sm" className="space-y-3 rounded-2xl">
             {entries.map((entry) => {
               const category = CATEGORY_OPTIONS.find((item) => item.value === entry.category);
               return (
                 <motion.div
                   key={entry.id}
                   layout
-                  className={`flex items-center gap-4 rounded-[var(--radius-xl)] border px-4 py-3 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] ${
+                  className={`flex items-center gap-4 rounded-xl border px-4 py-3 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-sm) ${
                     entry.is_active
-                      ? 'border-[color:var(--border-default)] bg-[var(--surface-panel)]'
-                      : 'border-dashed border-[color:var(--border-default)] bg-[var(--surface-raised)] opacity-70'
+                      ? 'border-(--border-default) bg-(--surface-panel)'
+                      : 'border-dashed border-(--border-default) bg-(--surface-raised) opacity-70'
                   }`}
                 >
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     {entry.emoji ? (
                       <span className="mt-0.5 text-lg">{entry.emoji}</span>
                     ) : (
-                      <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-overlay)] text-sm">
+                      <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-(--surface-overlay) text-sm">
                         ✦
                       </span>
                     )}
@@ -274,9 +274,9 @@ export default function AdminNowPage() {
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
-              className="w-full max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
+              className="w-full max-w-xl overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-2xl)"
             >
-              <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex items-center justify-between border-b border-(--border-default) px-6 py-5">
                 <div>
                   <h2 className="text-lg font-semibold">{editing ? '编辑条目' : '添加条目'}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">更新当下状态、链接和展示顺序。</p>
@@ -331,12 +331,12 @@ export default function AdminNowPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3">
+                <div className="flex items-center gap-3 rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-3">
                   <input
                     type="checkbox"
                     checked={form.is_active ?? true}
                     onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))}
-                    className="h-4 w-4 rounded border-[color:var(--border-default)]"
+                    className="h-4 w-4 rounded border-(--border-default)"
                   />
                   <div>
                     <p className="text-sm font-medium">立即公开显示</p>
@@ -345,7 +345,7 @@ export default function AdminNowPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex justify-end gap-3 border-t border-(--border-default) px-6 py-5">
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
                   取消
                 </Button>

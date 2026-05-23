@@ -36,27 +36,27 @@ export default function CollectionsPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 精选合集
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 把文章、灵感和资料整理成一组一组的主题入口，让内容比单篇阅读更有上下文。
               </p>
             </div>
             <Card
               variant="glass"
               padding="sm"
-              className="w-full max-w-sm rounded-[var(--radius-2xl)]"
+              className="w-full max-w-sm rounded-2xl"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                   <Layers3 className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-neutral-500)]">
+                  <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">
                     Public Collections
                   </p>
-                  <p className="text-2xl font-semibold text-[var(--color-neutral-900)]">
+                  <p className="text-2xl font-semibold text-neutral-900">
                     {collections.length}
                   </p>
                 </div>
@@ -68,7 +68,7 @@ export default function CollectionsPage() {
         {loading ? (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-[290px] rounded-[var(--radius-2xl)]" />
+              <Skeleton key={i} className="h-[290px] rounded-2xl" />
             ))}
           </div>
         ) : collections.length === 0 ? (
@@ -92,7 +92,7 @@ export default function CollectionsPage() {
                   <Card
                     variant="glass"
                     padding="sm"
-                    className="flex h-full flex-col overflow-hidden rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-xl)]"
+                    className="flex h-full flex-col overflow-hidden rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-xl)"
                   >
                     <div className="relative h-40 overflow-hidden rounded-[calc(var(--radius-2xl)-8px)] bg-[linear-gradient(135deg,var(--surface-overlay),var(--surface-raised))]">
                       {col.cover_image ? (
@@ -110,7 +110,7 @@ export default function CollectionsPage() {
                           {col.name.charAt(0)}
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/45 via-black/10 to-transparent" />
                       <div className="absolute left-4 top-4">
                         <Badge variant="soft" className="border-white/20 bg-black/35 text-white">
                           {col.post_count} 篇文章
@@ -122,23 +122,23 @@ export default function CollectionsPage() {
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
-                            <h2 className="text-lg font-semibold text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
+                            <h2 className="text-lg font-semibold text-neutral-900 transition-colors group-hover:text-(--color-primary-600)">
                               {col.name}
                             </h2>
                             {col.description ? (
-                              <p className="line-clamp-3 text-sm leading-6 text-[var(--color-neutral-600)]">
+                              <p className="line-clamp-3 text-sm leading-6 text-neutral-600">
                                 {col.description}
                               </p>
                             ) : (
-                              <p className="text-sm leading-6 text-[var(--color-neutral-500)]">
+                              <p className="text-sm leading-6 text-neutral-500">
                                 一个围绕 {col.name} 展开的主题内容集合。
                               </p>
                             )}
                           </div>
-                          <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[var(--color-neutral-500)] transition-transform duration-[var(--duration-fast)] group-hover:translate-x-1 group-hover:text-[var(--color-primary-600)]" />
+                          <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-neutral-500 transition-transform duration-(--duration-fast) group-hover:translate-x-1 group-hover:text-(--color-primary-600)" />
                         </div>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-[var(--color-neutral-500)]">
+                      <div className="flex items-center justify-between text-xs text-neutral-500">
                         <span>主题阅读入口</span>
                         <span>查看合集</span>
                       </div>

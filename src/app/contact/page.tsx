@@ -28,29 +28,29 @@ const contactInfo = [
     label: '邮箱',
     value: 'zyi408480@gmail.com',
     href: 'mailto:zyi408480@gmail.com',
-    color: 'bg-[var(--ink)]',
+    color: 'bg-(--ink)',
   },
   {
     icon: MapPin,
     label: '地点',
     value: '上海，中国',
     href: '#',
-    color: 'bg-[var(--ink-secondary)]',
+    color: 'bg-(--ink-secondary)',
   },
   {
     icon: Phone,
     label: '电话',
     value: '+86 123 4567 8900',
     href: 'tel:+8612345678900',
-    color: 'bg-[var(--gold)]',
+    color: 'bg-(--gold)',
   },
 ];
 
 const socialLinks = [
-  { name: 'GitHub', href: 'https://github.com', icon: Github, color: 'hover:bg-[var(--ink)] hover:text-[var(--paper)]' },
-  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter, color: 'hover:bg-[var(--ink)] hover:text-[var(--paper)]' },
-  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin, color: 'hover:bg-[var(--ink)] hover:text-[var(--paper)]' },
-  { name: 'WeChat', href: '#', icon: MessageCircle, color: 'hover:bg-[var(--gold)] hover:text-[var(--paper)]' },
+  { name: 'GitHub', href: 'https://github.com', icon: Github, color: 'hover:bg-(--ink) hover:text-(--paper)' },
+  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter, color: 'hover:bg-(--ink) hover:text-(--paper)' },
+  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin, color: 'hover:bg-(--ink) hover:text-(--paper)' },
+  { name: 'WeChat', href: '#', icon: MessageCircle, color: 'hover:bg-(--gold) hover:text-(--paper)' },
 ];
 
 export default function ContactPage() {
@@ -110,21 +110,21 @@ export default function ContactPage() {
             </Badge>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl space-y-3">
-                <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+                <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                   保持联系
                 </h1>
-                <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+                <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                   如果你想讨论合作、交流想法，或者只是想打个招呼，都欢迎通过这页联系我。
                 </p>
               </div>
               <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-md">
-                <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Response</p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">24h</p>
+                <Card variant="glass" padding="sm" className="rounded-2xl">
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Response</p>
+                  <p className="mt-2 text-2xl font-semibold text-neutral-900">24h</p>
                 </Card>
-                <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Timezone</p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">UTC+8</p>
+                <Card variant="glass" padding="sm" className="rounded-2xl">
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Timezone</p>
+                  <p className="mt-2 text-2xl font-semibold text-neutral-900">UTC+8</p>
                 </Card>
               </div>
             </div>
@@ -136,8 +136,8 @@ export default function ContactPage() {
             <AnimatedSection>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Contact Info</p>
-                  <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">联系方式</h2>
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Contact Info</p>
+                  <h2 className="text-2xl font-semibold text-neutral-900">联系方式</h2>
                 </div>
                 {contactInfo.map((info, index) => (
                   <motion.a
@@ -150,14 +150,14 @@ export default function ContactPage() {
                     whileHover={{ x: 4 }}
                     className="block"
                   >
-                    <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+                    <Card variant="glass" padding="sm" className="rounded-2xl">
                       <div className="flex items-center gap-4">
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] text-white ${info.color}`}>
+                        <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-white ${info.color}`}>
                           <info.icon className="h-5 w-5" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-sm text-[var(--color-neutral-500)]">{info.label}</p>
-                          <p className="font-medium text-[var(--color-neutral-900)]">{info.value}</p>
+                          <p className="text-sm text-neutral-500">{info.label}</p>
+                          <p className="font-medium text-neutral-900">{info.value}</p>
                         </div>
                       </div>
                     </Card>
@@ -169,8 +169,8 @@ export default function ContactPage() {
             <AnimatedSection delay={0.1}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Social</p>
-                  <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">社交媒体</h2>
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Social</p>
+                  <h2 className="text-2xl font-semibold text-neutral-900">社交媒体</h2>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {socialLinks.map((social, index) => (
@@ -189,7 +189,7 @@ export default function ContactPage() {
                       <Card
                         variant="glass"
                         padding="sm"
-                        className="flex h-14 w-14 items-center justify-center rounded-full p-0 transition hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]"
+                        className="flex h-14 w-14 items-center justify-center rounded-full p-0 transition hover:border-(--color-primary-300) hover:text-(--color-primary-600)"
                       >
                         <social.icon className="h-5 w-5" />
                       </Card>
@@ -200,14 +200,14 @@ export default function ContactPage() {
             </AnimatedSection>
 
             <AnimatedSection delay={0.2}>
-              <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" className="rounded-2xl">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-500)]/12 text-[var(--color-primary-600)]">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-(--color-primary-500)/12 text-(--color-primary-600)">
                     <MessageCircle className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-semibold text-[var(--color-neutral-900)]">快速响应</h3>
-                    <p className="text-sm leading-6 text-[var(--color-neutral-600)]">
+                    <h3 className="font-semibold text-neutral-900">快速响应</h3>
+                    <p className="text-sm leading-6 text-neutral-600">
                       我通常会在 24 小时内回复。紧急事项可以优先通过社交媒体联系。
                     </p>
                   </div>
@@ -218,11 +218,11 @@ export default function ContactPage() {
 
           <div className="lg:col-span-3">
             <AnimatedSection delay={0.05}>
-              <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" className="rounded-2xl">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Message Form</p>
-                    <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">发送消息</h2>
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Message Form</p>
+                    <h2 className="text-2xl font-semibold text-neutral-900">发送消息</h2>
                   </div>
 
                   <AnimatePresence mode="wait">
@@ -234,11 +234,11 @@ export default function ContactPage() {
                         exit={{ opacity: 0, scale: 0.96 }}
                         className="py-14 text-center"
                       >
-                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-lg)]">
+                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-(--color-primary-500) text-white shadow-(--shadow-lg)">
                           <Check className="h-10 w-10" />
                         </div>
-                        <h3 className="text-2xl font-semibold text-[var(--color-neutral-900)]">消息已发送</h3>
-                        <p className="mt-2 text-sm leading-6 text-[var(--color-neutral-600)]">
+                        <h3 className="text-2xl font-semibold text-neutral-900">消息已发送</h3>
+                        <p className="mt-2 text-sm leading-6 text-neutral-600">
                           感谢你的来信，我会尽快回复你。
                         </p>
                       </motion.div>
@@ -253,7 +253,7 @@ export default function ContactPage() {
                       >
                         <div className="grid gap-5 sm:grid-cols-2">
                           <label className="space-y-2">
-                            <span className="text-sm font-medium text-[var(--color-neutral-700)]">姓名</span>
+                            <span className="text-sm font-medium text-neutral-700">姓名</span>
                             <Input
                               type="text"
                               name="name"
@@ -264,7 +264,7 @@ export default function ContactPage() {
                             />
                           </label>
                           <label className="space-y-2">
-                            <span className="text-sm font-medium text-[var(--color-neutral-700)]">邮箱</span>
+                            <span className="text-sm font-medium text-neutral-700">邮箱</span>
                             <Input
                               type="email"
                               name="email"
@@ -277,7 +277,7 @@ export default function ContactPage() {
                         </div>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-[var(--color-neutral-700)]">主题</span>
+                          <span className="text-sm font-medium text-neutral-700">主题</span>
                           <Input
                             type="text"
                             name="subject"
@@ -289,7 +289,7 @@ export default function ContactPage() {
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-[var(--color-neutral-700)]">消息内容</span>
+                          <span className="text-sm font-medium text-neutral-700">消息内容</span>
                           <Textarea
                             name="message"
                             value={formState.message}
@@ -305,7 +305,7 @@ export default function ContactPage() {
                           <motion.div
                             initial={{ opacity: 0, y: -8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2 rounded-[var(--radius-xl)] border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-500"
+                            className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-500"
                           >
                             <AlertCircle className="h-4 w-4 shrink-0" />
                             <span>{error}</span>
@@ -326,16 +326,16 @@ export default function ContactPage() {
         </section>
 
         <AnimatedSection delay={0.15}>
-          <Card variant="glass" className="relative min-h-[320px] overflow-hidden rounded-[var(--radius-2xl)]">
+          <Card variant="glass" className="relative min-h-[320px] overflow-hidden rounded-2xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle,var(--border-default)_1px,transparent_1px)] [background-size:24px_24px]" />
-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-overlay)]/80 via-transparent to-[var(--surface-raised)]/80" />
+            <div className="absolute inset-0 bg-linear-to-br from-(--surface-overlay)/80 via-transparent to-(--surface-raised)/80" />
             <div className="relative flex h-full min-h-[320px] items-center justify-center">
               <div className="text-center">
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-500)]/12 text-[var(--color-primary-600)]">
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-(--color-primary-500)/12 text-(--color-primary-600)">
                   <MapPin className="h-8 w-8" />
                 </div>
-                <h3 className="text-2xl font-semibold text-[var(--color-neutral-900)]">上海，中国</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--color-neutral-600)]">
+                <h3 className="text-2xl font-semibold text-neutral-900">上海，中国</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-600">
                   期待在某个项目、某次交流，或者生活的交叉点与你相遇。
                 </p>
               </div>

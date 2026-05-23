@@ -357,7 +357,7 @@ export default function DiaryPage() {
                   <div className="mt-6 px-2">
                     <button
                       onClick={() => handleCreateDiary(today.toISOString().split('T')[0])}
-                      className="w-full py-3 border text-sm transition-colors hover:border-[var(--d-accent)]"
+                      className="w-full py-3 border text-sm transition-colors hover:border-(--d-accent)"
                       style={{ borderColor: 'var(--d-border)', color: 'var(--d-ink-2)', fontFamily: 'var(--d-font-title)', letterSpacing: '.1em' }}
                     >
                       + 今日日记
@@ -380,7 +380,7 @@ export default function DiaryPage() {
                   </span>
                   <button
                     onClick={() => handleCreateDiary(today.toISOString().split('T')[0])}
-                    className="px-6 py-2 border text-sm transition-colors hover:border-[var(--d-accent)]"
+                    className="px-6 py-2 border text-sm transition-colors hover:border-(--d-accent)"
                     style={{ borderColor: 'var(--d-border)', color: 'var(--d-accent)', fontFamily: 'var(--d-font-title)', letterSpacing: '.1em' }}
                   >
                     + 今日日记
@@ -514,6 +514,7 @@ function DiarySearchView({ diaries, onOpen }: { diaries: Diary[]; onOpen: (d: Di
         <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as SearchOptions['sortBy'])}
+          aria-label="排序方式"
           className="rounded-xl border px-3 py-2.5 text-xs outline-none"
           style={{ background: 'var(--d-bg)', borderColor: 'var(--d-border)', color: 'var(--d-ink-2)' }}
         >

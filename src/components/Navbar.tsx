@@ -126,7 +126,7 @@ export function Navbar() {
               whileHover={{ rotate: 8, scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               transition={APPLE_SPRING_GENTLE}
-              className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)]"
+              className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-(--gradient-start) to-(--gradient-end)"
             >
               <motion.div
                 className="absolute inset-0 bg-white/22"

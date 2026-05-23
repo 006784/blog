@@ -32,7 +32,7 @@ function GallerySkeleton({ viewMode }: { viewMode: 'grid' | 'masonry' }) {
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <Skeleton
             key={i}
-            className="mb-4 h-[220px] rounded-[var(--radius-2xl)]"
+            className="mb-4 h-[220px] rounded-2xl"
             style={{ height: `${180 + (i % 3) * 72}px` }}
           />
         ))}
@@ -43,7 +43,7 @@ function GallerySkeleton({ viewMode }: { viewMode: 'grid' | 'masonry' }) {
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-        <Skeleton key={i} className="aspect-square rounded-[var(--radius-2xl)]" />
+        <Skeleton key={i} className="aspect-square rounded-2xl" />
       ))}
     </div>
   );
@@ -150,25 +150,25 @@ export default function GalleryPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 相册
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 用镜头保存生活切片。这里展示最近拍下来的画面、地点和当时的心情。
               </p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Photos</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{photos.length}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Photos</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{photos.length}</p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Albums</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{albums.length}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Albums</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{albums.length}</p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Current View</p>
-                <p className="mt-2 text-lg font-semibold text-[var(--color-neutral-900)]">{activeAlbumName}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Current View</p>
+                <p className="mt-2 text-lg font-semibold text-neutral-900">{activeAlbumName}</p>
               </Card>
             </div>
           </div>
@@ -180,15 +180,15 @@ export default function GalleryPage() {
           transition={{ delay: 0.1 }}
           className="space-y-4"
         >
-          <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+          <Card variant="glass" className="rounded-2xl">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedAlbum(null)}
                   className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
                     !selectedAlbum
-                      ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                      : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                      ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                      : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                   }`}
                 >
                   <Grid3X3 className="h-4 w-4" />
@@ -201,8 +201,8 @@ export default function GalleryPage() {
                     onClick={() => setSelectedAlbum(album.id)}
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
                       selectedAlbum === album.id
-                        ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                        : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                        ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                        : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                     }`}
                   >
                     <Folder className="h-4 w-4" />
@@ -213,7 +213,7 @@ export default function GalleryPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-base)] p-1">
+                <div className="flex items-center gap-1 rounded-full border border-(--border-default) bg-(--surface-base) p-1">
                   <Button
                     variant={viewMode === 'masonry' ? 'primary' : 'ghost'}
                     size="sm"
@@ -394,7 +394,7 @@ function PhotoCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
-      className={`group relative mb-4 cursor-pointer overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] ${
+      className={`group relative mb-4 cursor-pointer overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) ${
         square ? 'aspect-square' : ''
       }`}
       onClick={onClick}
@@ -412,7 +412,7 @@ function PhotoCard({
       />
       
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/65 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       
       {/* Info — 只显示位置/日期，不显示文件名 */}
       {(photo.location || photo.taken_at) && (
@@ -447,7 +447,7 @@ function PhotoCard({
             {onEdit && (
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(photo); }}
-                className="rounded-full bg-black/30 p-2 backdrop-blur-sm transition-colors hover:bg-[var(--color-primary-600)]"
+                className="rounded-full bg-black/30 p-2 backdrop-blur-sm transition-colors hover:bg-(--color-primary-600)"
               >
                 <Edit2 className="w-4 h-4 text-white" />
               </button>
@@ -522,7 +522,7 @@ function EditPhotoModal({
         className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="border-b border-[color:var(--border-default)] p-6">
+        <div className="border-b border-(--border-default) p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-primary" />
@@ -530,7 +530,7 @@ function EditPhotoModal({
             </h2>
             <button
               onClick={onClose}
-              className="rounded-full p-2 transition-colors hover:bg-[var(--surface-overlay)]"
+              className="rounded-full p-2 transition-colors hover:bg-(--surface-overlay)"
             >
               <X className="w-5 h-5" />
             </button>
@@ -599,7 +599,7 @@ function EditPhotoModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] p-6">
+        <div className="flex justify-end gap-3 border-t border-(--border-default) p-6">
           <Button
             type="button"
             onClick={onClose}
@@ -830,7 +830,7 @@ function AddPhotoModal({
         className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="border-b border-[color:var(--border-default)] p-6">
+        <div className="border-b border-(--border-default) p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -838,7 +838,7 @@ function AddPhotoModal({
             </h2>
             <button
               onClick={onClose}
-              className="rounded-full p-2 transition-colors hover:bg-[var(--surface-overlay)]"
+              className="rounded-full p-2 transition-colors hover:bg-(--surface-overlay)"
             >
               <X className="w-5 h-5" />
             </button>
@@ -855,7 +855,7 @@ function AddPhotoModal({
               folder="photos"
               maxCount={60}
             />
-            <p className="mt-2 text-xs text-[var(--color-neutral-500)]">
+            <p className="mt-2 text-xs text-neutral-500">
               支持一次上传最多 60 张照片，标题、描述、地点、相册和日期会批量应用到本次所有图片。
             </p>
           </div>
@@ -916,7 +916,7 @@ function AddPhotoModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] p-6">
+        <div className="flex justify-end gap-3 border-t border-(--border-default) p-6">
           <Button
             type="button"
             onClick={onClose}

@@ -42,7 +42,7 @@ function PracticeSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2, 3, 4, 5].map((item) => (
-        <Skeleton key={item} className="h-28 rounded-[var(--radius-2xl)]" />
+        <Skeleton key={item} className="h-28 rounded-2xl" />
       ))}
     </div>
   );
@@ -119,10 +119,10 @@ export function PracticeListClient() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 编程练习
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 算法题、选择题和面试题都放在这里，配合在线运行环境一起练习会更顺手。
               </p>
             </div>
@@ -147,11 +147,11 @@ export function PracticeListClient() {
             { label: '中等', value: stats.medium, tone: 'warning' as const },
             { label: '困难', value: stats.hard, tone: 'error' as const },
           ].map((stat) => (
-            <Card key={stat.label} variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+            <Card key={stat.label} variant="glass" padding="sm" className="rounded-2xl">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">{stat.label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{stat.value}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{stat.label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-neutral-900">{stat.value}</p>
                 </div>
                 <Badge tone={stat.tone}>{stat.label}</Badge>
               </div>
@@ -164,11 +164,11 @@ export function PracticeListClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
         >
-          <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+          <Card variant="glass" className="rounded-2xl">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1 max-w-xl">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                   <Input
                     type="text"
                     placeholder="搜索题目..."
@@ -190,8 +190,8 @@ export function PracticeListClient() {
                       onClick={() => setType(value)}
                       className={`rounded-full border px-3.5 py-2 text-sm transition ${
                         type === value
-                          ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                          : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                          ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                          : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                       }`}
                     >
                       {label}
@@ -212,8 +212,8 @@ export function PracticeListClient() {
                     onClick={() => setDifficulty(value)}
                     className={`rounded-full border px-3.5 py-2 text-sm transition ${
                       difficulty === value
-                        ? 'border-[var(--color-primary-500)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]'
-                        : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                        ? 'border-(--color-primary-500) bg-(--surface-overlay) text-(--color-primary-600)'
+                        : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                     }`}
                   >
                     {label}
@@ -264,17 +264,17 @@ export function PracticeListClient() {
                     <Card
                       variant="glass"
                       padding="sm"
-                      className="rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                      className="rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
                         <div className="flex min-w-0 flex-1 items-start gap-4">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                             <span className="text-sm font-semibold">{index + 1}</span>
                           </div>
 
                           <div className="min-w-0 flex-1 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="truncate text-base font-semibold text-[var(--color-neutral-900)] transition-colors hover:text-[var(--color-primary-600)]">
+                              <h3 className="truncate text-base font-semibold text-neutral-900 transition-colors hover:text-(--color-primary-600)">
                                 {problem.title}
                               </h3>
                               <Badge variant="soft" className="gap-1.5">
@@ -299,7 +299,7 @@ export function PracticeListClient() {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-neutral-500)] lg:min-w-[220px] lg:justify-end">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 lg:min-w-[220px] lg:justify-end">
                           <span>提交 {problem.submission_count}</span>
                           <span>通过 {problem.accept_count}</span>
                           <span className={acceptRate !== null && acceptRate >= 50 ? 'text-emerald-600' : 'text-amber-600'}>

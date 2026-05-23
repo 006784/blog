@@ -170,7 +170,7 @@ function MobileWriteContent() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center max-w-md"
         >
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center">
             <Shield className="w-10 h-10 text-primary" />
           </div>
           <h1 className="text-2xl font-bold mb-2">需要管理员权限</h1>
@@ -178,7 +178,7 @@ function MobileWriteContent() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => showLoginModal()}
-            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25"
+            className="px-8 py-3 rounded-2xl bg-linear-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25"
           >
             管理员登录
           </motion.button>

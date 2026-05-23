@@ -280,7 +280,7 @@ export function Glow({ children, className = '' }: GlowProps) {
       transition={{ duration: 0.35, ease: APPLE_EASE_SOFT }}
     >
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] rounded-2xl opacity-0 blur-xl"
+        className="absolute inset-0 bg-linear-to-r from-(--gradient-start) to-(--gradient-end) rounded-2xl opacity-0 blur-xl"
         whileHover={{ opacity: 0.2 }}
         transition={{ duration: 0.35, ease: APPLE_EASE_SOFT }}
       />

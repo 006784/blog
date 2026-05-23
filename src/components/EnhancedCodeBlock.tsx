@@ -178,7 +178,7 @@ export function EnhancedCodeBlock({
 
       {/* 展开/收起按钮 */}
       {needsExpansion && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#1a1b26] to-transparent pt-8 pb-2 flex justify-center">
+        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-[#1a1b26] to-transparent pt-8 pb-2 flex justify-center">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 text-xs transition-colors"

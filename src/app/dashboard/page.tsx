@@ -156,10 +156,10 @@ export default function DashboardPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 文章管理
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 在这里查看文章状态、搜索内容、切换分类，并快速进行发布、编辑和删除。
               </p>
             </div>
@@ -184,13 +184,13 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 }}
             >
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">{stat.label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{stat.value}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{stat.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-neutral-900">{stat.value}</p>
                   </div>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-xl)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
                     <stat.icon className="h-5 w-5" />
                   </div>
                 </div>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+        <Card variant="glass" className="rounded-2xl">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap gap-2">
               {tabs.map((tab) => (
@@ -208,8 +208,8 @@ export default function DashboardPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition ${
                     activeTab === tab.id
-                      ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                      : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                      ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                      : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                   }`}
                 >
                   <tab.icon className="h-4 w-4" />
@@ -221,7 +221,7 @@ export default function DashboardPage() {
 
             <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:justify-end">
               <div className="relative w-full sm:max-w-sm">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                 <Input
                   type="text"
                   value={searchQuery}
@@ -234,7 +234,7 @@ export default function DashboardPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 sm:w-[180px]"
+                className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 sm:w-[180px]"
               >
                 <option value="">全部分类</option>
                 {categories.map((cat) => (
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                 action={
                   <Link
                     href="/write"
-                    className="inline-flex items-center justify-center rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
+                    className="inline-flex items-center justify-center rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     写文章
@@ -280,11 +280,11 @@ export default function DashboardPage() {
                     <Card
                       variant="glass"
                       padding="sm"
-                      className="rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                      className="rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
                     >
                       <div className="flex flex-col gap-4 md:flex-row">
                         {post.image ? (
-                          <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-[var(--radius-xl)] md:h-auto md:w-52">
+                          <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl md:h-auto md:w-52">
                             <Image
                               src={post.image}
                               alt={post.title}
@@ -305,14 +305,14 @@ export default function DashboardPage() {
                                 <Badge variant="soft">{categoryInfo.label}</Badge>
                               </div>
 
-                              <h3 className="truncate text-xl font-semibold text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
+                              <h3 className="truncate text-xl font-semibold text-neutral-900 transition-colors group-hover:text-(--color-primary-600)">
                                 {post.title}
                               </h3>
-                              <p className="line-clamp-2 text-sm leading-7 text-[var(--color-neutral-600)]">
+                              <p className="line-clamp-2 text-sm leading-7 text-neutral-600">
                                 {post.description || '暂无描述'}
                               </p>
 
-                              <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--color-neutral-500)]">
+                              <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-500">
                                 <span className="inline-flex items-center gap-1">
                                   <Calendar className="h-3.5 w-3.5" />
                                   {formatDate(post.updatedAt || post.createdAt)}
@@ -347,11 +347,11 @@ export default function DashboardPage() {
                                     initial={{ opacity: 0, scale: 0.96, y: -8 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.96, y: -8 }}
-                                    className="absolute right-0 top-full z-10 mt-2 w-48 overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-xl)]"
+                                    className="absolute right-0 top-full z-10 mt-2 w-48 overflow-hidden rounded-xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-xl)"
                                   >
                                     <Link
                                       href={`/write?edit=${post.id}`}
-                                      className="flex items-center gap-2 px-4 py-3 text-sm transition hover:bg-[var(--surface-overlay)]"
+                                      className="flex items-center gap-2 px-4 py-3 text-sm transition hover:bg-(--surface-overlay)"
                                       onClick={() => setOpenMenuId(null)}
                                     >
                                       <Edit3 className="h-4 w-4" />
@@ -360,7 +360,7 @@ export default function DashboardPage() {
                                     {post.status === 'published' ? (
                                       <Link
                                         href={`/blog/${post.slug}`}
-                                        className="flex items-center gap-2 px-4 py-3 text-sm transition hover:bg-[var(--surface-overlay)]"
+                                        className="flex items-center gap-2 px-4 py-3 text-sm transition hover:bg-(--surface-overlay)"
                                         onClick={() => setOpenMenuId(null)}
                                       >
                                         <Eye className="h-4 w-4" />
@@ -369,7 +369,7 @@ export default function DashboardPage() {
                                     ) : null}
                                     <button
                                       onClick={() => handleTogglePublish(post)}
-                                      className="flex w-full items-center gap-2 px-4 py-3 text-sm transition hover:bg-[var(--surface-overlay)]"
+                                      className="flex w-full items-center gap-2 px-4 py-3 text-sm transition hover:bg-(--surface-overlay)"
                                     >
                                       {post.status === 'published' ? (
                                         <>
@@ -425,12 +425,12 @@ export default function DashboardPage() {
               exit={{ opacity: 0, scale: 0.94 }}
               className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4"
             >
-              <Card variant="elevated" padding="lg" className="rounded-[var(--radius-2xl)] text-center">
+              <Card variant="elevated" padding="lg" className="rounded-2xl text-center">
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
                   <AlertCircle className="h-8 w-8" />
                 </div>
-                <h3 className="text-2xl font-semibold text-[var(--color-neutral-900)]">确认删除</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--color-neutral-600)]">
+                <h3 className="text-2xl font-semibold text-neutral-900">确认删除</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-600">
                   此操作不可撤销，文章将被永久删除。
                 </p>
                 <div className="mt-6 flex gap-3">
@@ -453,7 +453,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 50, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.94 }}
-            className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-[var(--radius-xl)] px-4 py-3 text-white shadow-[var(--shadow-lg)] ${
+            className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-white shadow-(--shadow-lg) ${
               notification.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
             }`}
           >

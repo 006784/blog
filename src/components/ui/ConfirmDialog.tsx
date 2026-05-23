@@ -77,21 +77,21 @@ export function ConfirmDialog() {
             aria-modal="true"
             aria-labelledby="confirm-title"
             aria-describedby="confirm-desc"
-            className="w-full max-w-sm rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-2xl)] backdrop-blur-xl"
+            className="w-full max-w-sm rounded-2xl border border-(--border-default) bg-(--surface-panel) p-6 shadow-(--shadow-2xl) backdrop-blur-xl"
           >
             {opts.danger && (
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-error)_12%,transparent)]">
-                <AlertTriangle className="h-5 w-5 text-[var(--color-error)]" strokeWidth={1.5} />
+                <AlertTriangle className="h-5 w-5 text-(--color-error)" strokeWidth={1.5} />
               </div>
             )}
 
             {opts.title && (
-              <h2 id="confirm-title" className="mb-2 text-base font-semibold text-[var(--ink)]">
+              <h2 id="confirm-title" className="mb-2 text-base font-semibold text-(--ink)">
                 {opts.title}
               </h2>
             )}
 
-            <p id="confirm-desc" className="text-sm leading-relaxed text-[var(--ink-secondary)]">
+            <p id="confirm-desc" className="text-sm leading-relaxed text-(--ink-secondary)">
               {opts.description}
             </p>
 

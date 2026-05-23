@@ -235,8 +235,8 @@ export function ProblemFormModal({ problem, onClose, onSave }: Props) {
                         onClick={() => toggleLang(lang)}
                         className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
                           (form.languages || []).includes(lang)
-                            ? 'border-[var(--gold)] bg-amber-50 text-amber-700'
-                            : 'border-border text-muted-foreground hover:border-[var(--gold)]'
+                            ? 'border-(--gold) bg-amber-50 text-amber-700'
+                            : 'border-border text-muted-foreground hover:border-(--gold)'
                         }`}
                       >
                         {LANG_LABELS[lang]}
@@ -281,7 +281,7 @@ export function ProblemFormModal({ problem, onClose, onSave }: Props) {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-sm font-medium">示例</label>
-                    <button onClick={addExample} className="text-xs flex items-center gap-1 text-[var(--gold)] hover:underline">
+                    <button onClick={addExample} className="text-xs flex items-center gap-1 text-(--gold) hover:underline">
                       <Plus className="w-3.5 h-3.5" /> 添加示例
                     </button>
                   </div>
@@ -306,13 +306,13 @@ export function ProblemFormModal({ problem, onClose, onSave }: Props) {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-sm font-medium">选项</label>
-                    <button onClick={addChoice} className="text-xs flex items-center gap-1 text-[var(--gold)] hover:underline">
+                    <button onClick={addChoice} className="text-xs flex items-center gap-1 text-(--gold) hover:underline">
                       <Plus className="w-3.5 h-3.5" /> 添加选项
                     </button>
                   </div>
                   {(form.choices || []).map((choice, i) => (
                     <div key={choice.id} className="flex items-start gap-2 mb-2">
-                      <span className="font-bold text-[var(--gold)] mt-2 min-w-[1.2rem] text-sm">{choice.id.toUpperCase()}.</span>
+                      <span className="font-bold text-(--gold) mt-2 min-w-[1.2rem] text-sm">{choice.id.toUpperCase()}.</span>
                       <textarea
                         value={choice.text}
                         onChange={e => setForm(f => ({ ...f, choices: (f.choices || []).map((c, ci) => ci === i ? { ...c, text: e.target.value } : c) }))}
@@ -326,7 +326,7 @@ export function ProblemFormModal({ problem, onClose, onSave }: Props) {
                           name="correct_choice"
                           checked={choice.is_correct}
                           onChange={() => setForm(f => ({ ...f, choices: (f.choices || []).map((c, ci) => ({ ...c, is_correct: ci === i })) }))}
-                          className="accent-[var(--gold)]"
+                          className="accent-(--gold)"
                         />
                         正确
                       </label>

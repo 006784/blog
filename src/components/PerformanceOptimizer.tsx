@@ -68,7 +68,7 @@ export function SkeletonCard() {
   return (
     <div className="rounded-2xl overflow-hidden border border-border/30 bg-card animate-pulse">
       <div className="h-56 bg-secondary relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
       </div>
       <div className="p-6 space-y-4">
         <div className="h-6 bg-secondary rounded-xl w-3/4" />
@@ -107,7 +107,7 @@ export function OptimizedImage({
     <div className={`relative overflow-hidden ${className}`}>
       {/* 占位符 */}
       <div 
-        className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/50 to-secondary animate-pulse"
+        className="absolute inset-0 bg-linear-to-br from-secondary via-secondary/50 to-secondary animate-pulse"
         style={{ aspectRatio: width && height ? `${width}/${height}` : '16/9' }}
       />
       

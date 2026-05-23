@@ -1,7 +1,7 @@
 /** 解析音乐 URL，返回可 embed 的信息 */
 
 export type EmbedInfo = {
-  type: 'youtube' | 'spotify' | 'bilibili' | 'netease' | 'link';
+  type: 'youtube' | 'spotify' | 'bilibili' | 'netease' | 'apple' | 'link';
   embedUrl?: string;   // iframe src
   externalUrl: string;
   platform: string;
@@ -60,6 +60,19 @@ export function parseMusicUrl(url: string): EmbedInfo | null {
           color: '#fb7299',
         };
       }
+    }
+
+    // Apple Music
+    if (host === 'music.apple.com') {
+      const embedUrl = new URL(url.replace('music.apple.com', 'embed.music.apple.com'));
+      embedUrl.searchParams.set('app', 'music');
+      return {
+        type: 'apple',
+        embedUrl: embedUrl.toString(),
+        externalUrl: url,
+        platform: 'Apple Music',
+        color: '#fc3c44',
+      };
     }
 
     // 网易云音乐

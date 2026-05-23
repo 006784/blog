@@ -71,9 +71,9 @@ function MediaCard({ item }: { item: MediaItem }) {
       <Card
         variant="glass"
         padding="sm"
-        className="group flex h-full gap-4 rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+        className="group flex h-full gap-4 rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
       >
-        <div className="h-24 w-16 shrink-0 overflow-hidden rounded-[var(--radius-xl)] bg-[var(--surface-overlay)]">
+        <div className="h-24 w-16 shrink-0 overflow-hidden rounded-xl bg-(--surface-overlay)">
           {item.cover_image ? (
             <Image
               src={item.cover_image}
@@ -93,11 +93,11 @@ function MediaCard({ item }: { item: MediaItem }) {
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
-                <h3 className="line-clamp-2 text-base font-semibold leading-tight text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
+                <h3 className="line-clamp-2 text-base font-semibold leading-tight text-neutral-900 transition-colors group-hover:text-(--color-primary-600)">
                   {item.title}
                 </h3>
                 {item.author && (
-                  <p className="truncate text-sm text-[var(--color-neutral-500)]">{item.author}</p>
+                  <p className="truncate text-sm text-neutral-500">{item.author}</p>
                 )}
               </div>
               {item.external_link && (
@@ -106,7 +106,7 @@ function MediaCard({ item }: { item: MediaItem }) {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={`打开 ${item.title} 外部链接`}
-                  className="mt-0.5 shrink-0 text-[var(--color-neutral-500)] transition-colors hover:text-[var(--color-primary-600)]"
+                  className="mt-0.5 shrink-0 text-neutral-500 transition-colors hover:text-(--color-primary-600)"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </a>
@@ -119,13 +119,13 @@ function MediaCard({ item }: { item: MediaItem }) {
             </div>
 
             {item.review ? (
-              <p className="line-clamp-2 text-sm leading-6 text-[var(--color-neutral-600)]">
+              <p className="line-clamp-2 text-sm leading-6 text-neutral-600">
                 {item.review}
               </p>
             ) : null}
           </div>
 
-          <div className="flex items-center justify-between text-xs text-[var(--color-neutral-500)]">
+          <div className="flex items-center justify-between text-xs text-neutral-500">
             <span>{TYPE_META.find((t) => t.key === item.type)?.label ?? '内容记录'}</span>
             <span>{item.status === 'done' ? '已完成' : '持续记录中'}</span>
           </div>
@@ -195,27 +195,27 @@ export default function MediaPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 书影音
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 把近期读过、看过、听过的内容整理成持续更新的观影与阅读清单。
               </p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">总记录</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{items.length}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">总记录</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{items.length}</p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">已完成</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">已完成</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">
                   {items.filter((item) => item.status === 'done').length}
                 </p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">正在进行</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">正在进行</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">
                   {items.filter((item) => item.status === 'doing').length}
                 </p>
               </Card>
@@ -223,7 +223,7 @@ export default function MediaPage() {
           </div>
         </motion.div>
 
-        <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+        <Card variant="glass" className="rounded-2xl">
           <div className="space-y-5">
             <div className="flex flex-wrap gap-2">
               {TYPE_META.filter((t) => t.key === 'all' || typeCounts[t.key] > 0).map((t) => (
@@ -232,8 +232,8 @@ export default function MediaPage() {
                   onClick={() => setActiveType(t.key)}
                   className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition ${
                     activeType === t.key
-                      ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                      : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                      ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                      : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                   }`}
                 >
                   <span>{t.icon}</span>
@@ -250,8 +250,8 @@ export default function MediaPage() {
                   onClick={() => setActiveStatus(s.key)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                     activeStatus === s.key
-                      ? 'border-[var(--color-primary-500)] bg-[var(--surface-overlay)] text-[var(--color-primary-600)]'
-                      : 'border-[color:var(--border-default)] bg-transparent text-[var(--color-neutral-500)] hover:text-[var(--color-neutral-700)]'
+                      ? 'border-(--color-primary-500) bg-(--surface-overlay) text-(--color-primary-600)'
+                      : 'border-(--border-default) bg-transparent text-neutral-500 hover:text-neutral-700'
                   }`}
                 >
                   {s.label}
@@ -264,7 +264,7 @@ export default function MediaPage() {
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-52 rounded-[var(--radius-2xl)]" />
+              <Skeleton key={i} className="h-52 rounded-2xl" />
             ))}
           </div>
         ) : error ? (
@@ -276,7 +276,7 @@ export default function MediaPage() {
             action={
               <button
                 onClick={() => void loadItems()}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
+                className="inline-flex items-center gap-2 rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
               >
                 <RefreshCw className="h-4 w-4" />
                 重新加载

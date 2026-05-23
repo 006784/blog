@@ -163,7 +163,7 @@ export function PasskeyManager() {
   }
 
   return (
-    <Card variant="elevated" padding="lg" className="border border-[color:var(--border-default)]">
+    <Card variant="elevated" padding="lg" className="border border-(--border-default)">
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
@@ -172,8 +172,8 @@ export function PasskeyManager() {
               通行密钥
             </Badge>
             <div>
-              <h2 className="text-xl font-semibold text-[var(--color-neutral-900)]">用指纹直接登录后台</h2>
-              <p className="mt-1 text-sm leading-6 text-[var(--color-neutral-600)]">
+              <h2 className="text-xl font-semibold text-neutral-900">用指纹直接登录后台</h2>
+              <p className="mt-1 text-sm leading-6 text-neutral-600">
                 先绑定一次通行密钥，后面在 Mac 上就可以直接用 Touch ID 登录，不用每次收验证码。
               </p>
             </div>
@@ -188,18 +188,18 @@ export function PasskeyManager() {
           </Button>
         </div>
 
-        <div className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3">
-          <p className="text-sm text-[var(--color-neutral-700)]">{statusText}</p>
+        <div className="rounded-xl border border-(--border-default) bg-(--surface-raised) px-4 py-3">
+          <p className="text-sm text-neutral-700">{statusText}</p>
         </div>
 
         {message ? (
-          <div className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3">
+          <div className="rounded-xl border border-(--border-default) bg-(--surface-raised) px-4 py-3">
             <div className="mb-2">
               <Badge tone={message.type === 'success' ? 'success' : 'error'}>
                 {message.type === 'success' ? '成功' : '出错了'}
               </Badge>
             </div>
-            <p className="text-sm text-[var(--color-neutral-700)]">{message.text}</p>
+            <p className="text-sm text-neutral-700">{message.text}</p>
           </div>
         ) : null}
 
@@ -222,21 +222,21 @@ export function PasskeyManager() {
             {passkeys.map((passkey) => (
               <div
                 key={passkey.id}
-                className="flex flex-col gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-xl border border-(--border-default) bg-(--surface-base) px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-[var(--color-neutral-900)]">{passkey.name}</p>
+                    <p className="font-medium text-neutral-900">{passkey.name}</p>
                     {passkey.deviceType ? (
                       <Badge tone="default" variant="outline">
                         {passkey.deviceType === 'multiDevice' ? '可同步' : '本机设备'}
                       </Badge>
                     ) : null}
                   </div>
-                  <p className="text-sm text-[var(--color-neutral-600)]">
+                  <p className="text-sm text-neutral-600">
                     添加时间：{formatDateTime(passkey.createdAt)}
                   </p>
-                  <p className="text-sm text-[var(--color-neutral-600)]">
+                  <p className="text-sm text-neutral-600">
                     最近使用：{formatDateTime(passkey.lastUsedAt)}
                   </p>
                 </div>
@@ -256,7 +256,7 @@ export function PasskeyManager() {
         )}
 
         {!supported ? (
-          <div className="flex items-start gap-2 rounded-[var(--radius-xl)] border border-[color:var(--color-error)]/20 bg-[var(--color-error)]/5 px-4 py-3 text-sm text-[var(--color-error)]">
+          <div className="flex items-start gap-2 rounded-xl border border-(--color-error)/20 bg-(--color-error)/5 px-4 py-3 text-sm text-(--color-error)">
             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span>如果你想在 Mac 上用指纹登录，请使用 Safari 或最新版 Chrome 打开后台。</span>
           </div>

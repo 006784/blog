@@ -33,7 +33,7 @@ export function ThemeSwitcher({ current, onChange }: Props) {
         onClick={() => setOpen(!open)}
         title={DIARY_THEMES[current].name}
         style={{ background: THEME_PREVIEW_BG[current] }}
-        className="w-5 h-5 border border-[var(--d-border)] transition-transform hover:scale-110"
+        className="w-5 h-5 border border-(--d-border) transition-transform hover:scale-110"
         aria-label="切换主题"
       />
 
@@ -42,7 +42,7 @@ export function ThemeSwitcher({ current, onChange }: Props) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-7 z-50 flex gap-2 p-3 border border-[var(--d-border)]"
+            className="absolute right-0 top-7 z-50 flex gap-2 p-3 border border-(--d-border)"
             style={{ background: 'var(--d-bg)' }}
           >
             {themes.map((t) => (

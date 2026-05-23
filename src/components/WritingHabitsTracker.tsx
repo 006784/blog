@@ -92,7 +92,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
 
       {/* 统计摘要卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+        <div className="bg-linear-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-5 h-5 text-blue-600" />
             <span className="text-sm font-medium text-blue-800">写作天数</span>
@@ -101,7 +101,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
           <div className="text-xs text-blue-700">天</div>
         </div>
         
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+        <div className="bg-linear-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-5 h-5 text-green-600" />
             <span className="text-sm font-medium text-green-800">总字数</span>
@@ -110,7 +110,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
           <div className="text-xs text-green-700">字</div>
         </div>
         
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+        <div className="bg-linear-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
           <div className="flex items-center gap-2 mb-2">
             <Star className="w-5 h-5 text-purple-600" />
             <span className="text-sm font-medium text-purple-800">平均每日</span>
@@ -119,7 +119,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
           <div className="text-xs text-purple-700">字/天</div>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
+        <div className="bg-linear-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-5 h-5 text-amber-600" />
             <span className="text-sm font-medium text-amber-800">连续天数</span>
@@ -137,40 +137,40 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
             目标追踪
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
+            <div className="p-4 bg-linear-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-cyan-800">每日字数目标</span>
                 <span className="text-sm font-bold text-cyan-900">{goals.currentProgress.daily}/{goals.dailyWordGoal}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full"
+                  className="bg-linear-to-r from-cyan-400 to-blue-500 h-2 rounded-full"
                   style={{ width: `${Math.min(100, (goals.currentProgress.daily / goals.dailyWordGoal) * 100)}%` }}
                 ></div>
               </div>
             </div>
             
-            <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
+            <div className="p-4 bg-linear-to-br from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-emerald-800">每周字数目标</span>
                 <span className="text-sm font-bold text-emerald-900">{goals.currentProgress.weekly}/{goals.weeklyGoal}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-emerald-400 to-green-500 h-2 rounded-full"
+                  className="bg-linear-to-r from-emerald-400 to-green-500 h-2 rounded-full"
                   style={{ width: `${Math.min(100, (goals.currentProgress.weekly / goals.weeklyGoal) * 100)}%` }}
                 ></div>
               </div>
             </div>
             
-            <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-lg border border-violet-200">
+            <div className="p-4 bg-linear-to-br from-violet-50 to-purple-50 rounded-lg border border-violet-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-violet-800">连续写作目标</span>
                 <span className="text-sm font-bold text-violet-900">{statistics.streakDays}/{goals.streakGoal}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-violet-400 to-purple-500 h-2 rounded-full"
+                  className="bg-linear-to-r from-violet-400 to-purple-500 h-2 rounded-full"
                   style={{ width: `${Math.min(100, (statistics.streakDays / goals.streakGoal) * 100)}%` }}
                 ></div>
               </div>
@@ -216,7 +216,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {milestones.slice(0, 4).map((milestone, index) => (
-              <div key={index} className="p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200 flex items-center gap-3">
+              <div key={index} className="p-3 bg-linear-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200 flex items-center gap-3">
                 <Trophy className="w-5 h-5 text-yellow-600 flex-shrink-0" />
                 <div>
                   <div className="font-medium text-yellow-800">{milestone.title}</div>
@@ -237,7 +237,7 @@ export function WritingHabitsTracker({ diaries, className = '' }: WritingHabitsT
           </h4>
           <div className="space-y-2">
             {suggestions.map((suggestion, index) => (
-              <div key={index} className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200 text-sm text-blue-800">
+              <div key={index} className="p-3 bg-linear-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200 text-sm text-blue-800">
                 • {suggestion}
               </div>
             ))}

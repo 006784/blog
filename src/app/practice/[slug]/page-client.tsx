@@ -146,7 +146,7 @@ export function ProblemPageClient({ slug }: Props) {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">题目不存在</p>
-          <Link href="/practice" className="text-[var(--gold)] hover:underline">返回题库</Link>
+          <Link href="/practice" className="text-(--gold) hover:underline">返回题库</Link>
         </div>
       </div>
     );
@@ -159,15 +159,15 @@ export function ProblemPageClient({ slug }: Props) {
   const availableLangs = (problem.languages as string[]) || [];
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[var(--paper,#faf8f5)]">
+    <div className="flex flex-col h-screen overflow-hidden bg-(--paper,#faf8f5)">
       {/* Top bar */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--line)] bg-[var(--paper)] flex-shrink-0">
-        <Link href="/practice" className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-(--line) bg-(--paper) flex-shrink-0">
+        <Link href="/practice" className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <h1 className="font-semibold text-sm truncate flex-1">{problem.title as string}</h1>
         <DifficultyBadge difficulty={problem.difficulty as string} />
-        <button onClick={handleReset} className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors text-muted-foreground" title="重置代码">
+        <button onClick={handleReset} className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors text-muted-foreground" title="重置代码">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
@@ -175,7 +175,7 @@ export function ProblemPageClient({ slug }: Props) {
       {/* Main layout: left description + right editor */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: description (40%) */}
-        <div className="w-[42%] flex-shrink-0 border-r border-[var(--line)] overflow-hidden bg-[var(--paper)]">
+        <div className="w-[42%] flex-shrink-0 border-r border-(--line) overflow-hidden bg-(--paper)">
           <ProblemDescription problem={problem as unknown as Parameters<typeof ProblemDescription>[0]["problem"]} />
         </div>
 
@@ -191,7 +191,7 @@ export function ProblemPageClient({ slug }: Props) {
           {/* Editor area */}
           <div className={`flex-1 overflow-hidden flex flex-col min-h-0`}>
             {isMultipleChoice ? (
-              <div className="flex-1 overflow-y-auto bg-[var(--paper)]">
+              <div className="flex-1 overflow-y-auto bg-(--paper)">
                 <MultipleChoiceView
                   choices={(problem.choices as Array<{ id: string; text: string }>) || []}
                   selected={selectedChoice}
@@ -245,7 +245,7 @@ export function ProblemPageClient({ slug }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={!selectedChoice || submitting || !!submitResult}
-                className="w-full py-2 rounded-lg bg-[var(--gold,#c4a96d)] text-white text-sm font-medium hover:bg-amber-500 transition-colors disabled:opacity-50"
+                className="w-full py-2 rounded-lg bg-(--gold,#c4a96d) text-white text-sm font-medium hover:bg-amber-500 transition-colors disabled:opacity-50"
               >
                 {submitting ? '提交中...' : submitResult ? (submitResult.status === 'accepted' ? '✓ 回答正确' : '✗ 回答错误') : '提交答案'}
               </button>

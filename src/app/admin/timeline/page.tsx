@@ -44,9 +44,9 @@ const EMPTY: Partial<TimelineEvent> = {
 
 const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
 const selectCls =
-  'w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-sm text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-base)]';
+  'w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-sm text-neutral-900 shadow-(--shadow-xs) transition-all duration-(--duration-fast) ease-(--ease-default) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface-base)';
 const iconButtonCls =
-  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-default) bg-(--surface-raised) text-neutral-700 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:border-(--border-strong) hover:text-neutral-900';
 
 export default function AdminTimelinePage() {
   const { isAdmin, loading: authLoading } = useAdmin();
@@ -233,7 +233,7 @@ export default function AdminTimelinePage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <Clock className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -265,18 +265,18 @@ export default function AdminTimelinePage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">事件总数</p>
             <p className="mt-3 text-3xl font-semibold">{events.length}</p>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">里程碑</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{milestoneCount}</p>
               <Badge tone="warning" variant="soft">重点节点</Badge>
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">普通事件</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{events.length - milestoneCount}</p>
@@ -310,14 +310,14 @@ export default function AdminTimelinePage() {
             }
           />
         ) : (
-          <Card variant="elevated" padding="sm" className="space-y-3 rounded-[var(--radius-2xl)]">
+          <Card variant="elevated" padding="sm" className="space-y-3 rounded-2xl">
             {events.map((event) => {
               const category = CATEGORY_OPTIONS.find((item) => item.value === event.category);
               return (
                 <motion.div
                   key={event.id}
                   layout
-                  className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+                  className="flex items-center gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-3 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-sm)"
                 >
                   <div className={`h-3 w-3 shrink-0 rounded-full ${category?.color ?? 'bg-zinc-400'}`} />
                   <div className="min-w-0 flex-1">
@@ -331,7 +331,7 @@ export default function AdminTimelinePage() {
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{event.date}</span>
                       <span>{category?.label}</span>
-                      {event.description ? <span className="max-w-[22rem] truncate">{event.description}</span> : null}
+                      {event.description ? <span className="max-w-88 truncate">{event.description}</span> : null}
                     </div>
                   </div>
 
@@ -368,9 +368,9 @@ export default function AdminTimelinePage() {
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
-              className="w-full max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
+              className="w-full max-w-xl overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-2xl)"
             >
-              <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex items-center justify-between border-b border-(--border-default) px-6 py-5">
                 <div>
                   <h2 className="text-lg font-semibold">{editing ? '编辑事件' : '添加事件'}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">补充标题、日期、分类和是否为里程碑。</p>
@@ -393,7 +393,7 @@ export default function AdminTimelinePage() {
                   </div>
                   <div>
                     <label className={fieldLabelCls}>分类</label>
-                    <select value={form.category} onChange={field('category')} className={selectCls}>
+                    <select value={form.category} onChange={field('category')} aria-label="分类" className={selectCls}>
                       {CATEGORY_OPTIONS.map((category) => (
                         <option key={category.value} value={category.value}>
                           {category.label}
@@ -408,12 +408,13 @@ export default function AdminTimelinePage() {
                     <label className={fieldLabelCls}>图标 Emoji</label>
                     <Input value={form.icon || ''} onChange={field('icon')} placeholder="🚀" />
                   </div>
-                  <div className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3">
+                  <div className="flex items-center gap-3 rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-3">
                     <input
                       type="checkbox"
                       checked={form.is_milestone ?? false}
                       onChange={(event) => setForm((current) => ({ ...current, is_milestone: event.target.checked }))}
-                      className="h-4 w-4 rounded border-[color:var(--border-default)]"
+                      aria-label="标记为里程碑"
+                      className="h-4 w-4 rounded border-(--border-default)"
                     />
                     <div>
                       <p className="text-sm font-medium">标记为里程碑</p>
@@ -433,7 +434,7 @@ export default function AdminTimelinePage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex justify-end gap-3 border-t border-(--border-default) px-6 py-5">
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
                   取消
                 </Button>
@@ -461,11 +462,11 @@ export default function AdminTimelinePage() {
               initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="w-full max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--surface-raised)] shadow-[var(--shadow-2xl)]"
+              className="w-full max-w-2xl overflow-hidden rounded-2xl bg-(--surface-raised) shadow-(--shadow-2xl)"
             >
-              <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+              <div className="flex items-center justify-between border-b border-(--border-default) px-6 py-5">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-[var(--color-teal-500)]" />
+                  <Sparkles className="h-5 w-5 text-teal-500" />
                   <h2 className="text-base font-semibold">DeepSeek AI 自动生成时间线</h2>
                 </div>
                 <button type="button" onClick={() => setShowAI(false)} className={iconButtonCls} aria-label="关闭">
@@ -474,7 +475,7 @@ export default function AdminTimelinePage() {
               </div>
 
               <div className="space-y-4 px-6 py-5">
-                <p className="text-sm text-[var(--color-neutral-500)]">
+                <p className="text-sm text-neutral-500">
                   描述你的经历，AI 会自动提取关键时间节点。例如：&quot;2020年7月开始第一份工作，2022年考研成功，2023年旅行去了日本...&quot;
                 </p>
                 <Textarea
@@ -501,17 +502,17 @@ export default function AdminTimelinePage() {
                 {aiPreview.length > 0 && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-[var(--color-neutral-700)]">
+                      <p className="text-sm font-medium text-neutral-700">
                         生成了 {aiPreview.length} 个事件，确认后全部导入：
                       </p>
                     </div>
-                    <div className="max-h-60 space-y-2 overflow-y-auto rounded-[var(--radius-xl)] bg-[var(--surface-base)] p-3">
+                    <div className="max-h-60 space-y-2 overflow-y-auto rounded-xl bg-(--surface-base) p-3">
                       {aiPreview.map((ev, i) => (
-                        <div key={i} className="flex items-center gap-3 rounded-[var(--radius-lg)] bg-[var(--surface-raised)] p-3 text-sm shadow-[var(--shadow-xs)]">
+                        <div key={i} className="flex items-center gap-3 rounded-lg bg-(--surface-raised) p-3 text-sm shadow-(--shadow-xs)">
                           <span className="text-base">{ev.icon ?? '📌'}</span>
                           <div className="min-w-0 flex-1">
                             <p className="font-medium truncate">{ev.title}</p>
-                            <p className="text-xs text-[var(--color-neutral-500)]">{ev.date} · {ev.category}</p>
+                            <p className="text-xs text-neutral-500">{ev.date} · {ev.category}</p>
                           </div>
                           {ev.is_milestone && (
                             <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">里程碑</span>
@@ -519,7 +520,7 @@ export default function AdminTimelinePage() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex justify-end gap-3 pt-2 border-t border-[color:var(--border-default)]">
+                    <div className="flex justify-end gap-3 pt-2 border-t border-(--border-default)">
                       <Button variant="secondary" onClick={() => setAiPreview([])}>重新生成</Button>
                       <Button
                         onClick={() => handleAIImport(aiPreview)}

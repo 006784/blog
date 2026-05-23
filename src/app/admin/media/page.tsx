@@ -61,7 +61,7 @@ const EMPTY: Partial<MediaItem> = {
 
 const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
 const iconButtonCls =
-  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-default) bg-(--surface-raised) text-neutral-700 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:border-(--border-strong) hover:text-neutral-900';
 
 function Stars({ rating }: { rating?: number | null }) {
   if (!rating) return null;
@@ -139,9 +139,9 @@ function ItemModal({
         initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 16 }}
-        className="w-full max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
+        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-2xl)"
       >
-        <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+        <div className="flex items-center justify-between border-b border-(--border-default) px-6 py-5">
           <div>
             <h2 className="text-lg font-semibold">{editing ? '编辑条目' : '添加条目'}</h2>
             <p className="mt-1 text-sm text-muted-foreground">维护书影音记录、评分和封面信息。</p>
@@ -152,8 +152,8 @@ function ItemModal({
         </div>
 
         <div className="space-y-5 px-6 py-6">
-          <div className="flex gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
-            <div className="flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-overlay)] text-3xl">
+          <div className="flex gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) p-4">
+            <div className="flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-(--border-default) bg-(--surface-overlay) text-3xl">
               {form.cover_image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -260,7 +260,7 @@ function ItemModal({
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+        <div className="flex justify-end gap-3 border-t border-(--border-default) px-6 py-5">
           <Button variant="secondary" onClick={onClose}>
             取消
           </Button>
@@ -372,7 +372,7 @@ export default function AdminMediaPage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <Film className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -403,18 +403,18 @@ export default function AdminMediaPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">总条目数</p>
             <p className="mt-3 text-3xl font-semibold">{items.length}</p>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">已完成</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{doneCount}</p>
               <Badge tone="success" variant="soft">已归档</Badge>
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">当前筛选结果</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{filtered.length}</p>
@@ -423,7 +423,7 @@ export default function AdminMediaPage() {
           </Card>
         </div>
 
-        <Card variant="elevated" className="space-y-4 rounded-[var(--radius-2xl)]">
+        <Card variant="elevated" className="space-y-4 rounded-2xl">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -495,7 +495,7 @@ export default function AdminMediaPage() {
             }
           />
         ) : (
-          <Card variant="elevated" padding="sm" className="rounded-[var(--radius-2xl)]">
+          <Card variant="elevated" padding="sm" className="rounded-2xl">
             <div className="grid gap-3 md:grid-cols-2">
               {filtered.map((item) => {
                 const typeInfo = TYPES.find((type) => type.value === item.type);
@@ -507,9 +507,9 @@ export default function AdminMediaPage() {
                     layout
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="group flex gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+                    className="group flex gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) p-4 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-sm)"
                   >
-                    <div className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-base)] text-2xl">
+                    <div className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-(--border-default) bg-(--surface-base) text-2xl">
                       {item.cover_image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

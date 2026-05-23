@@ -178,7 +178,7 @@ function LoginForm() {
         className="w-full max-w-sm"
       >
         <div className="flex justify-center mb-8">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
+          <div className="w-20 h-20 rounded-3xl bg-linear-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
             {step === 'email' ? (
               <Mail className="w-10 h-10 text-white" />
             ) : (
@@ -253,7 +253,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading || passkeyLoading || retryAfter > 0 || !email}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-linear-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {retryAfter > 0 ? `请等待 ${retryAfter}s` : '发送验证码'}
@@ -290,7 +290,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading || passkeyLoading || code.length !== 6}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-linear-to-r from-primary to-primary/90 text-white font-semibold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               登录后台

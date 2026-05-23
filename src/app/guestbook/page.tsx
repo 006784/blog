@@ -200,21 +200,21 @@ export default function GuestbookPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 给我留言
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 有什么想说的、想分享的，或者只是路过打个招呼，都欢迎留在这里。
               </p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-md">
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Messages</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{messages.length}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Messages</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{messages.length}</p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Pinned</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{pinnedCount}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Pinned</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{pinnedCount}</p>
               </Card>
             </div>
           </div>
@@ -227,13 +227,13 @@ export default function GuestbookPage() {
           onSubmit={handleSubmit}
           className="space-y-5"
         >
-          <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+          <Card variant="glass" className="rounded-2xl">
             <div className="space-y-5">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <label className="space-y-2">
-                  <span className="text-sm font-medium text-[var(--color-neutral-700)]">昵称</span>
+                  <span className="text-sm font-medium text-neutral-700">昵称</span>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                     <Input
                       type="text"
                       value={nickname}
@@ -246,9 +246,9 @@ export default function GuestbookPage() {
                   </div>
                 </label>
                 <label className="space-y-2">
-                  <span className="text-sm font-medium text-[var(--color-neutral-700)]">邮箱</span>
+                  <span className="text-sm font-medium text-neutral-700">邮箱</span>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                     <Input
                       type="email"
                       value={email}
@@ -259,9 +259,9 @@ export default function GuestbookPage() {
                   </div>
                 </label>
                 <label className="space-y-2">
-                  <span className="text-sm font-medium text-[var(--color-neutral-700)]">网站</span>
+                  <span className="text-sm font-medium text-neutral-700">网站</span>
                   <div className="relative">
-                    <Globe className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-neutral-500)]" />
+                    <Globe className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                     <Input
                       type="url"
                       value={website}
@@ -274,7 +274,7 @@ export default function GuestbookPage() {
               </div>
 
               <label className="space-y-2">
-                <span className="text-sm font-medium text-[var(--color-neutral-700)]">留言内容</span>
+                <span className="text-sm font-medium text-neutral-700">留言内容</span>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -287,7 +287,7 @@ export default function GuestbookPage() {
               </label>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--color-neutral-500)]">
+                <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
                   {content.length}/1000
                 </p>
                 <Button
@@ -308,7 +308,7 @@ export default function GuestbookPage() {
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <Card key={i} variant="glass" className="rounded-[var(--radius-2xl)]">
+                <Card key={i} variant="glass" className="rounded-2xl">
                   <div className="flex gap-4">
                     <Skeleton className="h-12 w-12 rounded-full" />
                     <div className="flex-1 space-y-3">
@@ -351,7 +351,7 @@ export default function GuestbookPage() {
                 >
                   <Card
                     variant="glass"
-                    className={`rounded-[var(--radius-2xl)] ${msg.is_pinned ? 'border-[var(--color-primary-500)]/30 bg-[var(--color-primary-500)]/5' : ''}`}
+                    className={`rounded-2xl ${msg.is_pinned ? 'border-(--color-primary-500)/30 bg-(--color-primary-500)/5' : ''}`}
                   >
                     <div className="flex gap-4">
                       <Image
@@ -359,24 +359,24 @@ export default function GuestbookPage() {
                         alt={msg.nickname}
                         width={48}
                         height={48}
-                        className="rounded-full bg-[var(--surface-overlay)]"
+                        className="rounded-full bg-(--surface-overlay)"
                       />
 
                       <div className="min-w-0 flex-1 space-y-3">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex flex-wrap items-center gap-2">
-                            {msg.is_pinned ? <Pin className="h-3.5 w-3.5 text-[var(--color-primary-600)]" /> : null}
+                            {msg.is_pinned ? <Pin className="h-3.5 w-3.5 text-(--color-primary-600)" /> : null}
                             {msg.website ? (
                               <a
                                 href={msg.website}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-base font-semibold text-[var(--color-neutral-900)] transition-colors hover:text-[var(--color-primary-600)]"
+                                className="text-base font-semibold text-neutral-900 transition-colors hover:text-(--color-primary-600)"
                               >
                                 {msg.nickname}
                               </a>
                             ) : (
-                              <span className="text-base font-semibold text-[var(--color-neutral-900)]">
+                              <span className="text-base font-semibold text-neutral-900">
                                 {msg.nickname}
                               </span>
                             )}
@@ -421,19 +421,19 @@ export default function GuestbookPage() {
                           ) : null}
                         </div>
 
-                        <p className="whitespace-pre-wrap break-words text-sm leading-7 text-[var(--color-neutral-700)]">
+                        <p className="whitespace-pre-wrap break-words text-sm leading-7 text-neutral-700">
                           {msg.content}
                         </p>
 
                         {msg.reply ? (
-                          <div className="rounded-[var(--radius-xl)] border border-[var(--color-primary-500)]/20 bg-[var(--color-primary-500)]/10 px-4 py-3">
+                          <div className="rounded-xl border border-(--color-primary-500)/20 bg-(--color-primary-500)/10 px-4 py-3">
                             <div className="mb-1 flex items-center gap-2">
-                              <Heart className="h-3.5 w-3.5 text-[var(--color-primary-600)]" />
-                              <span className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--color-primary-600)]">
+                              <Heart className="h-3.5 w-3.5 text-(--color-primary-600)" />
+                              <span className="text-xs font-medium uppercase tracking-[0.16em] text-(--color-primary-600)">
                                 博主回复
                               </span>
                             </div>
-                            <p className="text-sm leading-7 text-[var(--color-neutral-700)]">{msg.reply}</p>
+                            <p className="text-sm leading-7 text-neutral-700">{msg.reply}</p>
                           </div>
                         ) : null}
 

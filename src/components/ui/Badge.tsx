@@ -13,27 +13,27 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const toneClasses: Record<BadgeTone, Record<BadgeVariant, string>> = {
   default: {
-    solid: 'border-white/35 bg-[linear-gradient(135deg,var(--color-primary-500),var(--color-primary-600))] text-[var(--color-primary-foreground)] shadow-[0_12px_22px_-18px_var(--surface-button-shadow)]',
-    outline: 'border-[color:var(--border-default)] bg-white/35 text-[var(--color-neutral-700)]',
-    soft: 'border-transparent bg-[linear-gradient(180deg,var(--surface-overlay),var(--surface-raised))] text-[var(--color-neutral-700)] shadow-[inset_0_1px_0_var(--surface-card-highlight)]',
+    solid: 'border-white/35 bg-[linear-gradient(135deg,var(--color-primary-500),var(--color-primary-600))] text-(--color-primary-foreground) shadow-[0_12px_22px_-18px_var(--surface-button-shadow)]',
+    outline: 'border-(--border-default) bg-white/35 text-neutral-700',
+    soft: 'border-transparent bg-[linear-gradient(180deg,var(--surface-overlay),var(--surface-raised))] text-neutral-700 shadow-[inset_0_1px_0_var(--surface-card-highlight)]',
   },
   success: {
-    solid: 'border-transparent bg-[var(--color-success)] text-white',
+    solid: 'border-transparent bg-(--color-success) text-white',
     outline: 'border-emerald-500/30 bg-transparent text-emerald-600 dark:text-emerald-300',
     soft: 'border-transparent bg-emerald-500/12 text-emerald-600 dark:text-emerald-300',
   },
   warning: {
-    solid: 'border-transparent bg-[var(--color-warning)] text-white',
+    solid: 'border-transparent bg-(--color-warning) text-white',
     outline: 'border-amber-500/30 bg-transparent text-amber-600 dark:text-amber-300',
     soft: 'border-transparent bg-amber-500/12 text-amber-600 dark:text-amber-300',
   },
   error: {
-    solid: 'border-transparent bg-[var(--color-error)] text-white',
+    solid: 'border-transparent bg-(--color-error) text-white',
     outline: 'border-red-500/30 bg-transparent text-red-600 dark:text-red-300',
     soft: 'border-transparent bg-red-500/12 text-red-600 dark:text-red-300',
   },
   info: {
-    solid: 'border-transparent bg-[var(--color-info)] text-white',
+    solid: 'border-transparent bg-(--color-info) text-white',
     outline: 'border-cyan-500/30 bg-transparent text-cyan-600 dark:text-cyan-300',
     soft: 'border-transparent bg-cyan-500/12 text-cyan-600 dark:text-cyan-300',
   },

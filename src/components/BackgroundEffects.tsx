@@ -10,7 +10,7 @@ export function AuroraBackground({ children }: { children?: React.ReactNode }) {
       {/* Aurora layers */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
+        <div className="absolute inset-0 bg-linear-to-b from-background via-background to-secondary/20" />
         
         {/* Aurora wave 1 */}
         <motion.div

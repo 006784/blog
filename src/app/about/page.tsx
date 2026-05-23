@@ -149,7 +149,7 @@ export default function AboutPage() {
           <Card
             variant="glass"
             padding="lg"
-            className="overflow-hidden border-[color:var(--border-strong)]"
+            className="overflow-hidden border-(--border-strong)"
           >
             <div className="mb-5 flex flex-wrap items-center gap-3">
               <Badge variant="soft" className="gap-1.5 px-3 py-1.5">
@@ -163,13 +163,13 @@ export default function AboutPage() {
 
             <div className="space-y-5">
               <div className="space-y-3">
-                <h1 className="text-4xl font-semibold tracking-[-0.03em] text-[var(--color-neutral-900)] sm:text-5xl">
+                <h1 className="text-4xl font-semibold tracking-[-0.03em] text-neutral-900 sm:text-5xl">
                   你好，我是
                   <span className="ml-3 bg-[linear-gradient(120deg,var(--color-primary-600),var(--color-primary-900))] bg-clip-text text-transparent">
                     {profile.nickname}
                   </span>
                 </h1>
-                <p className="max-w-2xl text-[var(--text-lg)] leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                <p className="max-w-2xl text-(--text-lg) leading-(--leading-relaxed) text-neutral-600">
                   {profile.bio ||
                     '一名热爱技术和设计的全栈开发者，专注于创建美观、高性能的 Web 应用。'}
                 </p>
@@ -177,12 +177,12 @@ export default function AboutPage() {
 
               <Card
                 variant="bordered"
-                className="rounded-[var(--radius-2xl)] bg-[linear-gradient(135deg,var(--surface-raised),var(--surface-base))]"
+                className="rounded-2xl bg-[linear-gradient(135deg,var(--surface-raised),var(--surface-base))]"
               >
-                <p className="text-sm font-medium tracking-[0.16em] text-[var(--color-primary-700)]">
+                <p className="text-sm font-medium tracking-[0.16em] text-(--color-primary-700)">
                   个人宣言
                 </p>
-                <p className="mt-3 text-[var(--text-lg)] leading-[var(--leading-relaxed)] text-[var(--color-neutral-700)]">
+                <p className="mt-3 text-(--text-lg) leading-(--leading-relaxed) text-neutral-700">
                   {profile.motto || '用代码编织梦想，用文字记录时光。'}
                 </p>
               </Card>
@@ -193,10 +193,10 @@ export default function AboutPage() {
                     key={item.label}
                     variant="bordered"
                     padding="sm"
-                    className="rounded-[var(--radius-xl)] bg-[var(--surface-base)]"
+                    className="rounded-xl bg-(--surface-base)"
                   >
-                    <p className="text-sm text-[var(--color-neutral-500)]">{item.label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">
+                    <p className="text-sm text-neutral-500">{item.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-neutral-900">
                       {item.value}
                     </p>
                   </Card>
@@ -222,11 +222,11 @@ export default function AboutPage() {
             <Card
               variant="elevated"
               padding="lg"
-              className="relative overflow-hidden border-[color:var(--border-strong)]"
+              className="relative overflow-hidden border-(--border-strong)"
             >
               <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(135deg,var(--color-primary-100),transparent)] opacity-80" />
               <div className="relative grid gap-6 sm:grid-cols-[220px_1fr] sm:items-center">
-                <div className="mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-[calc(var(--radius-2xl)+4px)] border border-[color:var(--border-strong)] bg-[var(--surface-overlay)] shadow-[var(--shadow-lg)]">
+                <div className="mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-[calc(var(--radius-2xl)+4px)] border border-(--border-strong) bg-(--surface-overlay) shadow-(--shadow-lg)">
                   {profile.avatar ? (
                     <Image
                       src={profile.avatar}
@@ -237,7 +237,7 @@ export default function AboutPage() {
                       priority
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,var(--surface-overlay),var(--surface-base))] text-6xl font-semibold text-[var(--color-primary-700)]">
+                    <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,var(--surface-overlay),var(--surface-base))] text-6xl font-semibold text-(--color-primary-700)">
                       {profile.nickname.charAt(0)}
                     </div>
                   )}
@@ -245,13 +245,13 @@ export default function AboutPage() {
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium tracking-[0.18em] text-[var(--color-primary-700)]">
+                    <p className="text-sm font-medium tracking-[0.18em] text-(--color-primary-700)">
                       当前状态
                     </p>
-                    <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">
+                    <h2 className="text-2xl font-semibold text-neutral-900">
                       保持创作，也保持好奇
                     </h2>
-                    <p className="text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                    <p className="text-sm leading-(--leading-relaxed) text-neutral-600">
                       这里记录我的技术栈、成长经历和日常偏好，也希望让你更快理解这个站点背后的气质。
                     </p>
                   </div>
@@ -260,13 +260,13 @@ export default function AboutPage() {
                     {profileHighlights.map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-3"
+                        className="rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-3"
                       >
-                        <div className="flex items-center gap-2 text-sm text-[var(--color-neutral-500)]">
-                          <item.icon className="h-4 w-4 text-[var(--color-primary-600)]" />
+                        <div className="flex items-center gap-2 text-sm text-neutral-500">
+                          <item.icon className="h-4 w-4 text-(--color-primary-600)" />
                           {item.label}
                         </div>
-                        <p className="mt-2 text-base font-medium text-[var(--color-neutral-900)]">
+                        <p className="mt-2 text-base font-medium text-neutral-900">
                           {item.value}
                         </p>
                       </div>
@@ -282,7 +282,7 @@ export default function AboutPage() {
                           target={social.name === 'Email' ? undefined : '_blank'}
                           rel={social.name === 'Email' ? undefined : 'noopener noreferrer'}
                           whileHover={{ y: -2 }}
-                          className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border-default)] bg-[var(--surface-base)] px-4 py-2 text-sm font-medium text-[var(--color-neutral-700)] transition-colors hover:border-[var(--color-primary-500)] hover:text-[var(--color-primary-700)]"
+                          className="inline-flex items-center gap-2 rounded-full border border-(--border-default) bg-(--surface-base) px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-(--color-primary-500) hover:text-(--color-primary-700)"
                         >
                           <social.icon className="h-4 w-4" />
                           {social.name}
@@ -307,10 +307,10 @@ export default function AboutPage() {
                 <Badge variant="soft" className="mb-3 px-3 py-1.5">
                   Core Skills
                 </Badge>
-                <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+                <h2 className="text-3xl font-semibold text-neutral-900">
                   技能专长
                 </h2>
-                <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
                   主要聚焦现代 Web 技术栈，也持续把设计系统、体验细节和工程质量一起往前推。
                 </p>
               </div>
@@ -324,14 +324,14 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{ delay: index * 0.06 }}
-                  className="rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] p-4"
+                  className="rounded-xl border border-(--border-default) bg-(--surface-base) p-4"
                 >
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-base font-semibold text-[var(--color-neutral-900)]">
+                      <p className="text-base font-semibold text-neutral-900">
                         {skill.name}
                       </p>
-                      <p className="mt-1 text-sm text-[var(--color-neutral-600)]">
+                      <p className="mt-1 text-sm text-neutral-600">
                         {skill.summary}
                       </p>
                     </div>
@@ -339,7 +339,7 @@ export default function AboutPage() {
                       {skill.level}%
                     </Badge>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-overlay)]">
+                  <div className="h-2 overflow-hidden rounded-full bg-(--surface-overlay)">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${skill.level}%` }}
@@ -357,10 +357,10 @@ export default function AboutPage() {
             <Badge variant="soft" className="mb-3 px-3 py-1.5">
               Life
             </Badge>
-            <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+            <h2 className="text-3xl font-semibold text-neutral-900">
               兴趣爱好
             </h2>
-            <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+            <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
               工作之外，我也希望生活保持层次感，这些兴趣会直接反过来影响产品审美和表达方式。
             </p>
 
@@ -376,15 +376,15 @@ export default function AboutPage() {
                   <Card
                     variant="bordered"
                     padding="sm"
-                    className="h-full rounded-[var(--radius-2xl)] bg-[var(--surface-base)]"
+                    className="h-full rounded-2xl bg-(--surface-base)"
                   >
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-100),var(--surface-overlay))] text-[var(--color-primary-700)]">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-100),var(--surface-overlay))] text-(--color-primary-700)">
                       <interest.icon className="h-5 w-5" />
                     </div>
-                    <p className="text-lg font-semibold text-[var(--color-neutral-900)]">
+                    <p className="text-lg font-semibold text-neutral-900">
                       {interest.label}
                     </p>
-                    <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                    <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
                       {interest.description}
                     </p>
                   </Card>
@@ -401,10 +401,10 @@ export default function AboutPage() {
                 <Badge variant="soft" className="mb-3 px-3 py-1.5">
                   Timeline
                 </Badge>
-                <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+                <h2 className="text-3xl font-semibold text-neutral-900">
                   工作经历
                 </h2>
-                <p className="mt-2 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
                   从执行项目，到搭建系统，再到开始关注产品气质和整体体验。
                 </p>
               </div>
@@ -425,7 +425,7 @@ export default function AboutPage() {
                   <Card
                     variant="bordered"
                     padding="md"
-                    className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-[linear-gradient(180deg,var(--surface-base),var(--surface-panel))]"
+                    className="relative overflow-hidden rounded-2xl bg-[linear-gradient(180deg,var(--surface-base),var(--surface-panel))]"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-2">
@@ -433,15 +433,15 @@ export default function AboutPage() {
                           {experience.period}
                         </Badge>
                         <div>
-                          <h3 className="text-xl font-semibold text-[var(--color-neutral-900)]">
+                          <h3 className="text-xl font-semibold text-neutral-900">
                             {experience.title}
                           </h3>
-                          <p className="mt-1 text-sm font-medium text-[var(--color-primary-700)]">
+                          <p className="mt-1 text-sm font-medium text-(--color-primary-700)">
                             {experience.company}
                           </p>
                         </div>
                       </div>
-                      <div className="max-w-2xl text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                      <div className="max-w-2xl text-sm leading-(--leading-relaxed) text-neutral-600">
                         {experience.description}
                       </div>
                     </div>
@@ -456,17 +456,17 @@ export default function AboutPage() {
           <Card
             variant="glass"
             padding="lg"
-            className="overflow-hidden border-[color:var(--border-strong)]"
+            className="overflow-hidden border-(--border-strong)"
           >
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-2xl">
                 <Badge variant="soft" className="mb-3 px-3 py-1.5">
                   Connect
                 </Badge>
-                <h2 className="text-3xl font-semibold text-[var(--color-neutral-900)]">
+                <h2 className="text-3xl font-semibold text-neutral-900">
                   让我们一起创造精彩
                 </h2>
-                <p className="mt-3 text-sm leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)]">
+                <p className="mt-3 text-sm leading-(--leading-relaxed) text-neutral-600">
                   如果你想聊项目合作、站点设计、内容系统，或者只是想打个招呼，都欢迎来联系我。
                 </p>
               </div>

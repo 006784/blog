@@ -51,9 +51,9 @@ const EMPTY: Partial<UsesItem> = {
 
 const fieldLabelCls = 'mb-1.5 block text-xs font-medium text-muted-foreground';
 const selectCls =
-  'w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-sm text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-base)]';
+  'w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-sm text-neutral-900 shadow-(--shadow-xs) transition-all duration-(--duration-fast) ease-(--ease-default) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface-base)';
 const iconButtonCls =
-  'inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-[var(--color-neutral-700)] shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:border-[color:var(--border-strong)] hover:text-[var(--color-neutral-900)]';
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-default) bg-(--surface-raised) text-neutral-700 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:border-(--border-strong) hover:text-neutral-900';
 
 function getCategory(value: string) {
   return CATEGORIES.find((category) => category.value === value) ?? { label: value, icon: '📦', value };
@@ -123,9 +123,9 @@ function ItemModal({
         initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 16 }}
-        className="w-full max-w-xl overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-base)] shadow-[var(--shadow-2xl)]"
+        className="w-full max-w-xl overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-base) shadow-(--shadow-2xl)"
       >
-        <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-6 py-5">
+        <div className="flex items-center justify-between border-b border-(--border-default) px-6 py-5">
           <div>
             <h2 className="text-lg font-semibold">{editing ? '编辑工具' : '添加工具'}</h2>
             <p className="mt-1 text-sm text-muted-foreground">维护工具图标、说明和跳转链接。</p>
@@ -136,8 +136,8 @@ function ItemModal({
         </div>
 
         <div className="space-y-4 px-6 py-6">
-          <div className="flex items-center gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-overlay)]">
+          <div className="flex items-center gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) p-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-(--border-default) bg-(--surface-overlay)">
               {form.icon_url ? (
                 <UsesIcon
                   key={`preview:${form.icon_url ?? ''}:${form.link ?? ''}`}
@@ -224,7 +224,7 @@ function ItemModal({
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[color:var(--border-default)] px-6 py-5">
+        <div className="flex justify-end gap-3 border-t border-(--border-default) px-6 py-5">
           <Button variant="secondary" onClick={onClose}>
             取消
           </Button>
@@ -386,7 +386,7 @@ export default function AdminUsesPage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <Wrench className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -416,18 +416,18 @@ export default function AdminUsesPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">工具总数</p>
             <p className="mt-3 text-3xl font-semibold">{items.length}</p>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">当前分类</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{visibleCategoryCount}</p>
               <Badge variant="soft">可视分类</Badge>
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <p className="text-sm text-muted-foreground">已筛选结果</p>
             <div className="mt-3 flex items-center justify-between">
               <p className="text-3xl font-semibold">{filtered.length}</p>
@@ -443,19 +443,19 @@ export default function AdminUsesPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
             >
-              <Card variant="default" padding="sm" className="flex items-center gap-3 rounded-[var(--radius-xl)]">
+              <Card variant="default" padding="sm" className="flex items-center gap-3 rounded-xl">
                 {caching ? (
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 ) : (
                   <Check className="h-4 w-4 text-emerald-500" />
                 )}
-                <p className="text-sm text-[var(--color-neutral-700)]">{cacheMsg}</p>
+                <p className="text-sm text-neutral-700">{cacheMsg}</p>
               </Card>
             </motion.div>
           ) : null}
         </AnimatePresence>
 
-        <Card variant="elevated" className="space-y-4 rounded-[var(--radius-2xl)]">
+        <Card variant="elevated" className="space-y-4 rounded-2xl">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -514,12 +514,12 @@ export default function AdminUsesPage() {
             {orderedCats.map((cat) => {
               const meta = getCategory(cat);
               return (
-                <Card key={cat} variant="elevated" className="space-y-4 rounded-[var(--radius-2xl)]">
+                <Card key={cat} variant="elevated" className="space-y-4 rounded-2xl">
                   <div className="flex items-center gap-3">
                     <span className="text-base">{meta.icon}</span>
                     <h2 className="text-base font-semibold">{meta.label}</h2>
                     <Badge variant="outline">{grouped[cat].length} 条</Badge>
-                    <div className="h-px flex-1 bg-[var(--border-default)]" />
+                    <div className="h-px flex-1 bg-(--border-default)" />
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -529,11 +529,11 @@ export default function AdminUsesPage() {
                         layout
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="group rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] p-4 shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-fast)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+                        className="group rounded-xl border border-(--border-default) bg-(--surface-panel) p-4 shadow-(--shadow-xs) transition-all duration-(--duration-fast) hover:-translate-y-0.5 hover:shadow-(--shadow-sm)"
                       >
                         <div className="mb-3 flex items-start justify-between gap-3">
                           <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-base)]">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-(--border-default) bg-(--surface-base)">
                               {item.icon_url ? (
                                 <UsesIcon
                                   key={`${item.id}:${item.icon_url ?? ''}:${item.link ?? ''}`}
@@ -581,7 +581,7 @@ export default function AdminUsesPage() {
                             href={item.link}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-3 inline-flex max-w-full items-center gap-1.5 text-xs text-primary transition-colors hover:text-[var(--color-primary-700)]"
+                            className="mt-3 inline-flex max-w-full items-center gap-1.5 text-xs text-primary transition-colors hover:text-(--color-primary-700)"
                           >
                             <ExternalLink className="h-3 w-3 shrink-0" />
                             <span className="truncate">{item.link.replace(/^https?:\/\//, '')}</span>
@@ -592,7 +592,7 @@ export default function AdminUsesPage() {
 
                     <button
                       onClick={() => openCreate(cat)}
-                      className="flex min-h-[146px] flex-col items-center justify-center gap-2 rounded-[var(--radius-xl)] border border-dashed border-[color:var(--border-default)] bg-[var(--surface-raised)] text-sm text-muted-foreground transition-all duration-[var(--duration-fast)] hover:border-[var(--color-primary-500)] hover:text-primary"
+                      className="flex min-h-[146px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-(--border-default) bg-(--surface-raised) text-sm text-muted-foreground transition-all duration-(--duration-fast) hover:border-(--color-primary-500) hover:text-primary"
                     >
                       <Plus className="h-5 w-5" />
                       添加到 {meta.label}

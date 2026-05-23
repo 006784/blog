@@ -17,10 +17,10 @@ interface StatePanelProps {
 }
 
 const toneStyles: Record<StateTone, string> = {
-  empty: 'border-[color:var(--border-default)]',
-  error: 'border-red-500/25 bg-[var(--surface-base)]',
-  loading: 'border-[color:var(--border-default)] bg-[var(--surface-base)]',
-  default: 'border-[color:var(--border-default)]',
+  empty: 'border-(--border-default)',
+  error: 'border-red-500/25 bg-(--surface-base)',
+  loading: 'border-(--border-default) bg-(--surface-base)',
+  default: 'border-(--border-default)',
 };
 
 const defaultIcons: Record<StateTone, ReactNode> = {
@@ -42,20 +42,20 @@ export function StatePanel({
     <Card
       variant="bordered"
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-[var(--radius-2xl)] px-6 py-10 text-center',
+        'flex flex-col items-center justify-center gap-3 rounded-2xl px-6 py-10 text-center',
         toneStyles[tone],
         className
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(180deg,var(--surface-card-start),var(--surface-overlay))] text-[var(--color-primary-600)] shadow-[0_14px_26px_-20px_var(--surface-card-shadow-strong)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(180deg,var(--surface-card-start),var(--surface-overlay))] text-(--color-primary-600) shadow-[0_14px_26px_-20px_var(--surface-card-shadow-strong)]">
         {icon || defaultIcons[tone]}
       </div>
       <div className="space-y-1">
-        <p className="text-[var(--text-lg)] font-semibold text-[var(--color-neutral-900)] dark:text-[var(--color-neutral-900)]">
+        <p className="text-(--text-lg) font-semibold text-neutral-900 dark:text-neutral-900">
           {title}
         </p>
         {description && (
-          <p className="max-w-md text-[var(--text-sm)] leading-[var(--leading-relaxed)] text-[var(--color-neutral-600)] dark:text-[var(--color-neutral-600)]">
+          <p className="max-w-md text-(--text-sm) leading-(--leading-relaxed) text-neutral-600 dark:text-neutral-600">
             {description}
           </p>
         )}

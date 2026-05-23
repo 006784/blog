@@ -109,9 +109,9 @@ function SectionHeader({
     <div className="mb-4 flex items-center gap-3">
       {icon}
       <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold text-[var(--color-neutral-900)]">{title}</h2>
+        <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
       </div>
-      <div className="h-px flex-1 bg-[var(--border-default)]" />
+      <div className="h-px flex-1 bg-(--border-default)" />
       {action}
     </div>
   );
@@ -136,7 +136,7 @@ function AdminActionButton({
       className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${
         danger
           ? 'border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/15'
-          : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:text-[var(--color-primary-600)]'
+          : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:text-(--color-primary-600)'
       }`}
     >
       {children}
@@ -160,7 +160,7 @@ function FeaturedCard({
       <Card
         variant="glass"
         padding="sm"
-        className="h-full rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-xl)]"
+        className="h-full rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-xl)"
       >
         <a
           href={link.url}
@@ -172,26 +172,26 @@ function FeaturedCard({
             <Avatar src={link.avatar} name={link.name} size={48} />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex items-center gap-2">
-                <h3 className="truncate text-lg font-semibold text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
+                <h3 className="truncate text-lg font-semibold text-neutral-900 transition-colors group-hover:text-(--color-primary-600)">
                   {link.name}
                 </h3>
-                <Star className="h-4 w-4 shrink-0 fill-[var(--color-warning)] text-[var(--color-warning)]" />
+                <Star className="h-4 w-4 shrink-0 fill-(--color-warning) text-(--color-warning)" />
               </div>
               {link.description ? (
-                <p className="line-clamp-3 text-sm leading-6 text-[var(--color-neutral-600)]">
+                <p className="line-clamp-3 text-sm leading-6 text-neutral-600">
                   {link.description}
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-[var(--color-neutral-500)]">
+                <p className="text-sm leading-6 text-neutral-500">
                   一个值得常去逛逛的角落。
                 </p>
               )}
-              <div className="flex items-center gap-2 text-xs text-[var(--color-neutral-500)]">
+              <div className="flex items-center gap-2 text-xs text-neutral-500">
                 <Globe className="h-3.5 w-3.5" />
                 <span className="truncate">{safeHostname(link.url)}</span>
               </div>
             </div>
-            <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-[var(--color-neutral-500)] transition-colors group-hover:text-[var(--color-primary-600)]" />
+            <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-neutral-500 transition-colors group-hover:text-(--color-primary-600)" />
           </div>
         </a>
 
@@ -241,7 +241,7 @@ function LinkCard({
       <Card
         variant="glass"
         padding="sm"
-        className="h-full rounded-[var(--radius-2xl)] transition duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+        className="h-full rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
       >
         <a
           href={link.url}
@@ -253,17 +253,17 @@ function LinkCard({
             <Avatar src={link.avatar} name={link.name} size={40} />
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex items-center gap-2">
-                <h3 className="truncate text-base font-semibold text-[var(--color-neutral-900)] transition-colors group-hover:text-[var(--color-primary-600)]">
+                <h3 className="truncate text-base font-semibold text-neutral-900 transition-colors group-hover:text-(--color-primary-600)">
                   {link.name}
                 </h3>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--color-neutral-500)] transition-colors group-hover:text-[var(--color-primary-600)]" />
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-neutral-500 transition-colors group-hover:text-(--color-primary-600)" />
               </div>
               {link.description ? (
-                <p className="line-clamp-2 text-sm leading-6 text-[var(--color-neutral-600)]">
+                <p className="line-clamp-2 text-sm leading-6 text-neutral-600">
                   {link.description}
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-[var(--color-neutral-500)]">
+                <p className="text-sm leading-6 text-neutral-500">
                   {safeHostname(link.url)}
                 </p>
               )}
@@ -382,14 +382,14 @@ function LinkModal({
         <Card
           variant="elevated"
           padding="lg"
-          className="rounded-[var(--radius-2xl)]"
+          className="rounded-2xl"
         >
           <div className="mb-6 flex items-center justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">
+              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
                 {editing ? 'Edit Link' : 'Create Link'}
               </p>
-              <h3 className="text-2xl font-semibold text-[var(--color-neutral-900)]">
+              <h3 className="text-2xl font-semibold text-neutral-900">
                 {editing ? '编辑友链' : '添加友链'}
               </h3>
             </div>
@@ -399,14 +399,14 @@ function LinkModal({
           </div>
 
           <form onSubmit={submit} className="space-y-5">
-            <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
+            <Card variant="glass" padding="sm" className="rounded-2xl">
               <div className="flex items-center gap-4">
                 <Avatar src={form.avatar} name={form.name || '?'} size={44} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-base font-semibold text-[var(--color-neutral-900)]">
+                  <p className="truncate text-base font-semibold text-neutral-900">
                     {form.name || '博客名称'}
                   </p>
-                  <p className="truncate text-sm text-[var(--color-neutral-500)]">
+                  <p className="truncate text-sm text-neutral-500">
                     {form.url || 'https://example.com'}
                   </p>
                 </div>
@@ -416,7 +416,7 @@ function LinkModal({
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-medium text-[var(--color-neutral-700)]">名称</span>
+                <span className="text-sm font-medium text-neutral-700">名称</span>
                 <Input
                   value={form.name}
                   onChange={setField('name')}
@@ -426,11 +426,11 @@ function LinkModal({
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-[var(--color-neutral-700)]">分类</span>
+                <span className="text-sm font-medium text-neutral-700">分类</span>
                 <select
                   value={form.category}
                   onChange={setField('category')}
-                  className="w-full rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text-sm)] text-[var(--color-neutral-900)] shadow-[var(--shadow-xs)] outline-none transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)] focus-visible:ring-offset-2"
+                  className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
                 >
                   {CATEGORIES.map((category) => (
                     <option key={category} value={category}>
@@ -442,7 +442,7 @@ function LinkModal({
             </div>
 
             <label className="space-y-2">
-              <span className="text-sm font-medium text-[var(--color-neutral-700)]">网址</span>
+              <span className="text-sm font-medium text-neutral-700">网址</span>
               <Input
                 type="url"
                 value={form.url}
@@ -454,7 +454,7 @@ function LinkModal({
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-medium text-[var(--color-neutral-700)]">头像链接</span>
+                <span className="text-sm font-medium text-neutral-700">头像链接</span>
                 <Input
                   type="url"
                   value={form.avatar}
@@ -463,7 +463,7 @@ function LinkModal({
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-medium text-[var(--color-neutral-700)]">一句话介绍</span>
+                <span className="text-sm font-medium text-neutral-700">一句话介绍</span>
                 <Textarea
                   value={form.description}
                   onChange={setField('description')}
@@ -477,34 +477,34 @@ function LinkModal({
             <button
               type="button"
               onClick={() => setForm((current) => ({ ...current, is_featured: !current.is_featured }))}
-              className={`flex w-full items-center justify-between rounded-[var(--radius-xl)] border px-4 py-3 text-left transition ${
+              className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition ${
                 form.is_featured
                   ? 'border-amber-400/30 bg-amber-500/10'
-                  : 'border-[color:var(--border-default)] bg-[var(--surface-base)]'
+                  : 'border-(--border-default) bg-(--surface-base)'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface-overlay)]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-overlay)">
                   <Star
                     className={`h-4 w-4 ${
                       form.is_featured
-                        ? 'fill-[var(--color-warning)] text-[var(--color-warning)]'
-                        : 'text-[var(--color-neutral-500)]'
+                        ? 'fill-(--color-warning) text-(--color-warning)'
+                        : 'text-neutral-500'
                     }`}
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-neutral-900)]">精选推荐</p>
-                  <p className="text-xs text-[var(--color-neutral-500)]">在顶部以大卡片展示</p>
+                  <p className="text-sm font-medium text-neutral-900">精选推荐</p>
+                  <p className="text-xs text-neutral-500">在顶部以大卡片展示</p>
                 </div>
               </div>
               <div
                 className={`relative h-5 w-10 rounded-full transition ${
-                  form.is_featured ? 'bg-[var(--color-warning)]' : 'bg-[var(--surface-overlay)]'
+                  form.is_featured ? 'bg-(--color-warning)' : 'bg-(--surface-overlay)'
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-[var(--shadow-sm)] transition ${
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-(--shadow-sm) transition ${
                     form.is_featured ? 'left-[22px]' : 'left-0.5'
                   }`}
                 />
@@ -515,7 +515,7 @@ function LinkModal({
               <p className="text-sm text-red-500">{error}</p>
             ) : null}
 
-            <div className="flex flex-col-reverse gap-3 border-t border-[color:var(--border-default)] pt-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-(--border-default) pt-5 sm:flex-row sm:justify-end">
               <Button type="button" variant="secondary" onClick={onClose}>
                 取消
               </Button>
@@ -635,21 +635,21 @@ export default function LinksPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 友情链接
               </h1>
-              <p className="text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 一些喜欢逛、值得收藏，也愿意经常回访的朋友和他们的角落。
               </p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-md">
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">All Links</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{links.length}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">All Links</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{links.length}</p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-[var(--radius-2xl)]">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-neutral-500)]">Featured</p>
-                <p className="mt-2 text-2xl font-semibold text-[var(--color-neutral-900)]">{featured.length}</p>
+              <Card variant="glass" padding="sm" className="rounded-2xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Featured</p>
+                <p className="mt-2 text-2xl font-semibold text-neutral-900">{featured.length}</p>
               </Card>
             </div>
           </div>
@@ -668,12 +668,12 @@ export default function LinksPage() {
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3].map((item) => (
-                <Skeleton key={item} className="h-40 rounded-[var(--radius-2xl)]" />
+                <Skeleton key={item} className="h-40 rounded-2xl" />
               ))}
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((item) => (
-                <Skeleton key={item} className="h-28 rounded-[var(--radius-2xl)]" />
+                <Skeleton key={item} className="h-28 rounded-2xl" />
               ))}
             </div>
           </div>
@@ -700,7 +700,7 @@ export default function LinksPage() {
               !isAdmin ? (
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
+                  className="inline-flex items-center justify-center rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
                 >
                   去联系我
                 </Link>
@@ -713,7 +713,7 @@ export default function LinksPage() {
               <section>
                 <SectionHeader
                   title="精选推荐"
-                  icon={<Star className="h-4 w-4 fill-[var(--color-warning)] text-[var(--color-warning)]" />}
+                  icon={<Star className="h-4 w-4 fill-(--color-warning) text-(--color-warning)" />}
                 />
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {featured.map((link) => (
@@ -730,7 +730,7 @@ export default function LinksPage() {
             ) : null}
 
             {catList.length > 2 ? (
-              <Card variant="glass" className="rounded-[var(--radius-2xl)]">
+              <Card variant="glass" className="rounded-2xl">
                 <div className="flex flex-wrap gap-2">
                   {catList.map((category) => (
                     <button
@@ -738,8 +738,8 @@ export default function LinksPage() {
                       onClick={() => setActiveCat(category)}
                       className={`rounded-full border px-3.5 py-2 text-sm transition ${
                         activeCat === category
-                          ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white shadow-[var(--shadow-sm)]'
-                          : 'border-[color:var(--border-default)] bg-[var(--surface-base)] text-[var(--color-neutral-600)] hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]'
+                          ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
+                          : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
                       }`}
                     >
                       {category}
@@ -776,22 +776,22 @@ export default function LinksPage() {
             {!isAdmin ? (
               <Card
                 variant="bordered"
-                className="rounded-[var(--radius-2xl)] border-dashed text-center"
+                className="rounded-2xl border-dashed text-center"
               >
                 <div className="space-y-3">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-overlay)] text-[var(--color-primary-600)]">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-(--surface-overlay) text-(--color-primary-600)">
                     <Heart className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-lg font-semibold text-[var(--color-neutral-900)]">想交换友链？</p>
-                    <p className="text-sm text-[var(--color-neutral-600)]">
+                    <p className="text-lg font-semibold text-neutral-900">想交换友链？</p>
+                    <p className="text-sm text-neutral-600">
                       欢迎通过联系页面告诉我你的博客，我会认真去看。
                     </p>
                   </div>
                   <div className="pt-1">
                     <Link
                       href="/contact"
-                      className="inline-flex items-center justify-center rounded-full bg-[var(--color-primary-500)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-primary-600)]"
+                      className="inline-flex items-center justify-center rounded-full bg-(--color-primary-500) px-4 py-2 text-sm font-medium text-white transition hover:bg-(--color-primary-600)"
                     >
                       去联系我
                     </Link>

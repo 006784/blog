@@ -100,7 +100,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
       onMouseLeave={() => setHovered(false)}
       style={frameStyle}
       className={clsx(
-        'premium-blog-card ground-news-card group relative overflow-hidden rounded-[1.7rem] transition-[transform,box-shadow] duration-[var(--duration-normal)]',
+        'premium-blog-card ground-news-card group relative overflow-hidden rounded-[1.7rem] transition-[transform,box-shadow] duration-(--duration-normal)',
         featured && 'is-featured'
       )}
     >
@@ -189,7 +189,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
                 }
               />
             ) : (
-              <div className="h-full w-full bg-gradient-to-br from-secondary via-secondary/70 to-secondary/40" />
+              <div className="h-full w-full bg-linear-to-br from-secondary via-secondary/70 to-secondary/40" />
             )}
             <div className="ground-news-card-media-overlay" />
           </div>

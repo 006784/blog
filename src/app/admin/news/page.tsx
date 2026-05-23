@@ -142,7 +142,7 @@ export default function NewsAdminPage() {
             </Link>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xs)]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xs)">
                   <Newspaper className="h-5 w-5 text-primary" />
                 </span>
                 <div>
@@ -160,7 +160,7 @@ export default function NewsAdminPage() {
         </motion.div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">总新闻源</p>
@@ -169,7 +169,7 @@ export default function NewsAdminPage() {
               <Globe className="h-8 w-8 text-primary" />
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">活跃源</p>
@@ -178,7 +178,7 @@ export default function NewsAdminPage() {
               <CheckCircle className="h-8 w-8 text-emerald-500" />
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">语言种类</p>
@@ -187,7 +187,7 @@ export default function NewsAdminPage() {
               <Server className="h-8 w-8 text-cyan-500" />
             </div>
           </Card>
-          <Card variant="default" className="rounded-[var(--radius-2xl)]">
+          <Card variant="default" className="rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">分类数量</p>
@@ -212,13 +212,13 @@ export default function NewsAdminPage() {
             icon={<AlertCircle className="h-6 w-6" />}
           />
         ) : (
-          <Card variant="elevated" padding="sm" className="space-y-3 rounded-[var(--radius-2xl)]">
+          <Card variant="elevated" padding="sm" className="space-y-3 rounded-2xl">
             {sources.map((source) => {
               const result = testResults[source.id];
               return (
                 <div
                   key={source.id}
-                  className="flex flex-col gap-4 rounded-[var(--radius-xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] px-4 py-4 shadow-[var(--shadow-xs)] md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-4 rounded-xl border border-(--border-default) bg-(--surface-panel) px-4 py-4 shadow-(--shadow-xs) md:flex-row md:items-center md:justify-between"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

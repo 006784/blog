@@ -70,7 +70,7 @@ export function SubmitPanel({ onRun, onSubmit, running, submitting, runResult, s
         <button
           onClick={onSubmit}
           disabled={running || submitting}
-          className="flex items-center gap-1.5 px-5 py-1.5 rounded-lg bg-[var(--gold,#c4a96d)] hover:bg-amber-500 text-white text-sm font-medium transition-colors disabled:opacity-50 ml-auto"
+          className="flex items-center gap-1.5 px-5 py-1.5 rounded-lg bg-(--gold,#c4a96d) hover:bg-amber-500 text-white text-sm font-medium transition-colors disabled:opacity-50 ml-auto"
         >
           {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           提交

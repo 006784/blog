@@ -182,7 +182,7 @@ function MsgContent({ content }: { content: string }) {
           const isBlock = !!match;
           if (isBlock) {
             return (
-              <pre className="rounded-lg bg-[var(--paper-deep)] border border-[var(--line)] p-3 overflow-x-auto text-xs my-2">
+              <pre className="rounded-lg bg-(--paper-deep) border border-(--line) p-3 overflow-x-auto text-xs my-2">
                 <code className={className} {...props}>
                   {children}
                 </code>
@@ -190,7 +190,7 @@ function MsgContent({ content }: { content: string }) {
             );
           }
           return (
-            <code className="bg-[var(--paper-deep)] px-1 py-0.5 rounded text-[0.85em]" {...props}>
+            <code className="bg-(--paper-deep) px-1 py-0.5 rounded text-[0.85em]" {...props}>
               {children}
             </code>
           );
@@ -199,7 +199,7 @@ function MsgContent({ content }: { content: string }) {
         ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-0.5">{children}</ul>,
         ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-0.5">{children}</ol>,
         blockquote: ({ children }) => (
-          <blockquote className="border-l-2 border-[var(--gold)] pl-3 my-2 text-muted-foreground">{children}</blockquote>
+          <blockquote className="border-l-2 border-(--gold) pl-3 my-2 text-muted-foreground">{children}</blockquote>
         ),
       }}
     >
@@ -379,9 +379,9 @@ function SettingsModal({
         initial={{ opacity: 0, scale: 0.96, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 10 }}
-        className="relative z-10 w-full max-w-5xl rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl overflow-hidden"
+        className="relative z-10 w-full max-w-5xl rounded-2xl border border-(--line) bg-(--paper) shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--line)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-(--line)">
           <div className="flex items-center gap-2">
             <PlugZap className="w-4 h-4" style={{ color: 'var(--gold)' }} />
             <div>
@@ -389,13 +389,13 @@ function SettingsModal({
               <p className="text-xs text-muted-foreground">内置主流厂商，也支持新增自定义 API 提供商</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--paper-deep)] transition-colors">
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-(--paper-deep) transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="grid gap-0 lg:grid-cols-[1.2fr_0.9fr] max-h-[75vh] overflow-hidden">
-          <div className="p-6 overflow-y-auto space-y-6 border-b lg:border-b-0 lg:border-r border-[var(--line)]">
+          <div className="p-6 overflow-y-auto space-y-6 border-b lg:border-b-0 lg:border-r border-(--line)">
             <section className="space-y-4">
               <div>
                 <h3 className="text-sm font-semibold">内置 AI 提供商</h3>
@@ -406,7 +406,7 @@ function SettingsModal({
 
               <div className="grid gap-3 md:grid-cols-2">
                 {builtInProviders.map((provider) => (
-                  <div key={provider.id} className="rounded-xl border border-[var(--line)] bg-[var(--paper-deep)]/35 p-4 space-y-3">
+                  <div key={provider.id} className="rounded-xl border border-(--line) bg-(--paper-deep)/35 p-4 space-y-3">
                     <div className="flex items-center gap-2">
                       <ProviderDot provider={provider} />
                       <span className="font-medium text-sm">{provider.label}</span>
@@ -421,7 +421,7 @@ function SettingsModal({
                     </div>
 
                     {provider.authMode === 'none' ? (
-                      <div className="rounded-lg border border-dashed border-[var(--line)] px-3 py-2 text-xs text-muted-foreground">
+                      <div className="rounded-lg border border-dashed border-(--line) px-3 py-2 text-xs text-muted-foreground">
                         此提供商默认无需 API Key
                       </div>
                     ) : (
@@ -430,7 +430,7 @@ function SettingsModal({
                         placeholder={provider.keyPlaceholder || `输入 ${provider.label} API Key`}
                         value={keys[provider.id] ?? ''}
                         onChange={(e) => setKeys((prev) => ({ ...prev, [provider.id]: e.target.value }))}
-                        className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono"
+                        className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono"
                       />
                     )}
                   </div>
@@ -449,20 +449,20 @@ function SettingsModal({
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-3 py-2 rounded-lg border border-[var(--line)] text-xs hover:border-[var(--gold)] transition-colors"
+                  className="px-3 py-2 rounded-lg border border-(--line) text-xs hover:border-(--gold) transition-colors"
                 >
                   新增自定义
                 </button>
               </div>
 
               {draftProviders.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[var(--line)] px-4 py-6 text-sm text-muted-foreground text-center">
+                <div className="rounded-xl border border-dashed border-(--line) px-4 py-6 text-sm text-muted-foreground text-center">
                   还没有自定义提供商
                 </div>
               ) : (
                 <div className="space-y-3">
                   {draftProviders.map((provider) => (
-                    <div key={provider.id} className="rounded-xl border border-[var(--line)] p-4 space-y-3">
+                    <div key={provider.id} className="rounded-xl border border-(--line) p-4 space-y-3">
                       <div className="flex items-start gap-2">
                         <ProviderDot provider={provider} />
                         <div className="min-w-0 flex-1">
@@ -479,7 +479,7 @@ function SettingsModal({
                           <button
                             type="button"
                             onClick={() => editCustomProvider(provider)}
-                            className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors"
                             title="编辑"
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -496,7 +496,7 @@ function SettingsModal({
                       </div>
 
                       {provider.authMode === 'none' ? (
-                        <div className="rounded-lg border border-dashed border-[var(--line)] px-3 py-2 text-xs text-muted-foreground">
+                        <div className="rounded-lg border border-dashed border-(--line) px-3 py-2 text-xs text-muted-foreground">
                           此提供商配置为无需 API Key
                         </div>
                       ) : (
@@ -505,7 +505,7 @@ function SettingsModal({
                           placeholder={provider.keyPlaceholder || '输入 API Key'}
                           value={keys[provider.id] ?? ''}
                           onChange={(e) => setKeys((prev) => ({ ...prev, [provider.id]: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono"
+                          className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono"
                         />
                       )}
                     </div>
@@ -530,7 +530,7 @@ function SettingsModal({
                   value={editingForm.label}
                   onChange={(e) => setEditingForm((current) => ({ ...current, label: e.target.value }))}
                   placeholder="例如：Azure OpenAI / 公司内网网关"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors"
+                  className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors"
                 />
               </div>
 
@@ -540,7 +540,7 @@ function SettingsModal({
                   <select
                     value={editingForm.protocol}
                     onChange={(e) => handleProtocolChange(e.target.value as CiyuanProtocol)}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors"
+                    className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors"
                   >
                     <option value="openai">OpenAI 兼容</option>
                     <option value="anthropic">Anthropic Messages</option>
@@ -555,7 +555,7 @@ function SettingsModal({
                     type="color"
                     value={editingForm.color}
                     onChange={(e) => setEditingForm((current) => ({ ...current, color: e.target.value }))}
-                    className="w-full h-[42px] rounded-lg border border-[var(--line)] bg-transparent cursor-pointer"
+                    className="w-full h-[42px] rounded-lg border border-(--line) bg-transparent cursor-pointer"
                   />
                 </div>
               </div>
@@ -566,7 +566,7 @@ function SettingsModal({
                   value={editingForm.baseUrl}
                   onChange={(e) => setEditingForm((current) => ({ ...current, baseUrl: e.target.value }))}
                   placeholder="https://api.example.com/v1"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono"
                 />
               </div>
 
@@ -576,7 +576,7 @@ function SettingsModal({
                   value={editingForm.endpointPath}
                   onChange={(e) => setEditingForm((current) => ({ ...current, endpointPath: e.target.value }))}
                   placeholder={defaultEndpointPath(editingForm.protocol)}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono"
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   可用 <code>{'{model}'}</code> 占位符，例如 Gemini 或 Azure 风格路径。
@@ -599,7 +599,7 @@ function SettingsModal({
                             : '',
                       }));
                     }}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors"
+                    className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors"
                   >
                     <option value="bearer">Authorization: Bearer</option>
                     <option value="header">自定义 Header</option>
@@ -613,7 +613,7 @@ function SettingsModal({
                   <select
                     value={editingForm.modelPlacement}
                     onChange={(e) => setEditingForm((current) => ({ ...current, modelPlacement: e.target.value as CiyuanModelPlacement }))}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors"
+                    className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors"
                   >
                     <option value="body">请求体</option>
                     <option value="url">仅 URL</option>
@@ -631,7 +631,7 @@ function SettingsModal({
                     value={editingForm.authKeyName}
                     onChange={(e) => setEditingForm((current) => ({ ...current, authKeyName: e.target.value }))}
                     placeholder={defaultAuthKeyName(editingForm.protocol, editingForm.authMode)}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono"
+                    className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono"
                   />
                 </div>
               )}
@@ -643,7 +643,7 @@ function SettingsModal({
                   onChange={(e) => setEditingForm((current) => ({ ...current, modelsText: e.target.value }))}
                   rows={6}
                   placeholder={`gpt-4.1\nqwen-plus | 通义千问 Plus\nmy-company-model`}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono resize-none"
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   一行一个模型，支持 <code>模型ID | 显示名称</code> 格式。
@@ -658,7 +658,7 @@ function SettingsModal({
                     value={editingForm.apiKey}
                     onChange={(e) => setEditingForm((current) => ({ ...current, apiKey: e.target.value }))}
                     placeholder="只保存在当前浏览器"
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-transparent text-sm focus:border-[var(--gold)] outline-none transition-colors font-mono"
+                    className="w-full px-3 py-2 rounded-lg border border-(--line) bg-transparent text-sm focus:border-(--gold) outline-none transition-colors font-mono"
                   />
                 </div>
               )}
@@ -677,7 +677,7 @@ function SettingsModal({
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 rounded-lg text-sm border border-[var(--line)] hover:border-[var(--gold)] transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm border border-(--line) hover:border-(--gold) transition-colors"
                 >
                   重置
                 </button>
@@ -686,8 +686,8 @@ function SettingsModal({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-[var(--line)] flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm hover:bg-[var(--paper-deep)] transition-colors">
+        <div className="px-6 py-4 border-t border-(--line) flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm hover:bg-(--paper-deep) transition-colors">
             关闭
           </button>
           <button
@@ -734,7 +734,7 @@ function ProviderSelector({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((current) => !current)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--line)] hover:border-[var(--gold)] transition-colors text-sm"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-(--line) hover:border-(--gold) transition-colors text-sm"
       >
         <ProviderDot provider={activeProvider} />
         <span className="font-medium">{activeProvider?.label ?? '选择提供商'}</span>
@@ -748,7 +748,7 @@ function ProviderSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.12 }}
-            className="absolute top-full mt-2 left-0 z-50 w-80 rounded-xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl overflow-hidden"
+            className="absolute top-full mt-2 left-0 z-50 w-80 rounded-xl border border-(--line) bg-(--paper) shadow-2xl overflow-hidden"
           >
             <div className="p-2 space-y-2 max-h-96 overflow-y-auto">
               <div>
@@ -764,7 +764,7 @@ function ProviderSelector({
                       setOpen(false);
                     }}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      provider.id === providerId ? 'bg-[var(--paper-deep)] font-medium' : 'hover:bg-[var(--paper-deep)] text-muted-foreground'
+                      provider.id === providerId ? 'bg-(--paper-deep) font-medium' : 'hover:bg-(--paper-deep) text-muted-foreground'
                     }`}
                   >
                     <ProviderDot provider={provider} />
@@ -789,7 +789,7 @@ function ProviderSelector({
                         setOpen(false);
                       }}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        provider.id === providerId ? 'bg-[var(--paper-deep)] font-medium' : 'hover:bg-[var(--paper-deep)] text-muted-foreground'
+                        provider.id === providerId ? 'bg-(--paper-deep) font-medium' : 'hover:bg-(--paper-deep) text-muted-foreground'
                       }`}
                     >
                       <ProviderDot provider={provider} />
@@ -1081,7 +1081,7 @@ export function CiyuanChat() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--paper)]">
+    <div className="flex h-screen overflow-hidden bg-(--paper)">
       <AnimatePresence initial={false}>
         {sidebarOpen && (
           <motion.aside
@@ -1089,26 +1089,26 @@ export function CiyuanChat() {
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex-shrink-0 border-r border-[var(--line)] flex flex-col overflow-hidden"
+            className="flex-shrink-0 border-r border-(--line) flex flex-col overflow-hidden"
           >
-            <div className="px-4 py-3 flex items-center justify-between border-b border-[var(--line)]">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-(--line)">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4" style={{ color: 'var(--gold)' }} />
                 <span className="font-bold text-sm tracking-wide">词元</span>
               </div>
               <button
                 onClick={newChat}
-                className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors"
+                className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors"
                 title="新对话"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-4 py-3 border-b border-[var(--line)] space-y-2">
+            <div className="px-4 py-3 border-b border-(--line) space-y-2">
               <button
                 onClick={() => setShowSettings(true)}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--paper-deep)] transition-colors text-sm text-muted-foreground border border-[var(--line)]"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-(--paper-deep) transition-colors text-sm text-muted-foreground border border-(--line)"
               >
                 <Key className="w-4 h-4" />
                 <span>模型 / API 设置</span>
@@ -1142,7 +1142,7 @@ export function CiyuanChat() {
                     <div
                       key={conversation.id}
                       className={`group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                        conversation.id === activeId ? 'bg-[var(--paper-deep)]' : 'hover:bg-[var(--paper-deep)]'
+                        conversation.id === activeId ? 'bg-(--paper-deep)' : 'hover:bg-(--paper-deep)'
                       }`}
                       onClick={() => {
                         setActiveId(conversation.id);
@@ -1171,10 +1171,10 @@ export function CiyuanChat() {
       </AnimatePresence>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-[var(--line)] bg-[var(--paper)]">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-(--line) bg-(--paper)">
           <button
             onClick={() => setSidebarOpen((current) => !current)}
-            className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors"
             title={sidebarOpen ? '收起侧栏' : '展开侧栏'}
           >
             <MessageSquare className="w-4 h-4" />
@@ -1186,7 +1186,7 @@ export function CiyuanChat() {
             onProviderChange={handleProviderChange}
           />
 
-          <div className="flex items-center gap-2 rounded-lg border border-[var(--line)] px-3 py-1.5 min-w-[260px] max-w-full">
+          <div className="flex items-center gap-2 rounded-lg border border-(--line) px-3 py-1.5 min-w-[260px] max-w-full">
             <span className="text-xs text-muted-foreground whitespace-nowrap">模型</span>
             <input
               list="ciyuan-model-options"
@@ -1216,7 +1216,7 @@ export function CiyuanChat() {
                     }));
                   }
                 }}
-                className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors text-muted-foreground"
+                className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors text-muted-foreground"
                 title="清空对话"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -1224,7 +1224,7 @@ export function CiyuanChat() {
             )}
             <button
               onClick={() => setShowSettings(true)}
-              className="p-1.5 rounded-lg hover:bg-[var(--paper-deep)] transition-colors text-muted-foreground"
+              className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors text-muted-foreground"
               title="设置"
             >
               <Settings className="w-4 h-4" />
@@ -1241,7 +1241,7 @@ export function CiyuanChat() {
                 className="space-y-4"
               >
                 <div
-                  className="w-16 h-16 rounded-2xl border border-[var(--line)] flex items-center justify-center mx-auto"
+                  className="w-16 h-16 rounded-2xl border border-(--line) flex items-center justify-center mx-auto"
                   style={{ background: 'var(--paper-deep)' }}
                 >
                   <Sparkles className="w-8 h-8" style={{ color: 'var(--gold)' }} />
@@ -1258,8 +1258,8 @@ export function CiyuanChat() {
                       onClick={() => handleProviderChange(providerOption.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-xs ${
                         providerOption.id === provider
-                          ? 'border-[var(--gold)] text-[var(--gold)]'
-                          : 'border-[var(--line)] text-muted-foreground hover:border-[var(--gold)]'
+                          ? 'border-(--gold) text-(--gold)'
+                          : 'border-(--line) text-muted-foreground hover:border-(--gold)'
                       }`}
                     >
                       <ProviderDot provider={providerOption} size={6} />
@@ -1279,8 +1279,8 @@ export function CiyuanChat() {
                 className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center border border-[var(--line)] ${
-                    message.role === 'user' ? 'bg-[var(--paper-deep)]' : ''
+                  className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center border border-(--line) ${
+                    message.role === 'user' ? 'bg-(--paper-deep)' : ''
                   }`}
                   style={message.role === 'assistant' ? { background: `${activeProvider?.color ?? '#888'}20` } : {}}
                 >
@@ -1295,8 +1295,8 @@ export function CiyuanChat() {
                   <div
                     className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       message.role === 'user'
-                        ? 'bg-[var(--ink)] text-[var(--paper)] rounded-tr-sm'
-                        : 'bg-[var(--paper-deep)] border border-[var(--line)] rounded-tl-sm'
+                        ? 'bg-(--ink) text-(--paper) rounded-tr-sm'
+                        : 'bg-(--paper-deep) border border-(--line) rounded-tl-sm'
                     }`}
                   >
                     {message.role === 'assistant' ? (
@@ -1315,7 +1315,7 @@ export function CiyuanChat() {
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
                       <button
                         onClick={() => copyMessage(message.id, message.content)}
-                        className="p-1 rounded hover:bg-[var(--paper-deep)] transition-colors text-muted-foreground"
+                        className="p-1 rounded hover:bg-(--paper-deep) transition-colors text-muted-foreground"
                         title="复制"
                       >
                         {copied === message.id ? (
@@ -1333,9 +1333,9 @@ export function CiyuanChat() {
           <div ref={bottomRef} />
         </div>
 
-        <div className="px-4 pb-4 pt-2 border-t border-[var(--line)]">
+        <div className="px-4 pb-4 pt-2 border-t border-(--line)">
           <div className="max-w-4xl mx-auto">
-            <div className="relative flex items-end gap-2 rounded-2xl border border-[var(--line)] bg-[var(--paper-deep)] px-4 py-3 focus-within:border-[var(--gold)] transition-colors">
+            <div className="relative flex items-end gap-2 rounded-2xl border border-(--line) bg-(--paper-deep) px-4 py-3 focus-within:border-(--gold) transition-colors">
               <textarea
                 ref={textareaRef}
                 value={input}

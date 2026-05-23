@@ -104,16 +104,16 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card variant="elevated" padding="lg" className="border border-[color:var(--border-default)]">
+          <Card variant="elevated" padding="lg" className="border border-(--border-default)">
           <form onSubmit={handleSubmit} className="space-y-8">
             {saveMessage && (
-              <div className="rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-raised)] px-4 py-3">
+              <div className="rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3">
                 <div className="mb-2">
                   <Badge tone={saveMessage.type === 'success' ? 'success' : 'error'}>
                     {saveMessage.type === 'success' ? '已保存' : '保存失败'}
                   </Badge>
                 </div>
-                <p className="text-sm text-[var(--color-neutral-700)]">
+                <p className="text-sm text-neutral-700">
                   {saveMessage.text}
                 </p>
               </div>
@@ -134,7 +134,7 @@ export default function ProfilePage() {
                       className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
                     />
                   ) : (
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--gradient-start)] to-[var(--gradient-end)] flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full bg-linear-to-br from-(--gradient-start) to-(--gradient-end) flex items-center justify-center">
                       <User className="w-10 h-10 text-white" />
                     </div>
                   )}

@@ -113,7 +113,7 @@ export function TimelineView({ diaries, onOpen }: Props) {
                   {/* Card */}
                   <button
                     onClick={() => onOpen(diary)}
-                    className="flex-1 text-left border p-4 transition-colors hover:border-[var(--d-accent)]"
+                    className="flex-1 text-left border p-4 transition-colors hover:border-(--d-accent)"
                     style={{ borderColor: 'var(--d-border)', background: 'var(--d-bg)' }}
                   >
                     {diary.title && (

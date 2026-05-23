@@ -103,10 +103,10 @@ export default function ComputerPage() {
               Desktop Wallpapers
             </Badge>
             <div className="max-w-3xl space-y-4">
-              <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-neutral-900)] sm:text-5xl lg:text-6xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
                 电脑专区
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-[var(--color-neutral-600)] sm:text-base">
+              <p className="max-w-2xl text-sm leading-7 text-neutral-600 sm:text-base">
                 收集适合电脑桌面的壁纸：从安静的自然风景到深色工作台，按屏幕比例、氛围和使用场景快速挑选。
               </p>
             </div>
@@ -122,17 +122,17 @@ export default function ComputerPage() {
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {collections.map((item) => (
               <Card key={item.label} variant="glass" padding="sm">
-                <item.icon className="h-5 w-5 text-[var(--color-primary-600)]" />
-                <p className="mt-4 text-lg font-semibold text-[var(--color-neutral-900)]">
+                <item.icon className="h-5 w-5 text-(--color-primary-600)" />
+                <p className="mt-4 text-lg font-semibold text-neutral-900">
                   {item.count}
                 </p>
-                <p className="text-sm text-[var(--color-neutral-600)]">{item.label}</p>
+                <p className="text-sm text-neutral-600">{item.label}</p>
               </Card>
             ))}
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-xl)]">
+        <section className="overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-xl)">
           <div className="grid lg:grid-cols-[1.25fr_0.75fr]">
             <div className="relative min-h-[280px] overflow-hidden sm:min-h-[420px]">
               <Image
@@ -143,7 +143,7 @@ export default function ComputerPage() {
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
               <div className="absolute bottom-5 left-5 right-5 flex flex-wrap gap-2">
                 {featured.tags.map((tag) => (
                   <Badge key={tag} className="border-white/20 bg-white/20 text-white backdrop-blur-xl">
@@ -159,23 +159,23 @@ export default function ComputerPage() {
                   本周推荐
                 </Badge>
                 <div>
-                  <h2 className="text-3xl font-semibold tracking-tight text-[var(--color-neutral-900)]">
+                  <h2 className="text-3xl font-semibold tracking-tight text-neutral-900">
                     {featured.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-[var(--color-neutral-600)]">
+                  <p className="mt-3 text-sm leading-7 text-neutral-600">
                     {featured.mood}。{featured.accent}，画面中部留有充足空间，适合放置桌面组件和常用文件夹。
                   </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Card variant="bordered" padding="sm">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">
+                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
                     Ratio
                   </p>
                   <p className="mt-2 text-xl font-semibold">{featured.ratio}</p>
                 </Card>
                 <Card variant="bordered" padding="sm">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-neutral-500)]">
+                  <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
                     Quality
                   </p>
                   <p className="mt-2 text-xl font-semibold">{featured.resolution}</p>
@@ -188,10 +188,10 @@ export default function ComputerPage() {
         <section className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-[var(--color-neutral-900)]">
+              <h2 className="text-2xl font-semibold text-neutral-900">
                 精选壁纸
               </h2>
-              <p className="mt-2 text-sm text-[var(--color-neutral-600)]">
+              <p className="mt-2 text-sm text-neutral-600">
                 点击下载会打开原图来源，后续可以接入后台上传和分类管理。
               </p>
             </div>
@@ -205,7 +205,7 @@ export default function ComputerPage() {
             {wallpapers.map((wallpaper) => (
               <article
                 key={wallpaper.title}
-                className="group overflow-hidden rounded-[var(--radius-2xl)] border border-[color:var(--border-default)] bg-[var(--surface-panel)] shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-normal)] hover:-translate-y-1 hover:shadow-[var(--shadow-lg)]"
+                className="group overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) transition-all duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Image
@@ -226,10 +226,10 @@ export default function ComputerPage() {
                 </div>
                 <div className="space-y-4 p-5">
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--color-neutral-900)]">
+                    <h3 className="text-lg font-semibold text-neutral-900">
                       {wallpaper.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-[var(--color-neutral-600)]">
+                    <p className="mt-2 text-sm leading-6 text-neutral-600">
                       {wallpaper.mood}
                     </p>
                   </div>
@@ -244,7 +244,7 @@ export default function ComputerPage() {
                     href={wallpaper.image}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-[color:var(--border-default)] bg-[var(--surface-base)] px-4 text-sm font-medium text-[var(--color-neutral-800)] transition hover:border-[var(--color-primary-300)] hover:text-[var(--color-primary-600)]"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-(--border-default) bg-(--surface-base) px-4 text-sm font-medium text-neutral-800 transition hover:border-(--color-primary-300) hover:text-(--color-primary-600)"
                   >
                     <ArrowDownToLine className="h-4 w-4" />
                     下载壁纸

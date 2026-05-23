@@ -82,7 +82,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
 
       {/* 摘要卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+        <div className="bg-linear-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-5 h-5 text-blue-600" />
             <span className="text-sm font-medium text-blue-800">总记录</span>
@@ -91,7 +91,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
           <div className="text-xs text-blue-700">篇日记</div>
         </div>
         
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+        <div className="bg-linear-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
           <div className="flex items-center gap-2 mb-2">
             <Star className="w-5 h-5 text-green-600" />
             <span className="text-sm font-medium text-green-800">平均强度</span>
@@ -100,7 +100,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
           <div className="text-xs text-green-700">/10</div>
         </div>
         
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+        <div className="bg-linear-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
           <div className="flex items-center gap-2 mb-2">
             <PieChart className="w-5 h-5 text-purple-600" />
             <span className="text-sm font-medium text-purple-800">主导情绪</span>
@@ -109,7 +109,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
           <div className="text-xs text-purple-700">最常见情绪</div>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
+        <div className="bg-linear-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-5 h-5 text-amber-600" />
             <span className="text-sm font-medium text-amber-800">分析期间</span>
@@ -131,7 +131,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
               <span className="w-24 text-sm font-medium text-gray-700 truncate">{item.mood}</span>
               <div className="flex-1 bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-amber-400 to-orange-500 h-2 rounded-full"
+                  className="bg-linear-to-r from-amber-400 to-orange-500 h-2 rounded-full"
                   style={{ width: `${item.percentage}%` }}
                 ></div>
               </div>
@@ -152,7 +152,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
             {report.weatherImpact.slice(0, 4).map((item, index) => (
               <div 
                 key={index} 
-                className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200"
+                className="p-3 bg-linear-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200"
               >
                 <div className="font-medium text-cyan-800 mb-1">{item.weather}</div>
                 <div className="text-sm text-cyan-600">平均强度: {item.avgIntensity}</div>
@@ -201,7 +201,7 @@ export function EmotionAnalytics({ diaries, className = '' }: EmotionAnalyticsPr
           </h4>
           <div className="space-y-2">
             {report.recommendations.map((rec, index) => (
-              <div key={index} className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 text-sm text-amber-800">
+              <div key={index} className="p-3 bg-linear-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 text-sm text-amber-800">
                 • {rec}
               </div>
             ))}

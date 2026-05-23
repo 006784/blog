@@ -231,19 +231,19 @@ export function MusicPlayer({
             className="fixed bottom-[min(15rem,30vh)] left-1/2 z-40 w-[min(720px,calc(100vw-2rem))] -translate-x-1/2"
           >
             <div className="overflow-hidden rounded-[28px] border border-white/45 bg-[rgba(255,250,245,0.84)] shadow-[0_20px_60px_rgba(117,74,33,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(23,20,18,0.88)]">
-              <div className="flex items-center justify-between border-b border-[color:var(--border-default)] px-5 py-4">
+              <div className="flex items-center justify-between border-b border-(--border-default) px-5 py-4">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-[var(--color-primary-700)]">
+                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-(--color-primary-700)">
                     Playlist
                   </p>
-                  <h3 className="mt-1 text-lg font-semibold text-[var(--color-neutral-900)] dark:text-white">
+                  <h3 className="mt-1 text-lg font-semibold text-neutral-900 dark:text-white">
                     当前队列
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowPlaylist(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-[var(--color-neutral-700)] transition-colors hover:bg-white dark:bg-white/10 dark:text-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-neutral-700 transition-colors hover:bg-white dark:bg-white/10 dark:text-white"
                   aria-label="关闭播放列表"
                 >
                   <X className="h-5 w-5" />
@@ -263,23 +263,23 @@ export function MusicPlayer({
                       }}
                       className="flex w-full items-center gap-3 rounded-[22px] px-3 py-3 text-left transition-colors hover:bg-white/60 dark:hover:bg-white/5"
                     >
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--surface-overlay)] text-[var(--color-neutral-500)]">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-(--surface-overlay) text-neutral-500">
                         {isActive && isPlaying ? (
-                          <Disc3 className="h-5 w-5 animate-spin text-[var(--color-primary-700)]" />
+                          <Disc3 className="h-5 w-5 animate-spin text-(--color-primary-700)" />
                         ) : (
                           <span className="text-sm font-medium">{index + 1}</span>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="line-clamp-1 text-sm font-medium text-[var(--color-neutral-900)] dark:text-white">
+                        <p className="line-clamp-1 text-sm font-medium text-neutral-900 dark:text-white">
                           {song.title}
                         </p>
-                        <p className="line-clamp-1 text-xs text-[var(--color-neutral-500)] dark:text-white/65">
+                        <p className="line-clamp-1 text-xs text-neutral-500 dark:text-white/65">
                           {song.artist}
                         </p>
                       </div>
                       {isActive ? (
-                        <span className="rounded-full bg-[var(--color-primary-100)] px-3 py-1 text-xs font-medium text-[var(--color-primary-800)]">
+                        <span className="rounded-full bg-(--color-primary-100) px-3 py-1 text-xs font-medium text-(--color-primary-800)">
                           播放中
                         </span>
                       ) : null}
@@ -315,7 +315,7 @@ export function MusicPlayer({
 
           <div className="relative space-y-4 px-4 py-4 sm:px-5 sm:py-5">
             <div className="flex items-start gap-4">
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[22px] border border-white/50 bg-[var(--surface-overlay)] shadow-[0_12px_28px_rgba(70,43,20,0.14)] sm:h-20 sm:w-20">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[22px] border border-white/50 bg-(--surface-overlay) shadow-[0_12px_28px_rgba(70,43,20,0.14)] sm:h-20 sm:w-20">
                 {currentSong.cover_image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -325,7 +325,7 @@ export function MusicPlayer({
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,rgba(255,210,186,0.8),rgba(181,228,255,0.7))]">
-                    <Music2 className="h-8 w-8 text-[var(--color-primary-800)]" />
+                    <Music2 className="h-8 w-8 text-(--color-primary-800)" />
                   </div>
                 )}
 
@@ -338,11 +338,11 @@ export function MusicPlayer({
 
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--color-primary-800)] shadow-[0_8px_18px_rgba(125,80,41,0.08)] dark:bg-white/10 dark:text-[var(--color-primary-100)]">
+                  <span className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-(--color-primary-800) shadow-[0_8px_18px_rgba(125,80,41,0.08)] dark:bg-white/10 dark:text-(--color-primary-100)">
                     Now Playing
                   </span>
                   {autoplayBlocked ? (
-                    <span className="rounded-full bg-[rgba(255,210,186,0.86)] px-3 py-1 text-[11px] font-medium text-[var(--color-primary-900)]">
+                    <span className="rounded-full bg-[rgba(255,210,186,0.86)] px-3 py-1 text-[11px] font-medium text-(--color-primary-900)">
                       自动播放被拦截
                     </span>
                   ) : (
@@ -352,10 +352,10 @@ export function MusicPlayer({
                   )}
                 </div>
 
-                <h2 className="mt-3 line-clamp-1 text-2xl font-semibold tracking-[-0.04em] text-[var(--color-neutral-900)] dark:text-white sm:text-[2rem]">
+                <h2 className="mt-3 line-clamp-1 text-2xl font-semibold tracking-[-0.04em] text-neutral-900 dark:text-white sm:text-[2rem]">
                   {currentSong.title}
                 </h2>
-                <p className="mt-1 line-clamp-1 text-lg text-[var(--color-neutral-500)] dark:text-white/68">
+                <p className="mt-1 line-clamp-1 text-lg text-neutral-500 dark:text-white/68">
                   {currentSong.artist}
                   {currentSong.album ? ` · ${currentSong.album}` : ''}
                 </p>
@@ -368,7 +368,7 @@ export function MusicPlayer({
                     onClick={() =>
                       window.open(currentSong.music_url, '_blank', 'noopener,noreferrer')
                     }
-                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-[var(--color-neutral-700)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-neutral-700 transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
                     aria-label="打开歌曲来源链接"
                   >
                     <ExternalLink className="h-5 w-5" />
@@ -378,7 +378,7 @@ export function MusicPlayer({
                 <button
                   type="button"
                   onClick={() => setShowPlaylist((current) => !current)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-[var(--color-neutral-700)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-neutral-700 transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
                   aria-label="切换播放列表"
                 >
                   <ListMusic className="h-5 w-5" />
@@ -387,7 +387,7 @@ export function MusicPlayer({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-[var(--color-neutral-700)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-neutral-700 transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
                   aria-label="关闭播放器"
                 >
                   <X className="h-5 w-5" />
@@ -426,7 +426,7 @@ export function MusicPlayer({
                 />
               </div>
 
-              <div className="flex items-center justify-between text-sm text-[var(--color-neutral-500)] dark:text-white/60">
+              <div className="flex items-center justify-between text-sm text-neutral-500 dark:text-white/60">
                 <span>{formatTime(currentTime)}</span>
                 <span>-{formatTime(remainingTime)}</span>
               </div>
@@ -439,8 +439,8 @@ export function MusicPlayer({
                   onClick={() => setIsShuffle((current) => !current)}
                   className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
                     isShuffle
-                      ? 'bg-[rgba(255,214,182,0.92)] text-[var(--color-primary-900)]'
-                      : 'bg-white/65 text-[var(--color-neutral-700)] hover:bg-white dark:bg-white/10 dark:text-white'
+                      ? 'bg-[rgba(255,214,182,0.92)] text-(--color-primary-900)'
+                      : 'bg-white/65 text-neutral-700 hover:bg-white dark:bg-white/10 dark:text-white'
                   }`}
                   aria-label="随机播放"
                 >
@@ -450,7 +450,7 @@ export function MusicPlayer({
                 <button
                   type="button"
                   onClick={playPrev}
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(255,255,255,0.72)] text-[var(--color-neutral-800)] shadow-[0_10px_22px_rgba(105,66,33,0.08)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(255,255,255,0.72)] text-neutral-800 shadow-[0_10px_22px_rgba(105,66,33,0.08)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
                   aria-label="上一首"
                 >
                   <SkipBack className="h-6 w-6 fill-current" />
@@ -472,7 +472,7 @@ export function MusicPlayer({
                 <button
                   type="button"
                   onClick={playNext}
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(255,255,255,0.72)] text-[var(--color-neutral-800)] shadow-[0_10px_22px_rgba(105,66,33,0.08)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(255,255,255,0.72)] text-neutral-800 shadow-[0_10px_22px_rgba(105,66,33,0.08)] transition-all hover:-translate-y-0.5 hover:bg-white dark:bg-white/10 dark:text-white"
                   aria-label="下一首"
                 >
                   <SkipForward className="h-6 w-6 fill-current" />
@@ -483,8 +483,8 @@ export function MusicPlayer({
                   onClick={() => setIsRepeat((current) => !current)}
                   className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
                     isRepeat
-                      ? 'bg-[rgba(255,214,182,0.92)] text-[var(--color-primary-900)]'
-                      : 'bg-white/65 text-[var(--color-neutral-700)] hover:bg-white dark:bg-white/10 dark:text-white'
+                      ? 'bg-[rgba(255,214,182,0.92)] text-(--color-primary-900)'
+                      : 'bg-white/65 text-neutral-700 hover:bg-white dark:bg-white/10 dark:text-white'
                   }`}
                   aria-label="循环播放"
                 >
@@ -492,7 +492,7 @@ export function MusicPlayer({
                 </button>
               </div>
 
-              <div className="flex items-center gap-3 rounded-full bg-white/65 px-3 py-2 text-[var(--color-neutral-700)] shadow-[0_10px_22px_rgba(105,66,33,0.08)] dark:bg-white/10 dark:text-white">
+              <div className="flex items-center gap-3 rounded-full bg-white/65 px-3 py-2 text-neutral-700 shadow-[0_10px_22px_rgba(105,66,33,0.08)] dark:bg-white/10 dark:text-white">
                 <button
                   type="button"
                   onClick={() => setIsMuted((current) => !current)}

@@ -32,8 +32,8 @@ export function InterviewAnswerView({ value, onChange, answerHint, showHint }: I
       {/* Editor/Preview */}
       <div className="flex-1 overflow-auto">
         {preview ? (
-          <div className="p-4 prose prose-sm max-w-none text-[var(--ink)]
-            prose-code:bg-[var(--paper-deep)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+          <div className="p-4 prose prose-sm max-w-none text-(--ink)
+            prose-code:bg-(--paper-deep) prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
             prose-pre:bg-[#1e1e1e] prose-pre:text-gray-100 prose-pre:rounded-lg">
             {value ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown> : <p className="text-gray-400">暂无内容</p>}
           </div>

@@ -668,7 +668,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
                         className="h-40 w-full object-cover"
                       />
                     ) : attachment.type === 'audio' ? (
-                      <div className="flex h-40 items-center justify-center bg-[var(--d-bg-warm)]">
+                      <div className="flex h-40 items-center justify-center bg-(--d-bg-warm)">
                         <div className="w-full max-w-[280px] px-4">
                           <div className="mb-3 flex items-center gap-2" style={{ color: 'var(--d-ink-2)' }}>
                             <Volume2 className="h-4 w-4" />
@@ -678,7 +678,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
                         </div>
                       </div>
                     ) : (
-                      <div className="flex h-40 items-center justify-center bg-[var(--d-bg-warm)]">
+                      <div className="flex h-40 items-center justify-center bg-(--d-bg-warm)">
                         <div className="text-sm" style={{ color: 'var(--d-ink-3)' }}>
                           已添加附件
                         </div>

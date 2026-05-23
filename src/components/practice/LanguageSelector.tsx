@@ -25,7 +25,7 @@ export function LanguageSelector({ value, onChange, availableLanguages }: Langua
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="px-3 py-1.5 text-sm rounded-lg bg-[#2d2d2d] text-gray-200 border border-[#3d3d3d] hover:border-[var(--gold)] focus:border-[var(--gold)] outline-none transition-colors cursor-pointer"
+      className="px-3 py-1.5 text-sm rounded-lg bg-[#2d2d2d] text-gray-200 border border-[#3d3d3d] hover:border-(--gold) focus:border-(--gold) outline-none transition-colors cursor-pointer"
     >
       {langs.map(l => (
         <option key={l.id} value={l.id}>{l.label}</option>
