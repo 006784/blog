@@ -54,11 +54,11 @@
   --surface-glass:   rgba(255, 255, 255, 0.60);
 
   /* card gradient */
-  --surface-card-start:     rgba(255, 255, 255, 0.95);
-  --surface-card-end:       rgba(240, 240, 238, 0.90);
-  --surface-card-highlight: rgba(255, 255, 255, 0.85);
-  --surface-card-shadow:    rgba(0, 0, 0, 0.07);
-  --surface-card-shadow-strong: rgba(0, 0, 0, 0.14);
+  --surface-card-start:     rgba(255, 255, 253, 0.97);
+  --surface-card-end:       rgba(238, 238, 234, 0.94);
+  --surface-card-highlight: rgba(255, 255, 255, 0.90);
+  --surface-card-shadow:    rgba(0, 0, 0, 0.10);
+  --surface-card-shadow-strong: rgba(0, 0, 0, 0.18);
   --surface-button-shadow:  rgba(27, 130, 114, 0.35);
   --surface-accent-ring:    rgba(232, 105, 58, 0.25);
 
@@ -70,8 +70,8 @@
   --neu-inset: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
 
   /* ── Borders ─────────────────────────────────────────────── */
-  --border-default: rgba(0, 0, 0, 0.07);
-  --border-strong:  rgba(0, 0, 0, 0.13);
+  --border-default: rgba(0, 0, 0, 0.11);
+  --border-strong:  rgba(0, 0, 0, 0.20);
   --border-teal:    rgba(27, 130, 114, 0.25);
 
   /* ── Spacing ─────────────────────────────────────────────── */
@@ -160,8 +160,8 @@
   --neu-shadow-sm: 3px 3px 8px var(--neu-dark), -3px -3px 8px var(--neu-light);
   --neu-inset: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
 
-  --border-default: rgba(255, 255, 255, 0.07);
-  --border-strong:  rgba(255, 255, 255, 0.13);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong:  rgba(255, 255, 255, 0.22);
   --border-teal:    rgba(78, 207, 176, 0.22);
 
   --shadow-xs: 2px 2px 6px rgba(0,0,0,0.35);
