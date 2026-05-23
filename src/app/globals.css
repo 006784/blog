@@ -196,7 +196,7 @@ body {
   text-size-adjust: 100%;
 }
 
-/* 网格背景 */
+/* 网格背景 — 格子纸风格 */
 body::before {
   content: '';
   position: fixed;
@@ -204,12 +204,12 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px);
-  background-size: 44px 44px;
+    linear-gradient(to right, rgba(0,0,0,0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.055) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
-/* 多色彩光晕渐变背景 */
+/* 极淡角落光晕 — 去掉彩色噪点 */
 body::after {
   content: '';
   position: fixed;
@@ -217,21 +217,24 @@ body::after {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 50% at 8% 2%,  color-mix(in srgb, var(--color-teal-200)   55%, transparent), transparent),
-    radial-gradient(ellipse 50% 40% at 92% 8%,  color-mix(in srgb, var(--color-orange-200) 45%, transparent), transparent),
-    radial-gradient(ellipse 45% 35% at 75% 95%, color-mix(in srgb, var(--color-teal-100)   40%, transparent), transparent),
-    radial-gradient(ellipse 40% 30% at 20% 85%, color-mix(in srgb, #c4b5fd 30%, transparent), transparent),
-    radial-gradient(ellipse 35% 25% at 50% 50%, color-mix(in srgb, var(--color-orange-100) 20%, transparent), transparent);
+    radial-gradient(ellipse 55% 40% at 0% 0%,   color-mix(in srgb, var(--color-teal-200) 20%, transparent), transparent),
+    radial-gradient(ellipse 45% 35% at 100% 0%,  color-mix(in srgb, var(--color-orange-200) 15%, transparent), transparent);
 }
 
-/* 深色模式光晕 */
+/* 深色模式 */
+.dark body::before,
+[data-theme="dark"] body::before {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
 .dark body::after,
 [data-theme="dark"] body::after {
   background:
-    radial-gradient(ellipse 60% 50% at 8% 2%,  color-mix(in srgb, var(--color-teal-800)   40%, transparent), transparent),
-    radial-gradient(ellipse 50% 40% at 92% 8%,  color-mix(in srgb, var(--color-orange-800) 30%, transparent), transparent),
-    radial-gradient(ellipse 45% 35% at 75% 95%, color-mix(in srgb, var(--color-teal-900)   35%, transparent), transparent),
-    radial-gradient(ellipse 40% 30% at 20% 85%, color-mix(in srgb, #3b2d6e 40%, transparent), transparent);
+    radial-gradient(ellipse 55% 40% at 0% 0%,   color-mix(in srgb, var(--color-teal-800) 25%, transparent), transparent),
+    radial-gradient(ellipse 45% 35% at 100% 0%,  color-mix(in srgb, var(--color-orange-900) 20%, transparent), transparent);
 }
 
 .studio-grid {
@@ -3888,41 +3891,12 @@ textarea:focus {
   position: relative;
   min-height: 100vh;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 0% 0%, var(--atelier-wash-copper) 0%, transparent 26%),
-    radial-gradient(circle at 100% 10%, var(--atelier-wash-claret) 0%, transparent 28%),
-    radial-gradient(circle at 16% 76%, var(--atelier-wash-sage) 0%, transparent 22%),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--atelier-cloud) 88%, var(--atelier-paper)) 0%,
-      color-mix(in srgb, var(--atelier-paper) 94%, white 6%) 42%,
-      color-mix(in srgb, var(--atelier-paper-strong) 92%, var(--atelier-wash-copper)) 100%
-    );
+  background: transparent;
   isolation: isolate;
 }
 
 .atelier-home::before,
-.atelier-home::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.atelier-home::before {
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 18%, transparent 34%, rgba(113, 135, 155, 0.06) 58%, transparent 74%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 18%);
-  opacity: 0.7;
-}
-
-.atelier-home::after {
-  background:
-    radial-gradient(circle at 82% 88%, rgba(112, 134, 154, 0.08), transparent 24%),
-    radial-gradient(circle at 20% 36%, rgba(186, 126, 88, 0.07), transparent 28%);
-  mix-blend-mode: multiply;
-  opacity: 0.68;
-}
+.atelier-home::after { display: none; }
 
 /* Orbs removed — magazine is flat */
 .atelier-noise,
@@ -4166,8 +4140,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--atelier-paper) 96%, white 4%) 0%, color-mix(in srgb, var(--atelier-paper-strong) 92%, var(--atelier-wash-copper)) 100%);
+  background: transparent;
 }
 
 .atelier-kicker,
@@ -4660,36 +4633,20 @@ textarea:focus {
 }
 
 .atelier-feed-card {
-  --atelier-card-accent: var(--atelier-accent-copper);
-  --atelier-card-wash: var(--atelier-wash-copper);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, white 8%) 0%, color-mix(in srgb, var(--surface-raised) 84%, var(--atelier-card-wash)) 100%);
-  padding: 1.35rem;
-  border: 1px solid color-mix(in srgb, var(--atelier-card-accent) 18%, var(--atelier-line));
-  box-shadow: 0 24px 40px -34px var(--surface-card-shadow-strong);
-  border-radius: 1.75rem;
+  --atelier-card-accent: var(--color-teal-500);
+  background: color-mix(in srgb, var(--surface-panel) 96%, white 4%);
+  padding: 0;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+  border-radius: 1.25rem;
   overflow: hidden;
-  transition: background 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
-}
-
-.atelier-feed-card:nth-child(4n + 2) {
-  --atelier-card-accent: var(--atelier-accent-slate);
-  --atelier-card-wash: var(--atelier-wash-slate);
-}
-
-.atelier-feed-card:nth-child(4n + 3) {
-  --atelier-card-accent: var(--atelier-accent-sage);
-  --atelier-card-wash: var(--atelier-wash-sage);
-}
-
-.atelier-feed-card:nth-child(4n + 4) {
-  --atelier-card-accent: var(--atelier-accent-claret);
-  --atelier-card-wash: var(--atelier-wash-claret);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
 }
 
 .atelier-feed-card:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 88%, white 12%) 0%, color-mix(in srgb, var(--surface-raised) 86%, var(--atelier-card-wash)) 100%);
-  border-color: color-mix(in srgb, var(--atelier-card-accent) 30%, var(--atelier-line));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  border-color: rgba(27,130,114,0.35);
 }
 
 .atelier-feed-card.is-emphasized {
@@ -4699,17 +4656,18 @@ textarea:focus {
 .atelier-feed-link {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0;
   height: 100%;
   color: inherit;
   text-decoration: none;
 }
 
 .atelier-feed-thumb {
-  aspect-ratio: 16/9;
+  aspect-ratio: 3/2;
   overflow: hidden;
-  background: color-mix(in srgb, var(--paper-deep) 82%, var(--atelier-card-accent));
-  border-radius: 1.1rem;
+  background: var(--paper-deep);
+  border-radius: 0;
+  flex-shrink: 0;
 }
 
 .atelier-image-shell {
@@ -4746,6 +4704,7 @@ textarea:focus {
   flex: 1;
   flex-direction: column;
   gap: 0.5rem;
+  padding: 1.25rem 1.25rem 1rem;
 }
 
 .atelier-feed-topline {
@@ -4764,21 +4723,23 @@ textarea:focus {
 }
 
 .atelier-feed-body h3 {
-  font-family: var(--font-mincho), serif;
-  font-size: 1.125rem;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  line-height: 1.4;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
+  color: var(--ink);
 }
 
 .atelier-feed-body p {
   font-size: 0.8125rem;
   color: var(--ink-muted);
-  line-height: 1.9;
+  line-height: 1.75;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin-top: 0.25rem;
 }
 
 .atelier-feed-footer {
@@ -4808,9 +4769,11 @@ textarea:focus {
 }
 
 .atelier-feed-card .atelier-pill {
-  border-color: color-mix(in srgb, var(--atelier-card-accent) 28%, var(--atelier-line));
-  background: color-mix(in srgb, var(--surface-panel) 82%, var(--atelier-card-wash));
-  color: color-mix(in srgb, var(--atelier-card-accent) 84%, var(--ink));
+  border-color: rgba(27,130,114,0.2);
+  background: rgba(27,130,114,0.08);
+  color: var(--color-teal-500);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
 }
 
 .atelier-feed-skeleton {
