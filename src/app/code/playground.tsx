@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 import {
   Play, Trash2, Copy, Check, ChevronDown, ChevronUp,
   Terminal, Code2, RotateCcw, Download, BookOpen,
-  Bot, Wand2, Sparkles, Bug, X, Loader2,
+  Bot, Wand2, Sparkles, Bug, X, Loader2, Undo2, Redo2, RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { CiyuanProviderConfig } from '@/lib/ciyuan-providers';
@@ -259,6 +259,8 @@ echo "反转: " . strrev($text) . "\\n";
 
 const CIYUAN_KEYS_STORAGE = 'ciyuan_api_keys';
 const CIYUAN_CUSTOM_PROVIDERS_STORAGE = 'ciyuan_custom_providers_v2';
+const PLAYGROUND_CODE_STORAGE = 'code_playground_code_v2';
+const PLAYGROUND_STDIN_STORAGE = 'code_playground_stdin_v1';
 
 type AssistantMode = 'generate' | 'explain' | 'fix' | 'optimize';
 
@@ -312,6 +314,14 @@ function loadStoredCustomProviders() {
     return JSON.parse(localStorage.getItem(CIYUAN_CUSTOM_PROVIDERS_STORAGE) || '[]') as CiyuanProviderConfig[];
   } catch {
     return [];
+  }
+}
+
+function loadStoredRecord(key: string) {
+  try {
+    return JSON.parse(localStorage.getItem(key) || '{}') as Record<string, string>;
+  } catch {
+    return {};
   }
 }
 
@@ -433,6 +443,10 @@ export function CodePlayground() {
   const [assistantCustomProviders, setAssistantCustomProviders] = useState<CiyuanProviderConfig[]>([]);
   const htmlDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const assistantAbortRef = useRef<AbortController | null>(null);
+  const editorRef = useRef<{
+    trigger: (source: string, handlerId: string, payload: unknown) => void;
+    getValue: () => string;
+  } | null>(null);
 
   const lang = LANGUAGES.find(l => l.id === langId)!;
   const isHtml = langId === 'html';
@@ -454,7 +468,28 @@ export function CodePlayground() {
   useEffect(() => {
     setAssistantKeys(loadStoredKeys());
     setAssistantCustomProviders(loadStoredCustomProviders());
+
+    const storedCode = loadStoredRecord(PLAYGROUND_CODE_STORAGE);
+    const storedStdin = loadStoredRecord(PLAYGROUND_STDIN_STORAGE);
+    if (storedCode.python) {
+      setCode(storedCode.python);
+    }
+    if (storedStdin.python) {
+      setStdin(storedStdin.python);
+    }
   }, []);
+
+  useEffect(() => {
+    const storedCode = loadStoredRecord(PLAYGROUND_CODE_STORAGE);
+    storedCode[langId] = code;
+    localStorage.setItem(PLAYGROUND_CODE_STORAGE, JSON.stringify(storedCode));
+  }, [code, langId]);
+
+  useEffect(() => {
+    const storedStdin = loadStoredRecord(PLAYGROUND_STDIN_STORAGE);
+    storedStdin[langId] = stdin;
+    localStorage.setItem(PLAYGROUND_STDIN_STORAGE, JSON.stringify(storedStdin));
+  }, [stdin, langId]);
 
   useEffect(() => {
     if (!activeAssistantProvider) return;
@@ -474,8 +509,11 @@ export function CodePlayground() {
   }, [code, isHtml]);
 
   function handleLangChange(id: string) {
+    const storedCode = loadStoredRecord(PLAYGROUND_CODE_STORAGE);
+    const storedStdin = loadStoredRecord(PLAYGROUND_STDIN_STORAGE);
     setLangId(id);
-    setCode(STARTER[id] || '');
+    setCode(storedCode[id] || STARTER[id] || '');
+    setStdin(storedStdin[id] || '');
     setOutput(null);
   }
 
@@ -529,6 +567,29 @@ export function CodePlayground() {
     a.href = URL.createObjectURL(blob);
     a.download = `code.${lang.ext}`;
     a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  async function handleOutputCopy() {
+    if (!output) return;
+    const parts = [
+      output.stdout ? `stdout:\n${output.stdout}` : '',
+      output.stderr ? `stderr:\n${output.stderr}` : '',
+      output.error ? `error:\n${output.error}` : '',
+    ].filter(Boolean);
+    await navigator.clipboard.writeText(parts.join('\n\n') || `exit ${output.code}`);
+  }
+
+  function handleUndo() {
+    editorRef.current?.trigger('toolbar', 'undo', null);
+    const nextValue = editorRef.current?.getValue();
+    if (typeof nextValue === 'string') setCode(nextValue);
+  }
+
+  function handleRedo() {
+    editorRef.current?.trigger('toolbar', 'redo', null);
+    const nextValue = editorRef.current?.getValue();
+    if (typeof nextValue === 'string') setCode(nextValue);
   }
 
   function handleAssistantProviderChange(nextProviderId: string) {
@@ -674,7 +735,7 @@ export function CodePlayground() {
               onClick={() => handleLangChange(l.id)}
               className={`px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors ${
                 langId === l.id
-                  ? 'bg-[var(--gold,#c4a96d)] text-white'
+                  ? 'bg-(--gold,#c4a96d) text-white'
                   : 'text-gray-400 hover:text-white hover:bg-[#3d3d3d]'
               }`}
             >
@@ -691,13 +752,19 @@ export function CodePlayground() {
           <button
             onClick={() => setShowAssistant(true)}
             title="AI 编程助手"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#3d3d3d] hover:border-[var(--gold,#c4a96d)] text-gray-300 hover:text-white transition-colors mr-1"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#3d3d3d] hover:border-(--gold,#c4a96d) text-gray-300 hover:text-white transition-colors mr-1"
           >
             <Bot className="w-3.5 h-3.5" />
             <span className="text-xs font-medium hidden sm:inline">AI 写代码</span>
           </button>
           <button onClick={handleReset} title="重置代码" className="p-1.5 rounded hover:bg-[#3d3d3d] text-gray-400 hover:text-white transition-colors">
             <RotateCcw className="w-4 h-4" />
+          </button>
+          <button onClick={handleUndo} title="撤销" className="p-1.5 rounded hover:bg-[#3d3d3d] text-gray-400 hover:text-white transition-colors">
+            <Undo2 className="w-4 h-4" />
+          </button>
+          <button onClick={handleRedo} title="重做" className="p-1.5 rounded hover:bg-[#3d3d3d] text-gray-400 hover:text-white transition-colors">
+            <Redo2 className="w-4 h-4" />
           </button>
           <button onClick={handleCopy} title="复制代码" className="p-1.5 rounded hover:bg-[#3d3d3d] text-gray-400 hover:text-white transition-colors">
             {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -732,6 +799,7 @@ export function CodePlayground() {
               language={lang.monacoId}
               value={code}
               onChange={v => setCode(v || '')}
+              onMount={(editor) => { editorRef.current = editor; }}
               theme="vs-dark"
               options={{
                 fontSize: 14,
@@ -791,6 +859,13 @@ export function CodePlayground() {
             <div className="flex items-center gap-2 px-4 py-2 bg-[#252526] border-b border-[#3d3d3d] flex-shrink-0">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span className="text-xs text-gray-400">实时预览</span>
+              <button
+                onClick={() => setHtmlPreview(code)}
+                className="ml-auto p-1 rounded hover:bg-[#3d3d3d] text-gray-500 hover:text-white transition-colors"
+                title="刷新预览"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
             </div>
             <iframe
               srcDoc={htmlPreview}
@@ -816,9 +891,14 @@ export function CodePlayground() {
                 )}
               </div>
               {output && (
-                <button onClick={handleClear} className="p-1 rounded hover:bg-[#3d3d3d] text-gray-500 hover:text-white transition-colors" title="清除输出">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button onClick={handleOutputCopy} className="p-1 rounded hover:bg-[#3d3d3d] text-gray-500 hover:text-white transition-colors" title="复制输出">
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={handleClear} className="p-1 rounded hover:bg-[#3d3d3d] text-gray-500 hover:text-white transition-colors" title="清除输出">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -891,7 +971,7 @@ export function CodePlayground() {
                       <p className="text-sm">点击「运行」执行代码</p>
                       <p className="text-xs text-gray-700">或按 <kbd className="px-1.5 py-0.5 rounded bg-[#3d3d3d] text-gray-400 text-xs font-mono">Ctrl+Enter</kbd></p>
                     </div>
-                    <Link href="/practice" className="flex items-center gap-1.5 text-xs text-[var(--gold,#c4a96d)] hover:underline mt-2">
+                    <Link href="/practice" className="flex items-center gap-1.5 text-xs text-(--gold,#c4a96d) hover:underline mt-2">
                       <BookOpen className="w-3.5 h-3.5" />
                       去练习题库
                     </Link>
@@ -902,7 +982,7 @@ export function CodePlayground() {
 
             {/* Bottom tip */}
             <div className="flex-shrink-0 px-4 py-2 border-t border-[#3d3d3d] text-xs text-gray-600">
-              由 <a href="https://github.com/engineer-man/piston" target="_blank" rel="noreferrer" className="hover:text-gray-400 transition-colors">Piston</a> 提供沙箱执行 · 每分钟最多 20 次
+              由 <a href="https://github.com/engineer-man/piston" target="_blank" rel="noreferrer" className="hover:text-gray-400 transition-colors">Piston</a> 沙箱执行 · 支持自托管 Piston · 每分钟最多 20 次
             </div>
           </div>
         )}
@@ -926,8 +1006,8 @@ export function CodePlayground() {
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2f2f2f] bg-[#1b1b1b]">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--gold,#c4a96d)]/15 border border-[var(--gold,#c4a96d)]/25 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-[var(--gold,#c4a96d)]" />
+                <div className="w-10 h-10 rounded-2xl bg-(--gold,#c4a96d)/15 border border-(--gold,#c4a96d)/25 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-(--gold,#c4a96d)" />
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-lg font-semibold">AI 编程助手</h2>
@@ -961,7 +1041,7 @@ export function CodePlayground() {
                             onClick={() => setAssistantMode(item.id)}
                             className={`flex items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm transition-colors ${
                               active
-                                ? 'border-[var(--gold,#c4a96d)] bg-[var(--gold,#c4a96d)]/10 text-white'
+                                ? 'border-(--gold,#c4a96d) bg-(--gold,#c4a96d)/10 text-white'
                                 : 'border-[#333] hover:border-[#555] text-gray-300'
                             }`}
                           >
@@ -979,7 +1059,7 @@ export function CodePlayground() {
                       <select
                         value={activeAssistantProvider?.id || assistantProviderId}
                         onChange={(event) => handleAssistantProviderChange(event.target.value)}
-                        className="w-full rounded-2xl border border-[#333] bg-[#101010] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold,#c4a96d)]"
+                        className="w-full rounded-2xl border border-[#333] bg-[#101010] px-3 py-2.5 text-sm outline-none focus:border-(--gold,#c4a96d)"
                       >
                         {assistantProviders.map((providerOption) => (
                           <option key={providerOption.id} value={providerOption.id}>
@@ -995,7 +1075,7 @@ export function CodePlayground() {
                         list="code-ai-models"
                         value={assistantModel}
                         onChange={(event) => setAssistantModel(event.target.value)}
-                        className="w-full rounded-2xl border border-[#333] bg-[#101010] px-3 py-2.5 text-sm font-mono outline-none focus:border-[var(--gold,#c4a96d)]"
+                        className="w-full rounded-2xl border border-[#333] bg-[#101010] px-3 py-2.5 text-sm font-mono outline-none focus:border-(--gold,#c4a96d)"
                         placeholder="输入或选择模型 ID"
                       />
                       <datalist id="code-ai-models">
@@ -1014,7 +1094,7 @@ export function CodePlayground() {
                           ? '已检测到该提供商的 API Key，会直接复用词元里的配置。'
                           : '当前浏览器还没找到这个提供商的 API Key，请先去词元配置后再用。'}
                       <div className="mt-2">
-                        <Link href="/tools/ciyuan" className="text-[var(--gold,#c4a96d)] hover:underline">
+                        <Link href="/tools/ciyuan" className="text-(--gold,#c4a96d) hover:underline">
                           去词元配置模型与密钥
                         </Link>
                       </div>
@@ -1027,14 +1107,14 @@ export function CodePlayground() {
                       value={assistantPrompt}
                       onChange={(event) => setAssistantPrompt(event.target.value)}
                       placeholder={assistantAction.placeholder}
-                      className="w-full min-h-[180px] rounded-2xl border border-[#333] bg-[#101010] px-3 py-3 text-sm resize-none outline-none focus:border-[var(--gold,#c4a96d)] placeholder:text-gray-600"
+                      className="w-full min-h-[180px] rounded-2xl border border-[#333] bg-[#101010] px-3 py-3 text-sm resize-none outline-none focus:border-(--gold,#c4a96d) placeholder:text-gray-600"
                     />
                   </div>
 
                   <button
                     onClick={runAssistant}
                     disabled={assistantLoading || !assistantModel.trim()}
-                    className="w-full rounded-2xl bg-[var(--gold,#c4a96d)] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full rounded-2xl bg-(--gold,#c4a96d) px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {assistantLoading ? (
                       <>
@@ -1074,7 +1154,7 @@ export function CodePlayground() {
                       <button
                         onClick={() => applyAssistantCode('replace')}
                         disabled={!assistantResult.trim()}
-                        className="px-3 py-1.5 rounded-xl bg-[var(--gold,#c4a96d)] text-xs font-medium text-white disabled:opacity-40"
+                        className="px-3 py-1.5 rounded-xl bg-(--gold,#c4a96d) text-xs font-medium text-white disabled:opacity-40"
                       >
                         替换当前代码
                       </button>
