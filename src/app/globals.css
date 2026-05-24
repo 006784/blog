@@ -4167,6 +4167,16 @@ textarea:focus {
   color: var(--ink-secondary);
 }
 
+.atelier-quote-author {
+  margin-top: 1rem;
+  font-family: var(--font-garamond), serif;
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--ink-muted, var(--ink-secondary));
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
 .atelier-action-row {
   display: flex;
   flex-wrap: wrap;

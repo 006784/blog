@@ -1,6 +1,35 @@
 'use client';
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+
+const HERO_QUOTES = [
+  { text: '如果有天堂，天堂应该是图书馆的模样。', author: '博尔赫斯' },
+  { text: '哪里会有人喜欢孤独，不过是不喜欢失望罢了。', author: '村上春树' },
+  { text: '心若没有栖息的地方，到哪里都是在流浪。', author: '三毛' },
+  { text: '此心安处是吾乡。', author: '苏轼' },
+  { text: '真正的发现之旅，不在于寻找新大陆，而在于用新的目光看世界。', author: '普鲁斯特' },
+  { text: '我们阅读，因为我们无法亲历一切。', author: '艾玛·汤普森' },
+  { text: '每个人的生命，都是走向自己的路。', author: '赫尔曼·黑塞' },
+  { text: '文学让你看到那些本来对你隐藏着的东西。', author: '卡尔维诺' },
+  { text: '秋天是第二个春天，每片叶子都是一朵鲜花。', author: '加缪' },
+  { text: '写作是把黑暗翻过来，看看它背面的颜色。', author: '余华' },
+  { text: '时间是最好的作者，它总能写出最完美的结局。', author: '卓别林' },
+  { text: '我们是我们所有故事的总和。', author: '玛格丽特·阿特伍德' },
+  { text: '生命中最重要的事情，是要有一个雄心壮志。', author: '拿破仑' },
+  { text: '生活在别处。', author: '米兰·昆德拉' },
+  { text: '记忆是种玫瑰，当它盛开时，冬天已经远去。', author: '罗曼·罗兰' },
+  { text: '一个人知道自己为什么而活，就可以忍受任何一种生活。', author: '尼采' },
+  { text: '凡是过去，皆为序章。', author: '莎士比亚' },
+  { text: '我不是在浪费时间，我是在投资于无聊。', author: '卡夫卡' },
+  { text: '美是真理，真理是美——这就是你们在世上所知道的，也是你们所需要知道的一切。', author: '济慈' },
+  { text: '我们所有的梦想都可以成真，只要我们有勇气去追求它们。', author: '华特·迪士尼' },
+  { text: '在平凡的生活中发现不平凡的美，这才是真正的艺术。', author: '罗丹' },
+  { text: '简单是复杂的极致形式。', author: '达·芬奇' },
+  { text: '设计不只是看起来漂亮，设计是让它工作起来漂亮。', author: '乔布斯' },
+  { text: '细节成就完美，而完美绝非细节。', author: '米开朗基罗' },
+  { text: '好奇心有其自己的存在理由。', author: '爱因斯坦' },
+];
+
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -407,6 +436,11 @@ export default function HomePageClient({
 
   const websiteSchema = getPageStructuredData('homepage');
   const activePosts = posts.length > 0 ? posts : fallbackHomePosts;
+  const heroQuote = useMemo(
+    () => HERO_QUOTES[Math.floor(Math.random() * HERO_QUOTES.length)],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   const heroPinnedPost = useMemo(
     () =>
       activePosts
@@ -554,10 +588,8 @@ export default function HomePageClient({
                 className="atelier-hero-copy"
               >
                 <p className="atelier-kicker">独立写作空间&ensp;·&ensp;ESSAY</p>
-                <h1>把技术、设计和日常写成一份值得反复翻阅的私人杂志。</h1>
-                <p className="atelier-intro">
-                  {siteConfig.description}。这里不是匆忙的信息流，而是经过挑选、归档与长期更新的内容花园。每一篇文章都希望既有结构感，也保留一点温度。
-                </p>
+                <h1>{heroQuote.text}</h1>
+                <p className="atelier-quote-author">—— {heroQuote.author}</p>
 
                 <div className="atelier-action-row">
                   <Link
