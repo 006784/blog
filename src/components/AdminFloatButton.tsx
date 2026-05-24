@@ -36,7 +36,7 @@ export default function AdminFloatButton() {
   ];
 
   return (
-    <div className="fixed top-3 right-3 z-50 md:hidden flex flex-col items-end gap-2">
+    <div className="fixed top-19.5 right-3 z-50 md:hidden flex flex-col items-end gap-2">
       {/* 触发按钮 — 顶部右侧 */}
       <motion.button
         type="button"

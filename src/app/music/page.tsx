@@ -37,7 +37,6 @@ function embedHeight(type: string, url: string) {
   return 240;
 }
 
-// ── Apple Music 元数据 ─────────────────────────────────────────────
 interface AppleMeta {
   title: string; artist: string; album: string; cover: string;
   genre: string; releaseDate: string; durationMs: number;
@@ -75,7 +74,7 @@ async function fetchLyrics(title: string, artist: string, album: string): Promis
   } catch { return null; }
 }
 
-// Apple Music 展开面板（iTunes 数据 + 试听播放器 + 歌词）
+// Apple Music detail panel (used in row expand)
 function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) {
   const [meta, setMeta] = useState<AppleMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -110,11 +109,12 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
     <div className="apple-detail-panel">
       {loading ? (
         <div className="flex flex-col gap-2 p-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-3 rounded bg-white/10 animate-pulse" style={{ width: `${60 + i * 10}%` }} />)}
+          {(['song-list-skel-w1', 'song-list-skel-w2', 'song-list-skel-w3'] as const).map(cls => (
+            <div key={cls} className={`h-3 rounded bg-white/10 animate-pulse ${cls}`} />
+          ))}
         </div>
       ) : meta ? (
         <>
-          {/* 元数据行 */}
           <div className="apple-detail-meta">
             {meta.album && (
               <div className="apple-detail-row">
@@ -132,7 +132,6 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
             </div>
           </div>
 
-          {/* 试听播放器 */}
           {meta.previewUrl && (
             <div className="apple-preview-player">
               <audio
@@ -151,30 +150,20 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
               </button>
               <div className="apple-preview-track">
                 <div className="apple-preview-bar">
-                  <div className="apple-preview-fill" style={{ width: `${progress}%` }} />
+                  <div className="apple-preview-fill" style={{ '--fill': `${progress}%` } as React.CSSProperties} />
                 </div>
                 <span className="apple-preview-label">{playing ? '试听中…' : '30 秒试听'}</span>
               </div>
-              <a
-                href={musicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="apple-open-btn"
-              >
+              <a href={musicUrl} target="_blank" rel="noopener noreferrer" className="apple-open-btn">
                 <ExternalLink className="h-3 w-3" />
                 完整收听
               </a>
             </div>
           )}
 
-          {/* 歌词 */}
           {(lyricsLoading || (lyrics && lyrics.length > 0)) && (
             <div className="apple-lyrics-section">
-              <button
-                type="button"
-                className="apple-lyrics-toggle"
-                onClick={() => setLyricsOpen(v => !v)}
-              >
+              <button type="button" className="apple-lyrics-toggle" onClick={() => setLyricsOpen(v => !v)}>
                 <span>歌词</span>
                 {lyricsLoading
                   ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -193,8 +182,8 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
                       {lyrics === '[纯音乐]'
                         ? <span className="apple-lyrics-instrumental">纯音乐，请欣赏</span>
                         : lyrics.split('\n').map((line, i) => (
-                            <p key={i} className={cn('apple-lyrics-line', !line.trim() && 'apple-lyrics-blank')}>{line || ' '}</p>
-                          ))}
+                          <p key={i} className={cn('apple-lyrics-line', !line.trim() && 'apple-lyrics-blank')}>{line || ' '}</p>
+                        ))}
                     </div>
                   </motion.div>
                 )}
@@ -212,8 +201,10 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
   );
 }
 
-// ── 歌曲卡片 ──────────────────────────────────────────────────────
-function SongCard({
+const REGION_NOTES = new Set(['欧美', '日本', '韩国']);
+
+// ── 歌曲列表行 ────────────────────────────────────────────────────
+function SongRow({
   song, index, isPlaying, onPlay, onToggleFavorite, onDelete, isAdmin,
 }: {
   song: Song;
@@ -224,248 +215,167 @@ function SongCard({
   onDelete: (id: string) => void;
   isAdmin?: boolean;
 }) {
+  const [detailOpen, setDetailOpen] = useState(false);
   const embedInfo = song.music_url ? parseMusicUrl(song.music_url) : null;
-  const hasEmbed = Boolean(embedInfo?.embedUrl);
-  const hasAudio = Boolean(getPlayableSongUrl(song));
   const isApple = embedInfo?.type === 'apple';
-  const [embedOpen, setEmbedOpen] = useState(false);
+  const isRegionNote = Boolean(song.note && REGION_NOTES.has(song.note));
+  const noteAsSubtitle = song.note && !isRegionNote ? song.note : null;
 
-  // Apple Music — 专属美化卡片
-  if (isApple && song.cover_image) {
-    return (
-      <motion.div
-        layout
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.97 }}
-        transition={{ delay: index * 0.04 }}
-        className={cn(
-          'relative overflow-hidden rounded-2xl transition-all duration-300',
-          isPlaying && 'ring-2 ring-[#fc3c44]/60 ring-offset-2 ring-offset-(--surface-base)'
-        )}
-      >
-        {/* 模糊背景 */}
-        <div className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={song.cover_image}
-            alt=""
-            aria-hidden="true"
-            className="h-full w-full object-cover blur-2xl scale-110 opacity-60"
-          />
-          <div className="absolute inset-0 bg-linear-to-br from-black/70 via-black/50 to-black/30" />
-        </div>
-
-        {/* 内容区 */}
-        <div className="relative p-4">
-          <div className="flex items-start gap-4">
-            {/* 封面 */}
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl shadow-2xl">
-              <Image
-                src={song.cover_image}
-                alt={song.title}
-                fill
-                sizes="80px"
-                className="object-cover"
-              />
-              {isPlaying && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                  <div className="flex items-end gap-0.5 h-5">
-                    {[1, 2, 3].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-1 rounded-full bg-white"
-                        animate={{ height: ['40%', '100%', '60%'] }}
-                        transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity, repeatType: 'mirror' }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 文字信息 */}
-            <div className="min-w-0 flex-1 pt-1">
-              <p className="truncate text-base font-semibold text-white leading-tight">{song.title}</p>
-              <p className="truncate text-sm text-white/70 mt-0.5">{song.artist}</p>
-              {song.note && (
-                <p className="mt-1.5 line-clamp-2 text-xs italic text-white/50 leading-relaxed">{song.note}</p>
-              )}
-            </div>
-
-            {/* 操作按钮 */}
-            <div className="flex items-center gap-1 shrink-0 pt-0.5">
-              {hasAudio && (
-                <button
-                  type="button"
-                  onClick={() => onPlay(song)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/30"
-                  aria-label={isPlaying ? '暂停' : '播放'}
-                >
-                  {isPlaying ? <Pause className="h-3.5 w-3.5 fill-current" /> : <Play className="h-3.5 w-3.5 fill-current" />}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => onToggleFavorite(song.id, song.is_favorite)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur transition-colors hover:bg-white/20"
-                aria-label={song.is_favorite ? '取消收藏' : '收藏'}
-              >
-                <Heart className={cn('h-3.5 w-3.5', song.is_favorite && 'fill-[#fc3c44] text-[#fc3c44]')} />
-              </button>
-              {song.music_url && (
-                <button
-                  type="button"
-                  onClick={() => window.open(song.music_url, '_blank', 'noopener,noreferrer')}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur transition-colors hover:bg-white/20"
-                  aria-label="在 Apple Music 打开"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </button>
-              )}
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => onDelete(song.id)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/20 text-red-300 backdrop-blur transition-colors hover:bg-red-500/30"
-                  aria-label="删除"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Apple Music 嵌入展开 */}
-          {hasEmbed && (
-            <div className="mt-3">
-              <button
-                type="button"
-                onClick={() => setEmbedOpen(!embedOpen)}
-                className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/80 transition-colors"
-              >
-                <Music2 className="h-3 w-3" />
-                <span>歌曲详情 · 试听</span>
-                <ChevronDown className={cn('h-3 w-3 transition-transform', embedOpen && 'rotate-180')} />
-              </button>
-              <AnimatePresence>
-                {embedOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="overflow-hidden mt-2"
-                  >
-                    <AppleDetailPanel url={song.music_url!} musicUrl={song.music_url!} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    );
-  }
-
-  // 通用卡片（Spotify、YouTube、网易云等）
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ delay: index * 0.04 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ delay: Math.min(index * 0.015, 0.4) }}
     >
-      <Card
-        variant="default"
+      <div
         className={cn(
-          'overflow-hidden p-0 transition-all',
-          isPlaying && 'ring-2 ring-gold ring-offset-2 ring-offset-(--surface-base)'
+          'song-row group',
+          isPlaying && 'song-row--playing',
         )}
       >
-        {/* Embed player */}
-        {hasEmbed && (
-          <iframe
-            src={embedInfo!.embedUrl}
-            className="block w-full border-none music-embed-frame"
-            height={embedHeight(embedInfo!.type, song.music_url ?? '')}
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            title={song.title}
-            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-          />
+        {/* 序号 / 均衡器 / 播放按钮 */}
+        <div className="song-row__num">
+          {isPlaying ? (
+            <div className="song-row__eq" aria-hidden>
+              {[1, 2, 3].map(i => (
+                <motion.span
+                  key={i}
+                  className="song-row__eq-bar"
+                  animate={{ scaleY: [0.25, 1, 0.4] }}
+                  transition={{ duration: 0.7, delay: i * 0.18, repeat: Infinity, repeatType: 'mirror' }}
+                />
+              ))}
+            </div>
+          ) : (
+            <>
+              <span className="song-row__index group-hover:hidden">{String(index + 1).padStart(2, '0')}</span>
+              <button
+                type="button"
+                onClick={() => onPlay(song)}
+                className="song-row__play-icon hidden group-hover:flex"
+                aria-label="播放"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* 封面 */}
+        <button
+          type="button"
+          className="song-row__cover"
+          onClick={() => onPlay(song)}
+          aria-label={`播放 ${song.title}`}
+        >
+          {song.cover_image ? (
+            <Image
+              src={song.cover_image}
+              alt={song.title}
+              fill
+              sizes="44px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="song-row__cover-empty">
+              <Disc3 className="h-5 w-5 text-ink-ghost" />
+            </div>
+          )}
+        </button>
+
+        {/* 歌曲信息 */}
+        <div className="song-row__info min-w-0">
+          <p className={cn('song-row__title', isPlaying && 'song-row__title--playing')}>
+            {song.title}
+          </p>
+          <p className="song-row__artist">
+            {song.artist}
+            {noteAsSubtitle && <span className="ml-2 italic text-ink-ghost">{noteAsSubtitle}</span>}
+          </p>
+        </div>
+
+        {/* 地区标签 */}
+        {isRegionNote && (
+          <span className="song-row__region hidden sm:inline-flex" data-region={song.note}>
+            {song.note}
+          </span>
         )}
 
-        {/* Audio-only card */}
-        {!hasEmbed && (
-          <div className="flex gap-4 p-4">
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-(--surface-overlay)">
-              {song.cover_image ? (
-                <Image src={song.cover_image} alt={song.title} fill sizes="80px" className="object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <Disc3 className={cn('h-9 w-9 text-ink-ghost', isPlaying && 'animate-spin')} style={{ animationDuration: '3s' }} />
-                </div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-ink">{song.title}</p>
-              <p className="truncate text-sm text-ink-muted">{song.artist}</p>
-              {song.note && (
-                <p className="mt-1 line-clamp-2 text-xs italic text-ink-ghost">{song.note}</p>
-              )}
-            </div>
-          </div>
+        {/* 时长 */}
+        {song.duration && (
+          <span className="song-row__duration hidden md:block">{song.duration}</span>
         )}
 
-        {/* Footer */}
-        <div className="flex items-center gap-1 border-t border-(--border-default) px-3 py-2">
-          {hasAudio && (
+        {/* 操作按钮 */}
+        <div className="song-row__actions">
+          {/* 详情展开（仅 Apple Music） */}
+          {isApple && (
             <button
               type="button"
-              onClick={() => onPlay(song)}
-              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-              style={{ background: isPlaying ? 'var(--color-teal-500)' : 'var(--surface-overlay)', color: isPlaying ? '#fff' : 'var(--ink)' }}
-              aria-label={isPlaying ? '暂停' : '播放'}
+              onClick={() => setDetailOpen(v => !v)}
+              className={cn(
+                'song-row__action opacity-0 group-hover:opacity-100',
+                detailOpen && 'opacity-100 text-gold'
+              )}
+              aria-label="歌曲详情"
             >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+              <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', detailOpen && 'rotate-180')} />
             </button>
           )}
-          {hasEmbed && song.note ? (
-            <p className="flex-1 truncate px-1 text-xs italic text-ink-muted">{song.note}</p>
-          ) : (
-            <span className="flex-1" />
-          )}
+
           <button
             type="button"
             onClick={() => onToggleFavorite(song.id, song.is_favorite)}
-            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-(--surface-overlay)"
+            className={cn('song-row__action', !song.is_favorite && 'opacity-0 group-hover:opacity-100')}
             aria-label={song.is_favorite ? '取消收藏' : '收藏'}
           >
-            <Heart className={cn('h-4 w-4', song.is_favorite ? 'fill-orange-500 text-orange-500' : 'text-ink-ghost')} />
+            <Heart className={cn('h-3.5 w-3.5', song.is_favorite && 'fill-[#fc3c44] text-[#fc3c44]')} />
           </button>
+
           {song.music_url && (
             <button
               type="button"
               onClick={() => window.open(song.music_url, '_blank', 'noopener,noreferrer')}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-ink-ghost transition-colors hover:bg-(--surface-overlay)"
+              className="song-row__action opacity-0 group-hover:opacity-100"
               aria-label="打开原链接"
             >
               <ExternalLink className="h-3.5 w-3.5" />
             </button>
           )}
+
           {isAdmin && (
             <button
               type="button"
               onClick={() => onDelete(song.id)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-red-400 transition-colors hover:bg-red-500/10"
+              className="song-row__action song-row__action--danger opacity-0 group-hover:opacity-100"
               aria-label="删除"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-      </Card>
+      </div>
+
+      {/* Apple Music 详情面板 */}
+      {isApple && (
+        <AnimatePresence>
+          {detailOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="overflow-hidden"
+            >
+              <div className="song-row-detail">
+                <AppleDetailPanel url={song.music_url!} musicUrl={song.music_url!} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </motion.div>
   );
 }
@@ -487,11 +397,10 @@ function AddSongModal({ onClose, onAdd }: {
   const trimmedUrl = url.trim();
   const embedInfo = trimmedUrl ? parseMusicUrl(trimmedUrl) : null;
 
-  // 当输入 Apple Music 链接时自动抓取元数据
   useEffect(() => {
     const u = trimmedUrl;
     if (!u || !u.includes('music.apple.com')) return;
-    if (title && artist) return; // 已手动填写
+    if (title && artist) return;
 
     const timer = setTimeout(async () => {
       setMetaLoading(true);
@@ -563,7 +472,6 @@ function AddSongModal({ onClose, onAdd }: {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 p-5">
-            {/* URL */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-ink">音乐链接</label>
               <div className="relative">
@@ -580,13 +488,12 @@ function AddSongModal({ onClose, onAdd }: {
               </div>
               {embedInfo && (
                 <p className="text-xs text-teal-600 dark:text-teal-400">
-                  ✓ 识别为 {embedInfo.platform}
+                  识别为 {embedInfo.platform}
                   {embedInfo.type === 'apple' && ' — 正在自动获取专辑信息…'}
                 </p>
               )}
             </div>
 
-            {/* 封面预览 */}
             {coverImage && (
               <div className="relative overflow-hidden rounded-xl border border-(--border-default)">
                 <div className="absolute inset-0">
@@ -613,7 +520,6 @@ function AddSongModal({ onClose, onAdd }: {
               </div>
             )}
 
-            {/* Live iframe preview (non-Apple) */}
             {embedInfo?.embedUrl && embedInfo.type !== 'apple' && (
               <div className="overflow-hidden rounded-xl border border-(--border-default)">
                 <iframe
@@ -627,7 +533,6 @@ function AddSongModal({ onClose, onAdd }: {
               </div>
             )}
 
-            {/* Title / Artist */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-sm text-ink-muted">歌曲名（选填）</label>
@@ -639,7 +544,6 @@ function AddSongModal({ onClose, onAdd }: {
               </div>
             </div>
 
-            {/* Note */}
             <div className="space-y-1.5">
               <label className="text-sm text-ink-muted">备注（选填）</label>
               <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="为什么喜欢这首歌？" />
@@ -662,6 +566,8 @@ function AddSongModal({ onClose, onAdd }: {
 }
 
 // ── 主页面 ─────────────────────────────────────────────────────────
+type RegionFilter = 'all' | 'favorites' | '欧美' | '日本' | '韩国';
+
 export default function MusicPage() {
   const { isAdmin } = useAdmin();
   const hasPrimedAutoPlayer = useRef(false);
@@ -670,7 +576,7 @@ export default function MusicPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'favorites'>('all');
+  const [filter, setFilter] = useState<RegionFilter>('all');
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [showPlayer, setShowPlayer] = useState(false);
   const [playerLoading, setPlayerLoading] = useState(false);
@@ -689,12 +595,15 @@ export default function MusicPage() {
     }
   }
 
-  // 所有歌曲都进播放列表（Apple Music 歌曲运行时异步获取 preview URL）
   const playableSongs = songs;
-  const filteredSongs = songs.filter((s) => (filter === 'favorites' ? s.is_favorite : true));
+
+  const filteredSongs = songs.filter((s) => {
+    if (filter === 'favorites') return s.is_favorite;
+    if (filter === '欧美' || filter === '日本' || filter === '韩国') return s.note === filter;
+    return true;
+  });
 
   useEffect(() => {
-    // 只有上传的直接音频才自动启动
     const directAudio = songs.filter((s) => Boolean(getPlayableSongUrl(s)));
     if (loading || hasPrimedAutoPlayer.current || directAudio.length === 0) return;
     setCurrentSong(directAudio[0]);
@@ -730,14 +639,11 @@ export default function MusicPage() {
   }
 
   async function handlePlaySong(song: Song) {
-    // 有直接音频 URL，直接播放
     if (getPlayableSongUrl(song)) {
       setCurrentSong(song);
       setShowPlayer(true);
       return;
     }
-
-    // Apple Music：获取 30s preview URL（有缓存直接用）
     if (song.music_url) {
       const cached = previewCache.current.get(song.id);
       if (cached) {
@@ -754,51 +660,65 @@ export default function MusicPage() {
         setShowPlayer(true);
         return;
       }
-      // 无 preview 则跳转
       window.open(song.music_url, '_blank', 'noopener,noreferrer');
     }
   }
 
+  const filterTabs: { key: RegionFilter; label: string }[] = [
+    { key: 'all', label: '全部' },
+    { key: '欧美', label: '欧美' },
+    { key: '日本', label: '日本' },
+    { key: '韩国', label: '韩国' },
+    { key: 'favorites', label: '收藏' },
+  ];
+
   return (
     <div className="min-h-screen px-4 pb-32 pt-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+      <div className="mx-auto max-w-3xl space-y-6">
 
         {/* 页头 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-ink">歌单</h1>
-              <p className="mt-1 text-sm text-ink-muted">最近反复播放的那些歌</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setFilter('all')}
-                className={cn(
-                  'rounded-full px-3 py-1 text-sm transition-colors',
-                  filter === 'all' ? 'bg-gold text-white' : 'text-ink-muted hover:bg-(--surface-overlay)'
+              <h1 className="font-mincho text-3xl font-semibold tracking-tight text-ink">歌单</h1>
+              <p className="mt-1 text-sm text-ink-muted">
+                最近反复播放的那些歌
+                {!loading && songs.length > 0 && (
+                  <span className="ml-2 text-ink-ghost">· {songs.length} 首</span>
                 )}
-              >全部</button>
+              </p>
+            </div>
+            {isAdmin && (
               <button
                 type="button"
-                onClick={() => setFilter('favorites')}
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-1 rounded-full border border-(--border-default) px-3 py-1.5 text-sm text-ink-muted transition-colors hover:bg-(--surface-overlay)"
+              >
+                <Plus className="h-3.5 w-3.5" />添加
+              </button>
+            )}
+          </div>
+
+          {/* 筛选标签 */}
+          <div className="mt-4 flex items-center gap-1.5 flex-wrap">
+            {filterTabs.map(tab => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setFilter(tab.key)}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1 text-sm transition-colors',
-                  filter === 'favorites' ? 'bg-gold text-white' : 'text-ink-muted hover:bg-(--surface-overlay)'
+                  'rounded-full px-3.5 py-1 text-sm transition-all',
+                  filter === tab.key
+                    ? 'bg-ink text-paper shadow-sm'
+                    : 'text-ink-muted hover:bg-(--surface-overlay)'
                 )}
               >
-                <Heart className="h-3 w-3" />收藏
+                {tab.key === 'favorites' && (
+                  <Heart className={cn('inline-block mr-1 h-3 w-3 -mt-0.5', filter === 'favorites' && 'fill-current')} />
+                )}
+                {tab.label}
               </button>
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(true)}
-                  className="flex items-center gap-1 rounded-full border border-(--border-default) px-3 py-1 text-sm text-ink-muted transition-colors hover:bg-(--surface-overlay)"
-                >
-                  <Plus className="h-3.5 w-3.5" />添加
-                </button>
-              )}
-            </div>
+            ))}
           </div>
         </motion.div>
 
@@ -811,22 +731,31 @@ export default function MusicPage() {
             action={<Button variant="secondary" onClick={() => void loadData()}>重新加载</Button>}
           />
         ) : loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-2xl" />
+          <div className="song-list">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="song-row-skeleton">
+                <Skeleton className="h-4 w-6 rounded" />
+                <Skeleton className="h-11 w-11 rounded-md shrink-0" />
+                <div className="flex-1 space-y-2 min-w-0">
+                  <Skeleton className="h-3.5 w-1/2 rounded" />
+                  <Skeleton className="h-3 w-1/3 rounded" />
+                </div>
+                <Skeleton className="h-5 w-10 rounded-full hidden sm:block" />
+                <Skeleton className="h-3 w-8 rounded hidden md:block" />
+              </div>
             ))}
           </div>
         ) : filteredSongs.length === 0 ? (
           <StatePanel
             tone="empty"
-            title="还没有歌曲"
+            title="没有歌曲"
             description={filter === 'favorites' ? '先把喜欢的歌标成收藏。' : '点击右上角添加一首。'}
           />
         ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="song-list">
             <AnimatePresence>
               {filteredSongs.map((song, index) => (
-                <SongCard
+                <SongRow
                   key={song.id}
                   song={song}
                   index={index}
@@ -862,7 +791,6 @@ export default function MusicPage() {
         )}
       </AnimatePresence>
 
-      {/* 切歌加载指示 */}
       {playerLoading && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 rounded-full bg-(--surface-panel) border border-line px-4 py-2 text-sm text-ink shadow-lg backdrop-blur-md">
           <Loader2 className="h-4 w-4 animate-spin text-gold" />
