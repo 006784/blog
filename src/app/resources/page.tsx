@@ -76,6 +76,50 @@ interface ResourceProduct {
   resource?: Resource;
 }
 
+interface AiRechargeService {
+  id: string;
+  service: 'chatgpt' | 'claude';
+  plan: string;
+  desc: string;
+  priceMonthly: number;
+  priceNote: string;
+  badge?: string;
+  features: string[];
+}
+
+const aiRechargeServices: AiRechargeService[] = [
+  {
+    id: 'chatgpt-plus',
+    service: 'chatgpt',
+    plan: 'ChatGPT Plus',
+    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成，对话记忆，插件全开放。',
+    priceMonthly: 168,
+    priceNote: '约 $20/月，月付',
+    badge: '热门',
+    features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '自定义 GPTs'],
+  },
+  {
+    id: 'claude-pro',
+    service: 'claude',
+    plan: 'Claude Pro',
+    desc: '5× 更高用量，Claude 3.7 Sonnet / Opus 完整访问，Projects 长上下文协作。',
+    priceMonthly: 168,
+    priceNote: '约 $20/月，月付',
+    badge: '',
+    features: ['Claude 3.7 Sonnet/Opus', '5× 更高用量', 'Projects 协作', '优先访问新功能'],
+  },
+  {
+    id: 'claude-max',
+    service: 'claude',
+    plan: 'Claude Max',
+    desc: '20× 或 40× 超高用量，适合重度用户和开发者，含 Claude 全系列旗舰模型。',
+    priceMonthly: 800,
+    priceNote: '约 $100/月，月付',
+    badge: '重度用户',
+    features: ['20× / 40× 超高用量', '全旗舰模型', '优先响应', '适合专业工作流'],
+  },
+];
+
 type PaymentMethod = 'wechat' | 'alipay';
 
 interface ShopOrder {
@@ -675,6 +719,21 @@ export default function ResourcesPage() {
     setOrderSubmitting(false);
   };
 
+  const openAiRecharge = (svc: AiRechargeService) => {
+    openCheckout({
+      id: svc.id,
+      title: svc.plan,
+      description: svc.desc,
+      category: 'AI 代充',
+      price: svc.priceMonthly,
+      originalPrice: undefined,
+      includes: svc.features,
+      tags: ['月付', '正规订阅', '人工代充'],
+      updateLabel: '实时到账',
+      delivery: '提供邮箱/手机号，付款后24小时内充值到账',
+    });
+  };
+
   const copyOrderInfo = async (order: ShopOrder) => {
     if (!checkoutProduct) return;
 
@@ -918,75 +977,131 @@ export default function ResourcesPage() {
           </Card>
         </section>
 
-        <section className="space-y-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        {/* AI 代充服务区块 */}
+        <section className="space-y-6">
+          <div className="res-section-head">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Featured Packs</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-900">精选资料包</h2>
+              <p className="res-section-eyebrow">AI Recharge · 代充服务</p>
+              <h2 className="res-section-title">ChatGPT / Claude 代充</h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-neutral-500">
-              可以用资源标签 `price:29.9` 来控制价格；没有价格标签时默认按入门价展示。
+            <p className="res-section-note">
+              提供邮箱/手机号 → 扫码付款 → 24 小时内充值到账。如有问题随时联系。
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-3">
+            {aiRechargeServices.map((svc, index) => (
+              <motion.article
+                key={svc.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.07, duration: 0.45, ease: APPLE_EASE_SOFT }}
+              >
+                <div className={`res-ai-card res-ai-card--${svc.service}`}>
+                  <div className="res-ai-card__bar" />
+                  <div className="res-ai-card__top">
+                    <div className="res-ai-card__logo">
+                      {svc.service === 'chatgpt' ? (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="res-ai-card__logo-icon">
+                          <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0L4.155 14.4A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.371 2.019-1.168a.076.076 0 0 1 .071 0l4.663 2.692a4.496 4.496 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.234-.58zm2.019-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.664-2.691a4.504 4.504 0 0 1 6.683 4.668zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.504 4.504 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="res-ai-card__logo-icon">
+                          <path d="M17.304 1.01h-1.146l-3.67 10.102h-1.03L7.788 1.01H6.646L2.837 11.944H1.01v1.112h5.002v-1.112H4.076l1.27-3.496h4.778l.718 1.976-1.197 3.295-1.073 2.954 1.073.39L17.304 1.01zm-10.48 7.326L8.972 3.11l2.15 5.226H6.824zm9.49 5.217c-.647 0-1.237.234-1.692.617l-.453-1.246h-1.047v9.066h1.134v-3.42c.455.384 1.045.617 1.692.617 1.46 0 2.647-1.188 2.647-2.817s-1.188-2.817-2.647-2.817zm-.198 4.495c-.895 0-1.622-.727-1.622-1.622v-.236c0-.895.727-1.622 1.622-1.622s1.622.727 1.622 1.622v.236c0 .895-.727 1.622-1.622 1.622z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div className="res-ai-card__meta">
+                      <h3 className="res-ai-card__plan">{svc.plan}</h3>
+                      {svc.badge && <span className="res-ai-card__badge">{svc.badge}</span>}
+                    </div>
+                  </div>
+
+                  <p className="res-ai-card__desc">{svc.desc}</p>
+
+                  <ul className="res-ai-card__features">
+                    {svc.features.map((f) => (
+                      <li key={f}>{f}</li>
+                    ))}
+                  </ul>
+
+                  <div className="res-ai-card__foot">
+                    <div>
+                      <p className="res-ai-card__price-note">{svc.priceNote}</p>
+                      <p className="res-ai-card__price">¥ {svc.priceMonthly.toFixed(0)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="res-ai-card__btn"
+                      onClick={() => openAiRecharge(svc)}
+                    >
+                      立即代充
+                    </button>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        {/* 精选资料包 */}
+        <section className="space-y-6">
+          <div className="res-section-head">
+            <div>
+              <p className="res-section-eyebrow">Featured Packs · 资料包</p>
+              <h2 className="res-section-title">精选资料包</h2>
+            </div>
+            {isAdmin && (
+              <p className="res-section-note">
+                可用资源标签 <code className="res-section-code">price:29.9</code> 控制单价
+              </p>
+            )}
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {resourceProducts.map((product, index) => (
               <motion.article
                 key={product.id}
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.48, ease: APPLE_EASE_SOFT }}
-                className="group"
+                transition={{ delay: index * 0.06, duration: 0.48, ease: APPLE_EASE_SOFT }}
               >
-                <Card variant="glass" className="flex h-full flex-col rounded-3xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)">
-                  <div className="flex items-start justify-between gap-4">
-                    <Badge variant="soft" className="w-fit">{product.category}</Badge>
-                    <span className="rounded-full border border-(--border-default) bg-(--surface-base) px-3 py-1 text-xs text-neutral-500">
-                      {product.updateLabel}
-                    </span>
+                <div className="res-product-card">
+                  <div className="res-product-card__bar" />
+
+                  <div className="res-product-card__head">
+                    <span className="res-product-card__cat">{product.category}</span>
+                    <span className="res-product-card__date">{product.updateLabel}</span>
                   </div>
 
-                  <div className="mt-4 space-y-3">
-                    <h3 className="line-clamp-2 text-xl font-semibold leading-snug text-neutral-900">{product.title}</h3>
-                    <p className="line-clamp-3 text-sm leading-7 text-neutral-600">{product.description}</p>
-                  </div>
+                  <h3 className="res-product-card__name">{product.title}</h3>
+                  <p className="res-product-card__desc">{product.description}</p>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {product.tags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-(--surface-overlay) px-2.5 py-1 text-xs text-neutral-600">
-                        {tag}
-                      </span>
+                  <ul className="res-product-card__items">
+                    {product.includes.slice(0, 4).map((item) => (
+                      <li key={item}>{item}</li>
                     ))}
-                  </div>
+                  </ul>
 
-                  <div className="mt-5 rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">包含内容</p>
-                    <ul className="mt-3 space-y-2">
-                      {product.includes.slice(0, 4).map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-neutral-700">
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-(--color-primary-600)" />
-                          <span className="truncate">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-auto flex items-end justify-between gap-4 pt-5">
+                  <div className="res-product-card__foot">
                     <div>
-                      <p className="text-xs text-neutral-500">{product.delivery}</p>
-                      <div className="mt-1 flex items-baseline gap-2">
-                        <strong className="text-3xl font-semibold text-neutral-900">￥{product.price.toFixed(2)}</strong>
+                      <p className="res-product-card__delivery">{product.delivery}</p>
+                      <p className="res-product-card__price">
+                        <span className="res-product-card__price-curr">¥{product.price.toFixed(2)}</span>
                         {product.originalPrice ? (
-                          <span className="text-sm text-neutral-400 line-through">￥{product.originalPrice}</span>
+                          <span className="res-product-card__price-orig">¥{product.originalPrice}</span>
                         ) : null}
-                      </div>
+                      </p>
                     </div>
-                    <Button onClick={() => openCheckout(product)}>
-                      <ShoppingBag className="h-4 w-4" />
-                      下单
-                    </Button>
+                    <button
+                      type="button"
+                      className="res-product-card__btn"
+                      onClick={() => openCheckout(product)}
+                    >
+                      立即购买
+                    </button>
                   </div>
-                </Card>
+                </div>
               </motion.article>
             ))}
           </div>
