@@ -62,7 +62,8 @@ const HERO_QUOTES = [
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { SplashScreen } from '@/components/SplashScreen';
 import { ArrowRight, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
@@ -378,6 +379,7 @@ export default function HomePageClient({
 }: {
   initialPosts?: import('@/lib/supabase').Post[];
 }) {
+  const [splashDone, setSplashDone] = useState(false);
   const [posts, setPosts] = useState<HomePost[]>(() =>
     initialPosts.length > 0
       ? toPublicCatalogPosts(initialPosts).map((post, index) => normalizePost(post, index))
@@ -565,7 +567,18 @@ export default function HomePageClient({
   );
 
   return (
-    <div className="atelier-home">
+    <>
+      <AnimatePresence>
+        {!splashDone && (
+          <SplashScreen
+            key="splash"
+            quote={heroQuote}
+            onDismiss={() => setSplashDone(true)}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="atelier-home">
       <Script id="homepage-structured-data" type="application/ld+json">
         {JSON.stringify(websiteSchema)}
       </Script>
@@ -812,6 +825,7 @@ export default function HomePageClient({
       </main>
 
     </div>
+    </>
   );
 }
 

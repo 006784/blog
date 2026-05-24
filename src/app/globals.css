@@ -6579,6 +6579,163 @@ textarea:focus {
 }
 
 /* ============================================ */
+/* ============================================ */
+/* 启动页（SplashScreen）                        */
+/* ============================================ */
+
+.splash-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-base);
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.055) 1px, transparent 1px);
+  background-size: 48px 48px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+.dark .splash-root,
+[data-theme="dark"] .splash-root {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+}
+
+.splash-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 40% at 0% 0%,   color-mix(in srgb, var(--color-teal-200) 20%, transparent), transparent),
+    radial-gradient(ellipse 45% 35% at 100% 0%,  color-mix(in srgb, var(--color-orange-200) 15%, transparent), transparent),
+    radial-gradient(ellipse 50% 45% at 50% 100%, color-mix(in srgb, var(--color-primary-500) 8%, transparent), transparent);
+}
+
+.splash-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 480px;
+  width: 100%;
+}
+
+.splash-avatar-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(233, 154, 105, 0.35);
+  box-shadow:
+    0 0 0 6px rgba(233, 154, 105, 0.10),
+    0 8px 32px rgba(233, 154, 105, 0.15);
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.splash-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.splash-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-primary-500) 15%, var(--surface-raised));
+  font-family: 'Noto Serif SC', serif;
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--color-primary-500);
+}
+
+.splash-site-title {
+  font-family: 'Noto Serif SC', 'Shippori Mincho', serif;
+  font-size: 2.75rem;
+  font-weight: 300;
+  letter-spacing: 0.5em;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1;
+}
+
+.splash-site-sub {
+  margin-top: 0.5rem;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: var(--ink-secondary);
+  opacity: 0.7;
+}
+
+.splash-divider {
+  width: 40px;
+  height: 1px;
+  background: color-mix(in srgb, var(--color-primary-500) 50%, transparent);
+  margin: 1.75rem auto;
+}
+
+.splash-quote {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+  font-weight: 300;
+  line-height: 1.9;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  margin: 0;
+  padding: 0;
+  max-width: 380px;
+}
+
+.splash-quote-author {
+  margin-top: 0.75rem;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.8rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  color: var(--ink-secondary);
+  opacity: 0.6;
+}
+
+.splash-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-secondary);
+  opacity: 0.45;
+}
+
+.splash-hint-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary-500);
+  animation: splash-pulse 2s ease-in-out infinite;
+}
+
+@keyframes splash-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
 /* Apple Music 详情面板                          */
 /* ============================================ */
 
