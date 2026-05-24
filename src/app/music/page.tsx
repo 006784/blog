@@ -63,17 +63,40 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// Apple Music 展开面板（iTunes 数据 + 试听播放器）
+async function fetchLyrics(title: string, artist: string, album: string): Promise<string | null> {
+  try {
+    const params = new URLSearchParams({ track_name: title, artist_name: artist, album_name: album });
+    const res = await fetch(`https://lrclib.net/api/get?${params}`);
+    if (!res.ok) return null;
+    const data = await res.json() as { plainLyrics?: string; instrumental?: boolean };
+    if (data.instrumental) return '[纯音乐]';
+    return data.plainLyrics ?? null;
+  } catch { return null; }
+}
+
+// Apple Music 展开面板（iTunes 数据 + 试听播放器 + 歌词）
 function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) {
   const [meta, setMeta] = useState<AppleMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [lyrics, setLyrics] = useState<string | null>(null);
+  const [lyricsOpen, setLyricsOpen] = useState(false);
+  const [lyricsLoading, setLyricsLoading] = useState(false);
 
   useEffect(() => {
     fetchAppleMeta(url).then(m => { setMeta(m); setLoading(false); });
   }, [url]);
+
+  useEffect(() => {
+    if (!meta || lyricsLoading || lyrics !== null) return;
+    setLyricsLoading(true);
+    fetchLyrics(meta.title, meta.artist, meta.album).then(l => {
+      setLyrics(l ?? '');
+      setLyricsLoading(false);
+    });
+  }, [meta, lyrics, lyricsLoading]);
 
   function togglePreview() {
     const a = audioRef.current;
@@ -140,6 +163,41 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
                 <ExternalLink className="h-3 w-3" />
                 完整收听
               </a>
+            </div>
+          )}
+
+          {/* 歌词 */}
+          {(lyricsLoading || (lyrics && lyrics.length > 0)) && (
+            <div className="apple-lyrics-section">
+              <button
+                type="button"
+                className="apple-lyrics-toggle"
+                onClick={() => setLyricsOpen(v => !v)}
+              >
+                <span>歌词</span>
+                {lyricsLoading
+                  ? <Loader2 className="h-3 w-3 animate-spin" />
+                  : <ChevronDown className={cn('h-3 w-3 transition-transform', lyricsOpen && 'rotate-180')} />}
+              </button>
+              <AnimatePresence>
+                {lyricsOpen && !lyricsLoading && lyrics && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="apple-lyrics-body">
+                      {lyrics === '[纯音乐]'
+                        ? <span className="apple-lyrics-instrumental">纯音乐，请欣赏</span>
+                        : lyrics.split('\n').map((line, i) => (
+                            <p key={i} className={cn('apple-lyrics-line', !line.trim() && 'apple-lyrics-blank')}>{line || ' '}</p>
+                          ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </>

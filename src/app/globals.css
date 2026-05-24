@@ -6694,6 +6694,61 @@ textarea:focus {
   color: white;
 }
 
+.apple-lyrics-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.apple-lyrics-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.15s;
+  text-align: left;
+}
+
+.apple-lyrics-toggle:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.apple-lyrics-body {
+  max-height: 14rem;
+  overflow-y: auto;
+  padding: 0.25rem 0.75rem 0.75rem;
+}
+
+.apple-lyrics-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.apple-lyrics-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-lyrics-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+.apple-lyrics-line {
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.apple-lyrics-blank {
+  height: 0.6rem;
+}
+
+.apple-lyrics-instrumental {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
 /* ============================================ */
 /* 代码块：Prism 暖色主题 + 包装样式             */
 /* ============================================ */
