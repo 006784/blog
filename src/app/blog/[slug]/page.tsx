@@ -33,14 +33,14 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     return { title: '文章未找到 - Lumen' };
   }
 
-  // 使用 /api/og 动态生成 OG 卡片图
+  // 优先用文章封面图；没有封面时才生成 OG 卡片
   const ogParams = new URLSearchParams({
     title: post.meta_title || post.title,
     description: post.meta_description || post.description || '',
     author: post.author || 'Lumen',
     date: post.published_at ? new Date(post.published_at).toLocaleDateString('zh-CN') : '',
   });
-  const ogImage = `${SITE_URL}/api/og?${ogParams.toString()}`;
+  const ogImage = post.cover_image || `${SITE_URL}/api/og?${ogParams.toString()}`;
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
 
   return {
