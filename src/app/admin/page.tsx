@@ -7,7 +7,8 @@ import {
   Plus, Edit2, Trash2, X, Loader2, Save,
   Eye, EyeOff, TrendingUp, LogOut, Lock,
   ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2,
-  Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck
+  Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck,
+  Link2, MessageSquare, Music2, Mail, Check, Star, Pin, ExternalLink, Upload, Send
 } from 'lucide-react';
 import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
 import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
@@ -31,7 +32,7 @@ import {
 
 const PAGE_SIZE = 20;
 
-type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums' | 'analytics' | 'practice' | 'security';
+type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums' | 'analytics' | 'practice' | 'security' | 'links' | 'guestbook' | 'music' | 'subscribers';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -150,6 +151,10 @@ export default function AdminPage() {
     { id: 'albums' as TabType,     label: '相册', icon: Folder,    count: albums.length },
     { id: 'analytics' as TabType,  label: '统计', icon: BarChart2 },
     { id: 'practice' as TabType,   label: '题库', icon: Code2 },
+    { id: 'links' as TabType,      label: '友链', icon: Link2 },
+    { id: 'guestbook' as TabType,  label: '留言', icon: MessageSquare },
+    { id: 'music' as TabType,      label: '歌单', icon: Music2 },
+    { id: 'subscribers' as TabType,label: '订阅', icon: Mail },
     { id: 'security' as TabType,   label: '安全', icon: Lock },
   ];
 
@@ -315,6 +320,10 @@ export default function AdminPage() {
                 <PracticeAdminTab />
               </motion.div>
             )}
+            {activeTab === 'links' && <LinksTab />}
+            {activeTab === 'guestbook' && <GuestbookTab />}
+            {activeTab === 'music' && <MusicTab />}
+            {activeTab === 'subscribers' && <SubscribersTab />}
             {activeTab === 'security' && (
               <motion.div
                 key="security"
@@ -941,6 +950,368 @@ function AlbumModal({ album, onClose, onSave }: {
         </form>
       </motion.div>
     </motion.div>
+  );
+}
+
+// ── Links Tab ──────────────────────────────────────────────────────────────────
+interface FriendLink { id: string; name: string; url: string; description?: string; avatar?: string; category?: string; is_featured: boolean; sort_order?: number; }
+
+function LinksTab() {
+  const [links, setLinks] = useState<FriendLink[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<Partial<FriendLink>>({});
+  const [showAdd, setShowAdd] = useState(false);
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    setLoading(true);
+    const r = await fetch('/api/links'); const d = await r.json();
+    setLinks(Array.isArray(d) ? d : []);
+    setLoading(false);
+  }
+
+  async function save(isNew: boolean) {
+    const method = isNew ? 'POST' : 'PUT';
+    const url = isNew ? '/api/links' : `/api/links/${editingId}`;
+    const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(form) });
+    if (!r.ok) { showToast.error('保存失败'); return; }
+    showToast.success(isNew ? '添加成功' : '已保存');
+    setShowAdd(false); setEditingId(null); setForm({});
+    await load();
+  }
+
+  async function del(id: string) {
+    if (!await showConfirm({ title: '删除友链', description: '此操作不可撤销。', danger: true })) return;
+    const r = await fetch(`/api/links/${id}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) { setLinks(l => l.filter(x => x.id !== id)); showToast.success('已删除'); }
+    else showToast.error('删除失败');
+  }
+
+  const FormFields = ({ data, onChange }: { data: Partial<FriendLink>; onChange: (v: Partial<FriendLink>) => void }) => (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Input placeholder="站点名称 *" value={data.name ?? ''} onChange={e => onChange({ ...data, name: e.target.value })} />
+      <Input placeholder="网址 * (https://...)" value={data.url ?? ''} onChange={e => onChange({ ...data, url: e.target.value })} />
+      <Input placeholder="头像 URL" value={data.avatar ?? ''} onChange={e => onChange({ ...data, avatar: e.target.value })} />
+      <Input placeholder="分类（如：技术、生活）" value={data.category ?? ''} onChange={e => onChange({ ...data, category: e.target.value })} />
+      <Textarea placeholder="简介" className="sm:col-span-2" value={data.description ?? ''} onChange={e => onChange({ ...data, description: e.target.value })} />
+      <label className="flex items-center gap-2 text-sm sm:col-span-2">
+        <input type="checkbox" checked={!!data.is_featured} onChange={e => onChange({ ...data, is_featured: e.target.checked })} />
+        推荐展示
+      </label>
+    </div>
+  );
+
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">友情链接 · {links.length} 个</h2>
+        <Button size="sm" onClick={() => { setShowAdd(true); setForm({ is_featured: false }); }}><Plus className="h-4 w-4" />添加</Button>
+      </div>
+
+      {showAdd && (
+        <Card variant="elevated" className="p-4 space-y-3">
+          <h3 className="font-medium">新建友链</h3>
+          <FormFields data={form} onChange={setForm} />
+          <div className="flex gap-2 justify-end">
+            <Button variant="ghost" size="sm" onClick={() => { setShowAdd(false); setForm({}); }}>取消</Button>
+            <Button size="sm" onClick={() => void save(true)}><Save className="h-4 w-4" />保存</Button>
+          </div>
+        </Card>
+      )}
+
+      <div className="space-y-2">
+        {links.map(link => (
+          <Card key={link.id} variant="default" className="p-4">
+            {editingId === link.id ? (
+              <div className="space-y-3">
+                <FormFields data={form} onChange={setForm} />
+                <div className="flex gap-2 justify-end">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditingId(null); setForm({}); }}>取消</Button>
+                  <Button size="sm" onClick={() => void save(false)}><Save className="h-4 w-4" />保存</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                {link.avatar && <img src={link.avatar} alt="" className="h-10 w-10 rounded-full object-cover" />}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{link.name}</span>
+                    {link.is_featured && <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />}
+                    {link.category && <Badge variant="soft" className="text-xs">{link.category}</Badge>}
+                  </div>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:underline truncate block">{link.url}</a>
+                  {link.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{link.description}</p>}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditingId(link.id); setForm(link); }}><Edit2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-red-500" onClick={() => void del(link.id)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        ))}
+        {links.length === 0 && <StatePanel tone="empty" title="暂无友链" description="点击右上角添加第一个友链。" />}
+      </div>
+    </div>
+  );
+}
+
+// ── Guestbook Tab ───────────────────────────────────────────────────────────────
+interface GuestbookMsg { id: string; nickname: string; content: string; email?: string; website?: string; is_approved: boolean; is_pinned: boolean; reply?: string; created_at: string; }
+
+function GuestbookTab() {
+  const [msgs, setMsgs] = useState<GuestbookMsg[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [replyingId, setReplyingId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/guestbook?all=true&limit=100', { credentials: 'include' })
+      .then(r => r.json()).then(d => setMsgs(d.messages ?? []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function update(id: string, patch: Partial<GuestbookMsg>) {
+    const r = await fetch('/api/guestbook', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id, ...patch }) });
+    if (r.ok) { setMsgs(ms => ms.map(m => m.id === id ? { ...m, ...patch } : m)); showToast.success('已更新'); }
+    else showToast.error('操作失败');
+  }
+
+  async function del(id: string) {
+    if (!await showConfirm({ title: '删除留言', description: '此操作不可撤销。', danger: true })) return;
+    const r = await fetch(`/api/guestbook?id=${id}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) { setMsgs(ms => ms.filter(m => m.id !== id)); showToast.success('已删除'); }
+    else showToast.error('删除失败');
+  }
+
+  async function sendReply(id: string) {
+    await update(id, { reply: replyText });
+    setReplyingId(null); setReplyText('');
+  }
+
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">留言板 · {msgs.length} 条</h2>
+      {msgs.length === 0 && <StatePanel tone="empty" title="暂无留言" description="还没有人留言。" />}
+      <div className="space-y-3">
+        {msgs.map(msg => (
+          <Card key={msg.id} variant="default" className={`p-4 space-y-2 ${!msg.is_approved ? 'border-amber-300/50 bg-amber-50/30 dark:bg-amber-900/10' : ''}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="font-medium text-sm">{msg.nickname}</span>
+                  {!msg.is_approved && <Badge variant="soft" className="text-xs bg-amber-100 text-amber-700">待审核</Badge>}
+                  {msg.is_pinned && <Pin className="h-3.5 w-3.5 text-blue-500" />}
+                  <span className="text-xs text-muted-foreground">{new Date(msg.created_at).toLocaleString('zh-CN')}</span>
+                </div>
+                <p className="text-sm">{msg.content}</p>
+                {msg.website && <a href={msg.website} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">{msg.website}</a>}
+                {msg.reply && <div className="mt-2 pl-3 border-l-2 border-primary/40 text-xs text-muted-foreground">回复：{msg.reply}</div>}
+              </div>
+              <div className="flex gap-1 shrink-0">
+                {!msg.is_approved && <Button size="sm" variant="ghost" className="text-green-600" onClick={() => void update(msg.id, { is_approved: true })} title="通过"><Check className="h-4 w-4" /></Button>}
+                <Button size="sm" variant="ghost" onClick={() => void update(msg.id, { is_pinned: !msg.is_pinned })} title={msg.is_pinned ? '取消置顶' : '置顶'}><Pin className={`h-4 w-4 ${msg.is_pinned ? 'text-blue-500' : ''}`} /></Button>
+                <Button size="sm" variant="ghost" onClick={() => { setReplyingId(msg.id); setReplyText(msg.reply ?? ''); }} title="回复"><MessageSquare className="h-4 w-4" /></Button>
+                <Button size="sm" variant="ghost" className="text-red-500" onClick={() => void del(msg.id)}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            </div>
+            {replyingId === msg.id && (
+              <div className="flex gap-2 pt-2">
+                <Textarea value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="输入回复内容..." className="flex-1 text-sm min-h-15" />
+                <div className="flex flex-col gap-1">
+                  <Button size="sm" onClick={() => void sendReply(msg.id)}><Send className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => setReplyingId(null)}><X className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Music Tab ───────────────────────────────────────────────────────────────────
+interface AdminSong { id: string; title: string; artist: string; album?: string; cover_image?: string; music_url?: string; audio_url?: string; platform: string; note?: string; is_favorite: boolean; play_count: number; }
+
+function MusicTab() {
+  const [songs, setSongs] = useState<AdminSong[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<AdminSong>>({});
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/music/songs').then(r => r.json()).then(d => setSongs(d.songs ?? [])).finally(() => setLoading(false));
+  }, []);
+
+  async function saveEdit(id: string) {
+    const r = await fetch(`/api/music/songs/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(editForm) });
+    if (!r.ok) { showToast.error('保存失败'); return; }
+    setSongs(ss => ss.map(s => s.id === id ? { ...s, ...editForm } : s));
+    setEditingId(null); setEditForm({}); showToast.success('已保存');
+  }
+
+  async function del(id: string) {
+    if (!await showConfirm({ title: '删除歌曲', description: '此操作不可撤销。', danger: true })) return;
+    const r = await fetch(`/api/music/songs/${id}`, { method: 'DELETE', credentials: 'include' });
+    if (r.ok) { setSongs(ss => ss.filter(s => s.id !== id)); showToast.success('已删除'); }
+    else showToast.error('删除失败');
+  }
+
+  async function uploadAudio(songId: string, file: File) {
+    setUploadingId(songId);
+    const form = new FormData(); form.append('file', file);
+    try {
+      const r = await fetch('/api/music/upload', { method: 'POST', body: form, credentials: 'include' });
+      const d = await r.json();
+      if (!r.ok) { showToast.error(d.error ?? '上传失败'); return; }
+      const audioUrl = d.url as string;
+      const r2 = await fetch(`/api/music/songs/${songId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ audio_url: audioUrl }) });
+      if (r2.ok) { setSongs(ss => ss.map(s => s.id === songId ? { ...s, audio_url: audioUrl } : s)); showToast.success('音频已上传并绑定'); }
+      else showToast.error('绑定失败');
+    } finally { setUploadingId(null); }
+  }
+
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">歌单管理 · {songs.length} 首</h2>
+        <Button size="sm" variant="ghost" onClick={() => window.open('/music', '_blank')}><ExternalLink className="h-4 w-4" />歌单页</Button>
+      </div>
+      <div className="space-y-2">
+        {songs.map(song => (
+          <Card key={song.id} variant="default" className="p-3">
+            {editingId === song.id ? (
+              <div className="space-y-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Input placeholder="歌曲名" value={editForm.title ?? ''} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
+                  <Input placeholder="艺人" value={editForm.artist ?? ''} onChange={e => setEditForm(f => ({ ...f, artist: e.target.value }))} />
+                  <Input placeholder="专辑" value={editForm.album ?? ''} onChange={e => setEditForm(f => ({ ...f, album: e.target.value }))} />
+                  <Input placeholder="Apple Music / 其他链接" value={editForm.music_url ?? ''} onChange={e => setEditForm(f => ({ ...f, music_url: e.target.value }))} />
+                  <Input placeholder="封面图 URL" value={editForm.cover_image ?? ''} onChange={e => setEditForm(f => ({ ...f, cover_image: e.target.value }))} />
+                  <Input placeholder="备注（地区/标签）" value={editForm.note ?? ''} onChange={e => setEditForm(f => ({ ...f, note: e.target.value }))} />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditingId(null); setEditForm({}); }}>取消</Button>
+                  <Button size="sm" onClick={() => void saveEdit(song.id)}><Save className="h-4 w-4" />保存</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                {song.cover_image ? <img src={song.cover_image} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" /> : <div className="h-10 w-10 rounded-lg bg-(--surface-overlay) flex items-center justify-center shrink-0"><Music2 className="h-4 w-4 text-muted-foreground" /></div>}
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-sm truncate">{song.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{song.artist}{song.album ? ` · ${song.album}` : ''}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {song.audio_url && <span className="text-xs text-green-600 font-medium">有音频</span>}
+                    {song.note && <Badge variant="soft" className="text-xs">{song.note}</Badge>}
+                    <span className="text-xs text-muted-foreground">{song.play_count} 次播放</span>
+                  </div>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <label className="cursor-pointer" title="上传本地音频">
+                    <input type="file" accept="audio/*" className="sr-only" disabled={uploadingId === song.id}
+                      onChange={e => { const f = e.target.files?.[0]; if (f) void uploadAudio(song.id, f); e.target.value = ''; }} />
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-(--surface-overlay) transition-colors">
+                      {uploadingId === song.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4 text-muted-foreground" />}
+                    </span>
+                  </label>
+                  <Button size="sm" variant="ghost" onClick={() => { setEditingId(song.id); setEditForm({ title: song.title, artist: song.artist, album: song.album, music_url: song.music_url, cover_image: song.cover_image, note: song.note }); }}><Edit2 className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" className="text-red-500" onClick={() => void del(song.id)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        ))}
+        {songs.length === 0 && <StatePanel tone="empty" title="歌单为空" description="去歌单页添加歌曲。" />}
+      </div>
+    </div>
+  );
+}
+
+// ── Subscribers Tab ─────────────────────────────────────────────────────────────
+interface Subscriber { id: string; email: string; is_active: boolean; subscribed_at: string; }
+
+function SubscribersTab() {
+  const [subs, setSubs] = useState<Subscriber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notifTitle, setNotifTitle] = useState('');
+  const [notifBody, setNotifBody] = useState('');
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/subscribe', { credentials: 'include' }).then(r => r.json()).then(d => setSubs(d.subscribers ?? [])).finally(() => setLoading(false));
+  }, []);
+
+  async function unsubscribe(email: string) {
+    if (!await showConfirm({ title: '取消订阅', description: `移除 ${email}`, danger: true })) return;
+    const r = await fetch('/api/subscribe', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email }) });
+    if (r.ok) { setSubs(ss => ss.filter(s => s.email !== email)); showToast.success('已移除'); }
+    else showToast.error('操作失败');
+  }
+
+  async function sendNotif() {
+    if (!notifTitle.trim() || !notifBody.trim()) { showToast.error('标题和内容不能为空'); return; }
+    if (!await showConfirm({ title: '发送通知', description: `将向 ${subs.filter(s => s.is_active).length} 位订阅者发送邮件。` })) return;
+    setSending(true);
+    try {
+      const r = await fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ title: notifTitle, content: notifBody }) });
+      if (r.ok) { showToast.success('通知已发送'); setNotifTitle(''); setNotifBody(''); }
+      else showToast.error('发送失败');
+    } finally { setSending(false); }
+  }
+
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  const active = subs.filter(s => s.is_active).length;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <div className="rounded-xl border border-line px-5 py-3 text-center">
+          <p className="text-2xl font-bold text-primary">{active}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">活跃订阅</p>
+        </div>
+        <div className="rounded-xl border border-line px-5 py-3 text-center">
+          <p className="text-2xl font-bold">{subs.length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">总订阅数</p>
+        </div>
+      </div>
+
+      {/* 发通知 */}
+      <Card variant="elevated" className="p-4 space-y-3">
+        <h3 className="font-semibold flex items-center gap-2"><Send className="h-4 w-4" />发送邮件通知</h3>
+        <Input placeholder="通知标题" value={notifTitle} onChange={e => setNotifTitle(e.target.value)} />
+        <Textarea placeholder="通知内容（支持 HTML）" value={notifBody} onChange={e => setNotifBody(e.target.value)} className="min-h-25" />
+        <div className="flex justify-end">
+          <Button size="sm" loading={sending} onClick={() => void sendNotif()}><Send className="h-4 w-4" />发送给 {active} 人</Button>
+        </div>
+      </Card>
+
+      {/* 订阅者列表 */}
+      <div className="space-y-2">
+        <h3 className="font-medium text-sm text-muted-foreground">订阅者列表</h3>
+        {subs.map(sub => (
+          <div key={sub.id} className="flex items-center gap-3 rounded-lg border border-line px-4 py-2.5">
+            <div className={`h-2 w-2 rounded-full shrink-0 ${sub.is_active ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
+            <span className="flex-1 text-sm font-mono">{sub.email}</span>
+            <span className="text-xs text-muted-foreground shrink-0">{new Date(sub.subscribed_at).toLocaleDateString('zh-CN')}</span>
+            <Button size="sm" variant="ghost" className="text-red-500 shrink-0" onClick={() => void unsubscribe(sub.email)}><Trash2 className="h-4 w-4" /></Button>
+          </div>
+        ))}
+        {subs.length === 0 && <StatePanel tone="empty" title="暂无订阅者" description="还没有人订阅。" />}
+      </div>
+    </div>
   );
 }
 
