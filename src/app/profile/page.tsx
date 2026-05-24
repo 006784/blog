@@ -296,6 +296,34 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* 打赏二维码 */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">打赏二维码</h3>
+              <p className="text-sm text-muted-foreground">上传二维码图片后，文章页将显示打赏按钮。</p>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">微信支付</label>
+                  <ImageUploader
+                    preview={formData.donate_wechat || ''}
+                    onUpload={(url) => setFormData({ ...formData, donate_wechat: url })}
+                    placeholder="上传微信支付二维码"
+                    folder="donate"
+                    aspectRatio="square"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">支付宝</label>
+                  <ImageUploader
+                    preview={formData.donate_alipay || ''}
+                    onUpload={(url) => setFormData({ ...formData, donate_alipay: url })}
+                    placeholder="上传支付宝二维码"
+                    folder="donate"
+                    aspectRatio="square"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* 保存按钮 */}
             <div className="flex justify-end pt-4">
               <Button

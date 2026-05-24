@@ -45,6 +45,7 @@ import { PostReadingMemory } from '@/components/post/PostReadingMemory';
 import { siteConfig } from '@/lib/site-config';
 import { AISummary } from '@/components/AISummary';
 import { LinkPreviewCard } from '@/components/LinkPreviewCard';
+import { DonateButton } from '@/components/DonateButton';
 
 interface BlogPostPageClientProps {
   slug: string;
@@ -419,11 +420,14 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
         <Card variant="default" className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl px-5 py-4">
           <PostInteractions postId={post.id} />
-          <ShareButtons
-            url={shareUrl || `/blog/${post.slug}`}
-            title={post.title}
-            description={post.description}
-          />
+          <div className="flex flex-wrap items-center gap-3">
+            <DonateButton />
+            <ShareButtons
+              url={shareUrl || `/blog/${post.slug}`}
+              title={post.title}
+              description={post.description}
+            />
+          </div>
         </Card>
 
         <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1fr)_280px]">

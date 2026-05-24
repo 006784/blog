@@ -11,6 +11,8 @@ export interface Profile {
   linkedin: string;
   email: string;
   website: string;
+  donate_wechat: string;
+  donate_alipay: string;
 }
 
 export const defaultProfile: Profile = {
@@ -26,6 +28,8 @@ export const defaultProfile: Profile = {
   linkedin: '',
   email: '',
   website: '',
+  donate_wechat: '',
+  donate_alipay: '',
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -52,5 +56,7 @@ export function normalizeProfile(value: unknown): Profile {
     linkedin: normalizeString(input.linkedin),
     email: normalizeString(input.email),
     website: normalizeString(input.website),
+    donate_wechat: normalizeString(input.donate_wechat),
+    donate_alipay: normalizeString(input.donate_alipay),
   };
 }
