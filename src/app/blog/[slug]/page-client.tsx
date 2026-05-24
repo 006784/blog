@@ -43,6 +43,7 @@ import { Comments } from '@/components/GiscusComments';
 import { getPageStructuredData } from '@/lib/seo';
 import { PostReadingMemory } from '@/components/post/PostReadingMemory';
 import { siteConfig } from '@/lib/site-config';
+import { AISummary } from '@/components/AISummary';
 
 interface BlogPostPageClientProps {
   slug: string;
@@ -412,6 +413,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
         <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1fr)_280px]">
           <Card variant="elevated" padding="sm" className="article-content rounded-2xl sm:p-6 xl:p-10">
+            <AISummary postId={post.id} />
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {post.content || ''}
             </ReactMarkdown>

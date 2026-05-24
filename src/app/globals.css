@@ -6326,6 +6326,111 @@ textarea:focus {
 }
 
 /* ============================================ */
+/* AI 摘要块                                    */
+/* ============================================ */
+
+.ai-summary-block {
+  margin-bottom: 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border-default) 65%);
+  background: color-mix(in srgb, var(--gold) 6%, var(--surface-raised) 94%);
+  overflow: hidden;
+}
+
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: color-mix(in srgb, var(--gold) 12%, var(--surface-overlay) 88%);
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 25%, var(--border-default) 75%);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--gold) 60%, var(--ink) 40%);
+  letter-spacing: 0.04em;
+}
+
+.ai-summary-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+
+.ai-summary-badge {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--gold) 18%, var(--surface-raised) 82%);
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+  color: color-mix(in srgb, var(--gold) 70%, var(--ink) 30%);
+  letter-spacing: 0.03em;
+}
+
+.ai-summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.ai-summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ink-secondary);
+}
+
+.ai-summary-dot {
+  flex-shrink: 0;
+  margin-top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.ai-summary-skeleton {
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ai-summary-skeleton-line {
+  height: 0.8rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--gold) 10%, var(--surface-overlay) 90%) 0%,
+    color-mix(in srgb, var(--gold) 18%, var(--surface-overlay) 82%) 50%,
+    color-mix(in srgb, var(--gold) 10%, var(--surface-overlay) 90%) 100%
+  );
+  background-size: 200% 100%;
+  animation: ai-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes ai-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 深色模式 */
+.dark .ai-summary-block {
+  background: color-mix(in srgb, var(--gold) 5%, var(--surface-raised) 95%);
+  border-color: color-mix(in srgb, var(--gold) 25%, var(--border-default) 75%);
+}
+
+.dark .ai-summary-header {
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-overlay) 92%);
+}
+
+/* ============================================ */
 /* 代码块：Prism 暖色主题 + 包装样式             */
 /* ============================================ */
 
