@@ -19,6 +19,13 @@ export function SplashScreen({ quote, onDismiss }: SplashScreenProps) {
   }, []);
 
   useEffect(() => {
+    // 锁定背景滚动，防止底层内容可见
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') onDismiss();
     };
