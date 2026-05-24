@@ -573,7 +573,7 @@ export default function HomePageClient({
           <SplashScreen
             key="splash"
             quote={heroQuote}
-            onDismiss={() => setSplashDone(true)}
+            onDismiss={() => { setSplashDone(true); window.scrollTo({ top: 0, behavior: 'instant' }); }}
           />
         )}
       </AnimatePresence>
@@ -687,9 +687,6 @@ export default function HomePageClient({
                 <p className="atelier-section-kicker">CURATED&ensp;·&ensp;CHAPTERS</p>
                 <h2>精选章节</h2>
               </div>
-              <p>
-                先从几篇最能代表站点气质的文章开始，再一路顺着分类和标签深入下去。
-              </p>
             </div>
 
             <div className="atelier-curation-layout">
