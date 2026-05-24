@@ -38,7 +38,11 @@ function embedHeight(type: string, url: string) {
 }
 
 // ── Apple Music 元数据 ─────────────────────────────────────────────
-interface AppleMeta { title: string; artist: string; cover: string; height: number }
+interface AppleMeta {
+  title: string; artist: string; album: string; cover: string;
+  genre: string; releaseDate: string; durationMs: number;
+  trackNumber: number; trackCount: number; previewUrl: string;
+}
 
 async function fetchAppleMeta(url: string): Promise<AppleMeta | null> {
   try {
@@ -46,6 +50,107 @@ async function fetchAppleMeta(url: string): Promise<AppleMeta | null> {
     if (!res.ok) return null;
     return await res.json() as AppleMeta;
   } catch { return null; }
+}
+
+function fmtDuration(ms: number) {
+  if (!ms) return '';
+  const s = Math.round(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function fmtDate(iso: string) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// Apple Music 展开面板（iTunes 数据 + 试听播放器）
+function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) {
+  const [meta, setMeta] = useState<AppleMeta | null>(null);
+  const [loading, setLoading] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    fetchAppleMeta(url).then(m => { setMeta(m); setLoading(false); });
+  }, [url]);
+
+  function togglePreview() {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing) { a.pause(); setPlaying(false); }
+    else { a.play(); setPlaying(true); }
+  }
+
+  return (
+    <div className="apple-detail-panel">
+      {loading ? (
+        <div className="flex flex-col gap-2 p-3">
+          {[1, 2, 3].map(i => <div key={i} className="h-3 rounded bg-white/10 animate-pulse" style={{ width: `${60 + i * 10}%` }} />)}
+        </div>
+      ) : meta ? (
+        <>
+          {/* 元数据行 */}
+          <div className="apple-detail-meta">
+            {meta.album && (
+              <div className="apple-detail-row">
+                <span className="apple-detail-label">专辑</span>
+                <span className="apple-detail-value">{meta.album}</span>
+              </div>
+            )}
+            <div className="apple-detail-pills">
+              {meta.genre && <span className="apple-detail-pill">{meta.genre}</span>}
+              {meta.durationMs > 0 && <span className="apple-detail-pill">{fmtDuration(meta.durationMs)}</span>}
+              {meta.trackNumber > 0 && (
+                <span className="apple-detail-pill">第 {meta.trackNumber} / {meta.trackCount} 首</span>
+              )}
+              {meta.releaseDate && <span className="apple-detail-pill">{fmtDate(meta.releaseDate)}</span>}
+            </div>
+          </div>
+
+          {/* 试听播放器 */}
+          {meta.previewUrl && (
+            <div className="apple-preview-player">
+              <audio
+                ref={audioRef}
+                src={meta.previewUrl}
+                onTimeUpdate={() => {
+                  const a = audioRef.current;
+                  if (a) setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0);
+                }}
+                onEnded={() => { setPlaying(false); setProgress(0); }}
+              />
+              <button type="button" onClick={togglePreview} className="apple-preview-btn" aria-label={playing ? '暂停试听' : '试听 30 秒'}>
+                {playing
+                  ? <Pause className="h-3.5 w-3.5 fill-current" />
+                  : <Play className="h-3.5 w-3.5 fill-current" />}
+              </button>
+              <div className="apple-preview-track">
+                <div className="apple-preview-bar">
+                  <div className="apple-preview-fill" style={{ width: `${progress}%` }} />
+                </div>
+                <span className="apple-preview-label">{playing ? '试听中…' : '30 秒试听'}</span>
+              </div>
+              <a
+                href={musicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="apple-open-btn"
+              >
+                <ExternalLink className="h-3 w-3" />
+                完整收听
+              </a>
+            </div>
+          )}
+        </>
+      ) : (
+        <a href={musicUrl} target="_blank" rel="noopener noreferrer" className="apple-open-btn mx-3 my-2">
+          <ExternalLink className="h-3 w-3" />
+          在 Apple Music 播放
+        </a>
+      )}
+    </div>
+  );
 }
 
 // ── 歌曲卡片 ──────────────────────────────────────────────────────
@@ -181,7 +286,7 @@ function SongCard({
                 className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/80 transition-colors"
               >
                 <Music2 className="h-3 w-3" />
-                <span>在 Apple Music 播放</span>
+                <span>歌曲详情 · 试听</span>
                 <ChevronDown className={cn('h-3 w-3 transition-transform', embedOpen && 'rotate-180')} />
               </button>
               <AnimatePresence>
@@ -191,16 +296,9 @@ function SongCard({
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.25 }}
-                    className="overflow-hidden mt-2 rounded-xl"
+                    className="overflow-hidden mt-2"
                   >
-                    <iframe
-                      src={embedInfo!.embedUrl}
-                      className="block w-full border-none rounded-xl music-embed-frame"
-                      height={embedHeight(embedInfo!.type, song.music_url ?? '')}
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      title={song.title}
-                      sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-                    />
+                    <AppleDetailPanel url={song.music_url!} musicUrl={song.music_url!} />
                   </motion.div>
                 )}
               </AnimatePresence>

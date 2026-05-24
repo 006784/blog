@@ -6569,6 +6569,132 @@ textarea:focus {
 }
 
 /* ============================================ */
+/* Apple Music 详情面板                          */
+/* ============================================ */
+
+.apple-detail-panel {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.apple-detail-meta {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.apple-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.apple-detail-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+  min-width: 2.5rem;
+  flex-shrink: 0;
+}
+
+.apple-detail-value {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+.apple-detail-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.apple-detail-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: rgba(252, 60, 68, 0.2);
+  color: rgba(255, 200, 200, 0.9);
+  border: 1px solid rgba(252, 60, 68, 0.25);
+}
+
+.apple-preview-player {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.apple-preview-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: rgba(252, 60, 68, 0.75);
+  color: white;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.apple-preview-btn:hover {
+  background: rgba(252, 60, 68, 1);
+}
+
+.apple-preview-track {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.apple-preview-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.apple-preview-fill {
+  height: 100%;
+  background: #fc3c44;
+  border-radius: 999px;
+  transition: width 0.2s linear;
+}
+
+.apple-preview-label {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.apple-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+
+.apple-open-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+}
+
+/* ============================================ */
 /* 代码块：Prism 暖色主题 + 包装样式             */
 /* ============================================ */
 
