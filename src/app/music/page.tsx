@@ -665,6 +665,7 @@ function AddSongModal({ onClose, onAdd }: {
 export default function MusicPage() {
   const { isAdmin } = useAdmin();
   const hasPrimedAutoPlayer = useRef(false);
+  const previewCache = useRef<Map<string, string>>(new Map());
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -672,6 +673,7 @@ export default function MusicPage() {
   const [filter, setFilter] = useState<'all' | 'favorites'>('all');
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [playerLoading, setPlayerLoading] = useState(false);
 
   useEffect(() => { void loadData(); }, []);
 
@@ -687,15 +689,18 @@ export default function MusicPage() {
     }
   }
 
-  const playableSongs = songs.filter((s) => Boolean(getPlayableSongUrl(s)));
+  // 所有歌曲都进播放列表（Apple Music 歌曲运行时异步获取 preview URL）
+  const playableSongs = songs;
   const filteredSongs = songs.filter((s) => (filter === 'favorites' ? s.is_favorite : true));
 
   useEffect(() => {
-    if (loading || hasPrimedAutoPlayer.current || playableSongs.length === 0) return;
-    setCurrentSong(playableSongs[0]);
+    // 只有上传的直接音频才自动启动
+    const directAudio = songs.filter((s) => Boolean(getPlayableSongUrl(s)));
+    if (loading || hasPrimedAutoPlayer.current || directAudio.length === 0) return;
+    setCurrentSong(directAudio[0]);
     setShowPlayer(true);
     hasPrimedAutoPlayer.current = true;
-  }, [loading, playableSongs]);
+  }, [loading, songs]);
 
   async function handleToggleFavorite(id: string, current: boolean) {
     try {
@@ -724,18 +729,39 @@ export default function MusicPage() {
     }
   }
 
-  function handlePlaySong(song: Song) {
+  async function handlePlaySong(song: Song) {
+    // 有直接音频 URL，直接播放
     if (getPlayableSongUrl(song)) {
       setCurrentSong(song);
       setShowPlayer(true);
-    } else if (song.music_url) {
+      return;
+    }
+
+    // Apple Music：获取 30s preview URL（有缓存直接用）
+    if (song.music_url) {
+      const cached = previewCache.current.get(song.id);
+      if (cached) {
+        setCurrentSong({ ...song, audio_url: cached });
+        setShowPlayer(true);
+        return;
+      }
+      setPlayerLoading(true);
+      const meta = await fetchAppleMeta(song.music_url);
+      setPlayerLoading(false);
+      if (meta?.previewUrl) {
+        previewCache.current.set(song.id, meta.previewUrl);
+        setCurrentSong({ ...song, audio_url: meta.previewUrl });
+        setShowPlayer(true);
+        return;
+      }
+      // 无 preview 则跳转
       window.open(song.music_url, '_blank', 'noopener,noreferrer');
     }
   }
 
   return (
     <div className="min-h-screen px-4 pb-32 pt-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl space-y-8">
+      <div className="mx-auto max-w-6xl space-y-8">
 
         {/* 页头 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -797,7 +823,7 @@ export default function MusicPage() {
             description={filter === 'favorites' ? '先把喜欢的歌标成收藏。' : '点击右上角添加一首。'}
           />
         ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             <AnimatePresence>
               {filteredSongs.map((song, index) => (
                 <SongCard
@@ -836,12 +862,20 @@ export default function MusicPage() {
         )}
       </AnimatePresence>
 
+      {/* 切歌加载指示 */}
+      {playerLoading && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 rounded-full bg-(--surface-panel) border border-line px-4 py-2 text-sm text-ink shadow-lg backdrop-blur-md">
+          <Loader2 className="h-4 w-4 animate-spin text-gold" />
+          正在加载试听...
+        </div>
+      )}
+
       <AnimatePresence>
         {showPlayer && currentSong && (
           <MusicPlayer
             songs={playableSongs}
             currentSong={currentSong}
-            onSongChange={setCurrentSong}
+            onSongChange={(song) => { void handlePlaySong(song); }}
             onClose={() => setShowPlayer(false)}
           />
         )}
