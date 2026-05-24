@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, type DragEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, type DragEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
   Download, Trash2, Eye, EyeOff, Search, Grid, List, X,
   Copy, Check, Shield, HardDrive, Loader2, Settings, Plus, Edit2,
   AlertCircle, CheckCircle2, RefreshCw,
-  Folder, Archive, Code, Database, Book, Link, Star
+  Folder, Archive, Code, Database, Book, Link, Star, ShoppingBag,
+  QrCode, LockKeyhole, WalletCards, MessageCircle, Mail
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
 import { Turnstile } from '@/components/Turnstile';
@@ -60,6 +62,61 @@ interface ResourceNotice {
   message: string;
 }
 
+interface ResourceProduct {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  includes: string[];
+  tags: string[];
+  updateLabel: string;
+  delivery: string;
+  resource?: Resource;
+}
+
+type PaymentMethod = 'wechat' | 'alipay';
+
+interface ShopOrder {
+  id: string;
+  order_number: string;
+  amount_cents: number;
+  status: 'pending' | 'paid' | 'delivered' | 'cancelled' | 'refunded';
+}
+
+const payQrConfig = {
+  wechat: process.env.NEXT_PUBLIC_WECHAT_PAY_QR || '',
+  alipay: process.env.NEXT_PUBLIC_ALIPAY_PAY_QR || '',
+};
+
+const sampleProducts: ResourceProduct[] = [
+  {
+    id: 'starter-curation',
+    title: '效率工具资料包',
+    description: '适合做个人知识库、自动化工作流和常用软件配置的入门整理包。',
+    category: '工具',
+    price: 19.9,
+    originalPrice: 39,
+    includes: ['目录索引', '安装说明', '常用配置模板', '更新记录'],
+    tags: ['自用整理', '持续更新', '网盘交付'],
+    updateLabel: '示例商品',
+    delivery: '付款确认后发送网盘链接',
+  },
+  {
+    id: 'learning-pack',
+    title: '学习资源索引包',
+    description: '把公开课程、文档、阅读路线和检索关键词整理成一份可复用索引。',
+    category: '学习',
+    price: 29.9,
+    originalPrice: 59,
+    includes: ['学习路线', '资料索引', '检索关键词', '使用建议'],
+    tags: ['公开资料', '索引服务', '适合收藏'],
+    updateLabel: '示例商品',
+    delivery: '付款确认后发送目录与链接',
+  },
+];
+
 // 图标映射
 const iconMap: Record<string, typeof File> = {
   image: Image, video: Video, 'file-text': FileText, package: Package,
@@ -100,6 +157,42 @@ function formatDate(dateStr: string): string {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+  });
+}
+
+function getResourcePrice(resource: Resource): number {
+  const priceTag = resource.tags?.find((tag) => /^price[:=]\d+(\.\d+)?$/i.test(tag));
+  if (!priceTag) return 19.9;
+  const price = Number(priceTag.split(/[:=]/)[1]);
+  return Number.isFinite(price) && price > 0 ? price : 19.9;
+}
+
+function createProductsFromResources(resources: Resource[], categories: Category[]): ResourceProduct[] {
+  const visibleResources = resources.filter((resource) => resource.is_public).slice(0, 6);
+  if (visibleResources.length === 0) return sampleProducts;
+
+  return visibleResources.map((resource) => {
+    const categoryName = categories.find((category) => category.slug === resource.category)?.name || resource.category || '资源包';
+    const visibleTags = (resource.tags || []).filter((tag) => !/^price[:=]/i.test(tag));
+
+    return {
+      id: resource.id,
+      title: resource.name,
+      description: resource.description || '精选整理资料包，付款确认后交付对应网盘链接与必要说明。',
+      category: categoryName,
+      price: getResourcePrice(resource),
+      originalPrice: Math.round(getResourcePrice(resource) * 1.8),
+      includes: [
+        resource.original_name || '资源文件',
+        '网盘链接',
+        '提取码/访问说明',
+        '后续更新记录',
+      ],
+      tags: visibleTags.length > 0 ? visibleTags.slice(0, 3) : ['精选整理', '网盘交付', '人工确认'],
+      updateLabel: formatDate(resource.created_at),
+      delivery: '付款确认后发送网盘链接',
+      resource,
+    };
   });
 }
 
@@ -144,6 +237,13 @@ export default function ResourcesPage() {
   // 下载验证
   const [downloadModal, setDownloadModal] = useState<Resource | null>(null);
   const [downloadVerified, setDownloadVerified] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState<ResourceProduct | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('wechat');
+  const [buyerContact, setBuyerContact] = useState('');
+  const [buyerNote, setBuyerNote] = useState('');
+  const [orderCopied, setOrderCopied] = useState(false);
+  const [checkoutOrder, setCheckoutOrder] = useState<ShopOrder | null>(null);
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
   
   // 上传表单
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -268,7 +368,7 @@ export default function ResourcesPage() {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const hasModalOpen = Boolean(downloadModal || showUploadModal || showCategoryModal);
+  const hasModalOpen = Boolean(downloadModal || showUploadModal || showCategoryModal || checkoutProduct);
   useEffect(() => {
     if (!hasModalOpen) return;
 
@@ -299,12 +399,17 @@ export default function ResourcesPage() {
 
       if (downloadModal) {
         setDownloadModal(null);
+        return;
+      }
+
+      if (checkoutProduct) {
+        setCheckoutProduct(null);
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [hasModalOpen, showCategoryModal, showUploadModal, downloadModal]);
+  }, [hasModalOpen, showCategoryModal, showUploadModal, downloadModal, checkoutProduct]);
 
   const handleUpload = async () => {
     if (!uploadFile || !isAdmin) return;
@@ -550,6 +655,86 @@ export default function ResourcesPage() {
     totalSize: resources.reduce((acc, r) => acc + r.file_size, 0),
     totalDownloads: resources.reduce((acc, r) => acc + r.download_count, 0),
   };
+  const resourceProducts = useMemo(
+    () => createProductsFromResources(resources, categories),
+    [resources, categories]
+  );
+  const checkoutOrderId = checkoutOrder?.order_number || '提交后生成';
+  const activePaymentQrEnv = paymentMethod === 'wechat'
+    ? 'NEXT_PUBLIC_WECHAT_PAY_QR'
+    : 'NEXT_PUBLIC_ALIPAY_PAY_QR';
+
+  const openCheckout = (product: ResourceProduct) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    setCheckoutProduct(product);
+    setPaymentMethod('wechat');
+    setBuyerContact('');
+    setBuyerNote('');
+    setOrderCopied(false);
+    setCheckoutOrder(null);
+    setOrderSubmitting(false);
+  };
+
+  const copyOrderInfo = async (order: ShopOrder) => {
+    if (!checkoutProduct) return;
+
+    const text = [
+      `订单号：${order.order_number}`,
+      `资源：${checkoutProduct.title}`,
+      `金额：￥${(order.amount_cents / 100).toFixed(2)}`,
+      `支付方式：${paymentMethod === 'wechat' ? '微信' : '支付宝'}`,
+      buyerContact ? `联系方式：${buyerContact}` : '',
+      buyerNote ? `备注：${buyerNote}` : '',
+    ].filter(Boolean).join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setOrderCopied(true);
+      pushNotice('success', '订单信息已复制，付款后发给站长核对。');
+      window.setTimeout(() => setOrderCopied(false), 2000);
+    } catch {
+      pushNotice('error', '复制失败，请手动保存订单号。');
+    }
+  };
+
+  const createOrderAndCopy = async () => {
+    if (!checkoutProduct) return;
+    if (!buyerContact.trim()) {
+      pushNotice('error', '请先填写联系方式，方便付款后交付资料。');
+      return;
+    }
+
+    try {
+      setOrderSubmitting(true);
+      const res = await fetch('/api/resource-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: checkoutProduct.id,
+          resourceId: checkoutProduct.resource?.id || null,
+          productTitle: checkoutProduct.title,
+          productCategory: checkoutProduct.category,
+          paymentMethod,
+          buyerContact,
+          buyerNote,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.order) {
+        throw new Error(data.error || '创建订单失败');
+      }
+
+      const order = data.order as ShopOrder;
+      setCheckoutOrder(order);
+      await copyOrderInfo(order);
+      pushNotice('success', '订单已保存，付款后把订单信息发给站长核对。');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '创建订单失败';
+      pushNotice('error', message);
+    } finally {
+      setOrderSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen px-4 py-20 pb-14 sm:px-6 lg:px-8">
@@ -594,10 +779,10 @@ export default function ResourcesPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
               <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
-                资源存储
+                资源商店
               </h1>
               <p className="text-sm leading-7 text-neutral-600 sm:text-base">
-                集中管理文件、安装包、文档和媒体资源，支持公开分享与私有归档。
+                出售自有整理、公开授权或可合规分享的资料包。付款确认后交付网盘链接、提取码与使用说明。
               </p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4 lg:max-w-4xl">
@@ -648,6 +833,164 @@ export default function ResourcesPage() {
             </div>
           </div>
         </motion.div>
+
+        <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)]">
+          <Card variant="glass" className="overflow-hidden rounded-3xl p-0">
+            <div className="grid min-h-[320px] gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="flex flex-col justify-between border-b border-(--border-default) bg-gradient-to-br from-(--surface-panel) via-(--surface-raised) to-(--surface-overlay) p-6 lg:border-b-0 lg:border-r">
+                <div className="space-y-4">
+                  <Badge tone="info" variant="soft" className="w-fit gap-1.5">
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                    Paid Resource Packs
+                  </Badge>
+                  <div className="space-y-3">
+                    <h2 className="text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl">
+                      把你整理好的资料，做成可购买的网盘资源包。
+                    </h2>
+                    <p className="max-w-xl text-sm leading-7 text-neutral-600">
+                      适合售卖学习索引、工具合集、自制模板、授权素材和公开资料整理服务。用户下单后按订单号核对付款，再交付链接。
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-8 grid grid-cols-3 gap-3">
+                  {[
+                    ['交付', '网盘链接'],
+                    ['支付', '微信/支付宝'],
+                    ['模式', '人工确认'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-2xl border border-(--border-default) bg-white/45 p-3 backdrop-blur-xl">
+                      <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{label}</p>
+                      <p className="mt-1 text-sm font-semibold text-neutral-900">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid content-between gap-4 p-6">
+                <div className="rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
+                  <div className="flex items-start gap-3">
+                    <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-(--color-primary-600)" />
+                    <div>
+                      <h3 className="font-semibold text-neutral-900">合规售卖提示</h3>
+                      <p className="mt-1 text-sm leading-6 text-neutral-600">
+                        页面默认按“整理服务/自有或授权资料”来设计。请不要上架无授权影视、课程、电子书等侵权内容。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
+                    <WalletCards className="h-5 w-5 text-(--color-primary-600)" />
+                    <p className="mt-3 text-sm font-semibold text-neutral-900">扫码付款</p>
+                    <p className="mt-1 text-xs leading-5 text-neutral-500">先用收款码 MVP 跑通，后续再接微信/支付宝官方回调。</p>
+                  </div>
+                  <div className="rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
+                    <MessageCircle className="h-5 w-5 text-(--color-primary-600)" />
+                    <p className="mt-3 text-sm font-semibold text-neutral-900">人工交付</p>
+                    <p className="mt-1 text-xs leading-5 text-neutral-500">用户复制订单信息发给你，确认后发送网盘链接和提取码。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card variant="glass" className="rounded-3xl">
+            <div className="flex h-full flex-col justify-between gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Checkout Flow</p>
+                <h2 className="mt-2 text-2xl font-semibold text-neutral-900">第一版下单流程</h2>
+              </div>
+              <div className="space-y-3">
+                {[
+                  ['1', '选择资料包并提交订单'],
+                  ['2', '微信或支付宝扫码付款'],
+                  ['3', '复制订单号和联系方式'],
+                  ['4', '站长确认后交付网盘链接'],
+                ].map(([step, label]) => (
+                  <div key={step} className="flex items-center gap-3 rounded-2xl border border-(--border-default) bg-(--surface-base) p-3">
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-(--surface-overlay) text-sm font-semibold text-neutral-900">{step}</span>
+                    <span className="text-sm text-neutral-700">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </section>
+
+        <section className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Featured Packs</p>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-900">精选资料包</h2>
+            </div>
+            <p className="max-w-xl text-sm leading-6 text-neutral-500">
+              可以用资源标签 `price:29.9` 来控制价格；没有价格标签时默认按入门价展示。
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {resourceProducts.map((product, index) => (
+              <motion.article
+                key={product.id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05, duration: 0.48, ease: APPLE_EASE_SOFT }}
+                className="group"
+              >
+                <Card variant="glass" className="flex h-full flex-col rounded-3xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)">
+                  <div className="flex items-start justify-between gap-4">
+                    <Badge variant="soft" className="w-fit">{product.category}</Badge>
+                    <span className="rounded-full border border-(--border-default) bg-(--surface-base) px-3 py-1 text-xs text-neutral-500">
+                      {product.updateLabel}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    <h3 className="line-clamp-2 text-xl font-semibold leading-snug text-neutral-900">{product.title}</h3>
+                    <p className="line-clamp-3 text-sm leading-7 text-neutral-600">{product.description}</p>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {product.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-(--surface-overlay) px-2.5 py-1 text-xs text-neutral-600">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">包含内容</p>
+                    <ul className="mt-3 space-y-2">
+                      {product.includes.slice(0, 4).map((item) => (
+                        <li key={item} className="flex items-center gap-2 text-sm text-neutral-700">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-(--color-primary-600)" />
+                          <span className="truncate">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-auto flex items-end justify-between gap-4 pt-5">
+                    <div>
+                      <p className="text-xs text-neutral-500">{product.delivery}</p>
+                      <div className="mt-1 flex items-baseline gap-2">
+                        <strong className="text-3xl font-semibold text-neutral-900">￥{product.price.toFixed(2)}</strong>
+                        {product.originalPrice ? (
+                          <span className="text-sm text-neutral-400 line-through">￥{product.originalPrice}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <Button onClick={() => openCheckout(product)}>
+                      <ShoppingBag className="h-4 w-4" />
+                      下单
+                    </Button>
+                  </div>
+                </Card>
+              </motion.article>
+            ))}
+          </div>
+        </section>
 
         <Card variant="glass" className="rounded-2xl">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -947,6 +1290,166 @@ export default function ResourcesPage() {
             })}
           </div>
         )}
+
+        {/* 下单弹窗 */}
+        {typeof document !== 'undefined' && checkoutProduct ? createPortal(
+            <motion.div
+              variants={modalBackdropVariants}
+              initial="hidden"
+              animate="visible"
+              className="ios-modal-overlay fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pb-28 pt-6 sm:pb-6"
+              onPointerDown={(event) => {
+                if (event.target === event.currentTarget) {
+                  setCheckoutProduct(null);
+                }
+              }}
+            >
+              <motion.div
+                variants={modalPanelVariants}
+                className="surface-card ios-modal-card max-h-[calc(100dvh-8rem)] w-full max-w-3xl overflow-y-auto p-0 sm:max-h-[calc(100dvh-3rem)]"
+              >
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-(--border-default) bg-(--surface-panel)/95 p-5 backdrop-blur-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-2xl bg-(--surface-overlay)">
+                      <ShoppingBag className="h-5 w-5 text-(--color-primary-600)" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-neutral-900">确认下单</h3>
+                      <p className="text-xs text-neutral-500">订单号：{checkoutOrderId}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setCheckoutProduct(null)}
+                    className="ios-button-press rounded-lg p-2 transition-colors hover:bg-black/5"
+                    aria-label="关闭下单弹窗"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(18rem,1.05fr)]">
+                  <div className="space-y-4">
+                    <div className="rounded-3xl border border-(--border-default) bg-(--surface-base) p-5">
+                      <Badge variant="soft" className="w-fit">{checkoutProduct.category}</Badge>
+                      <h4 className="mt-4 text-2xl font-semibold leading-snug text-neutral-900">{checkoutProduct.title}</h4>
+                      <p className="mt-3 text-sm leading-7 text-neutral-600">{checkoutProduct.description}</p>
+                      <div className="mt-5 flex items-baseline gap-2">
+                        <strong className="text-4xl font-semibold text-neutral-900">￥{checkoutProduct.price.toFixed(2)}</strong>
+                        {checkoutProduct.originalPrice ? (
+                          <span className="text-sm text-neutral-400 line-through">￥{checkoutProduct.originalPrice}</span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl border border-(--border-default) bg-(--surface-base) p-5">
+                      <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">交付内容</p>
+                      <div className="mt-4 grid gap-2">
+                        {checkoutProduct.includes.map((item) => (
+                          <div key={item} className="flex items-center gap-2 rounded-2xl bg-(--surface-overlay) px-3 py-2 text-sm text-neutral-700">
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-(--color-primary-600)" />
+                            <span className="truncate">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl border border-(--border-default) bg-(--surface-base) p-5">
+                      <div className="flex items-start gap-3">
+                        <Shield className="mt-0.5 h-5 w-5 shrink-0 text-(--color-primary-600)" />
+                        <p className="text-sm leading-6 text-neutral-600">
+                          付款前请确认资料包说明。本站仅支持自有整理、公开授权或可合法分享的资料，不上架侵权内容。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="rounded-3xl border border-(--border-default) bg-(--surface-base) p-5">
+                      <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">选择支付方式</p>
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        {[
+                          ['wechat', '微信支付'],
+                          ['alipay', '支付宝'],
+                        ].map(([method, label]) => (
+                          <button
+                            key={method}
+                            type="button"
+                            onClick={() => setPaymentMethod(method as PaymentMethod)}
+                            className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                              paymentMethod === method
+                                ? 'border-(--color-primary-500) bg-(--surface-overlay) text-neutral-900'
+                                : 'border-(--border-default) bg-transparent text-neutral-500 hover:text-neutral-900'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 grid min-h-56 place-items-center rounded-3xl border border-dashed border-(--border-default) bg-(--surface-overlay) p-5 text-center">
+                        {payQrConfig[paymentMethod] ? (
+                          <div
+                            className="h-44 w-44 rounded-2xl bg-white bg-contain bg-center bg-no-repeat shadow-(--shadow-sm)"
+                            style={{ backgroundImage: `url(${payQrConfig[paymentMethod]})` }}
+                            role="img"
+                            aria-label={paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
+                          />
+                        ) : (
+                          <div>
+                            <QrCode className="mx-auto h-12 w-12 text-neutral-400" />
+                            <p className="mt-3 text-sm font-medium text-neutral-900">
+                              {paymentMethod === 'wechat' ? '微信收款码占位' : '支付宝收款码占位'}
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-neutral-500">
+                              配置 `{activePaymentQrEnv}` 后会显示二维码。
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-3 text-xs leading-5 text-neutral-500">
+                        {checkoutOrder
+                          ? '订单已写入数据库，后台可查看并更新支付/交付状态。'
+                          : '先填写联系方式并提交订单，再扫码付款，后台会保留这笔订单。'}
+                      </p>
+                    </div>
+
+                    <div className="rounded-3xl border border-(--border-default) bg-(--surface-base) p-5">
+                      <label className="block text-sm font-medium text-neutral-800">联系方式</label>
+                      <div className="mt-2 flex items-center gap-2 rounded-2xl border border-(--border-default) bg-(--surface-raised) px-3 py-2">
+                        <Mail className="h-4 w-4 text-neutral-400" />
+                        <input
+                          value={buyerContact}
+                          onChange={(event) => setBuyerContact(event.target.value)}
+                          placeholder="邮箱 / 微信号 / Telegram"
+                          className="min-w-0 flex-1 bg-transparent py-1 text-sm outline-none placeholder:text-neutral-400"
+                        />
+                      </div>
+
+                      <label className="mt-4 block text-sm font-medium text-neutral-800">备注</label>
+                      <textarea
+                        value={buyerNote}
+                        onChange={(event) => setBuyerNote(event.target.value)}
+                        placeholder="例如：已付款，微信昵称是..."
+                        rows={3}
+                        className="mt-2 w-full resize-none rounded-2xl border border-(--border-default) bg-(--surface-raised) px-3 py-3 text-sm outline-none placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-(--color-primary-500)"
+                      />
+
+                      <div className="mt-4 grid gap-2">
+                        <Button onClick={createOrderAndCopy} loading={orderSubmitting} className="w-full">
+                          {orderCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                          {checkoutOrder ? '重新复制订单信息' : '创建订单并复制'}
+                        </Button>
+                        <p className="text-xs leading-5 text-neutral-500">
+                          付款后把订单信息发给站长。支付平台回调或后台确认收款后，再发送网盘链接、提取码和后续更新说明。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>,
+            document.body
+        ) : null}
 
         {/* 下载验证弹窗 */}
         <AnimatePresence>

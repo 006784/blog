@@ -63,7 +63,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
-import { ArrowRight, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
+import { ArrowRight, BookOpenText, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { Badge } from '@/components/ui/Badge';
@@ -373,6 +373,32 @@ function EditorialMemoCard({
   );
 }
 
+function TopicRail({
+  categories,
+  totalPosts,
+}: {
+  categories: Array<[string, number]>;
+  totalPosts: number;
+}) {
+  if (categories.length === 0) return null;
+
+  return (
+    <div className="atelier-topic-rail" aria-label="内容主题快速入口">
+      <span className="atelier-topic-label">快速进入</span>
+      {categories.map(([name, count]) => (
+        <Link key={name} href={`/blog?category=${encodeURIComponent(name)}`} className="atelier-topic-chip">
+          <span>{name}</span>
+          <strong>{count}</strong>
+        </Link>
+      ))}
+      <Link href="/blog" className="atelier-topic-chip is-all">
+        <span>全部文章</span>
+        <strong>{totalPosts}</strong>
+      </Link>
+    </div>
+  );
+}
+
 export default function HomePageClient({
   initialPosts = [],
 }: {
@@ -467,7 +493,6 @@ export default function HomePageClient({
   const activePosts = posts.length > 0 ? posts : fallbackHomePosts;
   const heroQuote = useMemo(
     () => HERO_QUOTES[Math.floor(Math.random() * HERO_QUOTES.length)],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const heroPinnedPost = useMemo(
@@ -571,6 +596,7 @@ export default function HomePageClient({
       </Script>
 
       <header className="atelier-nav" style={navStyle}>
+        <div className="atelier-scroll-progress" style={{ transform: `scaleX(${scrollRatio})` }} />
         <div className="atelier-shell atelier-nav-row">
           <Link href="/" className="atelier-brand">
             <span className="atelier-brand-mark">拾</span>
@@ -619,13 +645,17 @@ export default function HomePageClient({
                 <p className="atelier-kicker">独立写作空间&ensp;·&ensp;ESSAY</p>
                 <h1>{heroQuote.text}</h1>
                 <p className="atelier-quote-author">—— {heroQuote.author}</p>
+                <p className="atelier-intro">
+                  这里收集技术实践、产品观察和生活札记。你可以从封面文章进入，也可以按主题慢慢翻阅，让每一次打开都有明确的下一步。
+                </p>
 
                 <div className="atelier-action-row">
                   <Link
                     href={`/blog/${heroPost.slug}`}
                     className="atelier-primary-button rounded-full shadow-(--shadow-lg) transition-all duration-(--duration-fast) hover:-translate-y-0.5"
                   >
-                    阅读最新文章
+                    <BookOpenText strokeWidth={1.5} className="h-4 w-4" />
+                    阅读封面文章
                     <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
                   </Link>
                   <Link
@@ -635,6 +665,8 @@ export default function HomePageClient({
                     认识作者
                   </Link>
                 </div>
+
+                <TopicRail categories={topCategories} totalPosts={activePosts.length} />
 
                 <div className="atelier-metrics">
                   <div className="atelier-metric-card rounded-xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm)">
@@ -683,7 +715,10 @@ export default function HomePageClient({
                 <div className="atelier-category-list">
                   {topCategories.map(([name, count]) => (
                     <div key={name} className="atelier-category-row">
-                      <span>{name}</span>
+                      <div className="atelier-category-copy">
+                        <span>{name}</span>
+                        <em style={{ transform: `scaleX(${count / Math.max(activePosts.length, 1)})` }} />
+                      </div>
                       <strong>{count}</strong>
                     </div>
                   ))}

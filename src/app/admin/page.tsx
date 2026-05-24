@@ -8,7 +8,7 @@ import {
   Eye, EyeOff, TrendingUp, LogOut, Lock,
   ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2,
   Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck,
-  Link2, MessageSquare, Music2, Mail, Check, Star, Pin, ExternalLink, Upload, Send
+  Link2, MessageSquare, Music2, Mail, Check, Star, Pin, ExternalLink, Upload, Send, ClipboardList
 } from 'lucide-react';
 import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
 import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
@@ -412,6 +412,7 @@ function OverviewTab({ posts, photos, diaries, albums }: {
     { href: '/admin/media', icon: Film, title: '书影音', description: '管理观影读书记录' },
     { href: '/admin/timeline', icon: Clock, title: '时间线', description: '管理重要人生节点' },
     { href: '/admin/uses', icon: Wrench, title: '工具箱', description: '管理硬件与软件配置' },
+    { href: '/admin/resource-orders', icon: ClipboardList, title: '资源订单', description: '处理付款与网盘交付' },
   ];
 
   return (
