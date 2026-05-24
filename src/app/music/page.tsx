@@ -65,12 +65,13 @@ function fmtDate(iso: string) {
 
 async function fetchLyrics(title: string, artist: string, album: string): Promise<string | null> {
   try {
-    const params = new URLSearchParams({ track_name: title, artist_name: artist, album_name: album });
-    const res = await fetch(`https://lrclib.net/api/get?${params}`);
+    const params = new URLSearchParams({ track: title, artist, album });
+    const res = await fetch(`/api/music/lyrics?${params}`);
     if (!res.ok) return null;
-    const data = await res.json() as { plainLyrics?: string; instrumental?: boolean };
+    const data = await res.json() as { found: boolean; lyrics?: string; instrumental?: boolean };
+    if (!data.found) return null;
     if (data.instrumental) return '[纯音乐]';
-    return data.plainLyrics ?? null;
+    return data.lyrics ?? null;
   } catch { return null; }
 }
 
