@@ -221,14 +221,13 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
       );
     },
     p: ({ children }) => {
-      // 检测段落内只有一个裸 URL 链接 → 渲染链接预览卡
+      // 段落内只有一个外链（text 可以 ≠ href）→ 渲染预览卡
       const kids = Array.isArray(children) ? children : [children];
       if (kids.length === 1 && isValidElement(kids[0])) {
         const child = kids[0] as React.ReactElement<{ href?: string; children?: ReactNode }>;
         if (child.type === 'a') {
           const href = child.props.href ?? '';
-          const text = getTextContent(child.props.children);
-          if (href.startsWith('http') && href === text) {
+          if (href.startsWith('http')) {
             return <LinkPreviewCard url={href} />;
           }
         }
