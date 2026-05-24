@@ -13,6 +13,10 @@ export interface Profile {
   website: string;
   donate_wechat: string;
   donate_alipay: string;
+  donate_paypal: string;
+  donate_btc: string;
+  donate_eth: string;
+  donate_usdt_trc20: string;
 }
 
 export const defaultProfile: Profile = {
@@ -30,6 +34,10 @@ export const defaultProfile: Profile = {
   website: '',
   donate_wechat: '',
   donate_alipay: '',
+  donate_paypal: '',
+  donate_btc: '',
+  donate_eth: '',
+  donate_usdt_trc20: '',
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -58,5 +66,9 @@ export function normalizeProfile(value: unknown): Profile {
     website: normalizeString(input.website),
     donate_wechat: normalizeString(input.donate_wechat),
     donate_alipay: normalizeString(input.donate_alipay),
+    donate_paypal: normalizeString(input.donate_paypal),
+    donate_btc: normalizeString(input.donate_btc),
+    donate_eth: normalizeString(input.donate_eth),
+    donate_usdt_trc20: normalizeString(input.donate_usdt_trc20),
   };
 }

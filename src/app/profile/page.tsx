@@ -296,13 +296,15 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* 打赏二维码 */}
+            {/* 打赏设置 */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">打赏二维码</h3>
-              <p className="text-sm text-muted-foreground">上传二维码图片后，文章页将显示打赏按钮。</p>
+              <h3 className="text-lg font-semibold">打赏设置</h3>
+              <p className="text-sm text-muted-foreground">配置后文章页将显示打赏按钮，至少填写一项。</p>
+
+              {/* 二维码 */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">微信支付</label>
+                  <label className="text-sm font-medium">微信支付二维码</label>
                   <ImageUploader
                     preview={formData.donate_wechat || ''}
                     onUpload={(url) => setFormData({ ...formData, donate_wechat: url })}
@@ -312,13 +314,50 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">支付宝</label>
+                  <label className="text-sm font-medium">支付宝二维码</label>
                   <ImageUploader
                     preview={formData.donate_alipay || ''}
                     onUpload={(url) => setFormData({ ...formData, donate_alipay: url })}
                     placeholder="上传支付宝二维码"
                     folder="donate"
                     aspectRatio="square"
+                  />
+                </div>
+              </div>
+
+              {/* PayPal & 加密货币 */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">PayPal 链接</label>
+                  <Input
+                    type="url"
+                    value={formData.donate_paypal || ''}
+                    onChange={(e) => setFormData({ ...formData, donate_paypal: e.target.value })}
+                    placeholder="https://paypal.me/yourname"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Bitcoin (BTC) 地址</label>
+                  <Input
+                    value={formData.donate_btc || ''}
+                    onChange={(e) => setFormData({ ...formData, donate_btc: e.target.value })}
+                    placeholder="bc1q..."
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Ethereum (ETH) 地址</label>
+                  <Input
+                    value={formData.donate_eth || ''}
+                    onChange={(e) => setFormData({ ...formData, donate_eth: e.target.value })}
+                    placeholder="0x..."
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">USDT (TRC20) 地址</label>
+                  <Input
+                    value={formData.donate_usdt_trc20 || ''}
+                    onChange={(e) => setFormData({ ...formData, donate_usdt_trc20: e.target.value })}
+                    placeholder="T..."
                   />
                 </div>
               </div>
