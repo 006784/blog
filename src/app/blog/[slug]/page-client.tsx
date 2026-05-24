@@ -44,6 +44,7 @@ import { getPageStructuredData } from '@/lib/seo';
 import { PostReadingMemory } from '@/components/post/PostReadingMemory';
 import { siteConfig } from '@/lib/site-config';
 import { AISummary } from '@/components/AISummary';
+import { LinkPreviewCard } from '@/components/LinkPreviewCard';
 
 interface BlogPostPageClientProps {
   slug: string;
@@ -218,6 +219,21 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           {children}
         </h4>
       );
+    },
+    p: ({ children }) => {
+      // 检测段落内只有一个裸 URL 链接 → 渲染链接预览卡
+      const kids = Array.isArray(children) ? children : [children];
+      if (kids.length === 1 && isValidElement(kids[0])) {
+        const child = kids[0] as React.ReactElement<{ href?: string; children?: ReactNode }>;
+        if (child.type === 'a') {
+          const href = child.props.href ?? '';
+          const text = getTextContent(child.props.children);
+          if (href.startsWith('http') && href === text) {
+            return <LinkPreviewCard url={href} />;
+          }
+        }
+      }
+      return <p>{children}</p>;
     },
     a: ({ children, ...props }) => (
       <a {...props} target="_blank" rel="noreferrer">
