@@ -111,6 +111,11 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
+        {/* Noto Serif SC — 中文衬线（古诗词 hero 标题） */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="app-body antialiased min-h-screen" suppressHydrationWarning>
         <I18nProvider>
