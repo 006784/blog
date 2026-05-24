@@ -10,18 +10,18 @@ interface SplashScreenProps {
 
 export function SplashScreen({ quote, onDismiss }: SplashScreenProps) {
   const [avatar, setAvatar] = useState('');
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     fetch('/api/profile')
       .then(r => r.json())
       .then((d: { avatar?: string }) => { setAvatar(d.avatar ?? ''); })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') onDismiss(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') onDismiss();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onDismiss]);
@@ -40,16 +40,12 @@ export function SplashScreen({ quote, onDismiss }: SplashScreenProps) {
       {/* 角落光晕 */}
       <div className="splash-glow" aria-hidden="true" />
 
-      <motion.div
-        className="splash-inner"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
-      >
+      {/* 内容区：纯 CSS 入场动画，避免 Framer Motion 初始化时机问题 */}
+      <div className="splash-inner">
         {/* 头像 */}
         <div className="splash-avatar-ring">
-          {loaded && avatar ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
+          {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={avatar} alt="博主头像" className="splash-avatar-img" />
           ) : (
             <div className="splash-avatar-fallback">L</div>
@@ -72,7 +68,7 @@ export function SplashScreen({ quote, onDismiss }: SplashScreenProps) {
           <span className="splash-hint-dot" />
           轻触任意处进入
         </p>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }

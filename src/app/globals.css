@@ -6628,6 +6628,12 @@ textarea:focus {
   padding: 2rem;
   max-width: 480px;
   width: 100%;
+  animation: splash-enter 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes splash-enter {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .splash-avatar-ring {
@@ -7041,6 +7047,7 @@ pre[class*="language-"] {
   font-size: 0.875em;
   line-height: 1.7;
   tab-size: 2;
+  -webkit-hyphens: none;
   hyphens: none;
   white-space: pre;
   word-spacing: normal;
