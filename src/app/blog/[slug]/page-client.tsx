@@ -59,10 +59,13 @@ function CodeBlock({ lang, highlighted, raw }: { lang: string; highlighted: stri
   };
 
   return (
-    <div className="article-pre-wrapper" data-lang={lang || 'code'}>
-      <button type="button" className="article-copy-btn" onClick={handleCopy} aria-label="复制代码">
-        {copied ? '已复制' : '复制'}
-      </button>
+    <div className="article-pre-wrapper">
+      <div className="article-pre-header">
+        <span className="article-pre-lang">{lang || 'code'}</span>
+        <button type="button" className="article-copy-btn" onClick={handleCopy} aria-label="复制代码">
+          {copied ? '已复制' : '复制'}
+        </button>
+      </div>
       <pre className="article-pre">
         <code className={`language-${lang}`} dangerouslySetInnerHTML={{ __html: highlighted }} />
       </pre>

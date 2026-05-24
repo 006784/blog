@@ -1684,29 +1684,9 @@ textarea:focus {
   isolation: isolate;
 }
 
-.site-main::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -5;
-  background:
-    radial-gradient(900px circle at 8% 4%, color-mix(in srgb, var(--gradient-start) 20%, transparent), transparent 56%),
-    radial-gradient(760px circle at 88% 18%, color-mix(in srgb, var(--gradient-end) 18%, transparent), transparent 58%),
-    linear-gradient(180deg, color-mix(in srgb, var(--background) 95%, transparent), var(--background));
-}
-
+.site-main::before,
 .site-main::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -4;
-  opacity: 0.32;
-  background-image:
-    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--foreground) 10%, transparent) 1px, transparent 0);
-  background-size: 18px 18px;
-  mask-image: linear-gradient(180deg, black, transparent 92%);
+  content: none;
 }
 
 .surface-hero {
@@ -2149,9 +2129,6 @@ textarea:focus {
   --ui-shadow-float: 0 28px 62px -34px rgba(0, 0, 0, 0.74);
 }
 
-.site-main::after {
-  opacity: 0.15;
-}
 
 .gradient-text,
 .shimmer-text,
@@ -2278,9 +2255,6 @@ textarea:focus {
   color: var(--apple-text);
 }
 
-.site-main::after {
-  opacity: 0.08 !important;
-}
 
 .surface-hero,
 .surface-card {
@@ -6365,15 +6339,19 @@ textarea:focus {
   background: var(--surface-raised);
 }
 
-.article-pre-wrapper::before {
-  content: attr(data-lang);
-  display: block;
-  padding: 0.35rem 1rem;
-  font-size: 0.7rem;
-  font-family: var(--font-mono);
-  color: var(--ink-muted);
+.article-pre-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.75rem 0.3rem 1rem;
   background: var(--surface-overlay);
   border-bottom: 1px solid var(--border-default);
+}
+
+.article-pre-lang {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--ink-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   line-height: 1.6;
@@ -6390,29 +6368,22 @@ textarea:focus {
 }
 
 .article-copy-btn {
-  position: absolute;
-  top: 0.2rem;
-  right: 0.5rem;
-  padding: 0.15rem 0.55rem;
+  padding: 0.18rem 0.65rem;
   border-radius: var(--radius-sm);
   font-size: 0.68rem;
   font-family: var(--font-inter);
-  background: var(--surface-glass);
+  background: var(--paper);
   border: 1px solid var(--border-default);
-  color: var(--ink-muted);
+  color: var(--ink-secondary);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s, background 0.15s;
-  z-index: 1;
-}
-
-.article-pre-wrapper:hover .article-copy-btn {
-  opacity: 1;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
 }
 
 .article-copy-btn:hover {
-  background: var(--surface-panel);
-  color: var(--ink);
+  background: var(--gold);
+  color: var(--paper);
+  border-color: var(--gold);
 }
 
 /* 改善行内代码 */
@@ -6464,12 +6435,8 @@ textarea:focus {
   min-width: 500px;
 }
 
-/* 移动端代码块：始终显示复制按钮，平滑横向滚动 */
+/* 移动端代码块 */
 @media (max-width: 768px) {
-  .article-copy-btn {
-    opacity: 1;
-  }
-
   .article-content {
     font-size: 1rem;
   }
