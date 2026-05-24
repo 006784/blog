@@ -64,6 +64,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.r2.dev' },
       // DiceBear 默认头像（留言板）
       { protocol: 'https', hostname: 'api.dicebear.com' },
+      // Apple Music / iTunes 专辑封面
+      { protocol: 'https', hostname: '*.mzstatic.com' },
       // 其他常见 CDN（可按需追加）
       { protocol: 'https', hostname: '*.cloudfront.net' },
       { protocol: 'https', hostname: '*.githubusercontent.com' },
