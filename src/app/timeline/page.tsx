@@ -1,15 +1,106 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Milestone, RefreshCw, Sparkles } from 'lucide-react';
+import { ChevronDown, GitCommit, Milestone, RefreshCw, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
 import { type TimelineEvent } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
+import rawGitLog from '@/data/git-log.json';
+
+// ── Git 提交类型颜色 ───────────────────────────────────────
+interface GitCommit { hash: string; date: string; message: string; author: string }
+const GIT_LOG: GitCommit[] = rawGitLog as GitCommit[];
+
+const COMMIT_TYPE_COLOR: Record<string, { dot: string; badge: string; label: string }> = {
+  feat:     { dot: 'bg-teal-500',   badge: 'bg-teal-500/15 text-teal-700',    label: '功能' },
+  fix:      { dot: 'bg-orange-500', badge: 'bg-orange-500/15 text-orange-700', label: '修复' },
+  refactor: { dot: 'bg-blue-500',   badge: 'bg-blue-500/15 text-blue-700',     label: '重构' },
+  docs:     { dot: 'bg-purple-500', badge: 'bg-purple-500/15 text-purple-700', label: '文档' },
+  chore:    { dot: 'bg-neutral-400', badge: 'bg-neutral-400/15 text-neutral-600', label: '杂务' },
+  style:    { dot: 'bg-pink-400',   badge: 'bg-pink-400/15 text-pink-700',     label: '样式' },
+  revert:   { dot: 'bg-red-400',    badge: 'bg-red-400/15 text-red-700',       label: '回滚' },
+  perf:     { dot: 'bg-amber-500',  badge: 'bg-amber-500/15 text-amber-700',   label: '性能' },
+};
+
+function getCommitType(message: string) {
+  const m = /^(\w+)(?:\(.+\))?!?:/.exec(message);
+  const type = m?.[1]?.toLowerCase() ?? '';
+  return COMMIT_TYPE_COLOR[type] ?? { dot: 'bg-neutral-400', badge: 'bg-neutral-400/15 text-neutral-600', label: type || 'other' };
+}
+
+function GitCommitSection() {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? GIT_LOG : GIT_LOG.slice(0, 8);
+
+  if (GIT_LOG.length === 0) return null;
+
+  return (
+    <div className="mt-12 space-y-6">
+      {/* 分节标题 */}
+      <div className="flex items-center gap-4">
+        <span className="shrink-0 flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold bg-(--surface-overlay) text-teal-500 shadow-(--neu-inset)">
+          <GitCommit className="h-3.5 w-3.5" />
+          代码提交
+        </span>
+        <div className="h-px flex-1 bg-(--border-default)" />
+        <span className="text-xs text-ink-ghost">{GIT_LOG.length} 条记录</span>
+      </div>
+
+      {/* 提交列表 */}
+      <div className="relative space-y-3 pl-6">
+        <div className="absolute bottom-0 left-2.25 top-0 w-px bg-(--border-default)" />
+
+        <AnimatePresence initial={false}>
+          {visible.map((commit, i) => {
+            const type = getCommitType(commit.message);
+            const subject = commit.message.replace(/^\w+(?:\(.+\))?!?:\s*/, '');
+            const dateStr = new Date(commit.date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+
+            return (
+              <motion.div
+                key={commit.hash}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ delay: i * 0.02 }}
+                className="relative flex gap-3 items-start"
+              >
+                {/* Dot */}
+                <div className={`absolute -left-3.75 mt-2 h-3 w-3 shrink-0 rounded-full border-2 border-(--surface-base) ${type.dot}`} />
+
+                {/* Card */}
+                <div className="flex-1 rounded-xl px-4 py-2.5 flex items-center gap-3 bg-(--surface-raised) shadow-(--neu-shadow-sm)">
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${type.badge}`}>
+                    {type.label}
+                  </span>
+                  <p className="flex-1 text-sm text-ink leading-snug line-clamp-1">{subject}</p>
+                  <span className="shrink-0 font-mono text-[11px] text-ink-ghost">{commit.hash}</span>
+                  <span className="shrink-0 text-xs text-ink-ghost">{dateStr}</span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {GIT_LOG.length > 8 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="relative ml-0 flex items-center gap-1.5 rounded-full border border-(--border-default) bg-(--surface-raised) px-4 py-1.5 text-xs text-ink-muted transition hover:border-teal-500/40 hover:text-teal-600"
+          >
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            {expanded ? '收起' : `查看全部 ${GIT_LOG.length} 条提交`}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ── 分类配置 ──────────────────────────────────────────────
 
@@ -299,6 +390,9 @@ export default function TimelinePage() {
             ))}
           </div>
         )}
+
+        {/* Git 提交历史 */}
+        <GitCommitSection />
       </div>
     </div>
   );

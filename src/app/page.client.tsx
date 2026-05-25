@@ -847,11 +847,38 @@ export default function HomePageClient({
   );
 }
 
-// ── 首页简报预览组件 ──────────────────────────────────────────────
+// ── 首页简报 + 时钟组件 ──────────────────────────────────────────────
 interface HomeBriefing {
   id: string; date: string; title: string; content: string;
   mood?: string | null; weather?: string | null;
   links: { title: string; url: string; comment?: string }[];
+}
+
+function LiveClock() {
+  const [time, setTime] = useState('');
+  const [date, setDate] = useState('');
+
+  useEffect(() => {
+    function tick() {
+      const now = new Date();
+      setTime(now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
+      setDate(now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }));
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <div className="flex flex-col items-end gap-0.5 select-none">
+      <span className="font-mono text-2xl sm:text-3xl font-light text-ink tracking-tight tabular-nums leading-none">
+        {time}
+      </span>
+      <span className="text-xs text-ink-ghost">{date}</span>
+    </div>
+  );
 }
 
 function TodayBriefingSection() {
@@ -864,54 +891,58 @@ function TodayBriefingSection() {
       .catch(() => setBriefing(null));
   }, []);
 
-  if (briefing === null) return null;
-
-  const today = new Date();
-  const dateLabel = today.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
-
   return (
     <section className="atelier-shell pt-12 pb-4">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="rounded-2xl border border-(--border-default) bg-(--surface-panel) backdrop-blur-xl p-5 sm:p-6 shadow-(--shadow-sm)"
+        className="rounded-2xl border border-(--border-default) bg-(--surface-panel) backdrop-blur-xl shadow-(--shadow-sm) overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-gold" />
+        {/* 头部：标签 + 时钟 */}
+        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b border-(--border-default)">
+          <div className="flex items-center gap-2 pt-1">
+            <CalendarDays className="h-4 w-4 text-gold shrink-0" />
             <span className="text-xs uppercase tracking-widest text-ink-muted">Daily Briefing</span>
-            <span className="text-xs text-ink-ghost">·&ensp;{dateLabel}</span>
           </div>
-          <Link href="/briefing" className="flex items-center gap-1 text-xs text-ink-ghost hover:text-gold transition-colors">
-            查看全部 <ArrowRight className="h-3 w-3" />
-          </Link>
+          <LiveClock />
         </div>
 
-        {briefing === undefined ? (
-          <div className="space-y-2">
-            <div className="h-4 rounded bg-(--surface-overlay) animate-pulse w-3/4" />
-            <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-full" />
-            <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-5/6" />
-          </div>
-        ) : (
-          <>
-            {briefing.title && <h3 className="font-semibold text-ink mb-2">{briefing.title}</h3>}
-            <p className="text-sm text-ink-muted leading-relaxed line-clamp-3">
-              {briefing.content.replace(/#+\s/g, '').replace(/\*\*/g, '')}
-            </p>
-            <div className="flex items-center gap-4 mt-3 flex-wrap">
-              {briefing.mood && <span className="text-xs text-ink-ghost">心情：{briefing.mood}</span>}
-              {briefing.weather && <span className="text-xs text-ink-ghost">天气：{briefing.weather}</span>}
-              {briefing.links.length > 0 && (
-                <span className="flex items-center gap-1 text-xs text-ink-ghost">
-                  <ExternalLink className="h-3 w-3" />{briefing.links.length} 个链接
-                </span>
-              )}
-              <Link href="/briefing" className="ml-auto text-xs text-gold hover:underline">阅读全文 →</Link>
+        {/* 简报内容 */}
+        <div className="px-5 sm:px-6 py-4">
+          {briefing === undefined ? (
+            <div className="space-y-2 py-2">
+              <div className="h-4 rounded bg-(--surface-overlay) animate-pulse w-3/4" />
+              <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-full" />
+              <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-5/6" />
             </div>
-          </>
-        )}
+          ) : briefing === null ? (
+            <p className="text-sm text-ink-ghost py-2">今天还没有简报，稍后见。</p>
+          ) : (
+            <>
+              {briefing.title && <h3 className="font-semibold text-ink mb-2">{briefing.title}</h3>}
+              <p className="text-sm text-ink-muted leading-relaxed line-clamp-4">
+                {briefing.content.replace(/#+\s/g, '').replace(/\*\*/g, '')}
+              </p>
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
+                {briefing.mood && <span className="text-xs text-ink-ghost">心情：{briefing.mood}</span>}
+                {briefing.weather && <span className="text-xs text-ink-ghost">天气：{briefing.weather}</span>}
+                {briefing.links.length > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-ink-ghost">
+                    <ExternalLink className="h-3 w-3" />{briefing.links.length} 个链接
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* 底部操作 */}
+        <div className="flex items-center justify-end px-5 sm:px-6 pb-4">
+          <Link href="/briefing" className="flex items-center gap-1 text-xs text-ink-ghost hover:text-gold transition-colors">
+            查看全部简报 <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
       </motion.div>
     </section>
   );

@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   ArrowLeft, CalendarDays, ChevronDown, Cloud, Edit3,
-  ExternalLink, Heart, Loader2, Plus, Save, Smile, Trash2, X,
+  ExternalLink, Heart, Loader2, Plus, Save, Smile, Sparkles, Trash2, X,
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
 import { Badge } from '@/components/ui/Badge';
@@ -358,6 +358,7 @@ export default function BriefingPage() {
   const [page, setPage] = useState(1);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Partial<Briefing> | null>(null);
+  const [generating, setGenerating] = useState(false);
   const LIMIT = 15;
 
   const loadBriefings = useCallback(async (p: number, append = false) => {
@@ -410,6 +411,21 @@ export default function BriefingPage() {
     setTotal((t) => t - 1);
   }
 
+  async function handleGenerate() {
+    setGenerating(true);
+    try {
+      const res = await fetch('/api/briefings/generate', { method: 'POST', credentials: 'include' });
+      const data = await res.json() as { briefing?: { title: string }; error?: string; newsCount?: number };
+      if (!res.ok) throw new Error(data.error ?? 'AI 生成失败');
+      showToast.success(`已生成「${data.briefing?.title ?? '今日简报'}」（抓取 ${data.newsCount ?? 0} 条新闻）`);
+      void loadBriefings(1);
+    } catch (e) {
+      showToast.error(e instanceof Error ? e.message : 'AI 生成失败');
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   const hasMore = briefings.length < total;
 
   return (
@@ -431,9 +447,20 @@ export default function BriefingPage() {
               <p className="mt-1 text-sm text-ink-muted">每天的一点记录，慢慢堆叠成时光。</p>
             </div>
             {isAdmin && (
-              <Button onClick={() => setEditing({})} className="shrink-0">
-                <Plus className="h-4 w-4" />新建简报
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="secondary"
+                  onClick={handleGenerate}
+                  loading={generating}
+                  title="用 DeepSeek AI 自动抓取今日新闻并生成简报"
+                >
+                  {!generating && <Sparkles className="h-4 w-4" />}
+                  AI 生成
+                </Button>
+                <Button onClick={() => setEditing({})}>
+                  <Plus className="h-4 w-4" />新建简报
+                </Button>
+              </div>
             )}
           </div>
         </motion.div>

@@ -1,0 +1,602 @@
+[
+  {
+    "hash": "4dcb9a5",
+    "date": "2026-05-25T17:26:02+08:00",
+    "message": "feat: 重设计小说阅读器，完善桌面端适配",
+    "author": "zyi"
+  },
+  {
+    "hash": "5bc831e",
+    "date": "2026-05-25T17:22:17+08:00",
+    "message": "feat: 书影音页新增小说阅读器功能",
+    "author": "zyi"
+  },
+  {
+    "hash": "8a8aac1",
+    "date": "2026-05-25T17:06:39+08:00",
+    "message": "refactor: 移动端管理员入口整合进底部导航 FAB",
+    "author": "zyi"
+  },
+  {
+    "hash": "f11e3a9",
+    "date": "2026-05-25T00:56:57+08:00",
+    "message": "feat: 资源页商品卡片重设计 + AI 代充服务区块",
+    "author": "zyi"
+  },
+  {
+    "hash": "aa0fff1",
+    "date": "2026-05-25T00:30:01+08:00",
+    "message": "fix: 文章分享卡片优先使用封面图而非生成的 OG 图",
+    "author": "zyi"
+  },
+  {
+    "hash": "fe2862a",
+    "date": "2026-05-25T00:20:10+08:00",
+    "message": "feat: 资源商店完整实现 + 歌单列表布局 + 首页移动端修复",
+    "author": "zyi"
+  },
+  {
+    "hash": "3443149",
+    "date": "2026-05-24T16:59:30+08:00",
+    "message": "refactor: 歌单改为 Spotify 风格列表行布局 + 修复移动端头像遮挡",
+    "author": "zyi"
+  },
+  {
+    "hash": "9d4da67",
+    "date": "2026-05-24T16:35:37+08:00",
+    "message": "feat: 管理后台新增友链、留言、歌单、订阅四个管理标签页",
+    "author": "zyi"
+  },
+  {
+    "hash": "5a00ab3",
+    "date": "2026-05-24T16:22:47+08:00",
+    "message": "feat: 歌单改三列网格布局 + 播放器支持 Apple Music 30s 试听",
+    "author": "zyi"
+  },
+  {
+    "hash": "5e46e69",
+    "date": "2026-05-24T16:06:09+08:00",
+    "message": "fix: 歌词改走服务端代理，解决中国访问 lrclib.net 被屏蔽问题",
+    "author": "zyi"
+  },
+  {
+    "hash": "b2eea12",
+    "date": "2026-05-24T15:51:21+08:00",
+    "message": "feat: 打赏支持 PayPal 和加密货币（BTC/ETH/USDT TRC20）",
+    "author": "zyi"
+  },
+  {
+    "hash": "811f6a6",
+    "date": "2026-05-24T15:47:19+08:00",
+    "message": "feat: 文章页新增打赏按钮，支持微信/支付宝二维码配置",
+    "author": "zyi"
+  },
+  {
+    "hash": "28d4e3f",
+    "date": "2026-05-24T13:39:48+08:00",
+    "message": "revert: 移除启动页（SplashScreen）",
+    "author": "zyi"
+  },
+  {
+    "hash": "f9b7f23",
+    "date": "2026-05-24T13:32:18+08:00",
+    "message": "fix: 移除精选章节多余描述文字 + splash 退出后强制回到页顶",
+    "author": "zyi"
+  },
+  {
+    "hash": "5d85bf1",
+    "date": "2026-05-24T13:23:11+08:00",
+    "message": "fix: 启动页内容居中 + 移动端视口高度修复",
+    "author": "zyi"
+  },
+  {
+    "hash": "37411ed",
+    "date": "2026-05-24T13:12:11+08:00",
+    "message": "fix: 启动页内容不显示 + 修复 hyphens Safari 兼容性",
+    "author": "zyi"
+  },
+  {
+    "hash": "976e8ca",
+    "date": "2026-05-24T13:07:08+08:00",
+    "message": "feat: 新增启动页（SplashScreen）",
+    "author": "zyi"
+  },
+  {
+    "hash": "18a4593",
+    "date": "2026-05-24T12:58:18+08:00",
+    "message": "feat: hero 标题换用 Noto Serif SC 衬线字体，字重 300",
+    "author": "zyi"
+  },
+  {
+    "hash": "e414fa8",
+    "date": "2026-05-24T12:55:18+08:00",
+    "message": "feat: 主页名言库扩充至 53 条，新增大量古诗词名句",
+    "author": "zyi"
+  },
+  {
+    "hash": "ca8d37d",
+    "date": "2026-05-24T12:51:05+08:00",
+    "message": "feat: 主页 hero 区域改为随机名人名言，每次刷新随机换一条",
+    "author": "zyi"
+  },
+  {
+    "hash": "bf00790",
+    "date": "2026-05-24T12:43:24+08:00",
+    "message": "feat: Apple Music 面板增加歌词显示（lrclib.net）",
+    "author": "zyi"
+  },
+  {
+    "hash": "cc4ad11",
+    "date": "2026-05-24T12:20:04+08:00",
+    "message": "feat: Apple Music 白框替换为 iTunes 富信息面板（含 30s 试听）",
+    "author": "zyi"
+  },
+  {
+    "hash": "8b688fc",
+    "date": "2026-05-24T12:04:46+08:00",
+    "message": "fix: 允许 Apple Music 封面图域名 (*.mzstatic.com)",
+    "author": "zyi"
+  },
+  {
+    "hash": "a728361",
+    "date": "2026-05-24T11:58:53+08:00",
+    "message": "feat: 链接预览卡放宽识别条件",
+    "author": "zyi"
+  },
+  {
+    "hash": "66613d0",
+    "date": "2026-05-24T11:53:22+08:00",
+    "message": "feat: 链接预览卡（Link Preview Card）",
+    "author": "zyi"
+  },
+  {
+    "hash": "0cf3f8a",
+    "date": "2026-05-24T11:48:41+08:00",
+    "message": "fix: Apple Music 元数据改用 iTunes Lookup API",
+    "author": "zyi"
+  },
+  {
+    "hash": "cbecc2f",
+    "date": "2026-05-24T11:43:00+08:00",
+    "message": "feat: AI 文章摘要（DeepSeek）",
+    "author": "zyi"
+  },
+  {
+    "hash": "26246f3",
+    "date": "2026-05-24T11:37:18+08:00",
+    "message": "style: 代码块复制按钮重构 + 全站格子背景统一",
+    "author": "zyi"
+  },
+  {
+    "hash": "cca21d3",
+    "date": "2026-05-23T21:35:24+08:00",
+    "message": "style: 圆角 & 颜色打磨——博客卡片、文章页、指标块精细化",
+    "author": "zyi"
+  },
+  {
+    "hash": "95ef856",
+    "date": "2026-05-23T21:02:06+08:00",
+    "message": "style: 全局 UI/UX 精细化打磨",
+    "author": "zyi"
+  },
+  {
+    "hash": "16a3406",
+    "date": "2026-05-23T17:53:08+08:00",
+    "message": "style: 时间线/工具箱/电脑页面视觉优化",
+    "author": "zyi"
+  },
+  {
+    "hash": "a6ab43b",
+    "date": "2026-05-23T17:45:15+08:00",
+    "message": "chore: Tailwind v4 语法迁移 + 全站样式统一清理",
+    "author": "zyi"
+  },
+  {
+    "hash": "27f7aab",
+    "date": "2026-05-23T17:37:42+08:00",
+    "message": "fix: Song platform 类型不含 youtube，改为 other",
+    "author": "zyi"
+  },
+  {
+    "hash": "c9dd7a1",
+    "date": "2026-05-23T17:32:27+08:00",
+    "message": "feat: 多语言支持 (zh/en/ko/ja) + 语言切换器",
+    "author": "zyi"
+  },
+  {
+    "hash": "8d04692",
+    "date": "2026-05-23T17:28:42+08:00",
+    "message": "feat: 每日简报功能（首页预览 + 完整归档页 + 管理编辑）",
+    "author": "zyi"
+  },
+  {
+    "hash": "753f27d",
+    "date": "2026-05-23T17:23:19+08:00",
+    "message": "feat: 歌单页重设计 + Apple Music 自动提取元数据",
+    "author": "zyi"
+  },
+  {
+    "hash": "6d573b1",
+    "date": "2026-05-23T17:16:36+08:00",
+    "message": "fix: 修正卡片深色模式文字不可见 + 加强边框与阴影对比度",
+    "author": "zyi"
+  },
+  {
+    "hash": "35cf20f",
+    "date": "2026-05-23T17:11:02+08:00",
+    "message": "fix: 写作页视觉空白、AdminFloatButton 全局化、文章移动端优化",
+    "author": "zyi"
+  },
+  {
+    "hash": "8967261",
+    "date": "2026-05-23T16:34:35+08:00",
+    "message": "feat(code): improve playground workflow",
+    "author": "zyi"
+  },
+  {
+    "hash": "a8a72ce",
+    "date": "2026-05-23T15:43:48+08:00",
+    "message": "fix: 优化文章页移动端阅读体验",
+    "author": "zyi"
+  },
+  {
+    "hash": "efe9868",
+    "date": "2026-05-23T12:55:15+08:00",
+    "message": "feat: 文章封面优先从相册随机取图，无图时回退 Unsplash",
+    "author": "zyi"
+  },
+  {
+    "hash": "d24f0f9",
+    "date": "2026-05-23T12:52:54+08:00",
+    "message": "chore: 配置现代浏览器目标，消除 CSS color-mix() 兼容性警告",
+    "author": "zyi"
+  },
+  {
+    "hash": "5a40b77",
+    "date": "2026-05-23T12:49:06+08:00",
+    "message": "style: 格子纸背景 + 首页文章卡片重设计",
+    "author": "zyi"
+  },
+  {
+    "hash": "a984c93",
+    "date": "2026-05-23T12:05:07+08:00",
+    "message": "feat: 文章发布自动从 Unsplash 生成封面图",
+    "author": "zyi"
+  },
+  {
+    "hash": "f0a5d29",
+    "date": "2026-05-23T10:43:03+08:00",
+    "message": "全面升级 UI/UX、安全加固与新功能",
+    "author": "zyi"
+  },
+  {
+    "hash": "c1e7fa1",
+    "date": "2026-04-14T03:09:07+08:00",
+    "message": "修复 sentry-integration 兼容 @sentry/nextjs v10",
+    "author": "006784"
+  },
+  {
+    "hash": "5be23b1",
+    "date": "2026-04-14T03:04:01+08:00",
+    "message": "升级 UI/UX 日系杂志风格 & 后端增强",
+    "author": "006784"
+  },
+  {
+    "hash": "eae131a",
+    "date": "2026-04-10T09:40:10+05:30",
+    "message": "优化",
+    "author": "006784"
+  },
+  {
+    "hash": "3d7f3ae",
+    "date": "2026-04-04T18:08:24+05:30",
+    "message": "修复",
+    "author": "006784"
+  },
+  {
+    "hash": "f32cfca",
+    "date": "2026-04-03T06:41:00+05:30",
+    "message": "Fix admin session persistence and protect private routes",
+    "author": "006784"
+  },
+  {
+    "hash": "046c485",
+    "date": "2026-04-03T06:19:20+05:30",
+    "message": "Harden admin auth and clean project warnings",
+    "author": "006784"
+  },
+  {
+    "hash": "3baf40b",
+    "date": "2026-03-31T10:06:14+05:30",
+    "message": "添加 CLAUDE.md 项目上下文文档",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "05f3f59",
+    "date": "2026-03-31T09:43:43+05:30",
+    "message": "修复文章过滤、改进相册预览、完善评论配置提示",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "138bb8b",
+    "date": "2026-03-31T05:11:01+05:30",
+    "message": "修复文章无法查看及桌面端写作界面",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "2fd388b",
+    "date": "2026-03-30T21:23:20+05:30",
+    "message": "修复bug",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "9b2b276",
+    "date": "2026-03-28T15:17:15+05:30",
+    "message": "修复",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "2391046",
+    "date": "2026-03-28T13:07:50+05:30",
+    "message": "支持管理员邮箱验证码登录并兼容多邮箱白名单",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "76b2c8b",
+    "date": "2026-03-27T13:29:10+05:30",
+    "message": "统一前后台高频页面并收口内容管理交互",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "601ea46",
+    "date": "2026-03-27T10:01:28+05:30",
+    "message": "完善个人资料与日记保存并搭建设计系统底座",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "515fc53",
+    "date": "2026-03-26T00:45:57+05:30",
+    "message": "完善站点核心功能并补齐 AI 能力",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "c92d433",
+    "date": "2026-03-25T23:23:48+05:30",
+    "message": "chore(ci): modernize github actions workflows",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "523b329",
+    "date": "2026-03-25T23:13:35+05:30",
+    "message": "fix(logger): use console transport only",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "30545c6",
+    "date": "2026-03-25T23:09:22+05:30",
+    "message": "fix(logger): disable file transports on serverless",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "b7d8ddd",
+    "date": "2026-03-25T23:02:52+05:30",
+    "message": "fix(auth): unify admin entry with login page",
+    "author": "李诗雅"
+  },
+  {
+    "hash": "f5a6d46",
+    "date": "2026-03-25T17:49:51+05:30",
+    "message": "修改了工具箱",
+    "author": "lishiya"
+  },
+  {
+    "hash": "66a9b18",
+    "date": "2026-03-25T13:57:19+05:30",
+    "message": "feat(code): add standalone code playground at /code",
+    "author": "lishiya"
+  },
+  {
+    "hash": "b718da0",
+    "date": "2026-03-25T13:07:47+05:30",
+    "message": "feat(practice): add LeetCode-style coding practice module",
+    "author": "lishiya"
+  },
+  {
+    "hash": "c478843",
+    "date": "2026-03-25T12:30:03+05:30",
+    "message": "fix(api): migrate all DB writes to supabaseAdmin to bypass RLS",
+    "author": "lishiya"
+  },
+  {
+    "hash": "e08131f",
+    "date": "2026-03-25T12:16:40+05:30",
+    "message": "fix(music): route song CRUD through API to bypass RLS",
+    "author": "lishiya"
+  },
+  {
+    "hash": "f1cad54",
+    "date": "2026-03-25T12:08:18+05:30",
+    "message": "fix(auth): use supabaseAdmin for all admin_sessions DB operations",
+    "author": "lishiya"
+  },
+  {
+    "hash": "8f97a2f",
+    "date": "2026-03-25T11:55:33+05:30",
+    "message": "feat(mobile): iOS/Android safe-area and viewport adaptation",
+    "author": "lishiya"
+  },
+  {
+    "hash": "3f234a0",
+    "date": "2026-03-25T11:23:38+05:30",
+    "message": "fix: add missing diary/themes.ts to git tracking",
+    "author": "lishiya"
+  },
+  {
+    "hash": "7cfaf8b",
+    "date": "2026-03-25T11:03:08+05:30",
+    "message": "feat(security): overhaul admin auth with JWT sessions and hardened API routes",
+    "author": "lishiya"
+  },
+  {
+    "hash": "1d9c12c",
+    "date": "2026-02-20T15:29:18+08:00",
+    "message": "feat(home): redesign glass homepage and support pinned hero cover",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "ee52b3c",
+    "date": "2026-02-15T23:03:51+08:00",
+    "message": "feat(ui): premium visual overhaul for navigation search and cards",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "3389188",
+    "date": "2026-02-15T10:43:27+08:00",
+    "message": "feat(ui): apple-style redesign v5 with diary readability lock",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "9a31814",
+    "date": "2026-02-15T10:34:59+08:00",
+    "message": "refactor(ui): polish visual quality and reduce noisy effects",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "a53c1f6",
+    "date": "2026-02-15T10:31:45+08:00",
+    "message": "feat(ui): unify navbar search and card-action motion rhythm",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "21f1e02",
+    "date": "2026-02-15T10:24:16+08:00",
+    "message": "feat(ui): refine diary/resources usability and visual consistency",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "824274e",
+    "date": "2026-02-15T10:16:24+08:00",
+    "message": "feat(devops): add daily scheduled auto-push scripts for macOS",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "a4880c0",
+    "date": "2026-02-15T10:14:31+08:00",
+    "message": "feat(ui): major apple-style interaction overhaul",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "d43d495",
+    "date": "2026-02-15T03:48:21+08:00",
+    "message": "Upgrade UI effects and verify APIs",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "748371f",
+    "date": "2026-02-15T03:48:01+08:00",
+    "message": "feat: overhaul ui and diary environment persistence",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "3428413",
+    "date": "2026-02-15T01:10:45+08:00",
+    "message": "Update blog UI palette",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "fa614da",
+    "date": "2026-02-10T22:59:13+08:00",
+    "message": "enhancement: 大幅提升日记功能体验",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "8975a2e",
+    "date": "2026-02-10T20:26:02+08:00",
+    "message": "fix: 修复Vercel部署问题，注释掉自定义distDir以适配Vercel默认配置",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "9e9363d",
+    "date": "2026-02-10T20:06:08+08:00",
+    "message": "fix: 全面修复项目功能完整性",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "4a7d49c",
+    "date": "2026-02-01T04:12:30+08:00",
+    "message": "feat: 添加数据导出备份功能和智能提醒系统",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "b714539",
+    "date": "2026-02-01T04:02:27+08:00",
+    "message": "fix: 修复日记保存功能，更新API路由配置",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "625bcc2",
+    "date": "2026-01-31T16:16:21+08:00",
+    "message": "fix: 修复TypeScript类型错误并完善日记功能",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "32fa158",
+    "date": "2026-01-31T15:53:05+08:00",
+    "message": "feat: 实现日记功能多项增强 - 智能标签、搜索过滤、模板系统、手写笔迹、多媒体增强",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "a5ce5df",
+    "date": "2026-01-31T04:56:46+08:00",
+    "message": "fix: 删除有问题的notebook-page.tsx文件以解决构建错误",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "9a38fcb",
+    "date": "2026-01-31T04:49:34+08:00",
+    "message": "trigger: 强制更新远程仓库",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "01a39cb",
+    "date": "2026-01-31T04:40:25+08:00",
+    "message": "feat: 完善日记功能和新闻收集系统",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "25033ef",
+    "date": "2026-01-30T16:08:51+08:00",
+    "message": "fix: 修复构建错误 - 为API路由添加静态导出配置",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "34f0bef",
+    "date": "2026-01-30T15:59:51+08:00",
+    "message": "feat: 完善日记功能 - 添加位置、温度、天气等环境信息自动获取",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "b7050a7",
+    "date": "2025-12-22T13:02:25+08:00",
+    "message": "perf: 优化资源下载体验",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "df934f2",
+    "date": "2025-12-22T12:46:13+08:00",
+    "message": "feat: 资源下载添加 Turnstile 验证",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "2e7a85e",
+    "date": "2025-12-22T12:42:54+08:00",
+    "message": "feat: 优化 Turnstile 验证时机",
+    "author": "Lishiya"
+  },
+  {
+    "hash": "063cf91",
+    "date": "2025-12-22T12:17:04+08:00",
+    "message": "feat: 集成 Cloudflare Turnstile 人机验证",
+    "author": "Lishiya"
+  }
+]

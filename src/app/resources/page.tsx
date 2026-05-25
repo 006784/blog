@@ -917,7 +917,7 @@ export default function ResourcesPage() {
                     ['支付', '微信/支付宝'],
                     ['模式', '人工确认'],
                   ].map(([label, value]) => (
-                    <div key={label} className="rounded-2xl border border-(--border-default) bg-white/45 p-3 backdrop-blur-xl">
+                    <div key={label} className="rounded-2xl border border-(--border-default) bg-(--surface-raised) p-3">
                       <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{label}</p>
                       <p className="mt-1 text-sm font-semibold text-neutral-900">{value}</p>
                     </div>

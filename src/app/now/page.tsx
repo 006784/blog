@@ -212,14 +212,14 @@ export default function NowPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="mt-12 text-center text-xs text-zinc-400"
+          className="mt-12 text-center text-xs text-ink-ghost"
         >
           灵感来自{' '}
           <a
             href="https://nownownow.com"
             target="_blank"
             rel="noreferrer"
-            className="underline underline-offset-2 hover:text-zinc-600"
+            className="underline underline-offset-2 hover:text-ink-secondary"
           >
             nownownow.com
           </a>{' '}
