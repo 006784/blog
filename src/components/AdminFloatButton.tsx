@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Lock, Unlock,
   LayoutDashboard, PenLine, Settings, X,
 } from 'lucide-react';
 import { useAdmin } from './AdminProvider';
@@ -61,15 +60,6 @@ export default function AdminFloatButton() {
           </span>
         )}
 
-        <span
-          className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white/60 bg-black/70 backdrop-blur"
-          aria-hidden="true"
-        >
-          {isAdmin
-            ? <Unlock className="w-2 h-2 text-emerald-300" strokeWidth={2} />
-            : <Lock className="w-2 h-2 text-white" strokeWidth={2} />
-          }
-        </span>
       </motion.button>
 
       {/* 下拉面板 */}

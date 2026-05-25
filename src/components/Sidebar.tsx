@@ -175,6 +175,7 @@ export function Sidebar() {
   const [panelOpen,  setPanelOpen]  = useState(false);
   const [panelIcon, setPanelIcon] = useState<string | null>(routeActiveIcon);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
 
   // Sync lang state with i18n on mount
   useEffect(() => {
@@ -670,13 +671,61 @@ export function Sidebar() {
             );
           })}
 
-          {/* FAB */}
+          {/* FAB — admin 时显示头像+菜单，非 admin 显示登录 */}
           {isAdmin ? (
-            <Link href="/write">
-              <div className="sidebar-mobile-fab">
-                <PenLine style={{ width: 18, height: 18, color: 'var(--paper)' }} strokeWidth={1.5} />
-              </div>
-            </Link>
+            <div className="relative">
+              <button
+                onClick={() => setAdminMenuOpen(v => !v)}
+                className="sidebar-mobile-fab overflow-hidden border-2 border-white/30"
+                style={{ background: 'none', padding: 0 }}
+                aria-label="管理员菜单"
+              >
+                {profile.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.avatar} alt={profile.nickname} className="h-full w-full object-cover" />
+                ) : (
+                  <span style={{ color: 'var(--paper)', fontSize: 18 }}>
+                    {(profile.nickname || 'L').charAt(0)}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {adminMenuOpen && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setAdminMenuOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 8 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 w-44 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-xl overflow-hidden"
+                    >
+                      {[
+                        { href: '/write',       icon: PenLine,         label: '写文章' },
+                        { href: '/admin',        icon: Shield,          label: '控制台' },
+                        { href: '/admin/media',  icon: Film,            label: '书影音' },
+                      ].map(({ href, icon: Icon, label }) => (
+                        <button
+                          key={href}
+                          onClick={() => { setAdminMenuOpen(false); router.push(href); }}
+                          className="flex w-full items-center gap-3 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                        >
+                          <Icon className="w-4 h-4 text-zinc-400" />
+                          {label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <button
               onClick={() => showLoginModal()}
