@@ -66,6 +66,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'api.dicebear.com' },
       // Apple Music / iTunes 专辑封面
       { protocol: 'https', hostname: '*.mzstatic.com' },
+      // youmind.com CMS 资源（提示词预览图）
+      { protocol: 'https', hostname: 'cms-assets.youmind.com' },
       // 其他常见 CDN（可按需追加）
       { protocol: 'https', hostname: '*.cloudfront.net' },
       { protocol: 'https', hostname: '*.githubusercontent.com' },
