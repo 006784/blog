@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { BookOpen, ExternalLink, Library, RefreshCw, Sparkles, Star } from 'lucide-react';
+import Link from 'next/link';
+import { BookOpen, ExternalLink, Library, RefreshCw, ShieldCheck, Sparkles, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
+import { getNovelForMediaTitle, NOVELS, WEB_NOVELS } from '@/lib/novels';
 import { type MediaItem } from '@/lib/supabase';
 
 // ── 常量 ──────────────────────────────────────────────────
@@ -62,6 +64,8 @@ function RatingStars({ rating }: { rating: number }) {
 // ── 媒体卡片 ──────────────────────────────────────────────
 
 function MediaCard({ item }: { item: MediaItem }) {
+  const novel = item.type === 'book' ? getNovelForMediaTitle(item.title) : undefined;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -125,9 +129,19 @@ function MediaCard({ item }: { item: MediaItem }) {
             ) : null}
           </div>
 
-          <div className="flex items-center justify-between text-xs text-neutral-500">
+          <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
             <span>{TYPE_META.find((t) => t.key === item.type)?.label ?? '内容记录'}</span>
-            <span>{item.status === 'done' ? '已完成' : '持续记录中'}</span>
+            {novel ? (
+              <Link
+                href={`/media/read/${novel.slug}`}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] px-2.5 py-1.5 font-medium text-[var(--color-teal-700)] transition hover:border-[var(--color-teal-500)] hover:bg-[var(--surface-overlay)]"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                阅读
+              </Link>
+            ) : (
+              <span>{item.status === 'done' ? '已完成' : '持续记录中'}</span>
+            )}
           </div>
         </div>
       </Card>
@@ -182,8 +196,8 @@ export default function MediaPage() {
   }, {});
 
   return (
-    <div className="min-h-screen px-6 py-16 sm:px-8">
-      <div className="mx-auto max-w-5xl space-y-8">
+    <div className="min-h-screen px-4 py-10 sm:px-8 sm:py-16">
+      <div className="mx-auto max-w-5xl space-y-7 sm:space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -202,18 +216,18 @@ export default function MediaPage() {
                 把近期读过、看过、听过的内容整理成持续更新的观影与阅读清单。
               </p>
             </div>
-            <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
-              <Card variant="glass" padding="sm" className="rounded-2xl">
+            <div className="grid w-full grid-cols-3 gap-2 sm:gap-3 lg:max-w-xl">
+              <Card variant="glass" padding="sm" className="rounded-xl sm:rounded-2xl">
                 <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">总记录</p>
                 <p className="mt-2 text-2xl font-semibold text-neutral-900">{items.length}</p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-2xl">
+              <Card variant="glass" padding="sm" className="rounded-xl sm:rounded-2xl">
                 <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">已完成</p>
                 <p className="mt-2 text-2xl font-semibold text-neutral-900">
                   {items.filter((item) => item.status === 'done').length}
                 </p>
               </Card>
-              <Card variant="glass" padding="sm" className="rounded-2xl">
+              <Card variant="glass" padding="sm" className="rounded-xl sm:rounded-2xl">
                 <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">正在进行</p>
                 <p className="mt-2 text-2xl font-semibold text-neutral-900">
                   {items.filter((item) => item.status === 'doing').length}
@@ -223,14 +237,14 @@ export default function MediaPage() {
           </div>
         </motion.div>
 
-        <Card variant="glass" className="rounded-2xl">
+        <Card variant="glass" className="rounded-xl sm:rounded-2xl">
           <div className="space-y-5">
-            <div className="flex flex-wrap gap-2">
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
               {TYPE_META.filter((t) => t.key === 'all' || typeCounts[t.key] > 0).map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setActiveType(t.key)}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition ${
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition ${
                     activeType === t.key
                       ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
                       : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
@@ -243,12 +257,12 @@ export default function MediaPage() {
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
               {STATUS_META.map((s) => (
                 <button
                   key={s.key}
                   onClick={() => setActiveStatus(s.key)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                     activeStatus === s.key
                       ? 'border-(--color-primary-500) bg-(--surface-overlay) text-(--color-primary-600)'
                       : 'border-(--border-default) bg-transparent text-neutral-500 hover:text-neutral-700'
@@ -260,6 +274,65 @@ export default function MediaPage() {
             </div>
           </div>
         </Card>
+
+        <section className="space-y-3">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold text-neutral-900">热门网文</h2>
+              <p className="mt-1 text-sm text-neutral-500">仍在版权期内的作品提供正版入口，不在站内存全文。</p>
+            </div>
+            <Badge tone="warning" variant="soft" className="shrink-0 gap-1">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              正版
+            </Badge>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {WEB_NOVELS.map((novel) => (
+              <a key={novel.title} href={novel.officialUrl} target="_blank" rel="noreferrer" className="group">
+                <Card variant="glass" padding="sm" className="flex h-full flex-col gap-3 rounded-lg transition hover:-translate-y-0.5 hover:shadow-(--shadow-lg)">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="line-clamp-2 font-semibold leading-snug text-neutral-900 group-hover:text-[var(--color-teal-700)]">{novel.title}</h3>
+                      <p className="mt-1 truncate text-sm text-neutral-500">{novel.author}</p>
+                    </div>
+                    <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-neutral-400 group-hover:text-[var(--color-teal-600)]" />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge tone="info" variant="soft">{novel.platform}</Badge>
+                    <Badge tone="default" variant="soft">{novel.status}</Badge>
+                  </div>
+                  <p className="text-xs text-neutral-500">{novel.genre}</p>
+                  <p className="line-clamp-3 text-sm leading-6 text-neutral-600">{novel.note}</p>
+                </Card>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold text-neutral-900">本地书库</h2>
+              <p className="mt-1 text-sm text-neutral-500">已内置公版小说文本，点击即可进入阅读器。</p>
+            </div>
+            <Badge tone="info" variant="soft">{NOVELS.length} 本</Badge>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {NOVELS.map((novel) => (
+              <Link key={novel.slug} href={`/media/read/${novel.slug}`} className="group">
+                <Card variant="glass" padding="sm" className="flex h-full items-center gap-3 rounded-lg transition hover:-translate-y-0.5 hover:shadow-(--shadow-lg)">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[var(--color-teal-500)] text-white">
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold text-neutral-900 group-hover:text-[var(--color-teal-700)]">{novel.title}</h3>
+                    <p className="truncate text-sm text-neutral-500">{novel.author} · {novel.sourceName}</p>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
