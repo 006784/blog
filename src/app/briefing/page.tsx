@@ -9,6 +9,7 @@ import {
   ArrowLeft, CalendarDays, ChevronDown, Cloud, Edit3,
   ExternalLink, Heart, Loader2, Plus, Save, Smile, Sparkles, Trash2, X,
 } from 'lucide-react';
+import { LinkPreviewCard } from '@/components/LinkPreviewCard';
 import { useAdmin } from '@/components/AdminProvider';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -318,25 +319,17 @@ function BriefingCard({
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{briefing.content}</ReactMarkdown>
                 </div>
 
-                {/* 相关链接 */}
+                {/* 相关链接（富预览卡片） */}
                 {briefing.links.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs uppercase tracking-widest text-ink-ghost">相关链接</p>
-                    {briefing.links.map((link, i) => (
-                      <a
-                        key={i}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start gap-2 group rounded-xl border border-(--border-default) p-3 hover:border-gold/50 transition-colors"
-                      >
-                        <ExternalLink className="h-4 w-4 mt-0.5 text-ink-ghost group-hover:text-gold shrink-0 transition-colors" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-ink group-hover:text-gold transition-colors truncate">{link.title || link.url}</p>
-                          {link.comment && <p className="text-xs text-ink-muted mt-0.5">{link.comment}</p>}
-                        </div>
-                      </a>
-                    ))}
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-widest text-ink-ghost flex items-center gap-1.5">
+                      <ExternalLink className="h-3 w-3" />相关链接
+                    </p>
+                    <div className="space-y-2 pt-1">
+                      {briefing.links.map((link, i) => (
+                        <LinkPreviewCard key={i} url={link.url} />
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

@@ -94,26 +94,26 @@ export default function NowPage() {
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
                 此刻
               </h1>
-              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+              <p className="text-sm leading-7 text-ink-secondary sm:text-base">
                 用一页记录最近正在关注、在做、在想和在学习的东西，让站点保持当下感。
               </p>
               {lastUpdated ? (
-                <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
+                <p className="text-xs uppercase tracking-[0.16em] text-ink-muted">
                   最后更新于 {formatDate(lastUpdated)}
                 </p>
               ) : null}
             </div>
-            <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-2xl">
+            <Card variant="bordered" padding="sm" className="w-full max-w-sm rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-orange-500">
                   <Compass className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Active Notes</p>
-                  <p className="text-2xl font-semibold text-neutral-900">{entries.length}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">Active Notes</p>
+                  <p className="text-2xl font-semibold text-ink">{entries.length}</p>
                 </div>
               </div>
             </Card>
@@ -156,40 +156,44 @@ export default function NowPage() {
                   transition={{ delay: gi * 0.06 }}
                   className="h-full"
                 >
-                  <Card variant="glass" className="h-full rounded-2xl">
-                    <div className="mb-5 flex items-center justify-between gap-3">
+                  <div
+                    className="h-full rounded-2xl border-l-[3px] border-(--border-default) p-5 shadow-(--neu-shadow-sm)"
+                    style={{
+                      borderLeftColor: 'var(--color-orange-500)',
+                      background: 'color-mix(in srgb, var(--surface-raised) 92%, var(--color-orange-500) 8%)',
+                    }}
+                  >
+                    <div className="mb-4 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">{meta.icon}</span>
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-(--surface-overlay) text-lg">
+                          {meta.icon}
+                        </span>
                         <div>
-                          <p className="text-lg font-semibold text-neutral-900">
-                            {meta.label}
-                          </p>
-                          <p className="text-sm text-neutral-500">
-                            当前 {items.length} 条记录
-                          </p>
+                          <p className="font-semibold text-ink">{meta.label}</p>
+                          <p className="text-xs text-ink-muted">当前 {items.length} 条记录</p>
                         </div>
                       </div>
-                      <Badge variant="soft">{items.length}</Badge>
+                      <Badge tone="warning" variant="soft">{items.length}</Badge>
                     </div>
 
-                    <ul className="space-y-3">
+                    <ul className="space-y-2">
                       {items.map((entry) => (
                         <li
                           key={entry.id}
-                          className="flex items-start gap-3 rounded-xl border border-(--border-default) bg-(--surface-base) px-4 py-3"
+                          className="flex items-start gap-3 rounded-xl border border-(--border-default) bg-(--surface-raised) px-4 py-3 shadow-(--neu-shadow-sm)"
                         >
                           {entry.emoji ? (
                             <span className="mt-0.5 shrink-0 text-base">{entry.emoji}</span>
                           ) : (
-                            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-(--color-primary-500)" />
+                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-orange-400" />
                           )}
-                          <span className="flex-1 text-sm leading-7 text-neutral-700">
+                          <span className="flex-1 text-sm leading-7 text-ink-secondary">
                             {entry.link ? (
                               <a
                                 href={entry.link}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="underline underline-offset-4 transition-colors hover:text-(--color-primary-600)"
+                                className="underline underline-offset-4 transition-colors hover:text-gold"
                               >
                                 {entry.content}
                               </a>
@@ -200,7 +204,7 @@ export default function NowPage() {
                         </li>
                       ))}
                     </ul>
-                  </Card>
+                  </div>
                 </motion.div>
               );
             })}

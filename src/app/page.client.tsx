@@ -64,6 +64,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
 import { ArrowRight, BookOpenText, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
+import { LinkPreviewCard } from '@/components/LinkPreviewCard';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { Badge } from '@/components/ui/Badge';
@@ -897,40 +898,61 @@ function TodayBriefingSection() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="rounded-2xl border border-(--border-default) bg-(--surface-panel) backdrop-blur-xl shadow-(--shadow-sm) overflow-hidden"
+        className="rounded-2xl overflow-hidden shadow-(--neu-shadow-sm) border border-(--border-default) border-l-4 border-l-orange-500"
+        style={{
+          background: 'color-mix(in srgb, var(--surface-raised) 91%, var(--color-orange-500) 9%)',
+        }}
       >
-        {/* 头部：标签 + 时钟 */}
-        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b border-(--border-default)">
-          <div className="flex items-center gap-2 pt-1">
-            <CalendarDays className="h-4 w-4 text-gold shrink-0" />
-            <span className="text-xs uppercase tracking-widest text-ink-muted">Daily Briefing</span>
+        {/* 编辑头部：橙色左边框条 + 标签 + 时钟 */}
+        <div
+          className="flex items-center justify-between gap-4 px-5 sm:px-6 py-3 border-b border-(--border-default)"
+          style={{
+            background: 'color-mix(in srgb, var(--surface-raised) 82%, var(--color-orange-500) 18%)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+            <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-medium">Daily Briefing</span>
           </div>
           <LiveClock />
         </div>
 
         {/* 简报内容 */}
-        <div className="px-5 sm:px-6 py-4">
+        <div className="px-5 sm:px-6 pt-5 pb-4">
           {briefing === undefined ? (
-            <div className="space-y-2 py-2">
-              <div className="h-4 rounded bg-(--surface-overlay) animate-pulse w-3/4" />
-              <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-full" />
-              <div className="h-3 rounded bg-(--surface-overlay) animate-pulse w-5/6" />
+            <div className="space-y-3 py-1">
+              <div className="h-5 rounded bg-(--surface-overlay) animate-pulse w-2/3" />
+              <div className="h-3.5 rounded bg-(--surface-overlay) animate-pulse w-full" />
+              <div className="h-3.5 rounded bg-(--surface-overlay) animate-pulse w-11/12" />
+              <div className="h-3.5 rounded bg-(--surface-overlay) animate-pulse w-4/5" />
             </div>
           ) : briefing === null ? (
-            <p className="text-sm text-ink-ghost py-2">今天还没有简报，稍后见。</p>
+            <div className="py-3 flex items-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-orange-300 shrink-0" />
+              <p className="text-sm text-ink-ghost">今天还没有简报，稍后见。</p>
+            </div>
           ) : (
             <>
-              {briefing.title && <h3 className="font-semibold text-ink mb-2">{briefing.title}</h3>}
-              <p className="text-sm text-ink-muted leading-relaxed line-clamp-4">
+              {briefing.title && (
+                <h3 className="text-xl font-semibold text-ink mb-3 leading-snug tracking-tight">
+                  {briefing.title}
+                </h3>
+              )}
+              <p className="text-sm text-ink-secondary leading-7 line-clamp-3">
                 {briefing.content.replace(/#+\s/g, '').replace(/\*\*/g, '')}
               </p>
-              <div className="flex items-center gap-4 mt-3 flex-wrap">
-                {briefing.mood && <span className="text-xs text-ink-ghost">心情：{briefing.mood}</span>}
-                {briefing.weather && <span className="text-xs text-ink-ghost">天气：{briefing.weather}</span>}
+              <div className="flex items-center gap-3 mt-4 flex-wrap">
                 {briefing.links.length > 0 && (
-                  <span className="flex items-center gap-1 text-xs text-ink-ghost">
-                    <ExternalLink className="h-3 w-3" />{briefing.links.length} 个链接
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-400/40 bg-(--surface-overlay) px-2.5 py-0.5 text-xs text-orange-500">
+                    <ExternalLink className="h-3 w-3" />
+                    {briefing.links.length} 条相关链接
                   </span>
+                )}
+                {briefing.mood && (
+                  <span className="text-xs text-ink-ghost">心情：{briefing.mood}</span>
+                )}
+                {briefing.weather && (
+                  <span className="text-xs text-ink-ghost">天气：{briefing.weather}</span>
                 )}
               </div>
             </>
@@ -939,7 +961,10 @@ function TodayBriefingSection() {
 
         {/* 底部操作 */}
         <div className="flex items-center justify-end px-5 sm:px-6 pb-4">
-          <Link href="/briefing" className="flex items-center gap-1 text-xs text-ink-ghost hover:text-gold transition-colors">
+          <Link
+            href="/briefing"
+            className="flex items-center gap-1 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors"
+          >
             查看全部简报 <ArrowRight className="h-3 w-3" />
           </Link>
         </div>

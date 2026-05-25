@@ -68,7 +68,10 @@ async function callDeepSeek(prompt: string): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
-  if (!await requireAdminSession(request)) {
+  // 允许：管理员 cookie 会话 OR Vercel cron secret header
+  const cronSecret = process.env.CRON_SECRET;
+  const isCron = cronSecret && request.headers.get('x-cron-secret') === cronSecret;
+  if (!isCron && !await requireAdminSession(request)) {
     return NextResponse.json({ error: '未授权' }, { status: 401 });
   }
 
