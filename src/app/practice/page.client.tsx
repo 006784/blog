@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatePanel } from '@/components/ui/StatePanel';
@@ -113,16 +112,16 @@ export function PracticeListClient() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-5"
         >
-          <Badge tone="info" variant="soft" className="w-fit gap-1.5">
+          <Badge tone="warning" variant="soft" className="w-fit gap-1.5">
             <Code2 className="h-3.5 w-3.5" />
             Practice Arena
           </Badge>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
                 编程练习
               </h1>
-              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+              <p className="text-sm leading-7 text-ink-secondary sm:text-base">
                 算法题、选择题和面试题都放在这里，配合在线运行环境一起练习会更顺手。
               </p>
             </div>
@@ -147,15 +146,19 @@ export function PracticeListClient() {
             { label: '中等', value: stats.medium, tone: 'warning' as const },
             { label: '困难', value: stats.hard, tone: 'error' as const },
           ].map((stat) => (
-            <Card key={stat.label} variant="glass" padding="sm" className="rounded-2xl">
+            <div
+              key={stat.label}
+              className="rounded-2xl p-4 shadow-(--neu-shadow-sm)"
+              style={{ background: 'color-mix(in srgb, var(--surface-raised) 93%, var(--color-orange-500) 7%)' }}
+            >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{stat.label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-neutral-900">{stat.value}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">{stat.label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-ink">{stat.value}</p>
                 </div>
                 <Badge tone={stat.tone}>{stat.label}</Badge>
               </div>
-            </Card>
+            </div>
           ))}
         </motion.div>
 
@@ -164,11 +167,11 @@ export function PracticeListClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
         >
-          <Card variant="glass" className="rounded-2xl">
+          <div className="rounded-2xl p-6 shadow-(--neu-shadow-sm) bg-(--surface-raised)">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1 max-w-xl">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
                   <Input
                     type="text"
                     placeholder="搜索题目..."
@@ -187,11 +190,12 @@ export function PracticeListClient() {
                   ].map(([value, label]) => (
                     <button
                       key={value}
+                      type="button"
                       onClick={() => setType(value)}
                       className={`rounded-full border px-3.5 py-2 text-sm transition ${
                         type === value
-                          ? 'border-(--color-primary-500) bg-(--color-primary-500) text-white shadow-(--shadow-sm)'
-                          : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
+                          ? 'border-orange-500 bg-orange-500 text-white shadow-(--neu-shadow-sm)'
+                          : 'border-(--border-default) bg-(--surface-base) text-ink-secondary hover:border-orange-400/60 hover:text-orange-600'
                       }`}
                     >
                       {label}
@@ -209,11 +213,12 @@ export function PracticeListClient() {
                 ].map(([value, label]) => (
                   <button
                     key={value}
+                    type="button"
                     onClick={() => setDifficulty(value)}
                     className={`rounded-full border px-3.5 py-2 text-sm transition ${
                       difficulty === value
-                        ? 'border-(--color-primary-500) bg-(--surface-overlay) text-(--color-primary-600)'
-                        : 'border-(--border-default) bg-(--surface-base) text-neutral-600 hover:border-(--color-primary-300) hover:text-(--color-primary-600)'
+                        ? 'border-orange-500 bg-(--surface-overlay) text-orange-600'
+                        : 'border-(--border-default) bg-(--surface-base) text-ink-secondary hover:border-orange-400/60 hover:text-orange-600'
                     }`}
                   >
                     {label}
@@ -221,7 +226,7 @@ export function PracticeListClient() {
                 ))}
               </div>
             </div>
-          </Card>
+          </div>
         </motion.div>
 
         {loading ? (
@@ -261,11 +266,7 @@ export function PracticeListClient() {
                   transition={{ delay: index * 0.03 }}
                 >
                   <Link href={`/practice/${problem.slug}`} className="block">
-                    <Card
-                      variant="glass"
-                      padding="sm"
-                      className="rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
-                    >
+                    <div className="rounded-2xl p-4 bg-(--surface-raised) shadow-(--neu-shadow-sm) border border-(--border-default) transition duration-200 hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-(--neu-shadow)">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
                         <div className="flex min-w-0 flex-1 items-start gap-4">
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
@@ -274,7 +275,7 @@ export function PracticeListClient() {
 
                           <div className="min-w-0 flex-1 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="truncate text-base font-semibold text-neutral-900 transition-colors hover:text-(--color-primary-600)">
+                              <h3 className="truncate text-base font-semibold text-ink transition-colors hover:text-orange-600">
                                 {problem.title}
                               </h3>
                               <Badge variant="soft" className="gap-1.5">
@@ -299,7 +300,7 @@ export function PracticeListClient() {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 lg:min-w-[220px] lg:justify-end">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-ink-muted lg:min-w-55 lg:justify-end">
                           <span>提交 {problem.submission_count}</span>
                           <span>通过 {problem.accept_count}</span>
                           <span className={acceptRate !== null && acceptRate >= 50 ? 'text-emerald-600' : 'text-amber-600'}>
@@ -307,7 +308,7 @@ export function PracticeListClient() {
                           </span>
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   </Link>
                 </motion.div>
               );

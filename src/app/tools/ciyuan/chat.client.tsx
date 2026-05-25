@@ -1081,7 +1081,7 @@ export function CiyuanChat() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--paper)">
+    <div className="flex h-screen overflow-hidden bg-(--surface-base)">
       <AnimatePresence initial={false}>
         {sidebarOpen && (
           <motion.aside
@@ -1090,10 +1090,11 @@ export function CiyuanChat() {
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="flex-shrink-0 border-r border-(--line) flex flex-col overflow-hidden"
+            style={{ background: 'color-mix(in srgb, var(--surface-raised) 91%, var(--color-orange-500) 9%)' }}
           >
-            <div className="px-4 py-3 flex items-center justify-between border-b border-(--line)">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-(--line) border-l-4 border-l-orange-500">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+                <Sparkles className="w-4 h-4 text-orange-500" />
                 <span className="font-bold text-sm tracking-wide">词元</span>
               </div>
               <button
@@ -1171,7 +1172,7 @@ export function CiyuanChat() {
       </AnimatePresence>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-(--line) bg-(--paper)">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-(--line) bg-(--surface-raised)">
           <button
             onClick={() => setSidebarOpen((current) => !current)}
             className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors"
@@ -1241,10 +1242,10 @@ export function CiyuanChat() {
                 className="space-y-4"
               >
                 <div
-                  className="w-16 h-16 rounded-2xl border border-(--line) flex items-center justify-center mx-auto"
-                  style={{ background: 'var(--paper-deep)' }}
+                  className="w-16 h-16 rounded-2xl border border-orange-400/30 flex items-center justify-center mx-auto"
+                  style={{ background: 'color-mix(in srgb, var(--surface-raised) 85%, var(--color-orange-500) 15%)' }}
                 >
-                  <Sparkles className="w-8 h-8" style={{ color: 'var(--gold)' }} />
+                  <Sparkles className="w-8 h-8 text-orange-500" />
                 </div>
                 <h2 className="text-2xl font-bold">词元 AI</h2>
                 <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
