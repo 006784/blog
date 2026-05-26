@@ -777,7 +777,7 @@ export default function ResourcesPage() {
       setAiFlow(prev => prev ? { ...prev, submitting: true } : null);
       const credNote = (() => {
         if (aiFlow.service.credentialType === 'token') return `Session Token: ${aiFlow.sessionToken.slice(0, 16)}...`;
-        if (aiFlow.service.credentialType === 'password') return `账号邮箱: ${aiFlow.email}`;
+        if (aiFlow.service.credentialType === 'password') return `OpenAI 账号: ${aiFlow.email} / 密码: ${aiFlow.accountPassword}`;
         return '成品号/代注册服务';
       })();
       const res = await fetch('/api/resource-orders', {
@@ -797,8 +797,8 @@ export default function ResourcesPage() {
       if (!res.ok || !data.order) throw new Error(data.error || '创建订单失败');
       const order = data.order as ShopOrder;
       const credLine = (() => {
-        if (aiFlow.service.credentialType === 'token') return `Session Token 已提供（已加密传输）`;
-        if (aiFlow.service.credentialType === 'password') return `账号密码：已提供`;
+        if (aiFlow.service.credentialType === 'token') return `Session Token: ${aiFlow.sessionToken}`;
+        if (aiFlow.service.credentialType === 'password') return `OpenAI 账号: ${aiFlow.email}\nOpenAI 密码: ${aiFlow.accountPassword}`;
         return '';
       })();
       const text = [
@@ -1097,7 +1097,7 @@ export default function ResourcesPage() {
                     </p>
                     <div className="divide-y divide-(--border-default)">
                       {[
-                        ['需要提供密码吗？', '不需要，只需提供 OpenAI 账号注册邮箱即可，全程不接触你的密码。'],
+                        ['需要提供密码吗？', '土耳其区代充需要提供 OpenAI 账号邮箱和密码，用于登录并完成区域订阅。代充完成后建议立即修改密码。'],
                         ['功能和美区一样吗？', '完全相同。土耳其区是 OpenAI 官方定价区，ChatGPT 所有功能无任何差异。'],
                         ['到期后如何续费？', '可以到期前联系续费，续费依然享受土耳其区低价，也可自行续订。'],
                       ].map(([q, a]) => (
