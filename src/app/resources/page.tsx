@@ -326,7 +326,7 @@ export default function ResourcesPage() {
   // AI 代充引导弹窗状态（必须在 hasModalOpen 之前声明）
   const [aiFlow, setAiFlow] = useState<{
     service: AiRechargeService;
-    step: 1 | 2 | 3;
+    step: 1 | 2;
     email: string;
     accountPassword: string;
     sessionToken: string;
@@ -733,7 +733,7 @@ export default function ResourcesPage() {
   const openAiFlow = (svc: AiRechargeService) => {
     window.scrollTo({ top: 0, behavior: 'auto' });
     setAiFlow({
-      service: svc, step: 1,
+      service: svc, step: 1 as const,
       email: '', accountPassword: '', sessionToken: '',
       tokenState: 'idle', tokenMsg: '',
       paymentMethod: 'wechat', note: '',
@@ -1793,7 +1793,7 @@ export default function ResourcesPage() {
         </AnimatePresence>
       </div>
 
-      {/* ── AI 代充引导弹窗 ── */}
+      {/* ── AI 代充引导弹窗（2步） ── */}
       {typeof document !== 'undefined' && aiFlow ? createPortal(
         <motion.div
           variants={modalBackdropVariants}
@@ -1806,11 +1806,11 @@ export default function ResourcesPage() {
         >
           <motion.div
             variants={modalPanelVariants}
-            className="surface-card ios-modal-card w-full max-w-xl overflow-hidden p-0"
+            className="surface-card ios-modal-card w-full max-w-lg overflow-hidden p-0"
           >
             {/* ── 彩色头部 ── */}
             <div className={`res-ai-flow-header res-ai-flow-header--${aiFlow.service.service}`}>
-              <div className="relative flex items-center justify-between p-5">
+              <div className="flex items-center justify-between px-5 pt-5 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="res-ai-flow-logo">
                     {aiFlow.service.service === 'chatgpt' ? (
@@ -1832,33 +1832,24 @@ export default function ResourcesPage() {
                     <p className="text-xs text-white/70">¥{aiFlow.service.priceMonthly} · {aiFlow.service.priceNote}</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  aria-label="关闭弹窗"
-                  onClick={() => setAiFlow(null)}
-                  className="rounded-lg p-1.5 text-white/70 hover:bg-white/15 hover:text-white transition-colors"
-                >
+                <button type="button" aria-label="关闭" onClick={() => setAiFlow(null)}
+                  className="rounded-lg p-1.5 text-white/70 hover:bg-white/15 hover:text-white transition-colors">
                   <X className="h-5 w-5" />
                 </button>
               </div>
-
-              {/* 步骤指示器 */}
-              <div className="relative flex border-t border-white/20">
-                {(['准备资料', '填写信息', '扫码付款'] as const).map((label, i) => {
-                  const stepNum = (i + 1) as 1 | 2 | 3;
+              {/* 2步指示器 */}
+              <div className="flex border-t border-white/20">
+                {([
+                  aiFlow.service.credentialType === 'token' ? '填写邮箱 + Token' : aiFlow.service.isReadyMade ? '填写联系方式' : '填写账号信息',
+                  '扫码付款',
+                ] as const).map((label, i) => {
+                  const stepNum = (i + 1) as 1 | 2;
                   const isActive = aiFlow.step === stepNum;
                   const isDone = aiFlow.step > stepNum;
                   return (
-                    <div
-                      key={label}
-                      className={`flex flex-1 flex-col items-center gap-1 py-3 text-center text-xs font-medium transition-colors ${
-                        isActive ? 'bg-white/15 text-white' : isDone ? 'text-white/80' : 'text-white/40'
-                      }`}
-                    >
-                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                        isDone ? 'bg-white text-emerald-600' : isActive ? 'bg-white/25 text-white' : 'bg-white/10 text-white/40'
-                      }`}>
-                        {isDone ? <Check className="h-3 w-3" /> : stepNum}
+                    <div key={label} className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-xs font-medium transition-colors ${isActive ? 'bg-white/15 text-white' : isDone ? 'text-white/80' : 'text-white/40'}`}>
+                      <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-[10px] font-bold ${isDone ? 'bg-white text-emerald-600' : isActive ? 'bg-white/25 text-white' : 'bg-white/10 text-white/40'}`}>
+                        {isDone ? <Check className="h-2.5 w-2.5" /> : stepNum}
                       </span>
                       {label}
                     </div>
@@ -1868,110 +1859,57 @@ export default function ResourcesPage() {
             </div>
 
             {/* ── 步骤内容 ── */}
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[65vh] overflow-y-auto">
 
-              {/* Step 1 — 准备资料 */}
+              {/* ─── Step 1：填写信息 ─── */}
               {aiFlow.step === 1 && (
-                <div className="space-y-4 p-6">
-                  {aiFlow.service.isReadyMade ? (
+                <div className="space-y-5 p-5">
+                  {aiFlow.service.credentialType === 'token' ? (
                     <>
-                      <div className="res-ai-flow-info-box res-ai-flow-info-box--green">
-                        <CheckCircle2 className="res-ai-flow-info-icon" />
-                        <div>
-                          <p className="font-semibold">成品账号，无需提供任何个人信息</p>
-                          <p className="mt-1 text-xs opacity-80">付款后站长会将完整账号密码发送给你，无需填写自己的账号。</p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">你将收到</p>
-                        <div className="space-y-2">
-                          {aiFlow.service.features.map((f) => (
-                            <div key={f} className="flex items-center gap-2.5 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
-                              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                              <span className="text-sm text-ink">{f}</span>
+                      {/* Token 获取教程 */}
+                      <div>
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-ink-muted">如何获取 Session Token</p>
+                        <div className="space-y-2.5">
+                          {[
+                            { n: 1, title: '登录账号', desc: '在电脑浏览器打开 chatgpt.com 或 claude.ai，确认已登录' },
+                            { n: 2, title: '打开开发者工具', desc: '按 F12（Windows）或 Command + Option + I（Mac）' },
+                            { n: 3, title: '切到 Application 标签', desc: '顶部点「应用程序 / Application」→ 左侧展开「Cookie」→ 点击当前网站域名' },
+                            { n: 4, title: '找到并复制 Token', desc: '搜索 __Secure-next-auth.session-token，点击该行，完整复制 Value 栏的内容（很长，务必全选）' },
+                          ].map(({ n, title, desc }) => (
+                            <div key={n} className="flex gap-3 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-3">
+                              <span className="res-ai-flow-step-num shrink-0">{n}</span>
+                              <div>
+                                <p className="text-sm font-semibold text-ink">{title}</p>
+                                <p className="mt-0.5 text-xs leading-5 text-ink-secondary">{desc}</p>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
-                      <div className="res-ai-flow-info-box res-ai-flow-info-box--gold">
-                        <Clock className="res-ai-flow-info-icon" />
-                        <p className="text-sm">付款后 <strong>24 小时内</strong>通过你填写的联系方式发送账号密码。</p>
-                      </div>
-                    </>
-                  ) : aiFlow.service.credentialType === 'token' ? (
-                    <>
-                      <div className="res-ai-flow-info-box res-ai-flow-info-box--blue">
-                        <LockKeyhole className="res-ai-flow-info-icon" />
-                        <div>
-                          <p className="font-semibold">Session Token 代充方式</p>
-                          <p className="mt-1 text-xs opacity-80">通过你的浏览器 Cookie 获取 Session Token，代充完全在你自己账号内完成，不需要提供密码。</p>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">如何获取 Session Token</p>
-                        {[
-                          { step: 1, title: '登录你的账号', desc: '在浏览器中登录 chatgpt.com 或 claude.ai（保持已登录状态）' },
-                          { step: 2, title: '打开开发者工具', desc: '按 F12（Windows）或 Command+Option+I（Mac），切换到「应用」/「Application」标签' },
-                          { step: 3, title: '找到 Cookie', desc: '在左侧「Cookie」中找到当前域名，搜索 __Secure-next-auth.session-token 或 sk- 开头的 Token' },
-                          { step: 4, title: '完整复制 Value', desc: 'Token 很长（超过 100 字符），务必全部复制，不要截断' },
-                        ].map(({ step, title, desc }) => (
-                          <div key={step} className="flex gap-3">
-                            <span className="res-ai-flow-step-num">{step}</span>
-                            <div>
-                              <p className="text-sm font-medium text-ink">{title}</p>
-                              <p className="mt-0.5 text-xs leading-5 text-ink-secondary">{desc}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="res-ai-flow-info-box res-ai-flow-info-box--orange">
-                        <Shield className="res-ai-flow-info-icon" />
-                        <div>
-                          <p className="font-semibold">土耳其区代充需要账号 + 密码</p>
-                          <p className="mt-1 text-xs opacity-80">由于土耳其区操作需要登录你的 OpenAI 账号进行区域切换，需要提供账号密码，操作完成后立即退出登录。</p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">需要提供</p>
-                        {['OpenAI 账号注册邮箱', 'OpenAI 账号密码（用于登录代充，操作后立即退出）', '代充期间请勿修改密码'].map((item, i) => (
-                          <div key={i} className="flex items-start gap-2.5 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
-                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
-                            <span className="text-sm text-ink">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="res-ai-flow-info-box res-ai-flow-info-box--green">
-                        <Shield className="res-ai-flow-info-icon" />
-                        <p className="text-sm">代充完成后建议立即修改密码，提升账号安全性。</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
 
-              {/* Step 2 — 填写信息 */}
-              {aiFlow.step === 2 && (
-                <div className="space-y-4 p-6">
-                  {aiFlow.service.credentialType === 'token' ? (
-                    <>
+                      {/* 账号邮箱 */}
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-ink">账号邮箱 <span className="text-red-400">*</span></label>
-                        <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                        <label className="text-sm font-semibold text-ink">
+                          需要充值的账号邮箱 <span className="text-red-400">*</span>
+                        </label>
+                        <div className={`flex items-center gap-2 rounded-xl border px-3.5 py-2.5 transition-colors ${aiFlow.email.trim() ? 'border-emerald-400 bg-emerald-50/50' : 'border-line bg-(--surface-raised)'}`}>
                           <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
                           <input
                             value={aiFlow.email}
                             onChange={(event) => setAiFlow(prev => prev ? { ...prev, email: event.target.value } : null)}
-                            placeholder="你的 ChatGPT / Claude 账号邮箱"
+                            placeholder="your@email.com"
                             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
                           />
+                          {aiFlow.email.trim() && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
                         </div>
-                        <p className="text-xs text-ink-muted">用于确认充值到正确账号，不会用于其他用途。</p>
+                        <p className="text-xs text-ink-muted">用于核对充值到正确账号，不用于其他用途。</p>
                       </div>
+
+                      {/* Session Token */}
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-ink">Session Token <span className="text-red-400">*</span></label>
+                        <label className="text-sm font-semibold text-ink">
+                          Session Token <span className="text-red-400">*</span>
+                        </label>
                         <textarea
                           value={aiFlow.sessionToken}
                           onChange={(event) => {
@@ -1984,17 +1922,23 @@ export default function ResourcesPage() {
                               tokenMsg: result.msg,
                             } : null);
                           }}
-                          placeholder="粘贴你从浏览器 Cookie 复制的完整 Session Token…"
+                          placeholder="粘贴从浏览器 Cookie 复制的完整 Token，通常超过 200 个字符…"
                           rows={4}
-                          className="w-full resize-none rounded-xl border border-line bg-(--surface-raised) px-3.5 py-3 text-xs font-mono outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-gold"
+                          className={`w-full resize-none rounded-xl border px-3.5 py-3 text-xs font-mono outline-none placeholder:text-ink-muted transition-colors focus-visible:ring-2 focus-visible:ring-gold ${
+                            aiFlow.tokenState === 'valid' ? 'border-emerald-400 bg-emerald-50/50' :
+                            aiFlow.tokenState === 'invalid' ? 'border-red-400 bg-red-50/30' :
+                            'border-line bg-(--surface-raised)'
+                          }`}
                         />
                         {aiFlow.tokenState !== 'idle' && (
-                          <div className={`flex items-center gap-1.5 text-xs font-medium ${
-                            aiFlow.tokenState === 'valid' ? 'text-emerald-600' : 'text-red-500'
+                          <div className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium ${
+                            aiFlow.tokenState === 'valid'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-red-50 text-red-600'
                           }`}>
                             {aiFlow.tokenState === 'valid'
-                              ? <CheckCircle2 className="h-3.5 w-3.5" />
-                              : <AlertCircle className="h-3.5 w-3.5" />
+                              ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                              : <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                             }
                             {aiFlow.tokenMsg}
                           </div>
@@ -2003,8 +1947,15 @@ export default function ResourcesPage() {
                     </>
                   ) : aiFlow.service.credentialType === 'password' ? (
                     <>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--orange">
+                        <Shield className="res-ai-flow-info-icon" />
+                        <div>
+                          <p className="font-semibold">需要提供 OpenAI 账号 + 密码</p>
+                          <p className="mt-1 text-xs opacity-80">代充完成后立即退出登录，建议操作完成后修改密码。</p>
+                        </div>
+                      </div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-ink">OpenAI 账号邮箱 <span className="text-red-400">*</span></label>
+                        <label className="text-sm font-semibold text-ink">OpenAI 账号邮箱 <span className="text-red-400">*</span></label>
                         <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
                           <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
                           <input
@@ -2016,7 +1967,7 @@ export default function ResourcesPage() {
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-ink">账号密码 <span className="text-red-400">*</span></label>
+                        <label className="text-sm font-semibold text-ink">账号密码 <span className="text-red-400">*</span></label>
                         <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
                           <LockKeyhole className="h-4 w-4 shrink-0 text-ink-muted" />
                           <input
@@ -2027,68 +1978,100 @@ export default function ResourcesPage() {
                             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
                           />
                         </div>
-                        <p className="text-xs text-ink-muted">仅用于代充操作，完成后立即退出登录，建议代充后修改密码。</p>
                       </div>
                     </>
                   ) : (
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-ink">联系方式 <span className="text-red-400">*</span></label>
-                      <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
-                        <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
-                        <input
-                          value={aiFlow.email}
-                          onChange={(event) => setAiFlow(prev => prev ? { ...prev, email: event.target.value } : null)}
-                          placeholder="邮箱 / 微信号 / Telegram，账号密码将发送到这里"
-                          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
-                        />
+                    <>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--green">
+                        <CheckCircle2 className="res-ai-flow-info-icon" />
+                        <div>
+                          <p className="font-semibold">成品账号，无需提供个人账号信息</p>
+                          <p className="mt-1 text-xs opacity-80">付款后站长会将完整账号密码发送给你，留下联系方式即可。</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-ink-muted">付款后 24h 内通过此联系方式发送完整账号密码。</p>
-                    </div>
+                      <div className="space-y-2">
+                        {aiFlow.service.features.map((f) => (
+                          <div key={f} className="flex items-center gap-2.5 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                            <span className="text-sm text-ink">{f}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-semibold text-ink">联系方式 <span className="text-red-400">*</span></label>
+                        <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                          <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
+                          <input
+                            value={aiFlow.email}
+                            onChange={(event) => setAiFlow(prev => prev ? { ...prev, email: event.target.value } : null)}
+                            placeholder="邮箱 / 微信号 / Telegram"
+                            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
+                          />
+                        </div>
+                        <p className="text-xs text-ink-muted">付款后 24h 内通过此方式发送账号密码。</p>
+                      </div>
+                    </>
                   )}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-ink">备注（可选）</label>
+                    <label className="text-sm font-medium text-ink-secondary">备注（可选）</label>
                     <textarea
                       value={aiFlow.note}
                       onChange={(event) => setAiFlow(prev => prev ? { ...prev, note: event.target.value } : null)}
-                      placeholder="例如：已付款，订单号 xxx"
+                      placeholder="其他说明"
                       rows={2}
-                      className="w-full resize-none rounded-xl border border-line bg-(--surface-raised) px-3.5 py-3 text-sm outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-gold"
+                      className="w-full resize-none rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5 text-sm outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-gold"
                     />
                   </div>
                 </div>
               )}
 
-              {/* Step 3 — 扫码付款 */}
-              {aiFlow.step === 3 && (
-                <div className="space-y-4 p-6">
-                  {/* 支付方式选择 */}
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">选择支付方式</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {([['wechat', '微信支付'], ['alipay', '支付宝']] as [PaymentMethod, string][]).map(([method, label]) => (
-                        <button
-                          key={method}
-                          type="button"
-                          onClick={() => setAiFlow(prev => prev ? { ...prev, paymentMethod: method } : null)}
-                          className={`rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
-                            aiFlow.paymentMethod === method
-                              ? 'border-gold bg-gold/10 text-ink'
-                              : 'border-line bg-(--surface-raised) text-ink-muted hover:text-ink'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
+              {/* ─── Step 2：扫码付款 ─── */}
+              {aiFlow.step === 2 && (
+                <div className="space-y-4 p-5">
+                  {/* 订单摘要 */}
+                  <div className="rounded-2xl border border-line bg-(--surface-raised) p-4 space-y-2 text-sm">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">订单信息</p>
+                    <div className="flex justify-between">
+                      <span className="text-ink-secondary">服务</span>
+                      <span className="font-medium text-ink">{aiFlow.service.plan}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-ink-secondary">金额</span>
+                      <span className="text-xl font-bold text-ink">¥{aiFlow.service.priceMonthly}</span>
+                    </div>
+                    {aiFlow.email && (
+                      <div className="flex justify-between gap-4">
+                        <span className="shrink-0 text-ink-secondary">{aiFlow.service.isReadyMade ? '联系方式' : '账号邮箱'}</span>
+                        <span className="truncate text-right text-ink">{aiFlow.email}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 支付方式 */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {([['wechat', '微信支付'], ['alipay', '支付宝']] as [PaymentMethod, string][]).map(([method, label]) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setAiFlow(prev => prev ? { ...prev, paymentMethod: method } : null)}
+                        className={`rounded-xl border py-2.5 text-sm font-medium transition ${
+                          aiFlow.paymentMethod === method
+                            ? 'border-gold bg-gold/10 text-ink'
+                            : 'border-line bg-(--surface-raised) text-ink-muted hover:text-ink'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
 
                   {/* 收款码 */}
-                  <div className="grid min-h-52 place-items-center rounded-2xl border border-dashed border-line bg-(--surface-raised) p-5 text-center">
+                  <div className="grid min-h-48 place-items-center rounded-2xl border border-dashed border-line bg-(--surface-raised) p-4 text-center">
                     {payQrConfig[aiFlow.paymentMethod] ? (
                       <img
                         src={payQrConfig[aiFlow.paymentMethod]}
                         alt={aiFlow.paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
-                        className="h-44 w-44 rounded-2xl bg-white object-contain shadow-(--shadow-sm)"
+                        className="h-40 w-40 rounded-2xl bg-white object-contain shadow-(--shadow-sm)"
                       />
                     ) : (
                       <div>
@@ -2097,26 +2080,8 @@ export default function ResourcesPage() {
                           {aiFlow.paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
                         </p>
                         <p className="mt-1 text-xs text-ink-muted">
-                          请配置 {aiFlow.paymentMethod === 'wechat' ? 'NEXT_PUBLIC_WECHAT_PAY_QR' : 'NEXT_PUBLIC_ALIPAY_PAY_QR'}
+                          配置 {aiFlow.paymentMethod === 'wechat' ? 'NEXT_PUBLIC_WECHAT_PAY_QR' : 'NEXT_PUBLIC_ALIPAY_PAY_QR'} 环境变量后显示
                         </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 订单摘要 */}
-                  <div className="rounded-xl border border-line bg-(--surface-raised) p-4 text-sm space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-ink-muted">服务</span>
-                      <span className="font-medium text-ink">{aiFlow.service.plan}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-ink-muted">金额</span>
-                      <span className="text-xl font-bold text-ink">¥{aiFlow.service.priceMonthly}</span>
-                    </div>
-                    {aiFlow.email && (
-                      <div className="flex justify-between">
-                        <span className="text-ink-muted">联系方式</span>
-                        <span className="truncate text-ink max-w-[200px]">{aiFlow.email}</span>
                       </div>
                     )}
                   </div>
@@ -2126,7 +2091,7 @@ export default function ResourcesPage() {
                       <CheckCircle2 className="res-ai-flow-info-icon" />
                       <div>
                         <p className="font-semibold">订单已创建</p>
-                        <p className="mt-0.5 text-xs opacity-80">订单号：{aiFlow.order.order_number}，信息已复制到剪贴板，付款后发给站长核对。</p>
+                        <p className="mt-0.5 text-xs opacity-80">订单号：{aiFlow.order.order_number}，信息已复制，扫码付款后发给站长核对。</p>
                       </div>
                     </div>
                   )}
@@ -2134,13 +2099,13 @@ export default function ResourcesPage() {
               )}
             </div>
 
-            {/* ── 底部导航 ── */}
-            <div className="flex items-center gap-3 border-t border-line px-6 py-4">
-              {aiFlow.step > 1 ? (
+            {/* ── 底部操作 ── */}
+            <div className="flex items-center gap-3 border-t border-line bg-(--surface-raised) px-5 py-4">
+              {aiFlow.step === 2 ? (
                 <button
                   type="button"
-                  onClick={() => setAiFlow(prev => prev ? { ...prev, step: (prev.step - 1) as 1 | 2 | 3 } : null)}
-                  className="flex items-center gap-1.5 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-(--surface-raised) transition-colors"
+                  onClick={() => setAiFlow(prev => prev ? { ...prev, step: 1 } : null)}
+                  className="rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-paper transition-colors"
                 >
                   上一步
                 </button>
@@ -2148,31 +2113,29 @@ export default function ResourcesPage() {
                 <button
                   type="button"
                   onClick={() => setAiFlow(null)}
-                  className="flex items-center gap-1.5 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-(--surface-raised) transition-colors"
+                  className="rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-paper transition-colors"
                 >
                   取消
                 </button>
               )}
               <div className="flex-1" />
-              {aiFlow.step < 3 ? (
+              {aiFlow.step === 1 ? (
                 <button
                   type="button"
                   onClick={() => {
-                    if (aiFlow.step === 2) {
-                      const { service, email, sessionToken, tokenState, accountPassword } = aiFlow;
-                      if (!email.trim()) { pushNotice('error', '请填写联系方式'); return; }
-                      if (service.credentialType === 'token' && tokenState !== 'valid') {
-                        pushNotice('error', 'Session Token 格式不正确，请重新检查'); return;
-                      }
-                      if (service.credentialType === 'password' && !accountPassword.trim()) {
-                        pushNotice('error', '请填写账号密码'); return;
-                      }
+                    const { service, email, sessionToken, tokenState, accountPassword } = aiFlow;
+                    if (!email.trim()) { pushNotice('error', service.credentialType === 'none' ? '请填写联系方式' : '请填写账号邮箱'); return; }
+                    if (service.credentialType === 'token' && tokenState !== 'valid') {
+                      pushNotice('error', 'Session Token 格式不正确，请重新检查'); return;
                     }
-                    setAiFlow(prev => prev ? { ...prev, step: (prev.step + 1) as 1 | 2 | 3 } : null);
+                    if (service.credentialType === 'password' && !accountPassword.trim()) {
+                      pushNotice('error', '请填写账号密码'); return;
+                    }
+                    setAiFlow(prev => prev ? { ...prev, step: 2 } : null);
                   }}
                   className="res-ai-flow-next-btn"
                 >
-                  下一步
+                  下一步，去付款
                   <ChevronRight className="h-4 w-4" />
                 </button>
               ) : (
@@ -2182,7 +2145,11 @@ export default function ResourcesPage() {
                   disabled={aiFlow.submitting}
                   className={`res-ai-flow-next-btn ${aiFlow.submitting ? 'opacity-60' : ''}`}
                 >
-                  {aiFlow.submitting ? '提交中…' : aiFlow.order ? (aiFlow.copied ? <><Check className="h-4 w-4" /> 已复制</> : '重新复制') : '确认下单'}
+                  {aiFlow.submitting
+                    ? '提交中…'
+                    : aiFlow.order
+                      ? (aiFlow.copied ? <><Check className="h-4 w-4" />已复制</> : '重新复制订单')
+                      : '确认下单并复制'}
                 </button>
               )}
             </div>
