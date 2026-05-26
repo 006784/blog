@@ -78,7 +78,7 @@ interface ResourceProduct {
 
 interface AiRechargeService {
   id: string;
-  service: 'chatgpt' | 'claude';
+  service: 'chatgpt' | 'claude' | 'apple';
   plan: string;
   desc: string;
   priceMonthly: number;
@@ -87,6 +87,10 @@ interface AiRechargeService {
   badge?: string;
   features: string[];
   featured?: boolean;
+  /** 代充所需凭证类型 */
+  credentialType?: 'token' | 'password' | 'none';
+  /** 成品号：付款后站长发送账号密码 */
+  isReadyMade?: boolean;
 }
 
 const aiRechargeServices: AiRechargeService[] = [
@@ -94,43 +98,83 @@ const aiRechargeServices: AiRechargeService[] = [
     id: 'chatgpt-plus-turkey',
     service: 'chatgpt',
     plan: 'ChatGPT Plus 土耳其区',
-    desc: '土耳其区 OpenAI 官方订阅，价格约为美区 40%，GPT-4o / o3 / DALL·E / 联网 / GPTs 全功能无阉割，与美区 Plus 完全一致。',
+    desc: '土耳其区 OpenAI 官方订阅，价格约为美区 40%，GPT-4o / o3 / DALL·E / 联网 / GPTs 全功能无阉割。',
     priceMonthly: 68,
     originalPrice: 168,
     priceNote: '美区标准价 ¥168，节省超 60%',
     badge: '最低价',
     featured: true,
+    credentialType: 'password',
     features: ['GPT-4o / o3 全模型', 'DALL·E 3 图像生成', '联网实时搜索', '自定义 GPTs', 'Projects 协作', '语音对话模式'],
   },
   {
-    id: 'chatgpt-plus',
+    id: 'chatgpt-plus-turkey-ready',
     service: 'chatgpt',
-    plan: 'ChatGPT Plus 美区',
-    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成，对话记忆，插件全开放。适合需要美区账号的用户。',
-    priceMonthly: 168,
-    priceNote: '约 $20/月，月付',
-    badge: '',
-    features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '自定义 GPTs'],
+    plan: 'ChatGPT Plus 土耳其区（成品号）',
+    desc: '由站长注册并激活土耳其区 Plus 的成品账号，付款后直接发送账号密码，即买即用。',
+    priceMonthly: 88,
+    priceNote: '买断式账号，拿到即有效',
+    badge: '即买即用',
+    credentialType: 'none',
+    isReadyMade: true,
+    features: ['完整账号 + 密码', 'GPT-4o / o3 全模型', 'DALL·E 3 / 联网', '自定义 GPTs', '不需要提供自己的账号'],
   },
   {
     id: 'claude-pro',
     service: 'claude',
-    plan: 'Claude Pro',
-    desc: '5× 更高用量，Claude Sonnet / Opus 完整访问，Projects 长上下文协作。',
+    plan: 'Claude Pro（代充）',
+    desc: '5× 更高用量，Claude Sonnet / Opus 完整访问，Projects 长上下文协作，提供 Session Token 代充。',
     priceMonthly: 168,
     priceNote: '约 $20/月，月付',
     badge: '',
-    features: ['Claude 3.7 Sonnet/Opus', '5× 更高用量', 'Projects 协作', '优先访问新功能'],
+    credentialType: 'token',
+    features: ['Claude Sonnet/Opus 全模型', '5× 更高用量', 'Projects 协作', '优先访问新功能'],
+  },
+  {
+    id: 'claude-pro-ready',
+    service: 'claude',
+    plan: 'Claude Pro（成品号）',
+    desc: '站长注册并激活的 Claude Pro 成品账号，付款后直接收到账号密码，无需提供个人信息。',
+    priceMonthly: 188,
+    priceNote: '即买即用，含完整账号',
+    badge: '成品号',
+    credentialType: 'none',
+    isReadyMade: true,
+    features: ['完整账号 + 密码', 'Claude Sonnet/Opus', '5× 用量', '不需要提供自己的账号'],
+  },
+  {
+    id: 'chatgpt-plus',
+    service: 'chatgpt',
+    plan: 'ChatGPT Plus 美区（代充）',
+    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成。提供 Session Token，代充到自有账号。',
+    priceMonthly: 168,
+    priceNote: '约 $20/月，月付',
+    badge: '',
+    credentialType: 'token',
+    features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '自定义 GPTs'],
   },
   {
     id: 'claude-max',
     service: 'claude',
-    plan: 'Claude Max',
+    plan: 'Claude Max（代充）',
     desc: '20× 或 40× 超高用量，适合重度用户和开发者，含 Claude 全系列旗舰模型。',
     priceMonthly: 800,
     priceNote: '约 $100/月，月付',
     badge: '重度用户',
+    credentialType: 'token',
     features: ['20× / 40× 超高用量', '全旗舰模型', '优先响应', '适合专业工作流'],
+  },
+  {
+    id: 'apple-id-us',
+    service: 'apple',
+    plan: '美区 Apple ID（代注册）',
+    desc: '由站长注册美区 Apple ID，付款后 24h 内发送完整账号密码，可用于 App Store 美区下载或订阅服务。',
+    priceMonthly: 38,
+    priceNote: '一次性服务，含账号 + 密码',
+    badge: '即买即用',
+    credentialType: 'none',
+    isReadyMade: true,
+    features: ['美区 Apple ID 完整账号', '注册邮箱 + 密码交付', 'App Store 美区可用', '付款后 24h 内交付'],
   },
 ];
 
@@ -278,6 +322,22 @@ export default function ResourcesPage() {
   const [checkoutProduct, setCheckoutProduct] = useState<ResourceProduct | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+
+  // AI 代充引导弹窗状态（必须在 hasModalOpen 之前声明）
+  const [aiFlow, setAiFlow] = useState<{
+    service: AiRechargeService;
+    step: 1 | 2 | 3;
+    email: string;
+    accountPassword: string;
+    sessionToken: string;
+    tokenState: 'idle' | 'valid' | 'invalid';
+    tokenMsg: string;
+    paymentMethod: PaymentMethod;
+    note: string;
+    order: ShopOrder | null;
+    submitting: boolean;
+    copied: boolean;
+  } | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('wechat');
   const [buyerContact, setBuyerContact] = useState('');
   const [buyerNote, setBuyerNote] = useState('');
@@ -346,7 +406,7 @@ export default function ResourcesPage() {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const hasModalOpen = Boolean(showUploadModal || showCategoryModal || checkoutProduct || cartOpen);
+  const hasModalOpen = Boolean(showUploadModal || showCategoryModal || checkoutProduct || cartOpen || !!aiFlow);
   useEffect(() => {
     if (!hasModalOpen) return;
 
@@ -363,6 +423,11 @@ export default function ResourcesPage() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
+
+      if (aiFlow) {
+        setAiFlow(null);
+        return;
+      }
 
       if (cartOpen) {
         setCartOpen(false);
@@ -387,7 +452,7 @@ export default function ResourcesPage() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [hasModalOpen, cartOpen, showCategoryModal, showUploadModal, checkoutProduct]);
+  }, [hasModalOpen, aiFlow, cartOpen, showCategoryModal, showUploadModal, checkoutProduct]);
 
   const handleUpload = async () => {
     if (!uploadFile || !isAdmin) return;
@@ -664,19 +729,95 @@ export default function ResourcesPage() {
     setOrderSubmitting(false);
   };
 
-  const openAiRecharge = (svc: AiRechargeService) => {
-    openCheckout({
-      id: svc.id,
-      title: svc.plan,
-      description: svc.desc,
-      category: 'AI 代充',
-      price: svc.priceMonthly,
-      originalPrice: undefined,
-      includes: svc.features,
-      tags: ['月付', '正规订阅', '人工代充'],
-      updateLabel: '实时到账',
-      delivery: '提供邮箱/手机号，付款后24小时内充值到账',
+  // ── AI 代充引导弹窗 ──────────────────────────────────────────
+  const openAiFlow = (svc: AiRechargeService) => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    setAiFlow({
+      service: svc, step: 1,
+      email: '', accountPassword: '', sessionToken: '',
+      tokenState: 'idle', tokenMsg: '',
+      paymentMethod: 'wechat', note: '',
+      order: null, submitting: false, copied: false,
     });
+  };
+
+  const validateSessionToken = (token: string): { ok: boolean; msg: string } => {
+    if (!token.trim()) return { ok: false, msg: '' };
+    const t = token.trim();
+    const parts = t.split('.');
+    if (parts.length === 3 && parts.every(p => p.length > 0)) {
+      try {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          return { ok: false, msg: 'Token 已过期，请重新登录后获取' };
+        }
+        return { ok: true, msg: '验证通过（Access Token 格式正确）' };
+      } catch {
+        return { ok: false, msg: '无法解析，请确认是否完整复制' };
+      }
+    }
+    if (t.startsWith('%7B') || t.startsWith('{')) {
+      return t.length > 80
+        ? { ok: true, msg: '验证通过（Session Cookie 格式）' }
+        : { ok: false, msg: '内容太短，请确认是否完整复制' };
+    }
+    if (t.length > 100 && /^[A-Za-z0-9+/=_%.\-|]+$/.test(t)) {
+      return { ok: true, msg: '验证通过' };
+    }
+    return { ok: false, msg: t.length < 50 ? 'Token 通常超过 100 个字符，请确认是否完整' : '格式不符预期，请确认复制方式' };
+  };
+
+  const submitAiOrder = async () => {
+    if (!aiFlow) return;
+    if (!aiFlow.email.trim()) {
+      pushNotice('error', '请填写联系邮箱');
+      return;
+    }
+    try {
+      setAiFlow(prev => prev ? { ...prev, submitting: true } : null);
+      const credNote = (() => {
+        if (aiFlow.service.credentialType === 'token') return `Session Token: ${aiFlow.sessionToken.slice(0, 16)}...`;
+        if (aiFlow.service.credentialType === 'password') return `账号邮箱: ${aiFlow.email}`;
+        return '成品号/代注册服务';
+      })();
+      const res = await fetch('/api/resource-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: aiFlow.service.id,
+          resourceId: null,
+          productTitle: aiFlow.service.plan,
+          productCategory: aiFlow.service.service === 'apple' ? '苹果账号' : 'AI 代充',
+          paymentMethod: aiFlow.paymentMethod,
+          buyerContact: aiFlow.email,
+          buyerNote: [aiFlow.note, credNote].filter(Boolean).join(' | '),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.order) throw new Error(data.error || '创建订单失败');
+      const order = data.order as ShopOrder;
+      const credLine = (() => {
+        if (aiFlow.service.credentialType === 'token') return `Session Token 已提供（已加密传输）`;
+        if (aiFlow.service.credentialType === 'password') return `账号密码：已提供`;
+        return '';
+      })();
+      const text = [
+        `订单号：${order.order_number}`,
+        `服务：${aiFlow.service.plan}`,
+        `金额：￥${(order.amount_cents / 100).toFixed(0)}`,
+        `联系方式：${aiFlow.email}`,
+        credLine,
+        aiFlow.note ? `备注：${aiFlow.note}` : '',
+      ].filter(Boolean).join('\n');
+      await navigator.clipboard.writeText(text);
+      setAiFlow(prev => prev ? { ...prev, order, copied: true, submitting: false } : null);
+      pushNotice('success', '订单已创建，信息已复制，请扫码付款后发给站长。');
+      window.setTimeout(() => setAiFlow(prev => prev ? { ...prev, copied: false } : null), 2500);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '创建订单失败';
+      pushNotice('error', msg);
+      setAiFlow(prev => prev ? { ...prev, submitting: false } : null);
+    }
   };
 
   const copyOrderInfo = async (order: ShopOrder) => {
@@ -789,90 +930,6 @@ export default function ResourcesPage() {
             </p>
           </div>
         </motion.div>
-
-        <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)]">
-          <Card variant="glass" className="overflow-hidden rounded-3xl p-0">
-            <div className="grid min-h-[320px] gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="flex flex-col justify-between border-b border-(--border-default) bg-gradient-to-br from-(--surface-panel) via-(--surface-raised) to-(--surface-overlay) p-6 lg:border-b-0 lg:border-r">
-                <div className="space-y-4">
-                  <Badge tone="info" variant="soft" className="w-fit gap-1.5">
-                    <ShoppingBag className="h-3.5 w-3.5" />
-                    Paid Resource Packs
-                  </Badge>
-                  <div className="space-y-3">
-                    <h2 className="text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl">
-                      把你整理好的资料，做成可购买的网盘资源包。
-                    </h2>
-                    <p className="max-w-xl text-sm leading-7 text-neutral-600">
-                      适合售卖学习索引、工具合集、自制模板、授权素材和公开资料整理服务。用户下单后按订单号核对付款，再交付链接。
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-8 grid grid-cols-3 gap-3">
-                  {[
-                    ['交付', '网盘链接'],
-                    ['支付', '微信/支付宝'],
-                    ['模式', '人工确认'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-2xl border border-(--border-default) bg-(--surface-raised) p-3">
-                      <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{label}</p>
-                      <p className="mt-1 text-sm font-semibold text-neutral-900">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid content-between gap-4 p-6">
-                <div className="rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
-                  <div className="flex items-start gap-3">
-                    <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-(--color-primary-600)" />
-                    <div>
-                      <h3 className="font-semibold text-neutral-900">合规售卖提示</h3>
-                      <p className="mt-1 text-sm leading-6 text-neutral-600">
-                        页面默认按“整理服务/自有或授权资料”来设计。请不要上架无授权影视、课程、电子书等侵权内容。
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
-                    <WalletCards className="h-5 w-5 text-(--color-primary-600)" />
-                    <p className="mt-3 text-sm font-semibold text-neutral-900">扫码付款</p>
-                    <p className="mt-1 text-xs leading-5 text-neutral-500">先用收款码 MVP 跑通，后续再接微信/支付宝官方回调。</p>
-                  </div>
-                  <div className="rounded-2xl border border-(--border-default) bg-(--surface-base) p-4">
-                    <MessageCircle className="h-5 w-5 text-(--color-primary-600)" />
-                    <p className="mt-3 text-sm font-semibold text-neutral-900">人工交付</p>
-                    <p className="mt-1 text-xs leading-5 text-neutral-500">用户复制订单信息发给你，确认后发送网盘链接和提取码。</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card variant="glass" className="rounded-3xl">
-            <div className="flex h-full flex-col justify-between gap-6">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Checkout Flow</p>
-                <h2 className="mt-2 text-2xl font-semibold text-neutral-900">第一版下单流程</h2>
-              </div>
-              <div className="space-y-3">
-                {[
-                  ['1', '选择资料包并提交订单'],
-                  ['2', '微信或支付宝扫码付款'],
-                  ['3', '复制订单号和联系方式'],
-                  ['4', '站长确认后交付网盘链接'],
-                ].map(([step, label]) => (
-                  <div key={step} className="flex items-center gap-3 rounded-2xl border border-(--border-default) bg-(--surface-base) p-3">
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-(--surface-overlay) text-sm font-semibold text-neutral-900">{step}</span>
-                    <span className="text-sm text-neutral-700">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        </section>
 
         {/* AI 代充服务区块 */}
         <section className="space-y-6">
@@ -1003,7 +1060,7 @@ export default function ResourcesPage() {
 
                     <button
                       type="button"
-                      onClick={() => openAiRecharge(aiRechargeServices[0])}
+                      onClick={() => openAiFlow(aiRechargeServices[0])}
                       className="res-turkey-btn mt-4 w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                     >
                       立即代充 ChatGPT Plus
@@ -1071,14 +1128,18 @@ export default function ResourcesPage() {
                 <div className={`res-ai-card res-ai-card--${svc.service}`}>
                   <div className="res-ai-card__bar" />
                   <div className="res-ai-card__top">
-                    <div className="res-ai-card__logo">
+                    <div className={`res-ai-card__logo res-ai-card__logo--${svc.service}`}>
                       {svc.service === 'chatgpt' ? (
                         <svg viewBox="0 0 24 24" fill="currentColor" className="res-ai-card__logo-icon">
                           <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0L4.155 14.4A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.371 2.019-1.168a.076.076 0 0 1 .071 0l4.663 2.692a4.496 4.496 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.234-.58zm2.019-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.664-2.691a4.504 4.504 0 0 1 6.683 4.668zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.504 4.504 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
                         </svg>
+                      ) : svc.service === 'apple' ? (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="res-ai-card__logo-icon">
+                          <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/>
+                        </svg>
                       ) : (
                         <svg viewBox="0 0 24 24" fill="currentColor" className="res-ai-card__logo-icon">
-                          <path d="M17.304 1.01h-1.146l-3.67 10.102h-1.03L7.788 1.01H6.646L2.837 11.944H1.01v1.112h5.002v-1.112H4.076l1.27-3.496h4.778l.718 1.976-1.197 3.295-1.073 2.954 1.073.39L17.304 1.01zm-10.48 7.326L8.972 3.11l2.15 5.226H6.824zm9.49 5.217c-.647 0-1.237.234-1.692.617l-.453-1.246h-1.047v9.066h1.134v-3.42c.455.384 1.045.617 1.692.617 1.46 0 2.647-1.188 2.647-2.817s-1.188-2.817-2.647-2.817zm-.198 4.495c-.895 0-1.622-.727-1.622-1.622v-.236c0-.895.727-1.622 1.622-1.622s1.622.727 1.622 1.622v.236c0 .895-.727 1.622-1.622 1.622z"/>
+                          <path d="M17.304 1.01h-1.146l-3.67 10.102h-1.03L7.788 1.01H6.646L2.837 11.944H1.01v1.112h5.002v-1.112H4.076l1.27-3.496h4.778l.718 1.976-1.197 3.295-1.073 2.954 1.073.39L17.304 1.01zm-10.48 7.326L8.972 3.11l2.15 5.226H6.824zm9.49 5.217c-.647 0-1.237.234-1.692.617l-.453-1.246h-1.047v9.066h1.134v-3.42c.455.384 1.045.617 1.692.617 1.46 0 2.647-1.188 2.647-2.817s-1.188-2.647-2.647-2.817zm-.198 4.495c-.895 0-1.622-.727-1.622-1.622v-.236c0-.895.727-1.622 1.622-1.622s1.622.727 1.622 1.622v.236c0 .895-.727 1.622-1.622 1.622z"/>
                         </svg>
                       )}
                     </div>
@@ -1105,9 +1166,9 @@ export default function ResourcesPage() {
                       <button
                         type="button"
                         className="res-ai-card__btn"
-                        onClick={() => openAiRecharge(svc)}
+                        onClick={() => openAiFlow(svc)}
                       >
-                        立即代充
+                        {svc.isReadyMade ? '立即购买' : '立即代充'}
                       </button>
                       <button
                         type="button"
@@ -1731,6 +1792,404 @@ export default function ResourcesPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── AI 代充引导弹窗 ── */}
+      {typeof document !== 'undefined' && aiFlow ? createPortal(
+        <motion.div
+          variants={modalBackdropVariants}
+          initial="hidden"
+          animate="visible"
+          className="ios-modal-overlay fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pb-28 pt-6 sm:pb-6"
+          onPointerDown={(event) => {
+            if (event.target === event.currentTarget) setAiFlow(null);
+          }}
+        >
+          <motion.div
+            variants={modalPanelVariants}
+            className="surface-card ios-modal-card w-full max-w-xl overflow-hidden p-0"
+          >
+            {/* ── 彩色头部 ── */}
+            <div className={`res-ai-flow-header res-ai-flow-header--${aiFlow.service.service}`}>
+              <div className="relative flex items-center justify-between p-5">
+                <div className="flex items-center gap-3">
+                  <div className="res-ai-flow-logo">
+                    {aiFlow.service.service === 'chatgpt' ? (
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-white">
+                        <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0L4.155 14.4A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.371 2.019-1.168a.076.076 0 0 1 .071 0l4.663 2.692a4.496 4.496 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.234-.58zm2.019-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.664-2.691a4.504 4.504 0 0 1 6.683 4.668zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.504 4.504 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+                      </svg>
+                    ) : aiFlow.service.service === 'apple' ? (
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-white">
+                        <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/>
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-white">
+                        <path d="M17.304 1.01h-1.146l-3.67 10.102h-1.03L7.788 1.01H6.646L2.837 11.944H1.01v1.112h5.002v-1.112H4.076l1.27-3.496h4.778l.718 1.976-1.197 3.295-1.073 2.954 1.073.39L17.304 1.01zm-10.48 7.326L8.972 3.11l2.15 5.226H6.824zm9.49 5.217c-.647 0-1.237.234-1.692.617l-.453-1.246h-1.047v9.066h1.134v-3.42c.455.384 1.045.617 1.692.617 1.46 0 2.647-1.188 2.647-2.817s-1.188-2.647-2.647-2.817zm-.198 4.495c-.895 0-1.622-.727-1.622-1.622v-.236c0-.895.727-1.622 1.622-1.622s1.622.727 1.622 1.622v.236c0 .895-.727 1.622-1.622 1.622z"/>
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">{aiFlow.service.plan}</h3>
+                    <p className="text-xs text-white/70">¥{aiFlow.service.priceMonthly} · {aiFlow.service.priceNote}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  aria-label="关闭弹窗"
+                  onClick={() => setAiFlow(null)}
+                  className="rounded-lg p-1.5 text-white/70 hover:bg-white/15 hover:text-white transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* 步骤指示器 */}
+              <div className="relative flex border-t border-white/20">
+                {(['准备资料', '填写信息', '扫码付款'] as const).map((label, i) => {
+                  const stepNum = (i + 1) as 1 | 2 | 3;
+                  const isActive = aiFlow.step === stepNum;
+                  const isDone = aiFlow.step > stepNum;
+                  return (
+                    <div
+                      key={label}
+                      className={`flex flex-1 flex-col items-center gap-1 py-3 text-center text-xs font-medium transition-colors ${
+                        isActive ? 'bg-white/15 text-white' : isDone ? 'text-white/80' : 'text-white/40'
+                      }`}
+                    >
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
+                        isDone ? 'bg-white text-emerald-600' : isActive ? 'bg-white/25 text-white' : 'bg-white/10 text-white/40'
+                      }`}>
+                        {isDone ? <Check className="h-3 w-3" /> : stepNum}
+                      </span>
+                      {label}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── 步骤内容 ── */}
+            <div className="max-h-[60vh] overflow-y-auto">
+
+              {/* Step 1 — 准备资料 */}
+              {aiFlow.step === 1 && (
+                <div className="space-y-4 p-6">
+                  {aiFlow.service.isReadyMade ? (
+                    <>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--green">
+                        <CheckCircle2 className="res-ai-flow-info-icon" />
+                        <div>
+                          <p className="font-semibold">成品账号，无需提供任何个人信息</p>
+                          <p className="mt-1 text-xs opacity-80">付款后站长会将完整账号密码发送给你，无需填写自己的账号。</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">你将收到</p>
+                        <div className="space-y-2">
+                          {aiFlow.service.features.map((f) => (
+                            <div key={f} className="flex items-center gap-2.5 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                              <span className="text-sm text-ink">{f}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--gold">
+                        <Clock className="res-ai-flow-info-icon" />
+                        <p className="text-sm">付款后 <strong>24 小时内</strong>通过你填写的联系方式发送账号密码。</p>
+                      </div>
+                    </>
+                  ) : aiFlow.service.credentialType === 'token' ? (
+                    <>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--blue">
+                        <LockKeyhole className="res-ai-flow-info-icon" />
+                        <div>
+                          <p className="font-semibold">Session Token 代充方式</p>
+                          <p className="mt-1 text-xs opacity-80">通过你的浏览器 Cookie 获取 Session Token，代充完全在你自己账号内完成，不需要提供密码。</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">如何获取 Session Token</p>
+                        {[
+                          { step: 1, title: '登录你的账号', desc: '在浏览器中登录 chatgpt.com 或 claude.ai（保持已登录状态）' },
+                          { step: 2, title: '打开开发者工具', desc: '按 F12（Windows）或 Command+Option+I（Mac），切换到「应用」/「Application」标签' },
+                          { step: 3, title: '找到 Cookie', desc: '在左侧「Cookie」中找到当前域名，搜索 __Secure-next-auth.session-token 或 sk- 开头的 Token' },
+                          { step: 4, title: '完整复制 Value', desc: 'Token 很长（超过 100 字符），务必全部复制，不要截断' },
+                        ].map(({ step, title, desc }) => (
+                          <div key={step} className="flex gap-3">
+                            <span className="res-ai-flow-step-num">{step}</span>
+                            <div>
+                              <p className="text-sm font-medium text-ink">{title}</p>
+                              <p className="mt-0.5 text-xs leading-5 text-ink-secondary">{desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--orange">
+                        <Shield className="res-ai-flow-info-icon" />
+                        <div>
+                          <p className="font-semibold">土耳其区代充需要账号 + 密码</p>
+                          <p className="mt-1 text-xs opacity-80">由于土耳其区操作需要登录你的 OpenAI 账号进行区域切换，需要提供账号密码，操作完成后立即退出登录。</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">需要提供</p>
+                        {['OpenAI 账号注册邮箱', 'OpenAI 账号密码（用于登录代充，操作后立即退出）', '代充期间请勿修改密码'].map((item, i) => (
+                          <div key={i} className="flex items-start gap-2.5 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+                            <span className="text-sm text-ink">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="res-ai-flow-info-box res-ai-flow-info-box--green">
+                        <Shield className="res-ai-flow-info-icon" />
+                        <p className="text-sm">代充完成后建议立即修改密码，提升账号安全性。</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Step 2 — 填写信息 */}
+              {aiFlow.step === 2 && (
+                <div className="space-y-4 p-6">
+                  {aiFlow.service.credentialType === 'token' ? (
+                    <>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-ink">账号邮箱 <span className="text-red-400">*</span></label>
+                        <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                          <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
+                          <input
+                            value={aiFlow.email}
+                            onChange={(event) => setAiFlow(prev => prev ? { ...prev, email: event.target.value } : null)}
+                            placeholder="你的 ChatGPT / Claude 账号邮箱"
+                            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
+                          />
+                        </div>
+                        <p className="text-xs text-ink-muted">用于确认充值到正确账号，不会用于其他用途。</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-ink">Session Token <span className="text-red-400">*</span></label>
+                        <textarea
+                          value={aiFlow.sessionToken}
+                          onChange={(event) => {
+                            const val = event.target.value;
+                            const result = validateSessionToken(val);
+                            setAiFlow(prev => prev ? {
+                              ...prev,
+                              sessionToken: val,
+                              tokenState: val.trim() ? (result.ok ? 'valid' : 'invalid') : 'idle',
+                              tokenMsg: result.msg,
+                            } : null);
+                          }}
+                          placeholder="粘贴你从浏览器 Cookie 复制的完整 Session Token…"
+                          rows={4}
+                          className="w-full resize-none rounded-xl border border-line bg-(--surface-raised) px-3.5 py-3 text-xs font-mono outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-gold"
+                        />
+                        {aiFlow.tokenState !== 'idle' && (
+                          <div className={`flex items-center gap-1.5 text-xs font-medium ${
+                            aiFlow.tokenState === 'valid' ? 'text-emerald-600' : 'text-red-500'
+                          }`}>
+                            {aiFlow.tokenState === 'valid'
+                              ? <CheckCircle2 className="h-3.5 w-3.5" />
+                              : <AlertCircle className="h-3.5 w-3.5" />
+                            }
+                            {aiFlow.tokenMsg}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : aiFlow.service.credentialType === 'password' ? (
+                    <>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-ink">OpenAI 账号邮箱 <span className="text-red-400">*</span></label>
+                        <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                          <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
+                          <input
+                            value={aiFlow.email}
+                            onChange={(event) => setAiFlow(prev => prev ? { ...prev, email: event.target.value } : null)}
+                            placeholder="your@email.com"
+                            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-ink">账号密码 <span className="text-red-400">*</span></label>
+                        <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                          <LockKeyhole className="h-4 w-4 shrink-0 text-ink-muted" />
+                          <input
+                            type="password"
+                            value={aiFlow.accountPassword}
+                            onChange={(event) => setAiFlow(prev => prev ? { ...prev, accountPassword: event.target.value } : null)}
+                            placeholder="你的 OpenAI 账号密码"
+                            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
+                          />
+                        </div>
+                        <p className="text-xs text-ink-muted">仅用于代充操作，完成后立即退出登录，建议代充后修改密码。</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-ink">联系方式 <span className="text-red-400">*</span></label>
+                      <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5">
+                        <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
+                        <input
+                          value={aiFlow.email}
+                          onChange={(event) => setAiFlow(prev => prev ? { ...prev, email: event.target.value } : null)}
+                          placeholder="邮箱 / 微信号 / Telegram，账号密码将发送到这里"
+                          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
+                        />
+                      </div>
+                      <p className="text-xs text-ink-muted">付款后 24h 内通过此联系方式发送完整账号密码。</p>
+                    </div>
+                  )}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-ink">备注（可选）</label>
+                    <textarea
+                      value={aiFlow.note}
+                      onChange={(event) => setAiFlow(prev => prev ? { ...prev, note: event.target.value } : null)}
+                      placeholder="例如：已付款，订单号 xxx"
+                      rows={2}
+                      className="w-full resize-none rounded-xl border border-line bg-(--surface-raised) px-3.5 py-3 text-sm outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-gold"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3 — 扫码付款 */}
+              {aiFlow.step === 3 && (
+                <div className="space-y-4 p-6">
+                  {/* 支付方式选择 */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">选择支付方式</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {([['wechat', '微信支付'], ['alipay', '支付宝']] as [PaymentMethod, string][]).map(([method, label]) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setAiFlow(prev => prev ? { ...prev, paymentMethod: method } : null)}
+                          className={`rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
+                            aiFlow.paymentMethod === method
+                              ? 'border-gold bg-gold/10 text-ink'
+                              : 'border-line bg-(--surface-raised) text-ink-muted hover:text-ink'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 收款码 */}
+                  <div className="grid min-h-52 place-items-center rounded-2xl border border-dashed border-line bg-(--surface-raised) p-5 text-center">
+                    {payQrConfig[aiFlow.paymentMethod] ? (
+                      <img
+                        src={payQrConfig[aiFlow.paymentMethod]}
+                        alt={aiFlow.paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
+                        className="h-44 w-44 rounded-2xl bg-white object-contain shadow-(--shadow-sm)"
+                      />
+                    ) : (
+                      <div>
+                        <QrCode className="mx-auto h-10 w-10 text-ink-muted" />
+                        <p className="mt-2 text-sm font-medium text-ink">
+                          {aiFlow.paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
+                        </p>
+                        <p className="mt-1 text-xs text-ink-muted">
+                          请配置 {aiFlow.paymentMethod === 'wechat' ? 'NEXT_PUBLIC_WECHAT_PAY_QR' : 'NEXT_PUBLIC_ALIPAY_PAY_QR'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 订单摘要 */}
+                  <div className="rounded-xl border border-line bg-(--surface-raised) p-4 text-sm space-y-1.5">
+                    <div className="flex justify-between">
+                      <span className="text-ink-muted">服务</span>
+                      <span className="font-medium text-ink">{aiFlow.service.plan}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-ink-muted">金额</span>
+                      <span className="text-xl font-bold text-ink">¥{aiFlow.service.priceMonthly}</span>
+                    </div>
+                    {aiFlow.email && (
+                      <div className="flex justify-between">
+                        <span className="text-ink-muted">联系方式</span>
+                        <span className="truncate text-ink max-w-[200px]">{aiFlow.email}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {aiFlow.order && (
+                    <div className="res-ai-flow-info-box res-ai-flow-info-box--green">
+                      <CheckCircle2 className="res-ai-flow-info-icon" />
+                      <div>
+                        <p className="font-semibold">订单已创建</p>
+                        <p className="mt-0.5 text-xs opacity-80">订单号：{aiFlow.order.order_number}，信息已复制到剪贴板，付款后发给站长核对。</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ── 底部导航 ── */}
+            <div className="flex items-center gap-3 border-t border-line px-6 py-4">
+              {aiFlow.step > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setAiFlow(prev => prev ? { ...prev, step: (prev.step - 1) as 1 | 2 | 3 } : null)}
+                  className="flex items-center gap-1.5 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-(--surface-raised) transition-colors"
+                >
+                  上一步
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAiFlow(null)}
+                  className="flex items-center gap-1.5 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-(--surface-raised) transition-colors"
+                >
+                  取消
+                </button>
+              )}
+              <div className="flex-1" />
+              {aiFlow.step < 3 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (aiFlow.step === 2) {
+                      const { service, email, sessionToken, tokenState, accountPassword } = aiFlow;
+                      if (!email.trim()) { pushNotice('error', '请填写联系方式'); return; }
+                      if (service.credentialType === 'token' && tokenState !== 'valid') {
+                        pushNotice('error', 'Session Token 格式不正确，请重新检查'); return;
+                      }
+                      if (service.credentialType === 'password' && !accountPassword.trim()) {
+                        pushNotice('error', '请填写账号密码'); return;
+                      }
+                    }
+                    setAiFlow(prev => prev ? { ...prev, step: (prev.step + 1) as 1 | 2 | 3 } : null);
+                  }}
+                  className="res-ai-flow-next-btn"
+                >
+                  下一步
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={submitAiOrder}
+                  disabled={aiFlow.submitting}
+                  className={`res-ai-flow-next-btn ${aiFlow.submitting ? 'opacity-60' : ''}`}
+                >
+                  {aiFlow.submitting ? '提交中…' : aiFlow.order ? (aiFlow.copied ? <><Check className="h-4 w-4" /> 已复制</> : '重新复制') : '确认下单'}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>,
+        document.body
+      ) : null}
 
       {/* ── 购物车悬浮按钮 ── */}
       <AnimatePresence>
