@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type DragEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
   Download, Trash2, Eye, EyeOff, Search, Grid, List, X,
   Copy, Check, Shield, HardDrive, Loader2, Settings, Plus, Edit2,
   AlertCircle, CheckCircle2, RefreshCw,
   Folder, Archive, Code, Database, Book, Link, Star, ShoppingBag,
-  QrCode, LockKeyhole, WalletCards, MessageCircle, Mail
+  QrCode, LockKeyhole, WalletCards, MessageCircle, Mail,
+  ChevronRight, ChevronDown, Clock,
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
 import { Turnstile } from '@/components/Turnstile';
@@ -82,27 +83,41 @@ interface AiRechargeService {
   plan: string;
   desc: string;
   priceMonthly: number;
+  originalPrice?: number;
   priceNote: string;
   badge?: string;
   features: string[];
+  featured?: boolean;
 }
 
 const aiRechargeServices: AiRechargeService[] = [
   {
+    id: 'chatgpt-plus-turkey',
+    service: 'chatgpt',
+    plan: 'ChatGPT Plus 土耳其区',
+    desc: '土耳其区 OpenAI 官方订阅，价格约为美区 40%，GPT-4o / o3 / DALL·E / 联网 / GPTs 全功能无阉割，与美区 Plus 完全一致。',
+    priceMonthly: 68,
+    originalPrice: 168,
+    priceNote: '美区标准价 ¥168，节省超 60%',
+    badge: '最低价',
+    featured: true,
+    features: ['GPT-4o / o3 全模型', 'DALL·E 3 图像生成', '联网实时搜索', '自定义 GPTs', 'Projects 协作', '语音对话模式'],
+  },
+  {
     id: 'chatgpt-plus',
     service: 'chatgpt',
-    plan: 'ChatGPT Plus',
-    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成，对话记忆，插件全开放。',
+    plan: 'ChatGPT Plus 美区',
+    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成，对话记忆，插件全开放。适合需要美区账号的用户。',
     priceMonthly: 168,
     priceNote: '约 $20/月，月付',
-    badge: '热门',
+    badge: '',
     features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '自定义 GPTs'],
   },
   {
     id: 'claude-pro',
     service: 'claude',
     plan: 'Claude Pro',
-    desc: '5× 更高用量，Claude 3.7 Sonnet / Opus 完整访问，Projects 长上下文协作。',
+    desc: '5× 更高用量，Claude Sonnet / Opus 完整访问，Projects 长上下文协作。',
     priceMonthly: 168,
     priceNote: '约 $20/月，月付',
     badge: '',
@@ -981,16 +996,182 @@ export default function ResourcesPage() {
         <section className="space-y-6">
           <div className="res-section-head">
             <div>
-              <p className="res-section-eyebrow">AI Recharge · 代充服务</p>
-              <h2 className="res-section-title">ChatGPT / Claude 代充</h2>
+              <p className="res-section-eyebrow">Digital Subscription · 代购代充</p>
+              <h2 className="res-section-title">AI 订阅代购</h2>
             </div>
             <p className="res-section-note">
-              提供邮箱/手机号 → 扫码付款 → 24 小时内充值到账。如有问题随时联系。
+              提供账号邮箱 → 扫码付款 → 24 小时内代开通到账
             </p>
           </div>
 
+          {/* ── Featured: GPT Plus 土耳其区 ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: APPLE_EASE_SOFT }}
+            className="res-turkey-card-bg relative overflow-hidden rounded-3xl border border-orange-300/50 shadow-(--neu-shadow)"
+          >
+            {/* Decorative circles */}
+            <div className="res-turkey-deco pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-[0.06]" />
+            <div className="res-turkey-deco pointer-events-none absolute -bottom-12 left-1/3 h-48 w-48 rounded-full opacity-[0.04]" />
+            {/* Top bar */}
+            <div className="h-1 w-full bg-gradient-to-r from-orange-600/80 via-orange-400 to-orange-300/50" />
+
+            <div className="relative px-6 py-8 lg:px-10 lg:py-10">
+              {/* Badges row */}
+              <div className="mb-6 flex flex-wrap items-center gap-2">
+                <Badge tone="warning" variant="soft" className="gap-1.5 px-3 py-1 text-xs">
+                  <Star className="h-3 w-3" />
+                  限时特价
+                </Badge>
+                <Badge tone="success" variant="soft" className="px-3 py-1 text-xs">
+                  省 ¥100+/月
+                </Badge>
+                <span className="text-xs text-ink-muted">
+                  土耳其官方区域定价 · 功能与美区 Plus 完全相同
+                </span>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+                {/* ── Left: product details ── */}
+                <div className="space-y-6">
+                  {/* Title */}
+                  <div className="flex items-start gap-4">
+                    <span className="mt-1 shrink-0 text-4xl leading-none">🇹🇷</span>
+                    <div>
+                      <h3 className="text-2xl font-bold text-ink sm:text-3xl">
+                        ChatGPT Plus 土耳其区
+                      </h3>
+                      <p className="mt-1 text-sm text-ink-secondary">代开通 · 月度订阅 · OpenAI 官方渠道</p>
+                    </div>
+                  </div>
+
+                  <p className="max-w-xl text-sm leading-7 text-ink-secondary">
+                    土耳其是 OpenAI 官方区域定价国，价格远低于美区。代你完成区域订阅开通，功能与美区 ChatGPT Plus
+                    100% 相同，包含最新 GPT-4o、o3 推理、DALL·E 图像生成、联网搜索等全部旗舰功能，无任何阉割。
+                  </p>
+
+                  {/* Feature grid */}
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {[
+                      'GPT-4o / o3 全模型',
+                      'DALL·E 3 图像生成',
+                      '联网实时搜索',
+                      '自定义 GPTs',
+                      'Projects 协作',
+                      '语音对话模式',
+                    ].map((f) => (
+                      <div
+                        key={f}
+                        className="res-turkey-feature-item flex items-center gap-2 rounded-xl border border-orange-200/60 px-3 py-2.5"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-orange-500" />
+                        <span className="text-xs font-medium text-ink">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Price comparison */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="res-turkey-price-bar rounded-2xl border border-orange-300/70 px-5 py-3 text-center">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-orange-700/70">土耳其区</p>
+                      <p className="mt-1 text-3xl font-bold text-orange-700">¥68</p>
+                      <p className="mt-0.5 text-[11px] text-orange-600">/月</p>
+                    </div>
+                    <span className="text-lg font-light text-ink-muted">vs</span>
+                    <div className="rounded-2xl border border-(--border-default) bg-(--surface-raised) px-5 py-3 text-center opacity-50">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-ink-muted">美区</p>
+                      <p className="mt-1 text-3xl font-bold text-ink-muted line-through">¥168</p>
+                      <p className="mt-0.5 text-[11px] text-ink-muted">/月</p>
+                    </div>
+                    <div className="rounded-2xl border border-emerald-300/50 bg-emerald-500/10 px-4 py-2.5">
+                      <p className="text-xs font-medium text-emerald-600">每月节省</p>
+                      <p className="mt-0.5 text-2xl font-bold text-emerald-600">¥100</p>
+                    </div>
+                  </div>
+
+                  {/* Delivery flow */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">购买流程</p>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                      {['提供 OpenAI 邮箱', '扫码支付', '代开通订阅', '24h 内到账'].map((step, i) => (
+                        <span key={i} className="flex items-center gap-1.5">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500/15 text-xs font-bold text-orange-600">
+                            {i + 1}
+                          </span>
+                          <span className="text-xs text-ink-secondary">{step}</span>
+                          {i < 3 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-ink-muted/40" />}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Right: purchase panel ── */}
+                <div className="space-y-4">
+                  {/* CTA card */}
+                  <div className="rounded-2xl border border-(--border-default) bg-(--surface-raised) p-5 shadow-(--neu-shadow-sm)">
+                    <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">立即订阅</p>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-ink">¥68</span>
+                      <span className="text-sm text-ink-muted">/月</span>
+                      <span className="ml-1 text-sm text-ink-muted line-through">¥168</span>
+                    </div>
+                    <p className="mt-0.5 text-xs font-medium text-orange-500">土耳其官方定价，节省约 60%</p>
+
+                    <button
+                      type="button"
+                      onClick={() => openAiRecharge(aiRechargeServices[0])}
+                      className="res-turkey-btn mt-4 w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
+                    >
+                      立即代充 ChatGPT Plus
+                    </button>
+
+                    <div className="mt-4 space-y-2.5 border-t border-(--border-default) pt-4">
+                      <div className="flex items-center gap-2 text-xs text-ink-secondary">
+                        <Shield className="h-3.5 w-3.5 shrink-0 text-orange-400" />
+                        <span>官方渠道，正规月度订阅</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-ink-secondary">
+                        <Clock className="h-3.5 w-3.5 shrink-0 text-orange-400" />
+                        <span>24 小时内完成代充</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-ink-secondary">
+                        <MessageCircle className="h-3.5 w-3.5 shrink-0 text-orange-400" />
+                        <span>问题售后可联系处理</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FAQ accordion */}
+                  <div className="rounded-2xl border border-(--border-default) bg-(--surface-raised) p-5">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">
+                      常见问题
+                    </p>
+                    <div className="divide-y divide-(--border-default)">
+                      {[
+                        ['需要提供密码吗？', '不需要，只需提供 OpenAI 账号注册邮箱即可，全程不接触你的密码。'],
+                        ['功能和美区一样吗？', '完全相同。土耳其区是 OpenAI 官方定价区，ChatGPT 所有功能无任何差异。'],
+                        ['到期后如何续费？', '可以到期前联系续费，续费依然享受土耳其区低价，也可自行续订。'],
+                      ].map(([q, a]) => (
+                        <details key={q} className="group py-3 first:pt-0 last:pb-0">
+                          <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-ink select-none">
+                            <span>{q}</span>
+                            <ChevronDown className="h-4 w-4 shrink-0 text-ink-muted transition-transform duration-200 group-open:rotate-180" />
+                          </summary>
+                          <p className="mt-2 text-xs leading-5 text-ink-secondary">{a}</p>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ── Secondary cards ── */}
           <div className="grid gap-5 md:grid-cols-3">
-            {aiRechargeServices.map((svc, index) => (
+            {aiRechargeServices.filter((svc) => !svc.featured).map((svc, index) => (
               <motion.article
                 key={svc.id}
                 initial={{ opacity: 0, y: 20 }}

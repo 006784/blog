@@ -8098,3 +8098,20 @@ pre[class*="language-"] {
 .res-ai-card--claude .res-ai-card__btn { background: #da7756; }
 .res-ai-card__btn:hover { opacity: 0.88; transform: translateY(-1px); }
 .res-ai-card__btn:active { opacity: 0.78; transform: translateY(0); }
+
+/* ── Featured Turkey GPT card ── */
+.res-turkey-card-bg {
+  background: color-mix(in srgb, var(--surface-raised) 74%, var(--color-orange-500) 26%);
+}
+.res-turkey-deco {
+  background: var(--color-orange-500);
+}
+.res-turkey-feature-item {
+  background: color-mix(in srgb, var(--surface-raised) 55%, white 45%);
+}
+.res-turkey-price-bar {
+  background: color-mix(in srgb, var(--surface-raised) 62%, var(--color-orange-500) 38%);
+}
+.res-turkey-btn {
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+}

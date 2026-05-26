@@ -6,7 +6,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   Bot,
-  User,
   Send,
   Plus,
   Settings,
@@ -197,7 +196,7 @@ function MsgContent({ content }: { content: string }) {
         li: ({ children }) => <li className="leading-6">{children}</li>,
         strong: ({ children }) => <strong className="font-semibold text-ink">{children}</strong>,
         blockquote: ({ children }) => (
-          <blockquote className="border-l-2 border-(--gold) pl-3 my-1.5 text-ink-secondary text-sm italic">{children}</blockquote>
+          <blockquote className="border-l-2 border-gold pl-3 my-1.5 text-ink-secondary text-sm italic">{children}</blockquote>
         ),
         code({ className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
@@ -570,7 +569,7 @@ function SettingsModal({
                     type="color"
                     value={editingForm.color}
                     onChange={(e) => setEditingForm((current) => ({ ...current, color: e.target.value }))}
-                    className="w-full h-[42px] rounded-lg border border-line bg-transparent cursor-pointer"
+                    className="w-full h-10.5 rounded-lg border border-line bg-transparent cursor-pointer"
                   />
                 </div>
               </div>
@@ -1113,7 +1112,7 @@ export function CiyuanChat() {
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex-shrink-0 border-r border-line flex flex-col overflow-hidden"
+            className="shrink-0 border-r border-line flex flex-col overflow-hidden"
             style={{ background: 'color-mix(in srgb, var(--surface-raised) 91%, var(--color-orange-500) 9%)' }}
           >
             <div className="px-4 py-3 flex items-center justify-between border-b border-line border-l-4 border-l-orange-500">
@@ -1122,6 +1121,7 @@ export function CiyuanChat() {
                 <span className="font-bold text-sm tracking-wide">词元</span>
               </div>
               <button
+                type="button"
                 onClick={newChat}
                 className="p-1.5 rounded-lg hover:bg-paper-deep transition-colors"
                 title="新对话"
@@ -1132,6 +1132,7 @@ export function CiyuanChat() {
 
             <div className="px-4 py-3 border-b border-line space-y-2">
               <button
+                type="button"
                 onClick={() => setShowSettings(true)}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-paper-deep transition-colors text-sm text-muted-foreground border border-line"
               >
@@ -1178,11 +1179,13 @@ export function CiyuanChat() {
                       <ProviderDot provider={dotProvider} size={6} />
                       <span className="flex-1 text-xs truncate">{conversation.title}</span>
                       <button
+                        type="button"
                         onClick={(event) => {
                           event.stopPropagation();
                           deleteConversation(conversation.id);
                         }}
                         className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-red-500 transition-all"
+                        title="删除对话"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -1198,6 +1201,7 @@ export function CiyuanChat() {
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line bg-(--surface-raised)">
           <button
+            type="button"
             onClick={() => setSidebarOpen((current) => !current)}
             className="p-1.5 rounded-lg hover:bg-paper-deep transition-colors"
             title={sidebarOpen ? '收起侧栏' : '展开侧栏'}
@@ -1232,6 +1236,7 @@ export function CiyuanChat() {
           <div className="ml-auto flex items-center gap-2">
             {activeConv && (
               <button
+                type="button"
                 onClick={() => {
                   if (confirm('清空此对话？')) {
                     updateConversation(activeConv.id, (conversation) => ({
@@ -1248,6 +1253,7 @@ export function CiyuanChat() {
               </button>
             )}
             <button
+              type="button"
               onClick={() => setShowSettings(true)}
               className="p-1.5 rounded-lg hover:bg-paper-deep transition-colors text-muted-foreground"
               title="设置"
@@ -1257,9 +1263,9 @@ export function CiyuanChat() {
           </div>
         </div>
 
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto">
           {!activeConv || activeConv.messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-20">
+            <div className="flex flex-col items-center justify-center h-full text-center py-20 px-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1279,11 +1285,12 @@ export function CiyuanChat() {
                 <div className="flex flex-wrap justify-center gap-2 pt-2">
                   {providers.map((providerOption) => (
                     <button
+                      type="button"
                       key={providerOption.id}
                       onClick={() => handleProviderChange(providerOption.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-xs ${
                         providerOption.id === provider
-                          ? 'border-(--gold) text-(--gold)'
+                          ? 'border-gold text-gold'
                           : 'border-line text-muted-foreground hover:border-gold'
                       }`}
                     >
@@ -1295,110 +1302,127 @@ export function CiyuanChat() {
               </motion.div>
             </div>
           ) : (
-            activeConv.messages.filter((message) => message.role !== 'system').map((message, index) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.02 }}
-                className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center border border-line ${
-                    message.role === 'user' ? 'bg-paper-deep' : ''
-                  }`}
-                  style={message.role === 'assistant' ? { background: `${activeProvider?.color ?? '#888'}20` } : {}}
-                >
-                  {message.role === 'user' ? (
-                    <User className="w-4 h-4" />
-                  ) : (
-                    <Bot className="w-4 h-4" style={{ color: activeProvider?.color }} />
-                  )}
-                </div>
-
-                <div className={`group max-w-[75%] space-y-1 ${message.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
-                  <div
-                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                      message.role === 'user'
-                        ? 'bg-(--ink) text-(--paper) rounded-tr-sm'
-                        : 'bg-paper-deep border border-line rounded-tl-sm'
-                    }`}
+            <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
+              {activeConv.messages.filter((message) => message.role !== 'system').map((message, index) => (
+                message.role === 'user' ? (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                    className="flex justify-end"
                   >
-                    {message.role === 'assistant' ? (
-                      <>
+                    <div className="group max-w-[80%] flex flex-col items-end space-y-1">
+                      <div className="rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed bg-ink text-paper">
+                        <p className="whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
+                        <button
+                          type="button"
+                          onClick={() => copyMessage(message.id, message.content)}
+                          className="p-1 rounded hover:bg-paper-deep transition-colors text-muted-foreground"
+                          title="复制"
+                        >
+                          {copied === message.id ? (
+                            <Check className="w-3 h-3 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                    className="flex gap-4"
+                  >
+                    <div
+                      className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 border border-line"
+                      style={{ background: `${activeProvider?.color ?? '#888'}18` }}
+                    >
+                      <Bot className="w-3.5 h-3.5" style={{ color: activeProvider?.color ?? '#888' }} />
+                    </div>
+                    <div className="group flex-1 min-w-0 space-y-2 pt-0.5">
+                      <div className="text-sm leading-relaxed text-ink">
                         {message.content ? <MsgContent content={message.content} /> : null}
                         {message.streaming && (
-                          <span className="inline-block w-1.5 h-4 bg-current opacity-70 animate-pulse ml-0.5 align-text-bottom" />
+                          <span className="inline-block w-1.5 h-4 bg-ink opacity-40 animate-pulse ml-0.5 align-text-bottom" />
                         )}
-                      </>
-                    ) : (
-                      <p className="whitespace-pre-wrap">{message.content}</p>
-                    )}
-                  </div>
-
-                  {!message.streaming && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
-                      <button
-                        onClick={() => copyMessage(message.id, message.content)}
-                        className="p-1 rounded hover:bg-paper-deep transition-colors text-muted-foreground"
-                        title="复制"
-                      >
-                        {copied === message.id ? (
-                          <Check className="w-3 h-3 text-emerald-500" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
-                      </button>
+                      </div>
+                      {!message.streaming && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => copyMessage(message.id, message.content)}
+                            className="p-1 rounded hover:bg-paper-deep transition-colors text-muted-foreground"
+                            title="复制"
+                          >
+                            {copied === message.id ? (
+                              <Check className="w-3 h-3 text-emerald-500" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </motion.div>
-            ))
+                  </motion.div>
+                )
+              ))}
+              <div ref={bottomRef} />
+            </div>
           )}
-          <div ref={bottomRef} />
         </div>
 
-        <div className="px-4 pb-4 pt-2 border-t border-line">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative flex items-end gap-2 rounded-2xl border border-line bg-paper-deep px-4 py-3 focus-within:border-gold transition-colors">
+        <div className="border-t border-line px-4 py-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="rounded-2xl border border-line bg-(--surface-raised) shadow-(--neu-shadow-sm) overflow-hidden focus-within:border-gold transition-all">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="输入消息… (Enter 发送，Shift+Enter 换行)"
+                placeholder="发送消息给词元 AI…"
                 rows={1}
-                className="flex-1 bg-transparent resize-none outline-none text-sm leading-relaxed max-h-44 overflow-y-auto"
-                style={{ minHeight: '1.5rem' }}
+                className="w-full bg-transparent resize-none outline-none text-sm leading-relaxed px-4 pt-3.5 pb-1 max-h-44 overflow-y-auto block"
+                style={{ minHeight: '24px' }}
               />
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {streaming ? (
-                  <button
-                    onClick={stopStream}
-                    className="p-2 rounded-xl transition-colors hover:bg-red-100 text-red-500"
-                    title="停止"
-                  >
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={send}
-                    disabled={!input.trim() || !model.trim()}
-                    className="p-2 rounded-xl transition-colors disabled:opacity-30"
-                    style={{
-                      background: input.trim() && model.trim() ? 'var(--gold)' : undefined,
-                      color: input.trim() && model.trim() ? '#fff' : undefined,
-                    }}
-                    title="发送"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                )}
+              <div className="flex items-center justify-between px-3 pb-2.5 pt-0.5">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5 min-w-0">
+                  <ProviderDot provider={activeProvider} size={6} />
+                  <span className="truncate opacity-70">{activeProvider?.label ?? '—'}</span>
+                  {model && <span className="opacity-40 shrink-0">·</span>}
+                  {model && <span className="font-mono opacity-60 truncate max-w-32">{model}</span>}
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {streaming ? (
+                    <button
+                      type="button"
+                      onClick={stopStream}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-colors hover:bg-red-50 text-red-500 text-xs border border-red-200/60"
+                      title="停止生成"
+                    >
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>停止</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={send}
+                      disabled={!input.trim() || !model.trim()}
+                      className={`p-2 rounded-xl transition-colors disabled:opacity-30 ${input.trim() && model.trim() ? 'bg-gold text-white' : ''}`}
+                      title="发送 (Enter)"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-            <p className="text-center text-xs text-muted-foreground mt-2 opacity-70">
-              API Key 与自定义提供商配置仅保存在当前浏览器。模型 ID 支持手填，方便接入最新模型或自建网关。
-            </p>
           </div>
         </div>
       </div>
