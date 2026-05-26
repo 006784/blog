@@ -2251,9 +2251,9 @@ export default function ResourcesPage() {
               </div>
 
               {/* 商品列表 */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto bg-(--surface-base) p-4 space-y-3">
                 {cart.map(item => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-line bg-(--surface-raised) p-3">
+                  <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-line bg-paper p-3 shadow-sm">
                     <div className="flex-1 min-w-0">
                       <p className="truncate text-sm font-medium text-ink">{item.title}</p>
                       <p className="mt-0.5 text-xs text-ink-muted">¥{item.price.toFixed(0)} / 件</p>
@@ -2290,22 +2290,22 @@ export default function ResourcesPage() {
               </div>
 
               {/* 底部结算 */}
-              <div className="border-t border-line p-5 space-y-4">
+              <div className="border-t border-line bg-(--surface-raised) p-5 space-y-3">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-sm text-ink-muted">合计</span>
+                  <span className="text-sm font-medium text-ink-secondary">合计</span>
                   <span className="text-2xl font-bold text-ink">¥{cartTotal.toFixed(0)}</span>
                 </div>
                 <button
                   type="button"
                   onClick={checkoutCart}
-                  className="res-turkey-btn w-full rounded-xl py-3.5 text-sm font-semibold text-white"
+                  className="w-full rounded-xl bg-ink py-3.5 text-sm font-semibold text-paper shadow-md transition-all hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                 >
                   去结算
                 </button>
                 <button
                   type="button"
                   onClick={() => setCart([])}
-                  className="w-full text-center text-xs text-ink-muted hover:text-ink transition-colors"
+                  className="w-full rounded-xl border border-line py-2 text-xs font-medium text-ink-secondary transition-colors hover:border-ink hover:text-ink"
                 >
                   清空购物车
                 </button>
