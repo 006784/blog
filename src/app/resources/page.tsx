@@ -5,15 +5,14 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
-  Download, Trash2, Eye, EyeOff, Search, Grid, List, X,
-  Copy, Check, Shield, HardDrive, Loader2, Settings, Plus, Edit2,
-  AlertCircle, CheckCircle2, RefreshCw,
+  Trash2, X, Minus,
+  Copy, Check, Shield, Settings, Plus, Edit2,
+  AlertCircle, CheckCircle2,
   Folder, Archive, Code, Database, Book, Link, Star, ShoppingBag,
   QrCode, LockKeyhole, WalletCards, MessageCircle, Mail,
   ChevronRight, ChevronDown, Clock,
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
-import { Turnstile } from '@/components/Turnstile';
 import {
   APPLE_EASE_SOFT,
   APPLE_SPRING_GENTLE,
@@ -135,6 +134,13 @@ const aiRechargeServices: AiRechargeService[] = [
   },
 ];
 
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  qty: number;
+}
+
 type PaymentMethod = 'wechat' | 'alipay';
 
 interface ShopOrder {
@@ -255,48 +261,23 @@ function createProductsFromResources(resources: Resource[], categories: Category
   });
 }
 
-function ResourceGridSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-        <Skeleton key={item} className="h-56 rounded-2xl" />
-      ))}
-    </div>
-  );
-}
-
-function ResourceListSkeleton() {
-  return (
-    <div className="space-y-3">
-      {[1, 2, 3, 4, 5].map((item) => (
-        <Skeleton key={item} className="h-24 rounded-2xl" />
-      ))}
-    </div>
-  );
-}
 
 export default function ResourcesPage() {
   const { isAdmin } = useAdmin();
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [resourceError, setResourceError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [notice, setNotice] = useState<ResourceNotice | null>(null);
   const [isDropActive, setIsDropActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // 下载验证
-  const [downloadModal, setDownloadModal] = useState<Resource | null>(null);
-  const [downloadVerified, setDownloadVerified] = useState(false);
+
   const [checkoutProduct, setCheckoutProduct] = useState<ResourceProduct | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('wechat');
   const [buyerContact, setBuyerContact] = useState('');
   const [buyerNote, setBuyerNote] = useState('');
@@ -321,65 +302,10 @@ export default function ResourcesPage() {
   const [newCatColor, setNewCatColor] = useState('gray');
   const [savingCategory, setSavingCategory] = useState(false);
 
-  // 下载进度
-  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
-
   const pushNotice = useCallback((type: ResourceNotice['type'], message: string) => {
     setNotice({ type, message });
   }, []);
   
-  // Turnstile 回调
-  const handleDownloadVerify = useCallback(() => {
-    setDownloadVerified(true);
-  }, []);
-
-  const handleDownloadError = useCallback(() => {
-    setDownloadVerified(false);
-  }, []);
-
-  // 点击下载按钮
-  const handleDownloadClick = (resource: Resource) => {
-    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-    // 如果没配置 Turnstile，直接下载
-    if (!siteKey) {
-      window.open(resource.file_url, '_blank');
-      pushNotice('success', `已开始下载：${resource.name}`);
-      return;
-    }
-    // 显示验证模态框
-    setDownloadModal(resource);
-    setDownloadVerified(false);
-  };
-
-  // 确认下载
-  const confirmDownload = async () => {
-    if (downloadModal && downloadVerified) {
-      // 显示下载进度
-      setDownloadProgress(0);
-      
-      try {
-        // 创建下载链接
-        const link = document.createElement('a');
-        link.href = downloadModal.file_url;
-        link.download = downloadModal.original_name;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // 关闭模态框
-        setDownloadModal(null);
-        setDownloadVerified(false);
-        setDownloadProgress(null);
-        pushNotice('success', `已开始下载：${downloadModal.name}`);
-      } catch (error) {
-        console.error('Download failed:', error);
-        setDownloadProgress(null);
-        pushNotice('error', '下载失败，请稍后重试。');
-      }
-    }
-  };
-
   const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('/api/categories');
@@ -394,24 +320,17 @@ export default function ResourcesPage() {
   const fetchResources = useCallback(async () => {
     try {
       setLoading(true);
-      setResourceError(false);
-      const params = new URLSearchParams();
-      if (selectedCategory !== 'all') params.set('category', selectedCategory);
-      if (searchQuery) params.set('search', searchQuery);
-      
-      const res = await fetch(`/api/resources?${params}`);
+      const res = await fetch('/api/resources');
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'failed');
       setResources(data.resources || []);
     } catch (error) {
       console.error('Failed to fetch resources:', error);
       setResources([]);
-      setResourceError(true);
-      pushNotice('error', '资源加载失败，请稍后重试。');
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, searchQuery, pushNotice]);
+  }, []);
 
   useEffect(() => {
     void fetchCategories();
@@ -427,7 +346,7 @@ export default function ResourcesPage() {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const hasModalOpen = Boolean(downloadModal || showUploadModal || showCategoryModal || checkoutProduct);
+  const hasModalOpen = Boolean(showUploadModal || showCategoryModal || checkoutProduct || cartOpen);
   useEffect(() => {
     if (!hasModalOpen) return;
 
@@ -445,6 +364,11 @@ export default function ResourcesPage() {
       if (event.key !== 'Escape') return;
       event.preventDefault();
 
+      if (cartOpen) {
+        setCartOpen(false);
+        return;
+      }
+
       if (showCategoryModal) {
         setShowCategoryModal(false);
         resetCategoryForm();
@@ -456,11 +380,6 @@ export default function ResourcesPage() {
         return;
       }
 
-      if (downloadModal) {
-        setDownloadModal(null);
-        return;
-      }
-
       if (checkoutProduct) {
         setCheckoutProduct(null);
       }
@@ -468,7 +387,7 @@ export default function ResourcesPage() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [hasModalOpen, showCategoryModal, showUploadModal, downloadModal, checkoutProduct]);
+  }, [hasModalOpen, cartOpen, showCategoryModal, showUploadModal, checkoutProduct]);
 
   const handleUpload = async () => {
     if (!uploadFile || !isAdmin) return;
@@ -574,18 +493,6 @@ export default function ResourcesPage() {
     } catch (error) {
       console.error('Delete error:', error);
       pushNotice('error', '删除失败，请稍后重试。');
-    }
-  };
-
-  const copyLink = async (url: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopiedId(id);
-      pushNotice('info', '资源链接已复制。');
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (error) {
-      console.error('Copy link failed:', error);
-      pushNotice('error', '复制链接失败。');
     }
   };
 
@@ -702,18 +609,41 @@ export default function ResourcesPage() {
     }
   };
 
-  // 获取资源的分类配置
-  const getResourceCategoryConfig = (slug: string) => {
-    const category = categories.find(c => c.slug === slug);
-    return getCategoryConfig(category);
+  const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
+  const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  const addToCart = (id: string, title: string, price: number) => {
+    setCart(prev => {
+      const existing = prev.find(i => i.id === id);
+      if (existing) return prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i);
+      return [...prev, { id, title, price, qty: 1 }];
+    });
+    pushNotice('success', `「${title}」已加入购物车`);
   };
 
-  const stats = {
-    total: resources.length,
-    public: resources.filter(r => r.is_public).length,
-    totalSize: resources.reduce((acc, r) => acc + r.file_size, 0),
-    totalDownloads: resources.reduce((acc, r) => acc + r.download_count, 0),
+  const removeFromCart = (id: string) => setCart(prev => prev.filter(i => i.id !== id));
+
+  const updateCartQty = (id: string, qty: number) => {
+    if (qty < 1) { removeFromCart(id); return; }
+    setCart(prev => prev.map(i => i.id === id ? { ...i, qty } : i));
   };
+
+  const checkoutCart = () => {
+    if (cart.length === 0) return;
+    setCartOpen(false);
+    openCheckout({
+      id: 'cart-order',
+      title: cart.length === 1 ? cart[0].title : `购物车结算（${cart.length}件商品）`,
+      description: cart.map(i => `${i.title} × ${i.qty}`).join('、'),
+      category: '购物车',
+      price: cartTotal,
+      includes: cart.map(i => `${i.title} × ${i.qty}`),
+      tags: ['购物车结算', '人工确认'],
+      updateLabel: '当前',
+      delivery: '付款确认后分别交付各商品',
+    });
+  };
+
   const resourceProducts = useMemo(
     () => createProductsFromResources(resources, categories),
     [resources, categories]
@@ -847,64 +777,16 @@ export default function ResourcesPage() {
           className="space-y-5"
         >
           <Badge tone="info" variant="soft" className="w-fit gap-1.5">
-            <FolderOpen className="h-3.5 w-3.5" />
-            Resource Hub
+            <ShoppingBag className="h-3.5 w-3.5" />
+            Shop
           </Badge>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
-                资源商店
-              </h1>
-              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
-                出售自有整理、公开授权或可合规分享的资料包。付款确认后交付网盘链接、提取码与使用说明。
-              </p>
-            </div>
-            <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4 lg:max-w-4xl">
-              <Card variant="glass" padding="sm" className="rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
-                    <File className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">总文件数</p>
-                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{stats.total}</p>
-                  </div>
-                </div>
-              </Card>
-              <Card variant="glass" padding="sm" className="rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-warning)">
-                    <Eye className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">公开资源</p>
-                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{stats.public}</p>
-                  </div>
-                </div>
-              </Card>
-              <Card variant="glass" padding="sm" className="rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
-                    <HardDrive className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">总存储</p>
-                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{formatFileSize(stats.totalSize)}</p>
-                  </div>
-                </div>
-              </Card>
-              <Card variant="glass" padding="sm" className="rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
-                    <Download className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">总下载</p>
-                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{stats.totalDownloads}</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
+          <div className="max-w-2xl space-y-3">
+            <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
+              商店
+            </h1>
+            <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+              AI 订阅代购与精选资料包。付款确认后交付网盘链接、提取码与使用说明。
+            </p>
           </div>
         </motion.div>
 
@@ -1126,6 +1008,14 @@ export default function ResourcesPage() {
                     >
                       立即代充 ChatGPT Plus
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => addToCart(aiRechargeServices[0].id, aiRechargeServices[0].plan, aiRechargeServices[0].priceMonthly)}
+                      className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-orange-300/60 py-2.5 text-sm font-medium text-orange-700 transition-all hover:bg-orange-50/50"
+                    >
+                      <ShoppingBag className="h-4 w-4" />
+                      加入购物车
+                    </button>
 
                     <div className="mt-4 space-y-2.5 border-t border-(--border-default) pt-4">
                       <div className="flex items-center gap-2 text-xs text-ink-secondary">
@@ -1211,13 +1101,23 @@ export default function ResourcesPage() {
                       <p className="res-ai-card__price-note">{svc.priceNote}</p>
                       <p className="res-ai-card__price">¥ {svc.priceMonthly.toFixed(0)}</p>
                     </div>
-                    <button
-                      type="button"
-                      className="res-ai-card__btn"
-                      onClick={() => openAiRecharge(svc)}
-                    >
-                      立即代充
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        className="res-ai-card__btn"
+                        onClick={() => openAiRecharge(svc)}
+                      >
+                        立即代充
+                      </button>
+                      <button
+                        type="button"
+                        className="res-ai-card__btn--ghost"
+                        onClick={() => addToCart(svc.id, svc.plan, svc.priceMonthly)}
+                      >
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                        加入购物车
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.article>
@@ -1274,13 +1174,23 @@ export default function ResourcesPage() {
                         ) : null}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      className="res-product-card__btn"
-                      onClick={() => openCheckout(product)}
-                    >
-                      立即购买
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="res-product-card__btn--ghost"
+                        onClick={() => addToCart(product.id, product.title, product.price)}
+                      >
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                        加入购物车
+                      </button>
+                      <button
+                        type="button"
+                        className="res-product-card__btn"
+                        onClick={() => openCheckout(product)}
+                      >
+                        立即购买
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.article>
@@ -1288,304 +1198,23 @@ export default function ResourcesPage() {
           </div>
         </section>
 
-        <Card variant="glass" className="rounded-2xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="relative flex-1 max-w-xl">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                <Input
-                  type="text"
-                  placeholder="搜索资源..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11"
-                />
-              </div>
-
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2 sm:w-[190px]"
+        {/* admin upload trigger — only shown to admin */}
+        {isAdmin && (
+          <div className="flex justify-end">
+            <motion.div whileHover={HOVER_BUTTON} whileTap={TAP_BUTTON} transition={APPLE_SPRING_GENTLE}>
+              <Button
+                onClick={() => {
+                  setIsDropActive(false);
+                  setShowUploadModal(true);
+                }}
               >
-                <option value="all">全部分类</option>
-                {categories.map((cat) => (
-                  <option key={cat.slug} value={cat.slug}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-
-              {isAdmin ? (
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowCategoryModal(true)}
-                  title="管理分类"
-                  className="sm:w-auto"
-                >
-                  <Settings className="h-4 w-4" />
-                  分类
-                </Button>
-              ) : null}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1 rounded-full border border-(--border-default) bg-(--surface-base) p-1">
-                <Button
-                  variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-full"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-full"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {isAdmin ? (
-                <motion.div
-                  whileHover={HOVER_BUTTON}
-                  whileTap={TAP_BUTTON}
-                  transition={APPLE_SPRING_GENTLE}
-                >
-                  <Button
-                    onClick={() => {
-                      setIsDropActive(false);
-                      setShowUploadModal(true);
-                    }}
-                  >
-                    <Upload className="h-4 w-4" />
-                    上传资源
-                  </Button>
-                </motion.div>
-              ) : null}
-            </div>
-          </div>
-        </Card>
-
-        {loading ? (
-          viewMode === 'grid' ? <ResourceGridSkeleton /> : <ResourceListSkeleton />
-        ) : resourceError ? (
-          <StatePanel
-            tone="error"
-            icon={<RefreshCw className="h-6 w-6" />}
-            title="资源列表加载失败"
-            description="这次没能获取到资源数据，你可以重新试一次。"
-            action={
-              <Button onClick={() => void fetchResources()}>
-                <RefreshCw className="h-4 w-4" />
-                重新加载
+                <Upload className="h-4 w-4" />
+                上传资源
               </Button>
-            }
-          />
-        ) : resources.length === 0 ? (
-          <StatePanel
-            tone="empty"
-            icon={<FolderOpen className="h-6 w-6" />}
-            title="还没有资源"
-            description="上传第一个资源后，这里会开始显示文件、分类和下载信息。"
-            action={
-              isAdmin ? (
-                <Button
-                  onClick={() => {
-                    setIsDropActive(false);
-                    setShowUploadModal(true);
-                  }}
-                >
-                  <Upload className="h-4 w-4" />
-                  上传第一个资源
-                </Button>
-              ) : null
-            }
-          />
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {resources.map((resource, index) => {
-              const config = getResourceCategoryConfig(resource.category);
-              const Icon = config.icon;
-              
-              return (
-                <motion.div
-                  key={resource.id}
-                  initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  transition={{ delay: index * 0.05, duration: 0.58, ease: APPLE_EASE_SOFT }}
-                  whileHover={HOVER_LIFT}
-                  whileTap={{ y: -2, scale: 0.994 }}
-                  className="group"
-                >
-                  <Card
-                    variant="glass"
-                    className="h-full rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-lg)"
-                  >
-                    <div className="mb-4 flex items-start justify-between gap-3">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.bg}`}>
-                        <Icon className={`h-6 w-6 ${config.color}`} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="soft">{config.name}</Badge>
-                        {resource.is_public ? (
-                          <Eye className="h-4 w-4 text-(--color-warning)" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-neutral-500" />
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <h3 className="line-clamp-2 text-base font-semibold text-neutral-900">
-                        {resource.name}
-                      </h3>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                      <span>{formatFileSize(resource.file_size)}</span>
-                      <span>·</span>
-                      <span>{formatDate(resource.created_at)}</span>
-                      {resource.download_count > 10 ? (
-                        <>
-                          <span>·</span>
-                          <span className="inline-flex items-center gap-1 text-(--color-warning)">
-                            <Star className="h-3 w-3" />
-                            高频
-                          </span>
-                        </>
-                      ) : null}
-                    </div>
-
-                    <div className="mt-5 flex items-center gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleDownloadClick(resource)}
-                        className="flex-1"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        下载
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyLink(resource.file_url, resource.id)}
-                        title="复制链接"
-                      >
-                        {copiedId === resource.id ? (
-                          <Check className="h-4 w-4 text-(--color-warning)" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                      {isAdmin ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(resource.id)}
-                          className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
-                          title="删除资源"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      ) : null}
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {resources.map((resource, index) => {
-              const config = getResourceCategoryConfig(resource.category);
-              const Icon = config.icon;
-              
-              return (
-                <motion.div
-                  key={resource.id}
-                  initial={{ opacity: 0, x: -20, filter: 'blur(5px)' }}
-                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                  transition={{ delay: index * 0.03, duration: 0.54, ease: APPLE_EASE_SOFT }}
-                  whileHover={{ x: 2, scale: 1.003 }}
-                  whileTap={{ scale: 0.995 }}
-                  className="group"
-                >
-                  <Card variant="glass" padding="sm" className="rounded-2xl">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${config.bg}`}>
-                        <Icon className={`h-5 w-5 ${config.color}`} />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="truncate text-base font-semibold text-neutral-900">
-                            {resource.name}
-                          </h3>
-                          <Badge variant="soft">{config.name}</Badge>
-                          {resource.is_public ? (
-                            <Eye className="h-3.5 w-3.5 text-(--color-warning)" />
-                          ) : (
-                            <EyeOff className="h-3.5 w-3.5 text-neutral-500" />
-                          )}
-                        </div>
-                        <p className="truncate text-sm text-neutral-500">{formatFileSize(resource.file_size)} · {formatDate(resource.created_at)}</p>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 lg:min-w-[260px] lg:justify-end">
-                        <span>{formatFileSize(resource.file_size)}</span>
-                        <span>{formatDate(resource.created_at)}</span>
-                        {resource.download_count > 10 ? (
-                          <span className="inline-flex items-center gap-1 text-(--color-warning)">
-                            <Star className="h-3 w-3" />
-                            高频
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownloadClick(resource)}
-                          title="下载资源"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyLink(resource.file_url, resource.id)}
-                          title="复制链接"
-                        >
-                          {copiedId === resource.id ? (
-                            <Check className="h-4 w-4 text-(--color-warning)" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                        {isAdmin ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(resource.id)}
-                            className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
-                            title="删除资源"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        ) : null}
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
+            </motion.div>
           </div>
         )}
+
 
         {/* 下单弹窗 */}
         {typeof document !== 'undefined' && checkoutProduct ? createPortal(
@@ -1615,6 +1244,7 @@ export default function ResourcesPage() {
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setCheckoutProduct(null)}
                     className="ios-button-press rounded-lg p-2 transition-colors hover:bg-black/5"
                     aria-label="关闭下单弹窗"
@@ -1747,90 +1377,6 @@ export default function ResourcesPage() {
             document.body
         ) : null}
 
-        {/* 下载验证弹窗 */}
-        <AnimatePresence>
-          {downloadModal && (
-            <motion.div
-              variants={modalBackdropVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="ios-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
-              onClick={() => setDownloadModal(null)}
-            >
-              <motion.div
-                variants={modalPanelVariants}
-                className="surface-card ios-modal-card w-full max-w-md p-6"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-primary/10">
-                      <Download className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">下载资源</h3>
-                      <p className="text-xs text-muted-foreground">请完成安全验证</p>
-                    </div>
-                  </div>
-                  <button onClick={() => setDownloadModal(null)} className="ios-button-press p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="p-4 rounded-xl border border-(--ui-line) bg-secondary/30 mb-4">
-                  <p className="font-medium truncate">{downloadModal.name}</p>
-                  <p className="text-sm text-muted-foreground">{formatFileSize(downloadModal.file_size)}</p>
-                </div>
-
-                {/* Turnstile 验证 */}
-                <div className="py-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <Shield className="w-4 h-4" />
-                    <span>请完成安全验证后下载</span>
-                  </div>
-                  <Turnstile
-                    onVerify={handleDownloadVerify}
-                    onError={handleDownloadError}
-                    onExpire={handleDownloadError}
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setDownloadModal(null)}
-                    className="btn-secondary ios-button-press flex-1 px-4 py-2.5 rounded-xl"
-                  >
-                    取消
-                  </button>
-                  <button
-                    onClick={confirmDownload}
-                    disabled={!downloadVerified || downloadProgress !== null}
-                    className="btn-primary ios-button-press flex-1 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {downloadProgress !== null ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        下载中...
-                      </>
-                    ) : downloadVerified ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        确认下载
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="w-4 h-4" />
-                        等待验证
-                      </>
-                    )}
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* 上传弹窗 */}
         <AnimatePresence>
           {showUploadModal && (
@@ -1861,6 +1407,8 @@ export default function ResourcesPage() {
                     </div>
                   </div>
                   <button
+                    type="button"
+                    aria-label="关闭上传弹窗"
                     onClick={() => {
                       setShowUploadModal(false);
                       setIsDropActive(false);
@@ -1913,6 +1461,7 @@ export default function ResourcesPage() {
                   <input
                     ref={fileInputRef}
                     type="file"
+                    aria-label="选择上传文件"
                     onChange={(e) => {
                       pickUploadFile(e.target.files?.[0] || null);
                     }}
@@ -1934,6 +1483,7 @@ export default function ResourcesPage() {
                   <div>
                     <label className="block text-sm font-medium mb-2">资源分类</label>
                     <select
+                      title="选择资源分类"
                       value={uploadCategory}
                       onChange={(e) => setUploadCategory(e.target.value)}
                       className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
@@ -2040,6 +1590,8 @@ export default function ResourcesPage() {
                 <div className="flex items-center justify-between p-6 border-b border-(--ui-line)">
                   <h3 className="text-xl font-bold">分类管理</h3>
                   <button
+                    type="button"
+                    aria-label="关闭分类管理"
                     onClick={() => { setShowCategoryModal(false); resetCategoryForm(); }}
                     className="ios-button-press rounded-lg p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
                   >
@@ -2086,9 +1638,10 @@ export default function ResourcesPage() {
                       <div>
                         <label className="block text-sm mb-1">图标</label>
                         <select
+                          title="选择图标"
                           value={newCatIcon}
                           onChange={(e) => setNewCatIcon(e.target.value)}
-                          className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
+                          className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
                         >
                           {Object.keys(iconMap).map(icon => (
                             <option key={icon} value={icon}>{icon}</option>
@@ -2098,9 +1651,10 @@ export default function ResourcesPage() {
                       <div>
                         <label className="block text-sm mb-1">颜色</label>
                         <select
+                          title="选择颜色"
                           value={newCatColor}
                           onChange={(e) => setNewCatColor(e.target.value)}
-                          className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-(--text-sm) text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
+                          className="w-full rounded-lg border border-(--border-default) bg-(--surface-raised) px-4 py-3 text-neutral-900 shadow-(--shadow-xs) outline-none transition-all focus-visible:ring-2 focus-visible:ring-(--color-primary-500) focus-visible:ring-offset-2"
                         >
                           {Object.keys(colorMap).map(color => (
                             <option key={color} value={color}>{color}</option>
@@ -2149,6 +1703,8 @@ export default function ResourcesPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <button
+                              type="button"
+                              aria-label="编辑分类"
                               onClick={() => handleEditCategory(cat)}
                               className="ios-button-press rounded-lg p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
                             >
@@ -2156,6 +1712,8 @@ export default function ResourcesPage() {
                             </button>
                             {!cat.is_system && (
                               <button
+                                type="button"
+                                aria-label="删除分类"
                                 onClick={() => handleDeleteCategory(cat.id)}
                                 className="ios-button-press rounded-lg p-2 text-red-500 transition-colors hover:bg-red-500/10"
                               >
@@ -2173,6 +1731,130 @@ export default function ResourcesPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── 购物车悬浮按钮 ── */}
+      <AnimatePresence>
+        {cartCount > 0 && !cartOpen && (
+          <motion.button
+            type="button"
+            aria-label={`查看购物车，共 ${cartCount} 件`}
+            onClick={() => setCartOpen(true)}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            transition={APPLE_SPRING_GENTLE}
+            className="fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-paper shadow-2xl md:bottom-8"
+          >
+            <ShoppingBag className="h-6 w-6" />
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[11px] font-bold text-white">
+              {cartCount > 9 ? '9+' : cartCount}
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* ── 购物车抽屉 ── */}
+      <AnimatePresence>
+        {cartOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+              onClick={() => setCartOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              className="fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col bg-paper shadow-2xl"
+            >
+              {/* 抽屉头部 */}
+              <div className="flex items-center justify-between border-b border-line px-5 py-4">
+                <div className="flex items-center gap-2.5">
+                  <ShoppingBag className="h-5 w-5 text-gold" />
+                  <h2 className="text-base font-semibold text-ink">购物车</h2>
+                  <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs font-semibold text-gold">{cartCount} 件</span>
+                </div>
+                <button
+                  type="button"
+                  aria-label="关闭购物车"
+                  onClick={() => setCartOpen(false)}
+                  className="rounded-lg p-2 text-ink-muted hover:bg-black/5"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* 商品列表 */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {cart.map(item => (
+                  <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-line bg-(--surface-raised) p-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-sm font-medium text-ink">{item.title}</p>
+                      <p className="mt-0.5 text-xs text-ink-muted">¥{item.price.toFixed(0)} / 件</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        aria-label="减少数量"
+                        onClick={() => updateCartQty(item.id, item.qty - 1)}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-line text-ink hover:bg-black/5"
+                      >
+                        <Minus className="h-3 w-3" />
+                      </button>
+                      <span className="w-6 text-center text-sm font-semibold text-ink">{item.qty}</span>
+                      <button
+                        type="button"
+                        aria-label="增加数量"
+                        onClick={() => updateCartQty(item.id, item.qty + 1)}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-line text-ink hover:bg-black/5"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="移除商品"
+                      onClick={() => removeFromCart(item.id)}
+                      className="rounded-lg p-1.5 text-red-400 hover:bg-red-50"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* 底部结算 */}
+              <div className="border-t border-line p-5 space-y-4">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm text-ink-muted">合计</span>
+                  <span className="text-2xl font-bold text-ink">¥{cartTotal.toFixed(0)}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={checkoutCart}
+                  className="res-turkey-btn w-full rounded-xl py-3.5 text-sm font-semibold text-white"
+                >
+                  去结算
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCart([])}
+                  className="w-full text-center text-xs text-ink-muted hover:text-ink transition-colors"
+                >
+                  清空购物车
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

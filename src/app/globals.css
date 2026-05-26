@@ -7943,6 +7943,26 @@ pre[class*="language-"] {
 .res-product-card__btn:hover { opacity: 0.88; transform: translateY(-1px); }
 .res-product-card__btn:active { opacity: 0.78; transform: translateY(0); }
 
+.res-product-card__btn--ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
+}
+.res-product-card__btn--ghost:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
+.res-product-card__btn--ghost:active { transform: translateY(0); }
+
 /* ── AI Recharge card ────────────────────────────────── */
 
 .res-ai-card {
@@ -8098,6 +8118,27 @@ pre[class*="language-"] {
 .res-ai-card--claude .res-ai-card__btn { background: #da7756; }
 .res-ai-card__btn:hover { opacity: 0.88; transform: translateY(-1px); }
 .res-ai-card__btn:active { opacity: 0.78; transform: translateY(0); }
+
+.res-ai-card__btn--ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, transform 0.12s;
+}
+.res-ai-card__btn--ghost:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
+.res-ai-card__btn--ghost:active { transform: translateY(0); }
 
 /* ── Featured Turkey GPT card ── */
 .res-turkey-card-bg {

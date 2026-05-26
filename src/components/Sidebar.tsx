@@ -18,8 +18,8 @@ import {
   Terminal,
   FileText,
   Film,
-  FolderOpen,
   Home,
+  ShoppingBag,
   Link as LinkIcon,
   LogOut,
   Mail,
@@ -70,7 +70,7 @@ const group2: NavItem[] = [
   { key: 'media',       href: '/media',       icon: Film,          label: '书影音', kana: '覧' },
   { key: 'timeline',    href: '/timeline',    icon: Clock,         label: '时间线', kana: '史' },
   { key: 'uses',        href: '/uses',        icon: Wrench,        label: '工具箱', kana: '具' },
-  { key: 'resources',   href: '/resources',   icon: FolderOpen,    label: '资源',  kana: '庫' },
+  { key: 'shop',        href: '/resources',   icon: ShoppingBag,   label: '商店',  kana: '店' },
   { key: 'links',       href: '/links',       icon: LinkIcon,      label: '友链',  kana: '縁' },
   { key: 'message',     href: '/guestbook',   icon: MessageCircle, label: '留言',  kana: '声' },
 ];
