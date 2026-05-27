@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo, type DragEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, type DragEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Upload, File, Image, Video, FileText, Package, Music,
+  Upload, File, Star,
   Trash2, X, Minus,
   Copy, Check, Shield, Plus, Edit2,
   AlertCircle, CheckCircle2,
-  Folder, Archive, Code, Database, Book, Link, Star, ShoppingBag,
+  ShoppingBag,
   QrCode, LockKeyhole, MessageCircle, Mail,
   ChevronRight, ChevronDown, Clock,
 } from 'lucide-react';
@@ -355,61 +355,6 @@ const payQrConfig = {
   alipay: process.env.NEXT_PUBLIC_ALIPAY_PAY_QR || '',
 };
 
-const sampleProducts: ResourceProduct[] = [
-  {
-    id: 'starter-curation',
-    title: '效率工具资料包',
-    description: '适合做个人知识库、自动化工作流和常用软件配置的入门整理包。',
-    category: '工具',
-    price: 19.9,
-    originalPrice: 39,
-    includes: ['目录索引', '安装说明', '常用配置模板', '更新记录'],
-    tags: ['自用整理', '持续更新', '网盘交付'],
-    updateLabel: '示例商品',
-    delivery: '付款确认后发送网盘链接',
-  },
-  {
-    id: 'learning-pack',
-    title: '学习资源索引包',
-    description: '把公开课程、文档、阅读路线和检索关键词整理成一份可复用索引。',
-    category: '学习',
-    price: 29.9,
-    originalPrice: 59,
-    includes: ['学习路线', '资料索引', '检索关键词', '使用建议'],
-    tags: ['公开资料', '索引服务', '适合收藏'],
-    updateLabel: '示例商品',
-    delivery: '付款确认后发送目录与链接',
-  },
-];
-
-// 图标映射
-const iconMap: Record<string, typeof File> = {
-  image: Image, video: Video, 'file-text': FileText, package: Package,
-  music: Music, file: File, folder: Folder, archive: Archive,
-  code: Code, database: Database, book: Book, link: Link, star: Star,
-};
-
-// 颜色映射 — 杂志金墨配色
-const colorMap: Record<string, { color: string; bg: string }> = {
-  blue:   { color: 'text-(--ink)',           bg: 'bg-(--paper-deep)' },
-  purple: { color: 'text-(--ink-secondary)',  bg: 'bg-(--paper-deep)' },
-  green:  { color: 'text-(--gold)',           bg: 'bg-(--paper-deep)' },
-  orange: { color: 'text-(--gold)',           bg: 'bg-(--paper-deep)' },
-  pink:   { color: 'text-(--ink-secondary)',  bg: 'bg-(--paper-deep)' },
-  red:    { color: 'text-(--ink)',            bg: 'bg-(--paper-deep)' },
-  yellow: { color: 'text-(--gold)',           bg: 'bg-(--paper-deep)' },
-  cyan:   { color: 'text-(--ink-secondary)',  bg: 'bg-(--paper-deep)' },
-  gray:   { color: 'text-(--ink-muted)',      bg: 'bg-(--paper-deep)' },
-};
-
-// 获取分类配置
-function getCategoryConfig(category: Category | undefined) {
-  if (!category) return { icon: File, color: 'text-gray-500', bg: 'bg-gray-500/10', name: '未分类' };
-  const icon = iconMap[category.icon] || File;
-  const colors = colorMap[category.color] || colorMap.gray;
-  return { icon, ...colors, name: category.name };
-}
-
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -417,56 +362,10 @@ function formatFileSize(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function getResourcePrice(resource: Resource): number {
-  const priceTag = resource.tags?.find((tag) => /^price[:=]\d+(\.\d+)?$/i.test(tag));
-  if (!priceTag) return 19.9;
-  const price = Number(priceTag.split(/[:=]/)[1]);
-  return Number.isFinite(price) && price > 0 ? price : 19.9;
-}
-
-function createProductsFromResources(resources: Resource[], categories: Category[]): ResourceProduct[] {
-  const visibleResources = resources.filter((resource) => resource.is_public).slice(0, 6);
-  if (visibleResources.length === 0) return sampleProducts;
-
-  return visibleResources.map((resource) => {
-    const categoryName = categories.find((category) => category.slug === resource.category)?.name || resource.category || '资源包';
-    const visibleTags = (resource.tags || []).filter((tag) => !/^price[:=]/i.test(tag));
-
-    return {
-      id: resource.id,
-      title: resource.name,
-      description: resource.description || '精选整理资料包，付款确认后交付对应网盘链接与必要说明。',
-      category: categoryName,
-      price: getResourcePrice(resource),
-      originalPrice: Math.round(getResourcePrice(resource) * 1.8),
-      includes: [
-        resource.original_name || '资源文件',
-        '网盘链接',
-        '提取码/访问说明',
-        '后续更新记录',
-      ],
-      tags: visibleTags.length > 0 ? visibleTags.slice(0, 3) : ['精选整理', '网盘交付', '人工确认'],
-      updateLabel: formatDate(resource.created_at),
-      delivery: '付款确认后发送网盘链接',
-      resource,
-    };
-  });
-}
-
 
 export default function ResourcesPage() {
   const { isAdmin } = useAdmin();
-  const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -533,28 +432,9 @@ export default function ResourcesPage() {
     }
   }, [pushNotice]);
 
-  const fetchResources = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/resources');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'failed');
-      setResources(data.resources || []);
-    } catch (error) {
-      console.error('Failed to fetch resources:', error);
-      setResources([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     void fetchCategories();
   }, [fetchCategories]);
-
-  useEffect(() => {
-    void fetchResources();
-  }, [fetchResources]);
 
   useEffect(() => {
     if (!notice) return;
@@ -678,7 +558,6 @@ export default function ResourcesPage() {
         setShowUploadModal(false);
         setIsDropActive(false);
         resetUploadForm();
-        void fetchResources();
         pushNotice('success', '资源上传成功。');
       } else {
         pushNotice('error', saveData.error || '保存失败');
@@ -840,10 +719,6 @@ export default function ResourcesPage() {
     });
   };
 
-  const resourceProducts = useMemo(
-    () => createProductsFromResources(resources, categories),
-    [resources, categories]
-  );
   const checkoutOrderId = checkoutOrder?.order_number || '提交后生成';
   const activePaymentQrEnv = paymentMethod === 'wechat'
     ? 'NEXT_PUBLIC_WECHAT_PAY_QR'
@@ -1494,79 +1369,6 @@ export default function ResourcesPage() {
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* 精选资料包 */}
-        <section className="space-y-6">
-          <div className="res-section-head">
-            <div>
-              <p className="res-section-eyebrow">Featured Packs · 资料包</p>
-              <h2 className="res-section-title">精选资料包</h2>
-            </div>
-            {isAdmin && (
-              <p className="res-section-note">
-                可用资源标签 <code className="res-section-code">price:29.9</code> 控制单价
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {resourceProducts.map((product, index) => (
-              <motion.article
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.06, duration: 0.48, ease: APPLE_EASE_SOFT }}
-              >
-                <div className="res-product-card">
-                  <div className="res-product-card__bar" />
-
-                  <div className="res-product-card__head">
-                    <span className="res-product-card__cat">{product.category}</span>
-                    <span className="res-product-card__date">{product.updateLabel}</span>
-                  </div>
-
-                  <h3 className="res-product-card__name">{product.title}</h3>
-                  <p className="res-product-card__desc">{product.description}</p>
-
-                  <ul className="res-product-card__items">
-                    {product.includes.slice(0, 4).map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-
-                  <div className="res-product-card__foot">
-                    <div>
-                      <p className="res-product-card__delivery">{product.delivery}</p>
-                      <p className="res-product-card__price">
-                        <span className="res-product-card__price-curr">¥{product.price.toFixed(2)}</span>
-                        {product.originalPrice ? (
-                          <span className="res-product-card__price-orig">¥{product.originalPrice}</span>
-                        ) : null}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        className="res-product-card__btn--ghost"
-                        onClick={() => addToCart(product.id, product.title, product.price)}
-                      >
-                        <ShoppingBag className="h-3.5 w-3.5" />
-                        加入购物车
-                      </button>
-                      <button
-                        type="button"
-                        className="res-product-card__btn"
-                        onClick={() => openCheckout(product)}
-                      >
-                        立即购买
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.article>
             ))}
           </div>
         </section>
