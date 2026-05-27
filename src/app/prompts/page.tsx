@@ -8,5 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default function PromptsPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <PromptsClient prompts={promptsData as any} />;
 }

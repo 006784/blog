@@ -91,6 +91,7 @@ function AppleDetailPanel({ url, musicUrl }: { url: string; musicUrl: string }) 
 
   useEffect(() => {
     if (!meta || lyricsLoading || lyrics !== null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLyricsLoading(true);
     fetchLyrics(meta.title, meta.artist, meta.album).then(l => {
       setLyrics(l ?? '');

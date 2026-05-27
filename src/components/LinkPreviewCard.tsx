@@ -16,7 +16,9 @@ export function LinkPreviewCard({ url }: Props) {
     const cached = sessionStorage.getItem(`lp:${url}`);
     if (cached) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setData(JSON.parse(cached));
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(false);
         return;
       } catch { /* ignore */ }

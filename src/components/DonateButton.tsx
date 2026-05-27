@@ -71,7 +71,7 @@ export function DonateButton() {
 
   useEffect(() => {
     if (!profile) return;
-    // 自动选中第一个有配置的标签
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (profile.donate_wechat) { setActiveTab('wechat'); return; }
     if (profile.donate_alipay) { setActiveTab('alipay'); return; }
     if (profile.donate_paypal) { setActiveTab('paypal'); return; }

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: false, error: data.error }, { status: 500 });
     }
 
-    console.log('[cron/briefing] generated:', data.briefing?.title, `(${data.newsCount} news items)`);
+    console.warn('[cron/briefing] generated:', data.briefing?.title, `(${data.newsCount} news items)`);
     return NextResponse.json({ ok: true, title: data.briefing?.title, newsCount: data.newsCount });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'unknown';

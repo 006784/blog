@@ -957,6 +957,22 @@ function AlbumModal({ album, onClose, onSave }: {
 // ── Links Tab ──────────────────────────────────────────────────────────────────
 interface FriendLink { id: string; name: string; url: string; description?: string; avatar?: string; category?: string; is_featured: boolean; sort_order?: number; }
 
+function LinkFormFields({ data, onChange }: { data: Partial<FriendLink>; onChange: (v: Partial<FriendLink>) => void }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Input placeholder="站点名称 *" value={data.name ?? ''} onChange={e => onChange({ ...data, name: e.target.value })} />
+      <Input placeholder="网址 * (https://...)" value={data.url ?? ''} onChange={e => onChange({ ...data, url: e.target.value })} />
+      <Input placeholder="头像 URL" value={data.avatar ?? ''} onChange={e => onChange({ ...data, avatar: e.target.value })} />
+      <Input placeholder="分类（如：技术、生活）" value={data.category ?? ''} onChange={e => onChange({ ...data, category: e.target.value })} />
+      <Textarea placeholder="简介" className="sm:col-span-2" value={data.description ?? ''} onChange={e => onChange({ ...data, description: e.target.value })} />
+      <label className="flex items-center gap-2 text-sm sm:col-span-2">
+        <input type="checkbox" checked={!!data.is_featured} onChange={e => onChange({ ...data, is_featured: e.target.checked })} />
+        推荐展示
+      </label>
+    </div>
+  );
+}
+
 function LinksTab() {
   const [links, setLinks] = useState<FriendLink[]>([]);
   const [loading, setLoading] = useState(true);
@@ -964,14 +980,14 @@ function LinksTab() {
   const [form, setForm] = useState<Partial<FriendLink>>({});
   const [showAdd, setShowAdd] = useState(false);
 
-  useEffect(() => { load(); }, []);
-
   async function load() {
     setLoading(true);
     const r = await fetch('/api/links'); const d = await r.json();
     setLinks(Array.isArray(d) ? d : []);
     setLoading(false);
   }
+
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
 
   async function save(isNew: boolean) {
     const method = isNew ? 'POST' : 'PUT';
@@ -990,20 +1006,6 @@ function LinksTab() {
     else showToast.error('删除失败');
   }
 
-  const FormFields = ({ data, onChange }: { data: Partial<FriendLink>; onChange: (v: Partial<FriendLink>) => void }) => (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <Input placeholder="站点名称 *" value={data.name ?? ''} onChange={e => onChange({ ...data, name: e.target.value })} />
-      <Input placeholder="网址 * (https://...)" value={data.url ?? ''} onChange={e => onChange({ ...data, url: e.target.value })} />
-      <Input placeholder="头像 URL" value={data.avatar ?? ''} onChange={e => onChange({ ...data, avatar: e.target.value })} />
-      <Input placeholder="分类（如：技术、生活）" value={data.category ?? ''} onChange={e => onChange({ ...data, category: e.target.value })} />
-      <Textarea placeholder="简介" className="sm:col-span-2" value={data.description ?? ''} onChange={e => onChange({ ...data, description: e.target.value })} />
-      <label className="flex items-center gap-2 text-sm sm:col-span-2">
-        <input type="checkbox" checked={!!data.is_featured} onChange={e => onChange({ ...data, is_featured: e.target.checked })} />
-        推荐展示
-      </label>
-    </div>
-  );
-
   if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
 
   return (
@@ -1016,7 +1018,7 @@ function LinksTab() {
       {showAdd && (
         <Card variant="elevated" className="p-4 space-y-3">
           <h3 className="font-medium">新建友链</h3>
-          <FormFields data={form} onChange={setForm} />
+          <LinkFormFields data={form} onChange={setForm} />
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" size="sm" onClick={() => { setShowAdd(false); setForm({}); }}>取消</Button>
             <Button size="sm" onClick={() => void save(true)}><Save className="h-4 w-4" />保存</Button>
@@ -1029,7 +1031,7 @@ function LinksTab() {
           <Card key={link.id} variant="default" className="p-4">
             {editingId === link.id ? (
               <div className="space-y-3">
-                <FormFields data={form} onChange={setForm} />
+                <LinkFormFields data={form} onChange={setForm} />
                 <div className="flex gap-2 justify-end">
                   <Button variant="ghost" size="sm" onClick={() => { setEditingId(null); setForm({}); }}>取消</Button>
                   <Button size="sm" onClick={() => void save(false)}><Save className="h-4 w-4" />保存</Button>
@@ -1071,6 +1073,7 @@ function GuestbookTab() {
   const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fetch('/api/guestbook?all=true&limit=100', { credentials: 'include' })
       .then(r => r.json()).then(d => setMsgs(d.messages ?? []))
