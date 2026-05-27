@@ -95,14 +95,14 @@ const aiRechargeServices: AiRechargeService[] = [
     id: 'chatgpt-plus-turkey',
     service: 'chatgpt',
     plan: 'ChatGPT Plus 土耳其区',
-    desc: '土耳其区 OpenAI 官方订阅，价格约为美区 40%，GPT-4o / o3 / DALL·E / 联网 / GPTs 全功能无阉割。',
+    desc: '土耳其区 OpenAI 官方订阅，价格约为美区 40%，高级模型 / Thinking 图像 / Codex / 深度研究全功能无阉割。',
     priceMonthly: 68,
     originalPrice: 168,
     priceNote: '美区标准价 ¥168，节省超 60%',
     badge: '最低价',
     featured: true,
     credentialType: 'password',
-    features: ['GPT-4o / o3 全模型', 'DALL·E 3 图像生成', '联网实时搜索', '自定义 GPTs', 'Projects 协作', '语音对话模式'],
+    features: ['高级模型', '更多消息和上传限额', '使用 Thinking 进行高级图像创建', '扩展容量的跨聊天记忆', 'Codex 编码智能体', '更高级别的深度研究', '项目和自定义 GPT'],
   },
   // ── ChatGPT ───────────────────────────────────────────────────
   {
@@ -111,56 +111,67 @@ const aiRechargeServices: AiRechargeService[] = [
     plan: 'ChatGPT Plus 土耳其区（成品号）',
     desc: '由站长注册并激活的土耳其区 Plus 成品账号，付款后直接发送账号密码，即买即用。',
     priceMonthly: 88,
-    priceNote: '5倍用量 · 土耳其区低价',
-    badge: '5倍用量',
+    priceNote: '即买即用 · 土耳其区低价',
+    badge: '成品号',
     credentialType: 'none',
     isReadyMade: true,
-    features: ['完整账号 + 密码', 'GPT-4o / o3 全模型', 'DALL·E 3 / 联网', '5倍用量', '不需要提供自己的账号'],
+    features: ['完整账号 + 密码', '高级模型', '更多消息和上传限额', 'Codex 编码智能体', '项目和自定义 GPT'],
   },
   {
     id: 'chatgpt-go',
     service: 'chatgpt',
     plan: 'ChatGPT Go（代充）',
-    desc: 'ChatGPT 入门订阅，支持 GPT-4o mini 等模型，适合轻度使用，Session Token 代充到自有账号。',
+    desc: '解锁更多功能，畅聊不停。核心模型加量，图片生成和语音模式额度提升，Session Token 代充到自有账号。',
     priceMonthly: 68,
     priceNote: '官网 $8/月，月付',
     badge: '入门',
     credentialType: 'token',
-    features: ['GPT-4o mini', '基础功能完整', '轻量级订阅', '适合日常轻度使用'],
+    features: ['核心模型', '更多消息和上传限额', '更多图片生成限额', '更多记忆内容', '扩展额度的语音模式'],
   },
   {
     id: 'chatgpt-plus',
     service: 'chatgpt',
     plan: 'ChatGPT Plus 美区（代充）',
-    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成，5倍用量。Session Token 代充到自有账号。',
+    desc: '解锁全面体验。高级模型、Thinking 图像创建、Codex 编码智能体、深度研究，Session Token 代充到自有账号。',
     priceMonthly: 168,
     priceNote: '官网 $20/月，月付',
-    badge: '5倍用量',
+    badge: '热门',
     credentialType: 'token',
-    features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '5倍用量 · 自定义 GPTs'],
+    features: ['高级模型', '更多消息和上传限额', '使用 Thinking 进行高级图像创建', '扩展容量的跨聊天记忆', 'Codex 编码智能体', '更高级别的深度研究', '项目和自定义 GPT'],
   },
   {
     id: 'chatgpt-plus-ready',
     service: 'chatgpt',
     plan: 'ChatGPT Plus 美区（成品号）',
-    desc: '站长注册的美区 ChatGPT Plus 成品账号，GPT-4o / o3 全模型，5倍用量，付款后直接收到账号密码。',
+    desc: '站长注册的美区 ChatGPT Plus 成品账号，高级模型全功能，付款后直接收到账号密码，即买即用。',
     priceMonthly: 198,
-    priceNote: '5倍用量 · 即买即用',
+    priceNote: '热门套餐 · 即买即用',
     badge: '成品号',
     credentialType: 'none',
     isReadyMade: true,
-    features: ['完整账号 + 密码', 'GPT-4o / o3 全模型', '5倍用量', '不需要提供自己的账号'],
+    features: ['完整账号 + 密码', '高级模型', 'Codex 编码智能体', '更高级别的深度研究', '不需要提供自己的账号'],
   },
   {
-    id: 'chatgpt-pro',
+    id: 'chatgpt-pro-5x',
     service: 'chatgpt',
-    plan: 'ChatGPT Pro（代充）',
-    desc: '20倍用量，o1 / o3 高级推理无限制，Sora 视频生成，适合专业重度用户。Session Token 代充。',
+    plan: 'ChatGPT Pro 5倍档（代充）',
+    desc: '有效提升效率。相比 Plus 多 5 倍使用额度，Pro 前沿模型，Codex 最大访问权限，Session Token 代充。',
+    priceMonthly: 840,
+    priceNote: '官网 $100/月，月付',
+    badge: '5倍用量',
+    credentialType: 'token',
+    features: ['相比 Plus 多 5 倍使用额度', 'Pro 前沿模型', '对 Codex 的最大访问权限', '最高级别的深度研究', '无限制核心聊天', '抢先体验实验性功能'],
+  },
+  {
+    id: 'chatgpt-pro-20x',
+    service: 'chatgpt',
+    plan: 'ChatGPT Pro 20倍档（代充）',
+    desc: '相比 Plus 多 20 倍使用额度，无限制图片生成，全面记忆和背景信息，适合重度专业用户，Session Token 代充。',
     priceMonthly: 1680,
     priceNote: '官网 $200/月，月付',
     badge: '20倍用量',
     credentialType: 'token',
-    features: ['20倍超高用量', 'o1 / o3 高级推理', 'Sora 视频生成', '所有旗舰功能无限制'],
+    features: ['相比 Plus 多 20 倍使用额度', 'Pro 前沿模型', '无限制且较快速的图片生成', '全面的记忆和背景信息', '对 Codex 的最大访问权限', '抢先体验实验性功能'],
   },
   // ── Claude ────────────────────────────────────────────────────
   {
@@ -1107,18 +1118,18 @@ export default function ResourcesPage() {
 
                   <p className="max-w-xl text-sm leading-7 text-ink-secondary">
                     土耳其是 OpenAI 官方区域定价国，价格远低于美区。代你完成区域订阅开通，功能与美区 ChatGPT Plus
-                    100% 相同，包含最新 GPT-4o、o3 推理、DALL·E 图像生成、联网搜索等全部旗舰功能，无任何阉割。
+                    100% 相同，高级模型、Thinking 图像创建、Codex 编码智能体、深度研究一应俱全，无任何阉割。
                   </p>
 
                   {/* Feature grid */}
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {[
-                      'GPT-4o / o3 全模型',
-                      'DALL·E 3 图像生成',
-                      '联网实时搜索',
-                      '自定义 GPTs',
-                      'Projects 协作',
-                      '语音对话模式',
+                      '高级模型',
+                      '使用 Thinking 进行高级图像创建',
+                      '扩展容量的跨聊天记忆',
+                      'Codex 编码智能体',
+                      '更高级别的深度研究',
+                      '项目和自定义 GPT',
                     ].map((f) => (
                       <div
                         key={f}
