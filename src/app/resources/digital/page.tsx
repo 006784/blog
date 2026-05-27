@@ -58,16 +58,14 @@ function ProductCard({
       exit={{ opacity: 0, scale: 0.97 }}
       className="overflow-hidden rounded-2xl border border-line bg-(--surface-raised) shadow-(--shadow-sm) transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-md)"
     >
-      <div className={`h-1.5 ${product.type === 'ebook' ? 'bg-amber-400' : 'bg-purple-400'}`} />
+      <div className={`h-1.5 res-digital-bar--${product.type}`} />
       <div className="p-5">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
             {product.type === 'ebook'
               ? <BookOpen className="h-4 w-4 text-amber-500 shrink-0" />
               : <Film className="h-4 w-4 text-purple-500 shrink-0" />}
-            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-              product.type === 'ebook' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'
-            }`}>
+            <span className={`res-digital-badge--${product.type} rounded-full px-2.5 py-0.5 text-[11px] font-semibold`}>
               {product.type === 'ebook' ? '电子书' : '影视资源'}
             </span>
           </div>

@@ -524,7 +524,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                     )}
                   </div>
                   <p className="mt-3 text-xs leading-5 text-neutral-500">
-                    {checkoutOrder ? '订单已写入数据库，后台可查看并更新状态。' : '先填写联系方式并提交订单，再扫码付款。'}
+                    {checkoutOrder ? '订单已创建，请立即扫码完成付款。' : '先填写联系方式并提交订单，再扫码付款。'}
                   </p>
                 </div>
 
@@ -549,15 +549,47 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                     className="mt-2 w-full resize-none rounded-2xl border border-(--border-default) bg-(--surface-raised) px-3 py-3 text-sm outline-none placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-(--color-primary-500)"
                   />
 
-                  <div className="mt-4 grid gap-2">
-                    <Button onClick={createOrderAndCopy} loading={orderSubmitting} className="w-full">
-                      {orderCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      {checkoutOrder ? '重新复制订单信息' : '创建订单并复制'}
-                    </Button>
-                    <p className="text-xs leading-5 text-neutral-500">
-                      付款后把订单信息发给站长，确认收款后发送交付内容。
-                    </p>
-                  </div>
+                  {checkoutOrder ? (
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                        <div>
+                          <p className="text-sm font-semibold text-emerald-700">订单已创建</p>
+                          <p className="mt-0.5 text-xs text-emerald-600">订单号：{checkoutOrder.order_number}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs leading-5 text-neutral-500">
+                        扫码付款后把订单号 <strong>{checkoutOrder.order_number}</strong> 发给站长，确认收款后交付内容。
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => copyOrderInfo(checkoutOrder)}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-neutral-200 py-2 text-xs font-medium text-neutral-600 transition hover:bg-black/5"
+                        >
+                          {orderCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                          {orderCopied ? '已复制' : '复制订单信息'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCheckoutProduct(null)}
+                          className="flex-1 rounded-xl bg-neutral-900 py-2 text-xs font-semibold text-white transition hover:opacity-85"
+                        >
+                          完成，关闭
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 grid gap-2">
+                      <Button onClick={createOrderAndCopy} loading={orderSubmitting} className="w-full">
+                        <Copy className="h-4 w-4" />
+                        创建订单并复制
+                      </Button>
+                      <p className="text-xs leading-5 text-neutral-500">
+                        付款后把订单信息发给站长，确认收款后发送交付内容。
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

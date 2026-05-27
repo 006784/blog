@@ -21,7 +21,7 @@ export default function ClaudePage() {
 
   return (
     <div className="min-h-screen px-4 py-20 pb-28 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-10">
+      <div className="mx-auto max-w-6xl space-y-10">
 
         {/* Breadcrumb */}
         <motion.div
