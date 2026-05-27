@@ -228,6 +228,105 @@ const aiRechargeServices: AiRechargeService[] = [
   },
 ];
 
+// ── 海外账号注册 ──────────────────────────────────────────────────
+interface AccountService {
+  id: string;
+  platform: 'twitter' | 'telegram' | 'gmail' | 'instagram';
+  name: string;
+  desc: string;
+  price: number;
+  originalPrice?: number;
+  badge?: string;
+  features: string[];
+  delivery: string;
+}
+
+const PLATFORM_INITIAL: Record<AccountService['platform'], string> = {
+  twitter: '𝕏', telegram: 'TG', gmail: 'G', instagram: 'IG',
+};
+
+const accountServices: AccountService[] = [
+  {
+    id: 'reg-gmail',
+    platform: 'gmail',
+    name: 'Gmail 账号注册',
+    desc: '美区 Google 账号，可用于绑定 ChatGPT、Claude 等各类国际服务，付款后发送账号密码。',
+    price: 18,
+    badge: '最低价',
+    features: ['美区 Google 账号', 'Gmail 邮箱', '可绑定 Google Play', '付款即发账号密码'],
+    delivery: '付款确认后发送账号密码',
+  },
+  {
+    id: 'reg-twitter',
+    platform: 'twitter',
+    name: 'Twitter / X 账号注册',
+    desc: '独立邮箱注册，可自定义用户名，完整账号权限，付款后 24 小时内发送账号密码。',
+    price: 28,
+    badge: '即买即用',
+    features: ['独立邮箱注册', '可自定义用户名', '完整账号权限', '付款即发账号密码'],
+    delivery: '付款确认后发送账号密码',
+  },
+  {
+    id: 'reg-telegram',
+    platform: 'telegram',
+    name: 'Telegram 账号注册',
+    desc: '独立手机号注册，可正常接收验证码，付款后 24 小时内发送账号及登录方式。',
+    price: 38,
+    badge: '独立手机号',
+    features: ['独立手机号注册', '可接收验证码', '立即可用', '付款即发账号信息'],
+    delivery: '付款确认后发送账号密码及登录方式',
+  },
+  {
+    id: 'reg-instagram',
+    platform: 'instagram',
+    name: 'Instagram 账号注册',
+    desc: '海外独立邮箱注册，可设置用户名和头像，付款后发送完整账号密码。',
+    price: 28,
+    features: ['独立邮箱注册', '可自定义用户名', '完整账号密码', '付款即发账号信息'],
+    delivery: '付款确认后发送账号密码',
+  },
+];
+
+// ── 数字资源 ──────────────────────────────────────────────────────
+interface DigitalItem {
+  id: string;
+  type: 'ebook' | 'video';
+  title: string;
+  desc: string;
+  price: number;
+  originalPrice?: number;
+  badge?: string;
+  includes: string[];
+  delivery: string;
+  tags: string[];
+}
+
+const digitalItems: DigitalItem[] = [
+  {
+    id: 'digital-ebook-pack',
+    type: 'ebook',
+    title: '精选电子书资源包',
+    desc: '涵盖技术、设计、商业、文学等多类别优质电子书合集，持续更新，付款后发送网盘链接。',
+    price: 29.9,
+    originalPrice: 59,
+    badge: '持续更新',
+    includes: ['技术类电子书', '设计类资料', '商业/效率书籍', '持续补充更新'],
+    delivery: '付款确认后发送网盘链接',
+    tags: ['电子书', '网盘交付'],
+  },
+  {
+    id: 'digital-video-pack',
+    type: 'video',
+    title: '高清影视资源',
+    desc: '精选高清电影、热门剧集，无广告无限制，付款后发送网盘直链，手机电脑均可观看。',
+    price: 19.9,
+    badge: '高清无广告',
+    includes: ['高清电影资源', '热门剧集', '无广告直链', '长期有效'],
+    delivery: '付款确认后发送网盘直链',
+    tags: ['影视', '高清', '网盘'],
+  },
+];
+
 interface CartItem {
   id: string;
   title: string;
@@ -1244,6 +1343,177 @@ export default function ResourcesPage() {
               </div>
             );
           })}
+        </section>
+
+        {/* 海外账号注册 */}
+        <section className="space-y-6">
+          <div className="res-section-head">
+            <div>
+              <p className="res-section-eyebrow">Overseas Accounts · 注册代办</p>
+              <h2 className="res-section-title">海外账号注册</h2>
+            </div>
+            <p className="res-section-note">
+              代注册海外平台账号，付款后 24 小时内发送账号密码
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {accountServices.map((svc, index) => (
+                <motion.div
+                  key={svc.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.07, duration: 0.45, ease: APPLE_EASE_SOFT }}
+                  className="overflow-hidden rounded-2xl border border-line bg-(--surface-raised) shadow-(--shadow-sm) transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-md)"
+                >
+                  <div className={`h-1.5 res-account-bar--${svc.platform}`} />
+                  <div className="flex flex-col p-5 h-full">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div
+                        className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-sm font-bold text-white res-account-logo--${svc.platform}`}
+                      >
+                        {PLATFORM_INITIAL[svc.platform]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-ink leading-tight">{svc.name}</p>
+                        {svc.badge && (
+                          <span className="mt-1 inline-block rounded-full bg-(--surface-overlay) px-2 py-0.5 text-[10px] font-medium text-gold">
+                            {svc.badge}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="mb-4 text-xs leading-5 text-ink-secondary">{svc.desc}</p>
+
+                    <ul className="mb-5 space-y-1.5">
+                      {svc.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-ink">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-gold" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-auto flex items-center justify-between border-t border-line pt-3">
+                      <div>
+                        <span className="text-xl font-bold text-ink">¥{svc.price}</span>
+                        {svc.originalPrice && (
+                          <span className="ml-1 text-xs text-ink-muted line-through">¥{svc.originalPrice}</span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openCheckout({
+                            id: svc.id,
+                            title: svc.name,
+                            description: svc.desc,
+                            category: '账号注册',
+                            price: svc.price,
+                            originalPrice: svc.originalPrice,
+                            includes: svc.features,
+                            tags: [svc.platform, '即买即用'],
+                            updateLabel: svc.badge || '注册服务',
+                            delivery: svc.delivery,
+                          })
+                        }
+                        className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-paper transition-all hover:opacity-85 active:scale-95"
+                      >
+                        立即购买
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* 数字资源 */}
+        <section className="space-y-6">
+          <div className="res-section-head">
+            <div>
+              <p className="res-section-eyebrow">Digital Resources · 网盘资源</p>
+              <h2 className="res-section-title">数字资源</h2>
+            </div>
+            <p className="res-section-note">
+              电子书、高清影视资源，付款后即发网盘直链
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            {digitalItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08, duration: 0.48, ease: APPLE_EASE_SOFT }}
+                className="overflow-hidden rounded-2xl border border-line bg-(--surface-raised) shadow-(--shadow-sm) transition-all hover:-translate-y-0.5 hover:shadow-(--shadow-md)"
+              >
+                <div className={`h-1.5 res-digital-bar--${item.type}`} />
+                <div className="p-6">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div>
+                      <span
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold res-digital-badge--${item.type}`}
+                      >
+                        {item.type === 'ebook' ? '电子书' : '影视资源'}
+                      </span>
+                      <h4 className="mt-2 text-lg font-bold text-ink">{item.title}</h4>
+                    </div>
+                    {item.badge && (
+                      <span className="shrink-0 rounded-full bg-(--surface-overlay) px-2.5 py-0.5 text-[11px] font-medium text-gold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mb-4 text-sm leading-6 text-ink-secondary">{item.desc}</p>
+
+                  <div className="mb-5 grid grid-cols-2 gap-2">
+                    {item.includes.map((inc) => (
+                      <div key={inc} className="flex items-center gap-1.5 text-xs text-ink">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-gold" />
+                        {inc}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-end justify-between border-t border-line pt-4">
+                    <div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold text-ink">¥{item.price}</span>
+                        {item.originalPrice && (
+                          <span className="text-sm text-ink-muted line-through">¥{item.originalPrice}</span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-ink-muted">{item.delivery}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openCheckout({
+                          id: item.id,
+                          title: item.title,
+                          description: item.desc,
+                          category: item.type === 'ebook' ? '电子书' : '影视资源',
+                          price: item.price,
+                          originalPrice: item.originalPrice,
+                          includes: item.includes,
+                          tags: item.tags,
+                          updateLabel: item.badge || '数字资源',
+                          delivery: item.delivery,
+                        })
+                      }
+                      className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition-all hover:opacity-85 active:scale-95"
+                    >
+                      立即购买
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </section>
 
         {/* 精选资料包 */}

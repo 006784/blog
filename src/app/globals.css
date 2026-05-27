@@ -8277,3 +8277,29 @@ pre[class*="language-"] {
 .dark .res-ai-flow-info-box--gold {
   color: #fcd34d;
 }
+
+/* ── 海外账号注册卡片 ─────────────────────────────── */
+.res-account-bar--twitter   { background: linear-gradient(90deg,#1a1a1a,#444); }
+.res-account-bar--telegram  { background: linear-gradient(90deg,#2AABEE,#0088CC); }
+.res-account-bar--gmail     { background: linear-gradient(90deg,#EA4335,#c62828); }
+.res-account-bar--instagram { background: linear-gradient(90deg,#E1306C,#833AB4); }
+
+.res-account-logo--twitter   { background: #1a1a1a; }
+.res-account-logo--telegram  { background: #2AABEE; }
+.res-account-logo--gmail     { background: #EA4335; }
+.res-account-logo--instagram { background: linear-gradient(135deg,#E1306C,#833AB4); }
+
+/* ── 数字资源卡片 ─────────────────────────────────── */
+.res-digital-bar--ebook { background: linear-gradient(90deg,#e99a69,#b86443); }
+.res-digital-bar--video { background: linear-gradient(90deg,#7c3aed,#4f46e5); }
+
+.res-digital-badge--ebook {
+  background: rgba(233,154,105,0.15);
+  color: #b86443;
+}
+.res-digital-badge--video {
+  background: rgba(124,58,237,0.12);
+  color: #7c3aed;
+}
+.dark .res-digital-badge--ebook { color: #f0be9a; }
+.dark .res-digital-badge--video { color: #c4b5fd; }
