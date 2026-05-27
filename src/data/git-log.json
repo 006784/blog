@@ -1,5 +1,89 @@
 [
   {
+    "hash": "6954aaf",
+    "date": "2026-05-27T10:52:23+08:00",
+    "message": "fix: 清除所有 ESLint warnings，lint 全绿",
+    "author": "zyi"
+  },
+  {
+    "hash": "865a045",
+    "date": "2026-05-27T10:45:20+08:00",
+    "message": "fix: 修复所有 ESLint errors，CI lint 检查恢复绿灯",
+    "author": "zyi"
+  },
+  {
+    "hash": "b37dee7",
+    "date": "2026-05-27T10:36:16+08:00",
+    "message": "fix: 移除 coverage-report job（secrets 不能用于 job 级 if 条件）",
+    "author": "zyi"
+  },
+  {
+    "hash": "52f5403",
+    "date": "2026-05-27T10:34:24+08:00",
+    "message": "feat: 商店新增海外账号注册和数字资源两个板块",
+    "author": "zyi"
+  },
+  {
+    "hash": "dac5b55",
+    "date": "2026-05-27T10:25:09+08:00",
+    "message": "feat: 调整商店商品价格，按官网美元价格加成定价",
+    "author": "zyi"
+  },
+  {
+    "hash": "3bebde2",
+    "date": "2026-05-27T10:17:41+08:00",
+    "message": "feat: 补全 AI 订阅档次 + 分组展示 + 修复 QR 码内联样式",
+    "author": "zyi"
+  },
+  {
+    "hash": "a2ac4f7",
+    "date": "2026-05-27T07:43:06+08:00",
+    "message": "refactor: AI 代充弹窗改为 2 步——教程+填写合并到第一步，第二步直接付款",
+    "author": "zyi"
+  },
+  {
+    "hash": "03d5942",
+    "date": "2026-05-27T07:36:06+08:00",
+    "message": "fix: 购物车底部按钮对比度——去结算改为深色背景，清空购物车加边框，列表背景区分",
+    "author": "zyi"
+  },
+  {
+    "hash": "220dfc9",
+    "date": "2026-05-27T07:33:19+08:00",
+    "message": "fix: 土耳其区代充流程修正——FAQ 说明需要提供密码，订单和剪贴板携带完整账号密码",
+    "author": "zyi"
+  },
+  {
+    "hash": "41417f6",
+    "date": "2026-05-27T07:22:35+08:00",
+    "message": "feat: 商店页 AI 代充三步引导弹窗 + Apple ID 服务 + 彩色 UI",
+    "author": "zyi"
+  },
+  {
+    "hash": "0cdd842",
+    "date": "2026-05-27T00:30:08+08:00",
+    "message": "feat: 将资源页改造为商店，新增购物车功能",
+    "author": "zyi"
+  },
+  {
+    "hash": "f88e14a",
+    "date": "2026-05-26T23:46:44+08:00",
+    "message": "feat: 资源页土耳其区 GPT Plus 特色卡片 + 词元 AI Claude 风格重设计",
+    "author": "zyi"
+  },
+  {
+    "hash": "6278514",
+    "date": "2026-05-25T22:27:58+08:00",
+    "message": "feat: 新增提示词库页面 /prompts",
+    "author": "zyi"
+  },
+  {
+    "hash": "949264b",
+    "date": "2026-05-25T21:37:16+08:00",
+    "message": "fix: 词元 AI 聊天窗口滚动抖动 + Markdown 标题过大 + emoji 输出",
+    "author": "zyi"
+  },
+  {
     "hash": "0222bd3",
     "date": "2026-05-25T20:59:19+08:00",
     "message": "feat: 新增算法练习题库 + 50 道题目数据",
@@ -513,90 +597,6 @@
     "hash": "d43d495",
     "date": "2026-02-15T03:48:21+08:00",
     "message": "Upgrade UI effects and verify APIs",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "748371f",
-    "date": "2026-02-15T03:48:01+08:00",
-    "message": "feat: overhaul ui and diary environment persistence",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "3428413",
-    "date": "2026-02-15T01:10:45+08:00",
-    "message": "Update blog UI palette",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "fa614da",
-    "date": "2026-02-10T22:59:13+08:00",
-    "message": "enhancement: 大幅提升日记功能体验",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "8975a2e",
-    "date": "2026-02-10T20:26:02+08:00",
-    "message": "fix: 修复Vercel部署问题，注释掉自定义distDir以适配Vercel默认配置",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "9e9363d",
-    "date": "2026-02-10T20:06:08+08:00",
-    "message": "fix: 全面修复项目功能完整性",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "4a7d49c",
-    "date": "2026-02-01T04:12:30+08:00",
-    "message": "feat: 添加数据导出备份功能和智能提醒系统",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "b714539",
-    "date": "2026-02-01T04:02:27+08:00",
-    "message": "fix: 修复日记保存功能，更新API路由配置",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "625bcc2",
-    "date": "2026-01-31T16:16:21+08:00",
-    "message": "fix: 修复TypeScript类型错误并完善日记功能",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "32fa158",
-    "date": "2026-01-31T15:53:05+08:00",
-    "message": "feat: 实现日记功能多项增强 - 智能标签、搜索过滤、模板系统、手写笔迹、多媒体增强",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "a5ce5df",
-    "date": "2026-01-31T04:56:46+08:00",
-    "message": "fix: 删除有问题的notebook-page.tsx文件以解决构建错误",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "9a38fcb",
-    "date": "2026-01-31T04:49:34+08:00",
-    "message": "trigger: 强制更新远程仓库",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "01a39cb",
-    "date": "2026-01-31T04:40:25+08:00",
-    "message": "feat: 完善日记功能和新闻收集系统",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "25033ef",
-    "date": "2026-01-30T16:08:51+08:00",
-    "message": "fix: 修复构建错误 - 为API路由添加静态导出配置",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "34f0bef",
-    "date": "2026-01-30T15:59:51+08:00",
-    "message": "feat: 完善日记功能 - 添加位置、温度、天气等环境信息自动获取",
     "author": "Lishiya"
   }
 ]

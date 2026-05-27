@@ -81,7 +81,10 @@
       "Bash(node -e \"const d=require\\('/Users/hk/blog/src/data/git-log.json'\\);console.log\\('条数:',d.length\\)\")",
       "Bash(gh repo *)",
       "WebFetch(domain:youmind.com)",
-      "Bash(gh run *)"
+      "Bash(gh run *)",
+      "Bash(gh api *)",
+      "Bash(python3 -c \"import sys,json; jobs=json.load\\(sys.stdin\\)['jobs']; [print\\(j['name'], j['conclusion'], j['id']\\) for j in jobs]\")",
+      "Bash(gh pr *)"
     ],
     "additionalDirectories": [
       "/tmp",
