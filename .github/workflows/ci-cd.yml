@@ -67,6 +67,12 @@ jobs:
       - name: Build application
         env:
           CI: true
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          JWT_SECRET: placeholder-jwt-secret-for-ci-build-only
+          ADMIN_EMAIL: ci@example.com
+          ADMIN_PASSWORD: placeholder
         run: npm run build
 
       - name: Upload build artifacts
