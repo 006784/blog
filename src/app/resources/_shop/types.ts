@@ -51,6 +51,20 @@ export interface DigitalItem {
   tags: string[];
 }
 
+export interface DigitalProduct {
+  id: string;
+  title: string;
+  description: string;
+  type: 'ebook' | 'video';
+  price: number;
+  original_price: number | null;
+  cover_url: string | null;
+  netdisk_type: 'baidu' | 'quark';
+  tags: string[];
+  sort_order: number;
+  created_at: string;
+}
+
 export interface CartItem {
   id: string;
   title: string;

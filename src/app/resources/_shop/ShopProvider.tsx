@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { payQrConfig } from './data';
 import type {
   ResourceProduct, AiRechargeService, CartItem,
-  PaymentMethod, ShopOrder, ShopNotice,
+  PaymentMethod, ShopOrder, ShopNotice, DigitalProduct,
 } from './types';
 
 // ── Context ──────────────────────────────────────────────────────────────────
@@ -29,6 +29,7 @@ import type {
 interface ShopContextValue {
   openCheckout: (product: ResourceProduct) => void;
   openAiFlow: (svc: AiRechargeService) => void;
+  openDigitalCheckout: (product: DigitalProduct) => void;
   addToCart: (id: string, title: string, price: number) => void;
   setCartOpen: (open: boolean) => void;
   cartCount: number;
@@ -75,6 +76,23 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     copied: boolean;
   } | null>(null);
 
+  // Digital checkout flow
+  const [digitalFlow, setDigitalFlow] = useState<{
+    product: DigitalProduct;
+    contact: string;
+    note: string;
+    paymentMethod: PaymentMethod;
+    submitting: boolean;
+    result: {
+      order: ShopOrder;
+      netdisk_type: string;
+      netdisk_url: string;
+      netdisk_password: string;
+    } | null;
+    linkCopied: boolean;
+    passCopied: boolean;
+  } | null>(null);
+
   // Notice
   const [notice, setNotice] = useState<ShopNotice | null>(null);
 
@@ -89,7 +107,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, [notice]);
 
   // Scroll lock + Escape
-  const hasModalOpen = Boolean(checkoutProduct || cartOpen || aiFlow);
+  const hasModalOpen = Boolean(checkoutProduct || cartOpen || aiFlow || digitalFlow);
   useEffect(() => {
     if (!hasModalOpen) return;
     const prev = document.body.style.overflow;
@@ -102,6 +120,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       e.preventDefault();
+      if (digitalFlow?.result) return;
+      if (digitalFlow) { setDigitalFlow(null); return; }
       if (aiFlow) { setAiFlow(null); return; }
       if (cartOpen) { setCartOpen(false); return; }
       if (checkoutProduct) { setCheckoutProduct(null); }
@@ -229,6 +249,65 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // ── Digital checkout helpers ──────────────────────────────────
+  const openDigitalCheckout = (product: DigitalProduct) => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    setDigitalFlow({
+      product, contact: '', note: '',
+      paymentMethod: 'wechat', submitting: false,
+      result: null, linkCopied: false, passCopied: false,
+    });
+  };
+
+  const submitDigitalOrder = async () => {
+    if (!digitalFlow) return;
+    if (!digitalFlow.contact.trim()) { pushNotice('error', '请先填写联系方式'); return; }
+    try {
+      setDigitalFlow(prev => prev ? { ...prev, submitting: true } : null);
+      const res = await fetch(`/api/shop/digital/${digitalFlow.product.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyerContact: digitalFlow.contact,
+          paymentMethod: digitalFlow.paymentMethod,
+          buyerNote: digitalFlow.note,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '创建订单失败');
+      setDigitalFlow(prev => prev ? {
+        ...prev, submitting: false,
+        result: {
+          order: data.order,
+          netdisk_type: data.netdisk_type,
+          netdisk_url: data.netdisk_url,
+          netdisk_password: data.netdisk_password,
+        },
+      } : null);
+    } catch (err) {
+      pushNotice('error', err instanceof Error ? err.message : '创建订单失败');
+      setDigitalFlow(prev => prev ? { ...prev, submitting: false } : null);
+    }
+  };
+
+  const copyDigitalLink = async () => {
+    if (!digitalFlow?.result) return;
+    try {
+      await navigator.clipboard.writeText(digitalFlow.result.netdisk_url);
+      setDigitalFlow(prev => prev ? { ...prev, linkCopied: true } : null);
+      window.setTimeout(() => setDigitalFlow(prev => prev ? { ...prev, linkCopied: false } : null), 2000);
+    } catch { pushNotice('error', '复制失败'); }
+  };
+
+  const copyDigitalPass = async () => {
+    if (!digitalFlow?.result) return;
+    try {
+      await navigator.clipboard.writeText(digitalFlow.result.netdisk_password);
+      setDigitalFlow(prev => prev ? { ...prev, passCopied: true } : null);
+      window.setTimeout(() => setDigitalFlow(prev => prev ? { ...prev, passCopied: false } : null), 2000);
+    } catch { pushNotice('error', '复制失败'); }
+  };
+
   const validateSessionToken = (token: string): { ok: boolean; msg: string } => {
     if (!token.trim()) return { ok: false, msg: '' };
     const t = token.trim();
@@ -306,8 +385,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   // ── Context value ─────────────────────────────────────────────
   const ctxValue: ShopContextValue = {
-    openCheckout, openAiFlow, addToCart,
-    setCartOpen, cartCount, pushNotice,
+    openCheckout, openAiFlow, openDigitalCheckout,
+    addToCart, setCartOpen, cartCount, pushNotice,
   };
 
   return (
@@ -481,6 +560,261 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                   </div>
                 </div>
               </div>
+            </div>
+          </motion.div>
+        </motion.div>,
+        document.body
+      ) : null}
+
+      {/* ── Digital checkout modal ── */}
+      {typeof document !== 'undefined' && digitalFlow ? createPortal(
+        <motion.div
+          variants={modalBackdropVariants}
+          initial="hidden"
+          animate="visible"
+          className="ios-modal-overlay fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pb-28 pt-6 sm:pb-6"
+          onPointerDown={(e) => { if (!digitalFlow.result && e.target === e.currentTarget) setDigitalFlow(null); }}
+        >
+          <motion.div
+            variants={modalPanelVariants}
+            className="surface-card ios-modal-card w-full max-w-lg overflow-hidden p-0"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-line bg-(--surface-raised) px-5 py-4">
+              <div>
+                <h3 className="text-base font-semibold text-ink">
+                  {digitalFlow.result ? '链接已获取' : '购买数字资源'}
+                </h3>
+                <p className="mt-0.5 text-xs text-ink-muted truncate max-w-xs">
+                  {digitalFlow.product.title}
+                </p>
+              </div>
+              {!digitalFlow.result && (
+                <button type="button" aria-label="关闭"
+                  onClick={() => setDigitalFlow(null)}
+                  className="rounded-lg p-2 text-ink-muted hover:bg-black/5 transition-colors">
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+
+            <div className="max-h-[75vh] overflow-y-auto">
+              {digitalFlow.result ? (
+                /* ─── Result: link revealed ─── */
+                <div className="space-y-4 p-5">
+                  <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+                    <div>
+                      <p className="text-sm font-semibold text-emerald-700">订单已创建</p>
+                      <p className="text-xs text-emerald-600">订单号：{digitalFlow.result.order.order_number}</p>
+                    </div>
+                  </div>
+
+                  {/* Netdisk type badge */}
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                      digitalFlow.result.netdisk_type === 'baidu'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-cyan-100 text-cyan-700'
+                    }`}>
+                      {digitalFlow.result.netdisk_type === 'baidu' ? '百度网盘' : '夸克网盘'}
+                    </span>
+                    <span className="text-xs text-ink-muted">· {digitalFlow.product.title}</span>
+                  </div>
+
+                  {/* Link */}
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">网盘链接</p>
+                    <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3 py-2.5">
+                      <a
+                        href={digitalFlow.result.netdisk_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-w-0 flex-1 truncate text-sm text-blue-600 underline underline-offset-2"
+                      >
+                        {digitalFlow.result.netdisk_url}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={copyDigitalLink}
+                        className="shrink-0 rounded-lg p-1.5 text-ink-muted hover:bg-black/5 transition-colors"
+                        aria-label="复制链接"
+                      >
+                        {digitalFlow.linkCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  {digitalFlow.result.netdisk_password && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">提取码</p>
+                      <div className="flex items-center gap-2 rounded-xl border border-line bg-(--surface-raised) px-3 py-2.5">
+                        <code className="flex-1 text-sm font-mono font-semibold text-ink tracking-widest">
+                          {digitalFlow.result.netdisk_password}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={copyDigitalPass}
+                          className="shrink-0 rounded-lg p-1.5 text-ink-muted hover:bg-black/5 transition-colors"
+                          aria-label="复制提取码"
+                        >
+                          {digitalFlow.passCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Payment reminder */}
+                  <div className="rounded-2xl border border-line bg-(--surface-raised) p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">请完成付款</p>
+                    <div className="flex items-center justify-center gap-4">
+                      {(['wechat', 'alipay'] as PaymentMethod[]).map((m) => (
+                        <button key={m} type="button"
+                          onClick={() => setDigitalFlow(prev => prev ? { ...prev, paymentMethod: m } : null)}
+                          className={`rounded-xl border px-4 py-2 text-xs font-medium transition ${
+                            digitalFlow.paymentMethod === m
+                              ? 'border-gold bg-gold/10 text-ink'
+                              : 'border-line text-ink-muted hover:text-ink'
+                          }`}>
+                          {m === 'wechat' ? '微信支付' : '支付宝'}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid place-items-center rounded-xl border border-dashed border-line bg-(--surface-overlay) py-4 px-3">
+                      {payQrConfig[digitalFlow.paymentMethod] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={payQrConfig[digitalFlow.paymentMethod]}
+                          alt={digitalFlow.paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
+                          className="h-36 w-36 rounded-xl bg-white object-contain shadow-(--shadow-sm)" />
+                      ) : (
+                        <div className="text-center">
+                          <QrCode className="mx-auto h-8 w-8 text-ink-muted" />
+                          <p className="mt-2 text-xs text-ink-muted">
+                            配置 {digitalFlow.paymentMethod === 'wechat' ? 'NEXT_PUBLIC_WECHAT_PAY_QR' : 'NEXT_PUBLIC_ALIPAY_PAY_QR'} 后显示
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs leading-5 text-ink-secondary">
+                      付款后请把订单号 <strong>{digitalFlow.result.order.order_number}</strong> 发给站长确认，谢谢支持。
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setDigitalFlow(null)}
+                    className="w-full rounded-xl bg-ink py-3 text-sm font-semibold text-paper transition-all hover:opacity-85"
+                  >
+                    完成
+                  </button>
+                </div>
+              ) : (
+                /* ─── Form: before purchase ─── */
+                <div className="space-y-4 p-5">
+                  {/* Product summary */}
+                  <div className="rounded-2xl border border-line bg-(--surface-raised) p-4 flex items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                        digitalFlow.product.type === 'ebook'
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-purple-100 text-purple-700'
+                      }`}>
+                        {digitalFlow.product.type === 'ebook' ? '电子书' : '影视资源'}
+                      </span>
+                      <h4 className="mt-2 text-base font-semibold text-ink leading-snug">
+                        {digitalFlow.product.title}
+                      </h4>
+                      <p className="mt-1 text-xs leading-5 text-ink-secondary line-clamp-2">
+                        {digitalFlow.product.description}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-2xl font-bold text-ink">¥{digitalFlow.product.price.toFixed(0)}</div>
+                      {digitalFlow.product.original_price && (
+                        <div className="text-xs text-ink-muted line-through">¥{digitalFlow.product.original_price}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Netdisk type */}
+                  <div className="flex items-center gap-2 text-xs text-ink-muted">
+                    <span className={`rounded-full px-2.5 py-1 font-semibold ${
+                      digitalFlow.product.netdisk_type === 'baidu'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-cyan-100 text-cyan-700'
+                    }`}>
+                      {digitalFlow.product.netdisk_type === 'baidu' ? '百度网盘' : '夸克网盘'}
+                    </span>
+                    <span>· 下单后立即获取直链</span>
+                  </div>
+
+                  {/* Contact */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-ink">
+                      联系方式 <span className="text-red-400">*</span>
+                    </label>
+                    <div className={`flex items-center gap-2 rounded-xl border px-3.5 py-2.5 transition-colors ${
+                      digitalFlow.contact.trim() ? 'border-emerald-400 bg-emerald-50/50' : 'border-line bg-(--surface-raised)'
+                    }`}>
+                      <Mail className="h-4 w-4 shrink-0 text-ink-muted" />
+                      <input
+                        value={digitalFlow.contact}
+                        onChange={(e) => setDigitalFlow(prev => prev ? { ...prev, contact: e.target.value } : null)}
+                        placeholder="邮箱 / 微信号 / Telegram"
+                        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted"
+                      />
+                      {digitalFlow.contact.trim() && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
+                    </div>
+                    <p className="text-xs text-ink-muted">用于发送订单确认，不用于其他用途。</p>
+                  </div>
+
+                  {/* Note */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-ink-secondary">备注（可选）</label>
+                    <textarea
+                      value={digitalFlow.note}
+                      onChange={(e) => setDigitalFlow(prev => prev ? { ...prev, note: e.target.value } : null)}
+                      placeholder="其他说明"
+                      rows={2}
+                      className="w-full resize-none rounded-xl border border-line bg-(--surface-raised) px-3.5 py-2.5 text-sm outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-gold"
+                    />
+                  </div>
+
+                  {/* Payment method */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-ink">支付方式</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['wechat', 'alipay'] as PaymentMethod[]).map((m) => (
+                        <button key={m} type="button"
+                          onClick={() => setDigitalFlow(prev => prev ? { ...prev, paymentMethod: m } : null)}
+                          className={`rounded-xl border py-2.5 text-sm font-medium transition ${
+                            digitalFlow.paymentMethod === m
+                              ? 'border-gold bg-gold/10 text-ink'
+                              : 'border-line bg-(--surface-raised) text-ink-muted hover:text-ink'
+                          }`}>
+                          {m === 'wechat' ? '微信支付' : '支付宝'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    type="button"
+                    onClick={submitDigitalOrder}
+                    disabled={digitalFlow.submitting}
+                    className={`w-full rounded-xl py-3 text-sm font-semibold text-paper transition-all ${
+                      digitalFlow.submitting ? 'bg-ink/50 cursor-not-allowed' : 'bg-ink hover:opacity-85 active:scale-[0.98]'
+                    }`}
+                  >
+                    {digitalFlow.submitting ? '处理中…' : '立即获取网盘链接'}
+                  </button>
+                  <p className="text-xs leading-5 text-ink-muted text-center">
+                    获取链接后请扫码完成付款，谢谢支持。
+                  </p>
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>,
