@@ -94,6 +94,7 @@ interface AiRechargeService {
 }
 
 const aiRechargeServices: AiRechargeService[] = [
+  // ── Featured ──────────────────────────────────────────────────
   {
     id: 'chatgpt-plus-turkey',
     service: 'chatgpt',
@@ -107,63 +108,112 @@ const aiRechargeServices: AiRechargeService[] = [
     credentialType: 'password',
     features: ['GPT-4o / o3 全模型', 'DALL·E 3 图像生成', '联网实时搜索', '自定义 GPTs', 'Projects 协作', '语音对话模式'],
   },
+  // ── ChatGPT ───────────────────────────────────────────────────
   {
     id: 'chatgpt-plus-turkey-ready',
     service: 'chatgpt',
     plan: 'ChatGPT Plus 土耳其区（成品号）',
-    desc: '由站长注册并激活土耳其区 Plus 的成品账号，付款后直接发送账号密码，即买即用。',
+    desc: '由站长注册并激活的土耳其区 Plus 成品账号，付款后直接发送账号密码，即买即用。',
     priceMonthly: 88,
-    priceNote: '买断式账号，拿到即有效',
-    badge: '即买即用',
+    priceNote: '5倍用量 · 土耳其区低价',
+    badge: '5倍用量',
     credentialType: 'none',
     isReadyMade: true,
-    features: ['完整账号 + 密码', 'GPT-4o / o3 全模型', 'DALL·E 3 / 联网', '自定义 GPTs', '不需要提供自己的账号'],
+    features: ['完整账号 + 密码', 'GPT-4o / o3 全模型', 'DALL·E 3 / 联网', '5倍用量', '不需要提供自己的账号'],
   },
   {
-    id: 'claude-pro',
-    service: 'claude',
-    plan: 'Claude Pro（代充）',
-    desc: '5× 更高用量，Claude Sonnet / Opus 完整访问，Projects 长上下文协作，提供 Session Token 代充。',
-    priceMonthly: 168,
-    priceNote: '约 $20/月，月付',
-    badge: '',
+    id: 'chatgpt-go',
+    service: 'chatgpt',
+    plan: 'ChatGPT Go（代充）',
+    desc: 'ChatGPT 入门订阅，支持 GPT-4o mini 等模型，适合轻度使用，Session Token 代充到自有账号。',
+    priceMonthly: 48,
+    priceNote: '约 $8/月，月付',
+    badge: '入门',
     credentialType: 'token',
-    features: ['Claude Sonnet/Opus 全模型', '5× 更高用量', 'Projects 协作', '优先访问新功能'],
-  },
-  {
-    id: 'claude-pro-ready',
-    service: 'claude',
-    plan: 'Claude Pro（成品号）',
-    desc: '站长注册并激活的 Claude Pro 成品账号，付款后直接收到账号密码，无需提供个人信息。',
-    priceMonthly: 188,
-    priceNote: '即买即用，含完整账号',
-    badge: '成品号',
-    credentialType: 'none',
-    isReadyMade: true,
-    features: ['完整账号 + 密码', 'Claude Sonnet/Opus', '5× 用量', '不需要提供自己的账号'],
+    features: ['GPT-4o mini', '基础功能完整', '轻量级订阅', '适合日常轻度使用'],
   },
   {
     id: 'chatgpt-plus',
     service: 'chatgpt',
     plan: 'ChatGPT Plus 美区（代充）',
-    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成。提供 Session Token，代充到自有账号。',
+    desc: 'GPT-4o + o3 推理模型，DALL·E 图像生成，5倍用量。Session Token 代充到自有账号。',
     priceMonthly: 168,
-    priceNote: '约 $20/月，月付',
-    badge: '',
+    priceNote: '5倍用量 · 约 $20/月',
+    badge: '5倍用量',
     credentialType: 'token',
-    features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '自定义 GPTs'],
+    features: ['GPT-4o / o3 全模型', 'DALL·E 生图', '联网搜索', '5倍用量 · 自定义 GPTs'],
+  },
+  {
+    id: 'chatgpt-plus-ready',
+    service: 'chatgpt',
+    plan: 'ChatGPT Plus 美区（成品号）',
+    desc: '站长注册的美区 ChatGPT Plus 成品账号，GPT-4o / o3 全模型，5倍用量，付款后直接收到账号密码。',
+    priceMonthly: 188,
+    priceNote: '5倍用量 · 即买即用',
+    badge: '成品号',
+    credentialType: 'none',
+    isReadyMade: true,
+    features: ['完整账号 + 密码', 'GPT-4o / o3 全模型', '5倍用量', '不需要提供自己的账号'],
+  },
+  {
+    id: 'chatgpt-pro',
+    service: 'chatgpt',
+    plan: 'ChatGPT Pro（代充）',
+    desc: '20倍用量，o1 / o3 高级推理无限制，Sora 视频生成，适合专业重度用户。Session Token 代充。',
+    priceMonthly: 1480,
+    priceNote: '20倍用量 · 约 $200/月',
+    badge: '20倍用量',
+    credentialType: 'token',
+    features: ['20倍超高用量', 'o1 / o3 高级推理', 'Sora 视频生成', '所有旗舰功能无限制'],
+  },
+  // ── Claude ────────────────────────────────────────────────────
+  {
+    id: 'claude-pro',
+    service: 'claude',
+    plan: 'Claude Pro（代充）',
+    desc: '5倍用量，Claude Sonnet / Opus 完整访问，Projects 长上下文协作，Session Token 代充到自有账号。',
+    priceMonthly: 168,
+    priceNote: '5倍用量 · 约 $20/月',
+    badge: '5倍用量',
+    credentialType: 'token',
+    features: ['Claude Sonnet/Opus 全模型', '5倍用量', 'Projects 协作', '优先访问新功能'],
+  },
+  {
+    id: 'claude-pro-ready',
+    service: 'claude',
+    plan: 'Claude Pro（成品号）',
+    desc: '站长注册并激活的 Claude Pro 成品账号，5倍用量，付款后直接收到账号密码，无需提供个人信息。',
+    priceMonthly: 188,
+    priceNote: '5倍用量 · 即买即用',
+    badge: '成品号',
+    credentialType: 'none',
+    isReadyMade: true,
+    features: ['完整账号 + 密码', 'Claude Sonnet/Opus', '5倍用量', '不需要提供自己的账号'],
   },
   {
     id: 'claude-max',
     service: 'claude',
     plan: 'Claude Max（代充）',
-    desc: '20× 或 40× 超高用量，适合重度用户和开发者，含 Claude 全系列旗舰模型。',
+    desc: '20倍超高用量，适合重度用户和开发者，含 Claude 全系列旗舰模型，Session Token 代充。',
     priceMonthly: 800,
-    priceNote: '约 $100/月，月付',
-    badge: '重度用户',
+    priceNote: '20倍用量 · 约 $100/月',
+    badge: '20倍用量',
     credentialType: 'token',
-    features: ['20× / 40× 超高用量', '全旗舰模型', '优先响应', '适合专业工作流'],
+    features: ['20倍超高用量', 'Claude 全旗舰模型', '优先响应', '适合专业工作流'],
   },
+  {
+    id: 'claude-max-ready',
+    service: 'claude',
+    plan: 'Claude Max（成品号）',
+    desc: '站长注册并激活的 Claude Max 成品账号，20倍超高用量，付款后直接发送账号密码，即买即用。',
+    priceMonthly: 900,
+    priceNote: '20倍用量 · 即买即用',
+    badge: '成品号',
+    credentialType: 'none',
+    isReadyMade: true,
+    features: ['完整账号 + 密码', 'Claude 全旗舰模型', '20倍用量', '不需要提供自己的账号'],
+  },
+  // ── Apple ─────────────────────────────────────────────────────
   {
     id: 'apple-id-us',
     service: 'apple',
@@ -1117,8 +1167,15 @@ export default function ResourcesPage() {
           </motion.div>
 
           {/* ── Secondary cards ── */}
-          <div className="grid gap-5 md:grid-cols-3">
-            {aiRechargeServices.filter((svc) => !svc.featured).map((svc, index) => (
+          {(['chatgpt', 'claude', 'apple'] as const).map((group) => {
+            const cards = aiRechargeServices.filter((svc) => !svc.featured && svc.service === group);
+            if (cards.length === 0) return null;
+            const groupLabel = group === 'chatgpt' ? 'ChatGPT' : group === 'claude' ? 'Claude' : 'Apple';
+            return (
+              <div key={group} className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">{groupLabel}</p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {cards.map((svc, index) => (
               <motion.article
                 key={svc.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -1182,8 +1239,11 @@ export default function ResourcesPage() {
                   </div>
                 </div>
               </motion.article>
-            ))}
-          </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </section>
 
         {/* 精选资料包 */}
@@ -1375,11 +1435,10 @@ export default function ResourcesPage() {
 
                       <div className="mt-4 grid min-h-56 place-items-center rounded-3xl border border-dashed border-(--border-default) bg-(--surface-overlay) p-5 text-center">
                         {payQrConfig[paymentMethod] ? (
-                          <div
-                            className="h-44 w-44 rounded-2xl bg-white bg-contain bg-center bg-no-repeat shadow-(--shadow-sm)"
-                            style={{ backgroundImage: `url(${payQrConfig[paymentMethod]})` }}
-                            role="img"
-                            aria-label={paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
+                          <img
+                            src={payQrConfig[paymentMethod]}
+                            alt={paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
+                            className="h-44 w-44 rounded-2xl bg-white object-contain shadow-(--shadow-sm)"
                           />
                         ) : (
                           <div>
