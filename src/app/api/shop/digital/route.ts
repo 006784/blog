@@ -23,8 +23,7 @@ export async function GET() {
 
 // POST /api/shop/digital — admin creates a product
 export async function POST(req: NextRequest) {
-  const authErr = await requireAdminSession(req);
-  if (authErr) return authErr;
+  if (!await requireAdminSession(req)) return NextResponse.json({ error: '未授权' }, { status: 401 });
 
   const body = await req.json();
   const { title, description, type, price, original_price, cover_url, netdisk_type, netdisk_url, netdisk_password, tags, sort_order } = body;

@@ -10,8 +10,7 @@ const supabaseAdmin = () =>
 
 // PUT /api/shop/digital/[id] — admin updates
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authErr = await requireAdminSession(req);
-  if (authErr) return authErr;
+  if (!await requireAdminSession(req)) return NextResponse.json({ error: '未授权' }, { status: 401 });
 
   const { id } = await params;
   const body = await req.json();
@@ -26,8 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 // DELETE /api/shop/digital/[id] — admin deletes (soft: set is_active=false)
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authErr = await requireAdminSession(req);
-  if (authErr) return authErr;
+  if (!await requireAdminSession(req)) return NextResponse.json({ error: '未授权' }, { status: 401 });
 
   const { id } = await params;
   const { error } = await supabaseAdmin()
