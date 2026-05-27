@@ -4,12 +4,12 @@ import { useState, useEffect, useRef, useCallback, useMemo, type DragEvent } fro
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FolderOpen, Upload, File, Image, Video, FileText, Package, Music,
+  Upload, File, Image, Video, FileText, Package, Music,
   Trash2, X, Minus,
-  Copy, Check, Shield, Settings, Plus, Edit2,
+  Copy, Check, Shield, Plus, Edit2,
   AlertCircle, CheckCircle2,
   Folder, Archive, Code, Database, Book, Link, Star, ShoppingBag,
-  QrCode, LockKeyhole, WalletCards, MessageCircle, Mail,
+  QrCode, LockKeyhole, MessageCircle, Mail,
   ChevronRight, ChevronDown, Clock,
 } from 'lucide-react';
 import { useAdmin } from '@/components/AdminProvider';
@@ -17,17 +17,13 @@ import {
   APPLE_EASE_SOFT,
   APPLE_SPRING_GENTLE,
   HOVER_BUTTON,
-  HOVER_LIFT,
   TAP_BUTTON,
   modalBackdropVariants,
   modalPanelVariants,
 } from '@/components/Animations';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Skeleton } from '@/components/ui/Skeleton';
-import { StatePanel } from '@/components/ui/StatePanel';
 import { Textarea } from '@/components/ui/Textarea';
 
 interface Resource {
@@ -459,7 +455,7 @@ export default function ResourcesPage() {
   const { isAdmin } = useAdmin();
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -682,31 +678,6 @@ export default function ResourcesPage() {
     } finally {
       setUploading(false);
       setUploadProgress(0);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个资源吗？此操作不可恢复！')) return;
-    
-    try {
-      const res = await fetch('/api/resources', {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        setResources(prev => prev.filter(r => r.id !== id));
-        pushNotice('success', '资源已删除。');
-      } else {
-        pushNotice('error', data.error || '删除失败');
-      }
-    } catch (error) {
-      console.error('Delete error:', error);
-      pushNotice('error', '删除失败，请稍后重试。');
     }
   };
 
@@ -1705,6 +1676,7 @@ export default function ResourcesPage() {
 
                       <div className="mt-4 grid min-h-56 place-items-center rounded-3xl border border-dashed border-(--border-default) bg-(--surface-overlay) p-5 text-center">
                         {payQrConfig[paymentMethod] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={payQrConfig[paymentMethod]}
                             alt={paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
@@ -2397,6 +2369,7 @@ export default function ResourcesPage() {
                   {/* 收款码 */}
                   <div className="grid min-h-48 place-items-center rounded-2xl border border-dashed border-line bg-(--surface-raised) p-4 text-center">
                     {payQrConfig[aiFlow.paymentMethod] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={payQrConfig[aiFlow.paymentMethod]}
                         alt={aiFlow.paymentMethod === 'wechat' ? '微信收款码' : '支付宝收款码'}
@@ -2452,7 +2425,7 @@ export default function ResourcesPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    const { service, email, sessionToken, tokenState, accountPassword } = aiFlow;
+                    const { service, email, tokenState, accountPassword } = aiFlow;
                     if (!email.trim()) { pushNotice('error', service.credentialType === 'none' ? '请填写联系方式' : '请填写账号邮箱'); return; }
                     if (service.credentialType === 'token' && tokenState !== 'valid') {
                       pushNotice('error', 'Session Token 格式不正确，请重新检查'); return;

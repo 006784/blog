@@ -987,7 +987,8 @@ function LinksTab() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load(); }, []);
 
   async function save(isNew: boolean) {
     const method = isNew ? 'POST' : 'PUT';
@@ -1039,7 +1040,8 @@ function LinksTab() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                {link.avatar && <img src={link.avatar} alt="" className="h-10 w-10 rounded-full object-cover" />}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+              {link.avatar && <img src={link.avatar} alt="" className="h-10 w-10 rounded-full object-cover" />}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{link.name}</span>
@@ -1212,6 +1214,7 @@ function MusicTab() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {song.cover_image ? <img src={song.cover_image} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" /> : <div className="h-10 w-10 rounded-lg bg-(--surface-overlay) flex items-center justify-center shrink-0"><Music2 className="h-4 w-4 text-muted-foreground" /></div>}
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm truncate">{song.title}</p>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Check, ChevronDown, Disc3, ExternalLink, Heart,
-  Loader2, Music2, Pause, Play, Plus, Trash2, X,
+  Loader2, Pause, Play, Plus, Trash2, X,
 } from 'lucide-react';
 import {
   type Song,

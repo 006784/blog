@@ -101,7 +101,6 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
 import { ArrowRight, BookOpenText, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
-import { LinkPreviewCard } from '@/components/LinkPreviewCard';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { Badge } from '@/components/ui/Badge';

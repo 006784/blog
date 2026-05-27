@@ -168,7 +168,7 @@ export function NovelReader({ novel }: { novel: Novel }) {
   useEffect(() => {
     let alive = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true); setFetchError(false); // eslint-disable-line react-hooks/set-state-in-effect
+    setLoading(true); setFetchError(false);
     fetch(novel.filePath)
       .then((r) => { if (!r.ok) throw new Error('fetch failed'); return r.text(); })
       .then((t) => { if (alive) setRawText(t); })
