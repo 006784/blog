@@ -38,6 +38,12 @@ export async function GET() {
       { url: '/diary',       priority: 0.5, changefreq: 'weekly'  },
       { url: '/guestbook',   priority: 0.5, changefreq: 'weekly'  },
       { url: '/now',         priority: 0.6, changefreq: 'weekly'  },
+      { url: '/briefing',    priority: 0.6, changefreq: 'daily'   },
+      { url: '/computer',    priority: 0.4, changefreq: 'monthly' },
+      { url: '/practice',    priority: 0.5, changefreq: 'weekly'  },
+      { url: '/code',        priority: 0.4, changefreq: 'monthly' },
+      { url: '/tools/ciyuan', priority: 0.4, changefreq: 'monthly' },
+      { url: '/prompts',     priority: 0.6, changefreq: 'weekly'  },
     ];
 
     const staticUrls = staticPages.map(

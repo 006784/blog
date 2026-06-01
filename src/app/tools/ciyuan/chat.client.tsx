@@ -21,6 +21,7 @@ import {
   Sparkles,
   PlugZap,
   Pencil,
+  FileDown,
 } from 'lucide-react';
 import type {
   CiyuanAuthMode,
@@ -926,6 +927,22 @@ export function CiyuanChat() {
     setActiveId(conversationId);
   }, [conversations, createConversationSnapshot, persistConversations]);
 
+  const exportConversation = useCallback(() => {
+    if (!activeConv || activeConv.messages.length === 0) return;
+    const lines: string[] = [`# ${activeConv.title}\n`];
+    for (const msg of activeConv.messages) {
+      const role = msg.role === 'user' ? '用户' : 'AI';
+      lines.push(`## ${role}\n\n${msg.content}\n`);
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeConv.title || '对话'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [activeConv]);
+
   const deleteConversation = useCallback((conversationId: string) => {
     const next = conversations.filter((conversation) => conversation.id !== conversationId);
     persistConversations(next);
@@ -1234,6 +1251,16 @@ export function CiyuanChat() {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            {activeConv && activeConv.messages.length > 0 && (
+              <button
+                type="button"
+                onClick={exportConversation}
+                className="p-1.5 rounded-lg hover:bg-paper-deep transition-colors text-muted-foreground"
+                title="导出为 Markdown"
+              >
+                <FileDown className="w-4 h-4" />
+              </button>
+            )}
             {activeConv && (
               <button
                 type="button"

@@ -38,6 +38,7 @@ import {
   X,
   BotMessageSquare,
   Lightbulb,
+  BarChart3,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import clsx from 'clsx';
@@ -79,7 +80,8 @@ const group3: NavItem[] = [
   { key: 'practice', href: '/practice',     icon: Code2,            label: '练习',  kana: '練' },
   { key: 'code',     href: '/code',         icon: Terminal,         label: '运行',  kana: '行' },
   { key: 'ciyuan',   href: '/tools/ciyuan', icon: BotMessageSquare, label: '词元',  kana: 'AI' },
-  { key: 'prompts',  href: '/prompts',      icon: Lightbulb,        label: '提示词', kana: '詞' },
+  { key: 'prompts',   href: '/prompts',    icon: Lightbulb,        label: '提示词',  kana: '詞' },
+  { key: 'dashboard', href: '/dashboard',  icon: BarChart3,        label: '看板',    kana: '計' },
 ];
 
 const group4: NavItem[] = [
