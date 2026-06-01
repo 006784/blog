@@ -374,7 +374,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
             {categoryLabel(post.category)}
           </Badge>
 
-          <h1 className="max-w-4xl text-3xl font-semibold leading-tight md:text-5xl">{post.title}</h1>
+          <h1 className="article-title max-w-4xl text-3xl font-semibold leading-tight md:text-5xl">{post.title}</h1>
 
           {post.description && (
             <p className="mt-4 max-w-3xl text-base text-muted-foreground md:text-lg">{post.description}</p>
@@ -444,7 +444,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         </div>
 
         <Card variant="elevated" className="mt-14 rounded-2xl md:p-8">
-          <h2 className="text-2xl font-semibold">评论区</h2>
+          <h2 className="article-section-title text-2xl font-semibold">评论区</h2>
           <p className="mt-2 text-sm text-muted-foreground">欢迎分享你的观点或补充你的实践经验。</p>
           <Comments />
         </Card>
@@ -452,7 +452,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         {relatedPosts.length > 0 && (
           <section className="mt-14">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">继续阅读</h2>
+              <h2 className="article-section-title text-2xl font-semibold">继续阅读</h2>
               <Link href="/blog">
                 <Button variant="link">查看全部</Button>
               </Link>
@@ -485,7 +485,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
                         <Badge variant="soft" className="text-[0.7rem]">
                           {categoryLabel(item.category)}
                         </Badge>
-                        <h3 className="mt-1 line-clamp-2 text-base font-semibold">{item.title}</h3>
+                        <h3 className="article-card-title mt-1 line-clamp-2 text-base font-semibold">{item.title}</h3>
                         <p className="mt-2 text-xs text-muted-foreground">{formatDate(itemDate)}</p>
                         <span className="mt-3 inline-flex items-center gap-1 text-sm text-primary">
                           阅读文章

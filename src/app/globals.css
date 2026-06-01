@@ -1387,18 +1387,31 @@ textarea:focus {
 }
 
 /* ============================================ */
-/* Blog Article Typography */
+/* Blog Article Typography — 日系杂志排版系统      */
 /* ============================================ */
 
 .article-content {
-  font-size: 1.0625rem;
-  line-height: 1.9;
+  max-width: none;
+  font-size: 1.075rem;
+  line-height: 1.85;
   color: var(--ink);
   font-family: var(--font-jp-serif), 'Noto Serif SC', 'Hiragino Mincho Pro', serif;
-  letter-spacing: 0.02em;
-  border-radius: 0 !important;
-  background: var(--paper, var(--card)) !important;
-  border-color: var(--line, var(--border)) !important;
+  letter-spacing: 0.012em;
+  border-radius: var(--radius-xl);
+  background: var(--paper, var(--card));
+  border-color: var(--line, var(--border));
+}
+
+/* 阅读栏宽：正文居中限宽，媒体（表格/代码/图片）适度加宽 */
+.article-content > * {
+  max-width: 44rem;
+  margin-inline: auto;
+}
+.article-content > .article-table-wrapper,
+.article-content > .article-pre-wrapper,
+.article-content > figure,
+.article-content > .block {
+  max-width: 48rem;
 }
 
 .article-content > *:first-child {
@@ -1406,102 +1419,175 @@ textarea:focus {
 }
 
 .article-content > * + * {
-  margin-top: 1.15rem;
+  margin-top: 1.45rem;
 }
 
 .article-content p {
-  color: var(--ink-secondary, color-mix(in srgb, var(--foreground) 88%, transparent));
+  margin: 0;
+  color: var(--ink-secondary, color-mix(in srgb, var(--foreground) 86%, transparent));
 }
 
 .article-content a {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--primary) 38%, transparent);
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
 
 .article-content a:hover {
   color: var(--gradient-end);
+  text-decoration-color: currentColor;
 }
 
-.article-h1,
-.article-h2,
-.article-h3,
-.article-h4 {
+/* 标题层级 */
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6 {
   scroll-margin-top: 88px;
   color: var(--ink);
   font-family: var(--font-mincho), 'Noto Serif SC', serif;
   font-weight: 700;
   letter-spacing: 0.01em;
+  border: none;
+  padding: 0;
 }
 
-.article-h1 {
-  margin-top: 2.4rem;
-  font-size: clamp(1.9rem, 3.8vw, 2.6rem);
-  line-height: 1.25;
+.article-content h1 {
+  margin-top: 2.6rem;
+  margin-bottom: 1rem;
+  font-size: clamp(1.8rem, 3.4vw, 2.3rem);
+  line-height: 1.28;
 }
 
-.article-h2 {
-  margin-top: 2rem;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  line-height: 1.3;
+.article-content h2 {
+  margin-top: 2.9rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.45rem;
+  font-size: clamp(1.4rem, 2.6vw, 1.7rem);
+  line-height: 1.34;
+  border-bottom: 1px solid var(--line, var(--border));
 }
 
-.article-h3 {
-  margin-top: 1.6rem;
-  font-size: clamp(1.25rem, 2.3vw, 1.5rem);
+.article-content h2::before {
+  content: "";
+  display: inline-block;
+  width: 0.52em;
+  height: 0.52em;
+  margin-right: 0.5em;
+  border-radius: 2px;
+  background: var(--gold);
+  transform: translateY(-0.08em);
 }
 
-.article-h4 {
-  margin-top: 1.3rem;
-  font-size: 1.1rem;
+.article-content h3 {
+  margin-top: 2.2rem;
+  margin-bottom: 0.7rem;
+  font-size: clamp(1.18rem, 2vw, 1.32rem);
+  line-height: 1.4;
+  color: var(--ink);
 }
 
+.article-content h4 {
+  margin-top: 1.7rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.06rem;
+  color: var(--ink-secondary);
+}
+
+/* 列表 */
 .article-content ul,
 .article-content ol {
-  margin: 1rem 0;
-  padding-left: 1.35rem;
+  margin: 0;
+  padding-left: 1.4rem;
 }
 
 .article-content ul {
-  list-style: disc;
+  list-style: none;
+  padding-left: 0.2rem;
+}
+
+.article-content ul > li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.article-content ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.1rem;
+  top: 0.72em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--gold);
 }
 
 .article-content ol {
   list-style: decimal;
 }
 
-.article-content li + li {
-  margin-top: 0.35rem;
+.article-content ol > li::marker {
+  color: var(--gold);
+  font-weight: 600;
 }
 
+.article-content li {
+  line-height: 1.78;
+}
+
+.article-content li + li {
+  margin-top: 0.45rem;
+}
+
+.article-content li > ul,
+.article-content li > ol {
+  margin-top: 0.45rem;
+}
+
+/* 引用块（中文不用斜体） */
 .article-content blockquote {
-  margin: 1.25rem 0;
+  margin: 0;
   border-left: 3px solid var(--gold);
-  padding: 0.8rem 1rem;
+  padding: 0.85rem 1.15rem;
   color: var(--ink-secondary);
   background: var(--surface-raised);
   border-radius: 0 10px 10px 0;
-  font-style: italic;
 }
 
+.article-content blockquote p {
+  color: inherit;
+}
+
+/* 表格 */
 .article-content table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  margin: 1.25rem 0;
+  font-size: 0.92rem;
+  margin: 0;
 }
 
 .article-content th {
-  padding: 0.6rem 0.9rem;
+  padding: 0.68rem 0.95rem;
   background: var(--surface-overlay);
-  font-weight: 600;
+  font-weight: 700;
   text-align: left;
+  color: var(--ink);
   border-bottom: 2px solid var(--border-strong);
 }
 
 .article-content td {
-  padding: 0.55rem 0.9rem;
+  padding: 0.62rem 0.95rem;
   border-bottom: 1px solid var(--border-default);
+  color: var(--ink-secondary);
+}
+
+.article-content tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--surface-raised) 50%, transparent);
 }
 
 .article-content tr:last-child td {
@@ -1513,15 +1599,18 @@ textarea:focus {
 }
 
 .article-inline-code {
-  border-radius: 8px;
-  padding: 0.15rem 0.45rem;
-  background: color-mix(in srgb, var(--secondary) 88%, transparent);
-  color: color-mix(in srgb, var(--foreground) 90%, transparent);
-  font-size: 0.92em;
+  border-radius: 6px;
+  padding: 0.12rem 0.42rem;
+  margin: 0 0.06em;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-default);
+  color: var(--color-primary-700);
+  font-size: 0.86em;
+  font-family: var(--font-mono);
 }
 
 .article-pre {
-  margin: 1.2rem 0;
+  margin: 0;
   overflow-x: auto;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
@@ -1540,15 +1629,17 @@ textarea:focus {
   border: 1px solid var(--border-default);
 }
 
+/* 装饰性分隔线：居中短虚线 */
 .article-content hr {
-  margin: 1.8rem 0;
+  margin: 2.8rem auto;
   border: none;
-  border-top: 1px solid var(--border-strong);
+  border-top: 2px dotted color-mix(in srgb, var(--gold) 55%, transparent);
+  width: 4rem;
 }
 
 .article-content strong {
-  color: var(--foreground);
-  font-weight: 650;
+  color: var(--ink);
+  font-weight: 700;
 }
 
 /* Article dark mode overrides */
@@ -1560,11 +1651,209 @@ textarea:focus {
   color: var(--color-primary-600);
 }
 
-.dark .article-h1,
-.dark .article-h2,
-.dark .article-h3,
-.dark .article-h4 {
+.dark .article-content h1,
+.dark .article-content h2,
+.dark .article-content h3,
+.dark .article-content h4 {
   color: var(--color-neutral-900);
+}
+
+.dark .article-inline-code {
+  color: var(--color-primary-500);
+}
+
+/* ── 文章排版精修：杂志级细节 ── */
+
+/* 选中高亮：金色调 */
+.article-content ::selection {
+  background: color-mix(in srgb, var(--gold) 26%, transparent);
+  color: var(--ink);
+}
+
+/* 标题断行更优雅，正文断行更自然 */
+.article-content h1,
+.article-content h2,
+.article-content h3 {
+  text-wrap: balance;
+}
+.article-content p,
+.article-content li {
+  text-wrap: pretty;
+}
+
+/* 首段导语：略大、墨色、更舒展 */
+.article-content > p:first-of-type {
+  font-size: 1.16em;
+  line-height: 1.95;
+  color: var(--ink);
+}
+
+/* h2 底线改为金色渐隐细线 */
+.article-content h2 {
+  border-bottom: none;
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--gold) 60%, transparent),
+    color-mix(in srgb, var(--gold) 12%, transparent) 55%,
+    transparent 80%
+  );
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 100% 1.5px;
+}
+
+/* 中文着重号：em 用着重号而非斜体 */
+.article-content em {
+  font-style: normal;
+  -webkit-text-emphasis: 0.4em filled var(--gold);
+  text-emphasis: 0.4em filled var(--gold);
+  -webkit-text-emphasis-position: under right;
+  text-emphasis-position: under right;
+}
+
+/* 引用块：装饰性引号 */
+.article-content blockquote {
+  position: relative;
+  padding-left: 2.5rem;
+}
+.article-content blockquote::before {
+  content: "\201C";
+  position: absolute;
+  left: 0.6rem;
+  top: 0.05rem;
+  font-family: var(--font-garamond), Georgia, serif;
+  font-size: 2.5rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--gold) 50%, transparent);
+}
+
+/* 标题悬停锚点提示（仅桌面，置于左侧留白） */
+.article-content h2,
+.article-content h3 {
+  position: relative;
+}
+@media (min-width: 1024px) {
+  .article-content h2:hover::after,
+  .article-content h3:hover::after {
+    content: "#";
+    position: absolute;
+    left: -1.3em;
+    top: 0;
+    color: color-mix(in srgb, var(--gold) 65%, transparent);
+    font-family: var(--font-garamond), Georgia, serif;
+    font-weight: 400;
+  }
+}
+
+/* 代码块：左侧金色细脊 */
+.article-pre-wrapper {
+  border-left: 2px solid color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+/* 图片：柔和投影 + 轻微悬浮 */
+.article-image {
+  box-shadow: 0 12px 32px -14px color-mix(in srgb, var(--ink) 30%, transparent);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.article-content > .block:hover .article-image {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--ink) 36%, transparent);
+}
+
+/* 文章页标题统一为衬线（明朝体），与正文气质一致 */
+.article-title {
+  font-family: var(--font-mincho), 'Noto Serif SC', serif;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.article-section-title {
+  font-family: var(--font-mincho), 'Noto Serif SC', serif;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  position: relative;
+  padding-left: 0.85rem;
+}
+.article-section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.18em;
+  bottom: 0.18em;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--gold);
+}
+
+.article-card-title {
+  font-family: var(--font-mincho), 'Noto Serif SC', serif;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+/* 文章排版：手机端适配 */
+@media (max-width: 640px) {
+  .article-content {
+    line-height: 1.8;
+    letter-spacing: 0;
+  }
+  .article-content > * {
+    max-width: 100%;
+  }
+  .article-content > * + * {
+    margin-top: 1.2rem;
+  }
+  .article-content > p:first-of-type {
+    font-size: 1.06em;
+    line-height: 1.85;
+  }
+
+  .article-content h1 {
+    margin-top: 1.9rem;
+    margin-bottom: 0.7rem;
+    font-size: 1.6rem;
+  }
+  .article-content h2 {
+    margin-top: 2rem;
+    margin-bottom: 0.85rem;
+    font-size: 1.3rem;
+    background-size: 100% 1px;
+  }
+  .article-content h3 {
+    margin-top: 1.6rem;
+    font-size: 1.15rem;
+  }
+  .article-content h4 {
+    margin-top: 1.3rem;
+  }
+
+  .article-content blockquote {
+    padding: 0.75rem 0.9rem 0.75rem 2.1rem;
+  }
+  .article-content blockquote::before {
+    font-size: 2.1rem;
+    left: 0.5rem;
+  }
+
+  /* 代码块在窄屏更紧凑 */
+  .article-pre-wrapper {
+    font-size: 0.82rem;
+    border-radius: var(--radius-md);
+  }
+  .article-pre-wrapper .article-pre {
+    padding: 0.9rem 1rem;
+  }
+  .article-pre-header {
+    padding: 0.25rem 0.6rem 0.25rem 0.8rem;
+  }
+
+  .article-table-wrapper table {
+    font-size: 0.85rem;
+  }
+  .article-content th,
+  .article-content td {
+    padding: 0.5rem 0.7rem;
+  }
 }
 
 /* Diary readability override */
@@ -6323,12 +6612,12 @@ textarea:focus {
 .ground-news-card-title {
   flex: 1;
   margin: 0;
-  font-family: "Iowan Old Style", "Source Han Serif SC", "Noto Serif SC", serif;
+  font-family: var(--font-mincho), "Source Han Serif SC", "Noto Serif SC", serif;
   font-size: clamp(1.26rem, 1.8vw, 1.68rem);
-  line-height: 1.12;
+  line-height: 1.18;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  color: #1b1611;
+  letter-spacing: 0.01em;
+  color: var(--ink);
 }
 
 .ground-news-card-title.is-featured {
