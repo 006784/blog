@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { PromptsClient } from './page.client';
-import promptsData from '@/data/prompts.json';
 
 export const metadata: Metadata = {
   title: '提示词库 · 拾光',
@@ -8,6 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function PromptsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <PromptsClient prompts={promptsData as any} />;
+  return <PromptsClient />;
 }

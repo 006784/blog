@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronUp, Star, Zap
 } from 'lucide-react';
 import { showToast } from '@/lib/toast';
+import promptsData from '@/data/prompts.json';
 
 // ── Types ─────────────────────────────────────────────────
 
@@ -24,9 +25,6 @@ interface Prompt {
   raycast: boolean;
 }
 
-interface Props {
-  prompts: Prompt[];
-}
 
 // ── Constants ─────────────────────────────────────────────
 
@@ -378,7 +376,8 @@ function PromptModal({ prompt, onClose }: { prompt: Prompt; onClose: () => void 
 
 // ── Main Component ────────────────────────────────────────
 
-export function PromptsClient({ prompts }: Props) {
+export function PromptsClient() {
+  const prompts = promptsData as Prompt[];
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
   const [selected, setSelected] = useState<Prompt | null>(null);

@@ -92,28 +92,12 @@ export default function RootLayout({
         {/* RSS */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} RSS`} href="/feed.xml" />
         
-        {/* 字体加载 */}
+        {/* 字体加载 — 合并为单次请求减少 RTT */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Plus Jakarta Sans — 现代无衬线，标题 + 正文主力 */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap"
           rel="stylesheet"
-        />
-        {/* Inter — UI 数字 / 英文辅助 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
-        />
-        {/* JetBrains Mono — 代码 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-        {/* Noto Serif SC — 中文衬线（古诗词 hero 标题） */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&display=swap"
-          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400&display=swap"
         />
       </head>
       <body className="app-body antialiased min-h-screen" suppressHydrationWarning>
