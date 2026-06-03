@@ -37,6 +37,12 @@ const envRemotePatterns = [
 const nextConfig: NextConfig = {
   // distDir: 'out',  // 注释掉自定义输出目录以适配Vercel
   trailingSlash: true,
+  // 生产构建移除 console.log（保留 error/warn 供 Sentry 与告警使用）
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production'
+      ? { exclude: ['error', 'warn'] }
+      : false,
+  },
   webpack: (config) => {
     // This repo runs in a tight local disk environment; disable filesystem cache
     // to avoid noisy ENOSPC warnings during production builds.

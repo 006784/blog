@@ -16,7 +16,7 @@ export default function GlobalError({
 
   return (
     <html lang="zh-CN">
-      <body style={{ margin: 0, fontFamily: 'system-ui, sans-serif', background: '#0a0a0a', color: '#e5e5e5' }}>
+      <body style={{ margin: 0, fontFamily: "'Noto Serif SC', serif", background: '#fff7f2', color: '#2d1e17' }}>
         <div style={{
           minHeight: '100vh',
           display: 'flex',
@@ -27,21 +27,20 @@ export default function GlobalError({
           padding: '24px',
           textAlign: 'center',
         }}>
-          <p style={{ fontSize: '3rem', margin: 0 }}>⚠️</p>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>页面出错了</h1>
-          <p style={{ margin: 0, color: '#a1a1aa', maxWidth: '400px', lineHeight: 1.6 }}>
-            应用遇到了一个意外错误，我们已收到通知并会尽快修复。
+          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>网站遇到了严重错误</h1>
+          <p style={{ margin: 0, color: '#6b4c3b', maxWidth: '400px', lineHeight: 1.7 }}>
+            应用遇到了一个意外错误，我们已收到通知并会尽快修复。请刷新重试。
           </p>
           {process.env.NODE_ENV === 'development' && (
             <pre style={{
-              background: '#18181b',
+              background: '#fdf0e7',
               padding: '12px 16px',
               borderRadius: '8px',
               fontSize: '0.75rem',
               textAlign: 'left',
               maxWidth: '600px',
               overflow: 'auto',
-              color: '#f87171',
+              color: '#b86443',
             }}>
               {error.message}
             </pre>
@@ -51,15 +50,15 @@ export default function GlobalError({
             style={{
               marginTop: '8px',
               padding: '10px 24px',
-              borderRadius: '12px',
+              borderRadius: '9999px',
               border: 'none',
-              background: '#14b8a6',
+              background: '#e99a69',
               color: '#fff',
               fontSize: '0.9rem',
               cursor: 'pointer',
             }}
           >
-            重新加载
+            刷新重试
           </button>
         </div>
       </body>

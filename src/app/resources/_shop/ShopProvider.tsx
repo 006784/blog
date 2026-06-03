@@ -128,7 +128,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [hasModalOpen, aiFlow, cartOpen, checkoutProduct]);
+  }, [hasModalOpen, aiFlow, cartOpen, checkoutProduct, digitalFlow]);
 
   // ── Cart helpers ──────────────────────────────────────────────
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
