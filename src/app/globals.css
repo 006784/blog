@@ -1662,6 +1662,188 @@ textarea:focus {
   color: var(--color-primary-500);
 }
 
+/* ── 每日简报正文排版（复用文章排版语言，更紧凑） ── */
+.briefing-content {
+  font-family: var(--font-jp-serif), 'Noto Serif SC', serif;
+  font-size: 0.98rem;
+  line-height: 1.85;
+  color: var(--ink-secondary, color-mix(in srgb, var(--foreground) 86%, transparent));
+}
+
+.briefing-content > * + * {
+  margin-top: 1rem;
+}
+
+.briefing-content h2 {
+  margin: 1.5rem 0 0.6rem;
+  font-family: var(--font-mincho), 'Noto Serif SC', serif;
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.briefing-content h2::before {
+  content: "";
+  flex: none;
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 2px;
+  background: var(--gold);
+  transform: translateY(-0.05em);
+}
+
+.briefing-content h3 {
+  margin: 1.2rem 0 0.5rem;
+  font-family: var(--font-mincho), 'Noto Serif SC', serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.briefing-content p {
+  margin: 0;
+}
+
+.briefing-content strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.briefing-content a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--gold) 40%, transparent);
+}
+
+.briefing-content a:hover {
+  text-decoration-color: currentColor;
+}
+
+.briefing-content ul,
+.briefing-content ol {
+  margin: 0.6rem 0;
+  padding-left: 0.2rem;
+  list-style: none;
+}
+
+.briefing-content ol {
+  counter-reset: bf;
+}
+
+.briefing-content li {
+  position: relative;
+  padding-left: 1.3rem;
+  line-height: 1.8;
+}
+
+.briefing-content li + li {
+  margin-top: 0.3rem;
+}
+
+.briefing-content ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.15rem;
+  top: 0.72em;
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.briefing-content ol > li {
+  counter-increment: bf;
+}
+
+.briefing-content ol > li::before {
+  content: counter(bf);
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
+.briefing-content blockquote {
+  margin: 0.8rem 0;
+  border-left: 3px solid var(--gold);
+  padding: 0.5rem 0.9rem;
+  background: var(--surface-raised);
+  border-radius: 0 8px 8px 0;
+  color: var(--ink-secondary);
+}
+
+.briefing-content code {
+  border-radius: 6px;
+  padding: 0.1rem 0.4rem;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-default);
+  color: var(--color-primary-700);
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+}
+
+.dark .briefing-content code {
+  color: var(--color-primary-500);
+}
+
+.briefing-content pre {
+  margin: 0.8rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background: color-mix(in srgb, var(--secondary) 65%, var(--background));
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.briefing-content pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--ink);
+}
+
+.briefing-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 0.8rem 0;
+}
+
+.briefing-content th {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-overlay);
+  font-weight: 700;
+  text-align: left;
+  color: var(--ink);
+  border-bottom: 2px solid var(--border-strong);
+}
+
+.briefing-content td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.dark .briefing-content h2,
+.dark .briefing-content h3,
+.dark .briefing-content strong {
+  color: var(--color-neutral-900);
+}
+
+.dark .briefing-content a {
+  color: var(--color-primary-500);
+}
+
 /* ── 文章排版精修：杂志级细节 ── */
 
 /* 选中高亮：金色调 */

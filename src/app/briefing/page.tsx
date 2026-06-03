@@ -314,8 +314,8 @@ function BriefingCard({
               className="overflow-hidden"
             >
               <div className="pt-4 mt-4 border-t border-(--border-default) space-y-4">
-                {/* Markdown 正文 */}
-                <div className="prose prose-sm max-w-none text-ink prose-headings:text-ink prose-strong:text-ink prose-a:text-gold">
+                {/* Markdown 正文 — 复用文章日系排版 */}
+                <div className="briefing-content">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{briefing.content}</ReactMarkdown>
                 </div>
 
