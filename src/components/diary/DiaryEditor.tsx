@@ -397,7 +397,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
   return (
     <div className="flex h-full flex-col">
       <div
-        className="flex flex-wrap items-center gap-4 border-b px-6 py-3"
+        className="flex flex-wrap items-center gap-2 md:gap-4 border-b px-3 md:px-6 py-2 md:py-3 overflow-x-auto"
         style={{ borderColor: 'var(--d-border)', background: 'var(--d-bg)' }}
       >
         <span
@@ -495,7 +495,7 @@ export function DiaryEditor({ theme, onThemeChange, date, initial, onSaved }: Pr
         </div>
       ) : null}
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
         <input
           value={title}
           onChange={(event) => setTitle(event.target.value)}

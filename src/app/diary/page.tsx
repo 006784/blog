@@ -240,33 +240,43 @@ export default function DiaryPage() {
       >
         {/* ── Top nav ───────────────────────────────────────── */}
         <nav
-          className="flex items-center gap-0 border-b px-6 py-0 flex-none"
+          className="flex items-center gap-0 border-b px-3 md:px-6 py-0 flex-none"
           style={{ borderColor: 'var(--d-border)', height: 40 }}
         >
           {/* Logo */}
           <span
-            className="text-sm mr-6"
+            className="text-sm mr-3 md:mr-6"
             style={{ fontFamily: 'var(--d-font-title)', color: 'var(--d-ink)', letterSpacing: '.2em' }}
           >
             日記
           </span>
 
-          {/* View tabs */}
-          {(Object.keys(VIEW_LABELS) as View[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className="px-4 h-full text-xs relative transition-colors"
-              style={{
-                color: view === v ? 'var(--d-ink)' : 'var(--d-ink-3)',
-                fontFamily: 'var(--d-font-title)',
-                letterSpacing: '.15em',
-                borderBottom: view === v ? '1px solid var(--d-accent)' : '1px solid transparent',
-              }}
-            >
-              {VIEW_LABELS[v]}
-            </button>
-          ))}
+          {/* View tabs — desktop only（手机端用底部导航）*/}
+          <div className="hidden md:flex h-full">
+            {(Object.keys(VIEW_LABELS) as View[]).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className="px-4 h-full text-xs relative transition-colors"
+                style={{
+                  color: view === v ? 'var(--d-ink)' : 'var(--d-ink-3)',
+                  fontFamily: 'var(--d-font-title)',
+                  letterSpacing: '.15em',
+                  borderBottom: view === v ? '1px solid var(--d-accent)' : '1px solid transparent',
+                }}
+              >
+                {VIEW_LABELS[v]}
+              </button>
+            ))}
+          </div>
+
+          {/* Mobile: current view label */}
+          <span
+            className="md:hidden text-xs"
+            style={{ color: 'var(--d-ink-2)', fontFamily: 'var(--d-font-title)', letterSpacing: '.15em' }}
+          >
+            {VIEW_LABELS[view]}
+          </span>
 
           <div className="flex-1" />
 
@@ -282,23 +292,23 @@ export default function DiaryPage() {
           {view === 'editor' && (
             <button
               onClick={() => handleCreateDiary(selectedDate)}
-              className="text-[10px] transition-opacity hover:opacity-60 ml-4"
+              className="text-[10px] transition-opacity hover:opacity-60 ml-3"
               style={{ color: 'var(--d-accent)', letterSpacing: '.1em' }}
             >
-              同日新篇
+              新篇
             </button>
           )}
 
           {/* Year nav */}
-          <div className="flex items-center gap-1 ml-4">
-            <button onClick={() => setCalYear((y) => y - 1)} className="text-sm" style={{ color: 'var(--d-ink-3)' }}>‹</button>
+          <div className="flex items-center gap-1 ml-3">
+            <button onClick={() => setCalYear((y) => y - 1)} className="text-sm px-1" style={{ color: 'var(--d-ink-3)' }}>‹</button>
             <span className="text-xs" style={{ color: 'var(--d-ink-2)', fontFamily: 'var(--d-font-title)' }}>{calYear}</span>
-            <button onClick={() => setCalYear((y) => y + 1)} className="text-sm" style={{ color: 'var(--d-ink-3)' }}>›</button>
+            <button onClick={() => setCalYear((y) => y + 1)} className="text-sm px-1" style={{ color: 'var(--d-ink-3)' }}>›</button>
           </div>
         </nav>
 
         {/* ── Main content ──────────────────────────────────── */}
-        <div className="flex flex-1 overflow-hidden" style={{ minHeight: 'calc(100vh - 80px)' }}>
+        <div className="flex flex-1 overflow-hidden" style={{ minHeight: 'calc(100dvh - 80px)' }}>
 
           {/* Left calendar column (non-washi themes) */}
           {theme !== 'washi' && (
@@ -321,7 +331,7 @@ export default function DiaryPage() {
           )}
 
           {/* Main view */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pb-14 md:pb-0">
             <AnimatePresence mode="wait">
               {loading && (
                 <motion.div

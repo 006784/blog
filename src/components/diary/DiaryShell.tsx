@@ -66,9 +66,9 @@ export function DiaryShell({ theme, children, date, pageNumber, leftSlot, epigra
         className="diary-shell relative flex min-h-screen"
         style={{ background: 'var(--d-bg)', border: '3px solid #c8a96e', transition: 'background-color .4s,color .4s,border-color .4s' }}
       >
-        {/* Book spine with spiral rings */}
+        {/* Book spine with spiral rings — hidden on mobile */}
         <div
-          className="flex-none flex flex-col items-center py-8 gap-6"
+          className="hidden md:flex flex-none flex-col items-center py-8 gap-6"
           style={{ width: 28, background: 'var(--d-spine)', flexShrink: 0 }}
         >
           {Array.from({ length: 6 }).map((_, i) => (
@@ -146,9 +146,9 @@ export function DiaryShell({ theme, children, date, pageNumber, leftSlot, epigra
         {/* Gold corner borders */}
         <div className="pointer-events-none absolute inset-[10px] border" style={{ borderColor: 'var(--d-border)', zIndex: 0 }} />
 
-        {/* Book spine */}
+        {/* Book spine — hidden on mobile */}
         <div
-          className="flex-none flex flex-col items-center justify-center py-8 relative z-10"
+          className="hidden md:flex flex-none flex-col items-center justify-center py-8 relative z-10"
           style={{ width: 40, background: 'var(--d-spine)' }}
         >
           <span
