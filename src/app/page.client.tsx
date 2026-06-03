@@ -100,7 +100,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
-import { ArrowRight, BookOpenText, CalendarDays, Clock3, ExternalLink, Search } from 'lucide-react';
+import { ArrowRight, BookOpenText, CalendarDays, CheckCircle2, Clock3, ExternalLink, Heart, Search, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { Badge } from '@/components/ui/Badge';
@@ -856,6 +856,9 @@ export default function HomePageClient({
         {/* ── 每日简报预览 ── */}
         <TodayBriefingSection />
 
+        {/* ── Claude 每日动态 ── */}
+        <ClaudeStatusSection />
+
         <section className="atelier-subscribe-section">
           <div className="atelier-shell">
             <div className="atelier-subscribe-card">
@@ -1003,6 +1006,100 @@ function TodayBriefingSection() {
           >
             查看全部简报 <ArrowRight className="h-3 w-3" />
           </Link>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+// ── Claude 每日动态 ──────────────────────────────────────────────────
+interface ClaudeStatus {
+  id: string; date: string; mood: string; thoughts: string; tasks: string[];
+}
+
+function ClaudeStatusSection() {
+  const [status, setStatus] = useState<ClaudeStatus | null | undefined>(undefined);
+
+  useEffect(() => {
+    fetch('/api/claude-status')
+      .then((r) => r.json())
+      .then((d: { status: ClaudeStatus | null }) => setStatus(d.status))
+      .catch(() => setStatus(null));
+  }, []);
+
+  if (status === null) return null; // 没有任何动态时不显示
+
+  function formatDate(s: string) {
+    return new Date(s + 'T00:00:00').toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+  }
+
+  return (
+    <section className="atelier-shell pb-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="rounded-2xl overflow-hidden shadow-(--neu-shadow-sm) border border-(--border-default) border-l-4 border-l-violet-500"
+        style={{ background: 'color-mix(in srgb, var(--surface-raised) 91%, #8b5cf6 9%)' }}
+      >
+        {/* 头部 */}
+        <div
+          className="flex items-center justify-between gap-4 px-5 sm:px-6 py-3 border-b border-(--border-default)"
+          style={{ background: 'color-mix(in srgb, var(--surface-raised) 82%, #8b5cf6 18%)' }}
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+            <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-medium">Claude · 今日动态</span>
+          </div>
+          {status && (
+            <span className="text-xs text-ink-ghost">{formatDate(status.date)}</span>
+          )}
+        </div>
+
+        {/* 内容 */}
+        <div className="px-5 sm:px-6 pt-5 pb-5">
+          {status === undefined ? (
+            <div className="space-y-3 py-1">
+              <div className="h-4 rounded bg-(--surface-overlay) animate-pulse w-1/2" />
+              <div className="h-3.5 rounded bg-(--surface-overlay) animate-pulse w-full" />
+              <div className="h-3.5 rounded bg-(--surface-overlay) animate-pulse w-4/5" />
+            </div>
+          ) : (
+            <>
+              {/* 心情 */}
+              <div className="flex items-start gap-2">
+                <Heart className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
+                <p className="text-sm text-ink leading-7">
+                  <span className="text-ink-muted">今天的心情：</span>{status.mood}
+                </p>
+              </div>
+
+              {/* 完成的任务 */}
+              {status.tasks.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs uppercase tracking-widest text-ink-ghost mb-2">今天完成了</p>
+                  <ul className="space-y-1.5">
+                    {status.tasks.map((t, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-ink-secondary leading-6">
+                        <CheckCircle2 className="h-4 w-4 text-violet-500/80 shrink-0 mt-0.5" />
+                        <span>{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* 对主人的看法 */}
+              {status.thoughts && (
+                <blockquote
+                  className="mt-4 rounded-r-lg border-l-2 border-violet-400 pl-3 py-1 text-sm leading-7 text-ink-secondary"
+                  style={{ background: 'color-mix(in srgb, var(--surface-raised) 60%, #8b5cf6 6%)' }}
+                >
+                  {status.thoughts}
+                </blockquote>
+              )}
+            </>
+          )}
         </div>
       </motion.div>
     </section>
