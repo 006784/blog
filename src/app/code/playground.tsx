@@ -213,7 +213,7 @@ echo "反转: " . strrev($text) . "\\n";
     body {
       font-family: -apple-system, 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
