@@ -46,6 +46,7 @@ import { siteConfig } from '@/lib/site-config';
 import { AISummary } from '@/components/AISummary';
 import { LinkPreviewCard } from '@/components/LinkPreviewCard';
 import { DonateButton } from '@/components/DonateButton';
+import { getInteractive } from '@/components/interactive/registry';
 
 interface BlogPostPageClientProps {
   slug: string;
@@ -240,6 +241,28 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         {children}
       </a>
     ),
+    pre: ({ children }) => {
+      // 拦截 ```interactive:<key>，渲染为交互组件（脱离 <pre>，避免非法嵌套）
+      if (isValidElement<{ className?: string }>(children)) {
+        const childClass = children.props.className ?? '';
+        const m = /language-interactive:([\w-]+)/.exec(childClass);
+        if (m) {
+          const Comp = getInteractive(m[1]);
+          if (Comp) {
+            return (
+              <div className="article-interactive">
+                <Comp />
+              </div>
+            );
+          }
+          return (
+            <div className="interactive-loading">未知的交互组件：{m[1]}</div>
+          );
+        }
+      }
+      // 普通代码块：直接透传 children，由 code 渲染器返回的 CodeBlock 自带 <pre>
+      return <>{children}</>;
+    },
     code: ({ className, children, ...props }) => {
       const code = String(children).replace(/\n$/, '');
 
@@ -252,6 +275,11 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
       }
 
       const lang = className.replace('language-', '');
+
+      // interactive 标签在 pre 渲染器里已处理；这里跳过，避免渲染成代码
+      if (lang.startsWith('interactive:')) {
+        return null;
+      }
       const grammar = Prism.languages[lang];
       const highlighted = grammar
         ? Prism.highlight(code, grammar, lang)

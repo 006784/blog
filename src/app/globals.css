@@ -1662,6 +1662,167 @@ textarea:focus {
   color: var(--color-primary-500);
 }
 
+/* ── 文章内嵌交互组件 ── */
+.article-interactive {
+  margin: 1.8rem 0;
+}
+.interactive-loading {
+  margin: 1.8rem 0;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border-default);
+  border-radius: 14px;
+  background: var(--surface-raised);
+}
+
+/* JWT 解码器 */
+.jwt-decoder {
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  padding: 1.1rem 1.2rem 1.3rem;
+  font-family: var(--font-jp-serif), 'Noto Serif SC', serif;
+}
+.jwt-decoder__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.98rem;
+}
+.jwt-decoder__head svg { color: var(--gold); }
+.jwt-decoder__hint {
+  font-weight: 400;
+  font-size: 0.76rem;
+  color: var(--ink-ghost);
+  margin-left: auto;
+}
+.jwt-decoder__input {
+  width: 100%;
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-base);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  resize: vertical;
+  word-break: break-all;
+}
+.jwt-decoder__input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+.jwt-decoder__colored {
+  margin-top: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: var(--surface-base);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  word-break: break-all;
+  border: 1px solid var(--border-default);
+}
+.jwt-seg { border-radius: 3px; padding: 0 1px; }
+.jwt-seg--header  { color: #c0392b; background: color-mix(in srgb, #c0392b 12%, transparent); }
+.jwt-seg--payload { color: #8e44ad; background: color-mix(in srgb, #8e44ad 12%, transparent); }
+.jwt-seg--sig     { color: #2563eb; background: color-mix(in srgb, #2563eb 12%, transparent); }
+.dark .jwt-seg--header  { color: #ff8a80; }
+.dark .jwt-seg--payload { color: #d8a8ff; }
+.dark .jwt-seg--sig     { color: #93c5fd; }
+.jwt-dot { color: var(--ink-ghost); }
+.jwt-decoder__error {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, #c0392b 8%, var(--surface-base));
+  border: 1px solid color-mix(in srgb, #c0392b 25%, transparent);
+  color: var(--ink-secondary);
+  font-size: 0.85rem;
+}
+.jwt-decoder__grid {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+@media (max-width: 640px) {
+  .jwt-decoder__grid { grid-template-columns: 1fr; }
+  .jwt-decoder__hint { display: none; }
+}
+.jwt-decoder__panel {
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  background: var(--surface-base);
+  border: 1px solid var(--border-default);
+  border-top: 3px solid var(--border-default);
+  min-width: 0;
+}
+.jwt-decoder__panel--header  { border-top-color: #c0392b; }
+.jwt-decoder__panel--payload { border-top-color: #8e44ad; }
+.jwt-decoder__panel--sig     { border-top-color: #2563eb; }
+.jwt-decoder__label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  margin-bottom: 0.4rem;
+}
+.jwt-decoder__panel pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.jwt-decoder__sig-note {
+  font-size: 0.76rem;
+  line-height: 1.7;
+  color: var(--ink-secondary);
+}
+.jwt-decoder__claims {
+  margin-top: 0.9rem;
+}
+.jwt-decoder__claims table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.jwt-decoder__claims td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border-default);
+  vertical-align: top;
+}
+.jwt-claim-key {
+  font-family: var(--font-mono);
+  color: var(--color-primary-700);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dark .jwt-claim-key { color: var(--color-primary-500); }
+.jwt-claim-val {
+  font-family: var(--font-mono);
+  color: var(--ink);
+  word-break: break-all;
+}
+.jwt-claim-ts { color: var(--ink-ghost); }
+.jwt-claim-desc {
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
 /* ── 每日简报正文排版（复用文章排版语言，更紧凑） ── */
 .briefing-content {
   font-family: var(--font-jp-serif), 'Noto Serif SC', serif;
