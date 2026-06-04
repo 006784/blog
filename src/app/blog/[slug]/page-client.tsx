@@ -243,20 +243,24 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
     ),
     pre: ({ children }) => {
       // 拦截 ```interactive:<key>，渲染为交互组件（脱离 <pre>，避免非法嵌套）
-      if (isValidElement<{ className?: string }>(children)) {
+      if (isValidElement<{ className?: string; children?: ReactNode }>(children)) {
         const childClass = children.props.className ?? '';
         const m = /language-interactive:([\w-]+)/.exec(childClass);
         if (m) {
           const Comp = getInteractive(m[1]);
-          if (Comp) {
-            return (
-              <div className="article-interactive">
-                <Comp />
-              </div>
-            );
+          if (!Comp) {
+            return <div className="interactive-loading">未知的交互组件：{m[1]}</div>;
+          }
+          // 代码块内容若是 JSON，解析为组件 props（用于同一组件多处复用、预填不同示例）
+          let compProps: Record<string, unknown> = {};
+          const body = getTextContent(children.props.children).trim();
+          if (body) {
+            try { compProps = JSON.parse(body) as Record<string, unknown>; } catch { /* 忽略非法 JSON */ }
           }
           return (
-            <div className="interactive-loading">未知的交互组件：{m[1]}</div>
+            <div className="article-interactive">
+              <Comp {...compProps} />
+            </div>
           );
         }
       }
