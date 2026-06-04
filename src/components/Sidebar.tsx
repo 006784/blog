@@ -131,18 +131,22 @@ function RailBtn({
   isCurrentPage,
   isPanelOpen,
   onClick,
+  onHover,
 }: {
   item: NavItem;
   isCurrentPage: boolean;
   isPanelOpen: boolean;
   onClick: () => void;
+  onHover: () => void;
 }) {
   return (
     <button
       onClick={onClick}
+      onMouseEnter={onHover}
+      onFocus={onHover}
       className={clsx(
         'rail-btn',
-        isCurrentPage && !isPanelOpen && 'active',
+        isCurrentPage && 'active',
         isPanelOpen && 'panel-open'
       )}
       aria-label={item.label}
@@ -217,21 +221,21 @@ export function Sidebar() {
     );
   }, [panelOpen]);
 
+  // 点击图标：直接跳转（hover 负责展开面板，点击不再切换面板）
   const handleIconClick = (item: NavItem) => {
-    const isCurrentPage = itemActive(pathname, item.href);
-
-    if (isCurrentPage && activeIcon === item.key && panelOpen) {
-      setPanelOpen(false);
-      return;
-    }
-
-    setPanelIcon(item.key);
-    setPanelOpen(true);
-
-    if (!isCurrentPage) {
+    if (!itemActive(pathname, item.href)) {
       router.push(item.href);
     }
   };
+
+  // hover 图标：展开面板并显示该图标所在分组
+  const handleIconHover = (item: NavItem) => {
+    setPanelIcon(item.key);
+    setPanelOpen(true);
+  };
+
+  // 鼠标离开整个 rail+panel 区域：收起面板
+  const handleRailLeave = () => setPanelOpen(false);
 
   const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   const visibleTheme = themeReady ? resolvedTheme : null;
@@ -248,6 +252,7 @@ export function Sidebar() {
       {/* ══ Desktop: Rail + Panel ══════════════════════════ */}
       <div
         className="hidden md:flex"
+        onMouseLeave={handleRailLeave}
         style={{
           position: 'fixed',
           left: 0,
@@ -318,6 +323,7 @@ export function Sidebar() {
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
                 onClick={() => handleIconClick(item)}
+                onHover={() => handleIconHover(item)}
               />
             ))}
 
@@ -330,6 +336,7 @@ export function Sidebar() {
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
                 onClick={() => handleIconClick(item)}
+                onHover={() => handleIconHover(item)}
               />
             ))}
 
@@ -342,6 +349,7 @@ export function Sidebar() {
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
                 onClick={() => handleIconClick(item)}
+                onHover={() => handleIconHover(item)}
               />
             ))}
 
@@ -354,6 +362,7 @@ export function Sidebar() {
                 isCurrentPage={itemActive(pathname, item.href)}
                 isPanelOpen={activeIcon === item.key && panelOpen}
                 onClick={() => handleIconClick(item)}
+                onHover={() => handleIconHover(item)}
               />
             ))}
           </div>
@@ -801,6 +810,7 @@ export function Sidebar() {
                 { title: '探索', items: group2 },
                 { title: '工具', items: group3 },
                 { title: '站点', items: group4 },
+                { title: '更多', items: groupMore },
               ].map((g, gi) => (
                 <div key={g.title}>
                   {gi > 0 && <div style={{ height: 1, background: 'var(--line)', margin: '8px 28px' }} />}
