@@ -159,17 +159,7 @@ function RailBtn({
 
 // ── Rail divider ──────────────────────────────────────────
 function RailDivider() {
-  return (
-    <div
-      style={{
-        width: 20,
-        height: 1,
-        background: 'var(--line)',
-        margin: '8px 0',
-        flexShrink: 0,
-      }}
-    />
-  );
+  return <div className="sb-divider" />;
 }
 
 // ── Main Sidebar ──────────────────────────────────────────
@@ -251,71 +241,22 @@ export function Sidebar() {
     <>
       {/* ══ Desktop: Rail + Panel ══════════════════════════ */}
       <div
-        className="hidden md:flex"
+        className="hidden md:flex sb-desktop"
         onMouseLeave={handleRailLeave}
-        style={{
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          height: '100dvh',
-          zIndex: 40,
-        }}
       >
         {/* ── Rail (52px) ─────────────────────────────── */}
-        <div
-          style={{
-            width: 52,
-            minWidth: 52,
-            background: 'linear-gradient(180deg, var(--surface-base) 0%, var(--surface-raised) 100%)',
-            borderRight: '1px solid var(--line)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
+        <div className="sb-rail">
           {/* Logo */}
-          <div
-            style={{
-              width: '100%',
-              borderBottom: '1px solid var(--line)',
-              padding: '18px 0 16px',
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
+          <div className="sb-logo">
             <Link href="/" style={{ display: 'block' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mincho)',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: 'var(--ink)',
-                  writingMode: 'vertical-rl',
-                  letterSpacing: '0.15em',
-                  lineHeight: 1,
-                }}
-              >
+              <span className="sb-logo-text">
                 Lumen
               </span>
             </Link>
           </div>
 
           {/* Nav icons */}
-          <div
-            className="custom-scrollbar"
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              paddingTop: 10,
-              paddingBottom: 8,
-              gap: 2,
-            }}
-          >
+          <div className="custom-scrollbar sb-nav">
             {group1.map(item => (
               <RailBtn
                 key={item.key}
@@ -369,37 +310,14 @@ export function Sidebar() {
 
           {/* Rail bottom: avatar + theme */}
           <div
-            style={{
-              width: '100%',
-              borderTop: '1px solid var(--line)',
-              padding: '12px 0',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 10,
-            }}
+            className="sb-rail-bottom"
           >
             {/* Avatar */}
             <button
               type="button"
               onClick={() => router.push(profileHref)}
-              title={isAdmin ? '个人资料' : '关于我'}
               aria-label={isAdmin ? '个人资料' : '关于我'}
-              className="rail-btn rail-avatar-btn"
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: '50%',
-                background: 'var(--surface-panel)',
-                border: '1px solid var(--border-default)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                flexShrink: 0,
-                padding: 0,
-                boxShadow: 'var(--shadow-xs)',
-              }}
+              className="rail-btn rail-avatar-btn sb-avatar-btn"
             >
               {profile.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -408,16 +326,9 @@ export function Sidebar() {
                   alt={profileLabel}
                   width={30}
                   height={30}
-                  style={{ width: 30, height: 30, objectFit: 'cover' }}
                 />
               ) : (
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mincho)',
-                    fontSize: 9,
-                    color: 'var(--ink-secondary)',
-                  }}
-                >
+                <span className="sb-avatar-fallback">
                   {profileLabel.charAt(0)}
                 </span>
               )}
@@ -431,8 +342,7 @@ export function Sidebar() {
                   new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
                 )
               }
-              className="rail-btn"
-              style={{ width: 30, height: 30 }}
+              className="rail-btn sb-rail-mini"
               aria-label="搜索"
             >
               <Search style={{ width: 14, height: 14 }} strokeWidth={1.5} />
@@ -442,8 +352,7 @@ export function Sidebar() {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="rail-btn"
-              style={{ width: 30, height: 30 }}
+              className="rail-btn sb-rail-mini"
               aria-label="切换主题"
             >
               {visibleTheme === 'dark' ? (
@@ -461,16 +370,7 @@ export function Sidebar() {
               <>
                 <Link
                   href="/write"
-                  className="rail-btn"
-                  style={{
-                    width: 30,
-                    height: 30,
-                    background: 'var(--gold)',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
+                  className="rail-btn sb-write-btn"
                   aria-label="写文章"
                 >
                   <PenLine style={{ width: 14, height: 14, color: 'var(--paper)' }} strokeWidth={2} />
@@ -478,8 +378,7 @@ export function Sidebar() {
                 </Link>
                 <Link
                   href="/admin"
-                  className="rail-btn"
-                  style={{ width: 30, height: 30 }}
+                  className="rail-btn sb-rail-mini"
                   aria-label="管理后台"
                 >
                   <Shield style={{ width: 14, height: 14 }} strokeWidth={1.5} />
@@ -490,8 +389,7 @@ export function Sidebar() {
               <button
                 type="button"
                 onClick={() => showLoginModal()}
-                className="rail-btn"
-                style={{ width: 30, height: 30, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                className="rail-btn sb-rail-ghost"
                 aria-label="管理员登录"
               >
                 <Shield style={{ width: 14, height: 14 }} strokeWidth={1.5} />

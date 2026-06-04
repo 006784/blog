@@ -3266,6 +3266,107 @@ textarea:focus {
 }
 .rail-btn.panel-open svg { opacity: 1; color: var(--gold); }
 
+/* ── Rail 结构布局（从内联 style 抽取） ── */
+.sb-desktop {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100dvh;
+  z-index: 40;
+}
+.sb-rail {
+  width: 52px;
+  min-width: 52px;
+  background: linear-gradient(180deg, var(--surface-base) 0%, var(--surface-raised) 100%);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+.sb-logo {
+  width: 100%;
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0 16px;
+  display: flex;
+  justify-content: center;
+}
+.sb-logo-text {
+  font-family: var(--font-mincho);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  writing-mode: vertical-rl;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}
+.sb-nav {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 8px;
+  gap: 2px;
+}
+.sb-rail-bottom {
+  width: 100%;
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.sb-divider {
+  width: 20px;
+  height: 1px;
+  background: var(--line);
+  margin: 8px 0;
+  flex-shrink: 0;
+}
+/* rail 底部小按钮统一尺寸 */
+.sb-rail-mini { width: 30px; height: 30px; }
+.sb-avatar-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-panel);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 0;
+  box-shadow: var(--shadow-xs);
+}
+.sb-avatar-btn img { width: 30px; height: 30px; object-fit: cover; }
+.sb-avatar-fallback {
+  font-family: var(--font-mincho);
+  font-size: 9px;
+  color: var(--ink-secondary);
+}
+.sb-write-btn {
+  width: 30px;
+  height: 30px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sb-rail-ghost {
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 /* ── Rail hover tooltip ── */
 .rail-tooltip {
   position: absolute;
