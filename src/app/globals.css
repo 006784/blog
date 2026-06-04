@@ -3782,6 +3782,7 @@ textarea:focus {
   --frost-sage: #9caa8f;
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--frost-title);
   background:
     radial-gradient(1200px circle at 8% -6%, var(--frost-bg) 0%, var(--frost-bg-strong) 66%),
@@ -3971,6 +3972,7 @@ textarea:focus {
 
 .frost-hero-section {
   min-height: 60vh;
+  min-height: 60dvh;
   padding: clamp(2rem, 5vw, 3.8rem) 0 clamp(2.2rem, 5vw, 3.4rem);
 }
 
@@ -4493,6 +4495,7 @@ textarea:focus {
   --atelier-cloud: #fffaf6;
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -4745,6 +4748,7 @@ textarea:focus {
   display: grid;
   grid-template-columns: 3fr 2fr;
   min-height: 75vh;
+  min-height: 75dvh;
   gap: 0;
   align-items: stretch;
 }
@@ -4980,6 +4984,7 @@ textarea:focus {
   position: relative;
   height: 100%;
   min-height: 50vh;
+  min-height: 50dvh;
   padding: 0;
 }
 
