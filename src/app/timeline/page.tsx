@@ -91,7 +91,7 @@ function GitCommitSection() {
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="relative ml-0 flex items-center gap-1.5 rounded-full border border-(--border-default) bg-(--surface-raised) px-4 py-1.5 text-xs text-ink-muted transition hover:border-teal-500/40 hover:text-teal-600"
+            className="relative ml-0 flex items-center gap-1.5 rounded-full border border-(--border-default) bg-(--surface-raised) px-4 py-2 text-sm text-ink-muted transition hover:border-teal-500/40 hover:text-teal-600"
           >
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
             {expanded ? '收起' : `查看全部 ${GIT_LOG.length} 条提交`}

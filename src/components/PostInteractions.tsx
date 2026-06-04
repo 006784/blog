@@ -114,7 +114,7 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
         whileTap={TAP_BUTTON}
         transition={APPLE_SPRING_GENTLE}
         onClick={() => handleInteraction('like')}
-        className={`ios-button-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
+        className={`ios-button-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-2 transition-colors ${
           userLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
         }`}
       >
@@ -128,7 +128,7 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
         whileTap={TAP_BUTTON}
         transition={APPLE_SPRING_GENTLE}
         onClick={() => handleInteraction('bookmark')}
-        className={`ios-button-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
+        className={`ios-button-press inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-2 transition-colors ${
           userBookmarked ? 'text-yellow-500' : 'text-muted-foreground hover:text-yellow-500'
         }`}
       >
@@ -142,7 +142,7 @@ export default function PostInteractions({ postId, className = '' }: PostInterac
         whileTap={TAP_BUTTON}
         transition={APPLE_SPRING_GENTLE}
         onClick={handleShare}
-        className="ios-button-press inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1.5 text-muted-foreground transition-colors hover:text-primary"
+        className="ios-button-press inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-2 text-muted-foreground transition-colors hover:text-primary"
       >
         {copied ? (
           <Check className="w-4 h-4 text-green-500" />
