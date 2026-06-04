@@ -3238,19 +3238,20 @@ textarea:focus {
   transform: translateY(-1px);
 }
 .rail-btn svg {
-  opacity: 0.45;
+  opacity: 0.55;
   transition:
     opacity var(--duration-fast) var(--ease-default),
     color var(--duration-fast) var(--ease-default);
   color: var(--ink);
 }
-.rail-btn:hover svg { opacity: 0.9; }
+.rail-btn:hover svg { opacity: 1; }
 .rail-btn.active,
 .rail-btn.panel-open {
   background: var(--surface-raised);
   box-shadow: var(--neu-inset);
 }
-.rail-btn.active svg { opacity: 1; color: var(--color-teal-500); }
+.rail-btn.active svg { opacity: 1; color: var(--gold); }
+.rail-btn.active::before,
 .rail-btn.panel-open::before {
   content: '';
   position: absolute;
@@ -3259,9 +3260,48 @@ textarea:focus {
   bottom: 8px;
   width: 3px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--color-teal-400), var(--color-teal-600));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--gold) 70%, transparent),
+    var(--gold));
 }
-.rail-btn.panel-open svg { opacity: 1; color: var(--color-teal-500); }
+.rail-btn.panel-open svg { opacity: 1; color: var(--gold); }
+
+/* ── Rail hover tooltip ── */
+.rail-tooltip {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-jp-serif), serif;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 60;
+  transition:
+    opacity var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+.rail-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-right-color: var(--ink);
+}
+.rail-btn:hover .rail-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
 .rail-avatar-btn:hover {
   transform: translateY(-1px) scale(1.04);
 }
@@ -3324,7 +3364,7 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-teal-600);
+  color: var(--color-primary-700);
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
@@ -3368,11 +3408,11 @@ textarea:focus {
 }
 .dark .panel-link:hover { background: var(--surface-raised); }
 .panel-link.active {
-  background: color-mix(in srgb, var(--color-teal-500) 10%, var(--surface-raised));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-raised));
   box-shadow: var(--neu-inset);
 }
 .dark .panel-link.active {
-  background: color-mix(in srgb, var(--color-teal-500) 15%, var(--surface-raised));
+  background: color-mix(in srgb, var(--gold) 15%, var(--surface-raised));
 }
 .panel-link-icon {
   display: inline-flex;
@@ -3388,8 +3428,8 @@ textarea:focus {
   flex-shrink: 0;
   transition: background 0.2s;
 }
-.panel-link.active .panel-link-dot { background: var(--color-teal-500); }
-.panel-link:hover .panel-link-dot  { background: var(--color-teal-400); }
+.panel-link.active .panel-link-dot { background: var(--gold); }
+.panel-link:hover .panel-link-dot  { background: color-mix(in srgb, var(--gold) 70%, transparent); }
 .panel-link-text {
   font-family: var(--font-sans);
   font-size: 12.5px;
@@ -3398,10 +3438,10 @@ textarea:focus {
   transition: color 0.15s;
   white-space: nowrap;
 }
-.panel-link.active .panel-link-icon { color: var(--color-teal-500); }
+.panel-link.active .panel-link-icon { color: var(--gold); }
 .panel-link:hover .panel-link-icon  { color: var(--ink); }
 .panel-link:hover .panel-link-text  { color: var(--ink); font-weight: 500; }
-.panel-link.active .panel-link-text { color: var(--color-teal-600); font-weight: 600; }
+.panel-link.active .panel-link-text { color: var(--color-primary-700); font-weight: 600; }
 
 /* ── Sidebar text utilities ── */
 .sidebar-text-link {
@@ -3485,8 +3525,8 @@ textarea:focus {
 }
 .sidebar-mobile-nav-item:hover { color: var(--ink); }
 .sidebar-mobile-nav-item.active {
-  color: var(--color-teal-500);
-  background: color-mix(in srgb, var(--color-teal-500) 10%, var(--surface-raised));
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-raised));
   box-shadow: var(--neu-shadow-sm);
 }
 
@@ -3494,13 +3534,13 @@ textarea:focus {
   width: 48px;
   height: 48px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, var(--color-teal-500) 0%, var(--color-teal-700) 100%);
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: -22px;
   border: none;
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-teal-500) 45%, transparent), var(--shadow-md);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--gold) 45%, transparent), var(--shadow-md);
   cursor: pointer;
   transition:
     transform var(--duration-fast) var(--ease-spring),
@@ -3508,7 +3548,7 @@ textarea:focus {
 }
 .sidebar-mobile-fab:hover {
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-teal-500) 50%, transparent), var(--shadow-lg);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--gold) 50%, transparent), var(--shadow-lg);
 }
 
 .sidebar-mobile-sheet-link {
@@ -3526,12 +3566,12 @@ textarea:focus {
     transform var(--duration-fast) var(--ease-default);
 }
 .sidebar-mobile-sheet-link:hover {
-  background: color-mix(in srgb, var(--color-teal-500) 6%, var(--surface-raised));
+  background: color-mix(in srgb, var(--gold) 6%, var(--surface-raised));
   border-color: var(--border-default);
 }
 .sidebar-mobile-sheet-link.active {
-  background: color-mix(in srgb, var(--color-teal-500) 10%, var(--surface-raised));
-  border-color: color-mix(in srgb, var(--color-teal-500) 28%, var(--border-default));
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-raised));
+  border-color: color-mix(in srgb, var(--gold) 28%, var(--border-default));
   transform: translateX(2px);
 }
 

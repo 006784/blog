@@ -141,10 +141,10 @@ function RailBtn({
         isCurrentPage && !isPanelOpen && 'active',
         isPanelOpen && 'panel-open'
       )}
-      title={item.label}
       aria-label={item.label}
     >
-      <item.icon style={{ width: 15, height: 15 }} strokeWidth={1.5} />
+      <item.icon style={{ width: 17, height: 17 }} strokeWidth={1.5} />
+      <span className="rail-tooltip">{item.label}</span>
     </button>
   );
 }
@@ -168,7 +168,6 @@ function RailDivider() {
 export function Sidebar() {
   const pathname  = usePathname();
   const router = useRouter();
-  const isHome    = pathname === '/';
   const { resolvedTheme, setTheme } = useTheme();
   const { isAdmin, showLoginModal, logout } = useAdmin();
   const { profile } = useProfile();
@@ -239,8 +238,6 @@ export function Sidebar() {
   const kana       = activeIcon
     ? (allItems.find(i => i.key === activeIcon)?.kana ?? '光')
     : '光';
-
-  if (isHome) return null;
 
   return (
     <>
@@ -411,6 +408,7 @@ export function Sidebar() {
                   {profileLabel.charAt(0)}
                 </span>
               )}
+              <span className="rail-tooltip">{isAdmin ? '个人资料' : '关于我'}</span>
             </button>
 
             {/* 搜索按钮 — 触发 Cmd+K */}
@@ -422,10 +420,10 @@ export function Sidebar() {
               }
               className="rail-btn"
               style={{ width: 30, height: 30 }}
-              title="搜索 (⌘K)"
               aria-label="搜索"
             >
-              <Search style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+              <Search style={{ width: 14, height: 14 }} strokeWidth={1.5} />
+              <span className="rail-tooltip">搜索 ⌘K</span>
             </button>
 
             {/* Theme toggle */}
@@ -433,19 +431,16 @@ export function Sidebar() {
               onClick={toggleTheme}
               className="rail-btn"
               style={{ width: 30, height: 30 }}
-              title={
-                visibleTheme === 'dark'
-                  ? '浅色模式'
-                  : visibleTheme === 'light'
-                    ? '深色模式'
-                    : '切换主题'
-              }
+              aria-label="切换主题"
             >
               {visibleTheme === 'dark' ? (
-                <Sun style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                <Sun style={{ width: 14, height: 14 }} strokeWidth={1.5} />
               ) : (
-                <Moon style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                <Moon style={{ width: 14, height: 14 }} strokeWidth={1.5} />
               )}
+              <span className="rail-tooltip">
+                {visibleTheme === 'dark' ? '浅色模式' : '深色模式'}
+              </span>
             </button>
 
             {/* Admin shortcuts — 永远在 rail 里可见 */}
@@ -463,19 +458,19 @@ export function Sidebar() {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
-                  title="写文章"
                   aria-label="写文章"
                 >
-                  <PenLine style={{ width: 13, height: 13, color: 'var(--paper)' }} strokeWidth={2} />
+                  <PenLine style={{ width: 14, height: 14, color: 'var(--paper)' }} strokeWidth={2} />
+                  <span className="rail-tooltip">写文章</span>
                 </Link>
                 <Link
                   href="/admin"
                   className="rail-btn"
                   style={{ width: 30, height: 30 }}
-                  title="管理后台"
                   aria-label="管理后台"
                 >
-                  <Shield style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                  <Shield style={{ width: 14, height: 14 }} strokeWidth={1.5} />
+                  <span className="rail-tooltip">管理后台</span>
                 </Link>
               </>
             ) : (
@@ -484,10 +479,10 @@ export function Sidebar() {
                 onClick={() => showLoginModal()}
                 className="rail-btn"
                 style={{ width: 30, height: 30, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                title="管理员登录"
                 aria-label="管理员登录"
               >
-                <Shield style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                <Shield style={{ width: 14, height: 14 }} strokeWidth={1.5} />
+                <span className="rail-tooltip">管理员登录</span>
               </button>
             )}
           </div>
