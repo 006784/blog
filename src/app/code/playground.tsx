@@ -1002,7 +1002,7 @@ export function CodePlayground() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.18 }}
-              className="w-full max-w-5xl h-[82vh] rounded-3xl border border-[#3d3d3d] bg-[#161616] text-gray-100 shadow-2xl overflow-hidden flex flex-col"
+              className="w-full max-w-5xl h-[82dvh] rounded-3xl border border-[#3d3d3d] bg-[#161616] text-gray-100 shadow-2xl overflow-hidden flex flex-col"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2f2f2f] bg-[#1b1b1b]">

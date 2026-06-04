@@ -84,12 +84,14 @@
       "Bash(gh run *)",
       "Bash(gh api *)",
       "Bash(python3 -c \"import sys,json; jobs=json.load\\(sys.stdin\\)['jobs']; [print\\(j['name'], j['conclusion'], j['id']\\) for j in jobs]\")",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "Bash(mkdir -p /Users/hk/blog/src/app/api/shop/digital/\\\\[id\\\\])"
     ],
     "additionalDirectories": [
       "/tmp",
       "/private/tmp",
-      "/Users/hk/.claude/commands"
+      "/Users/hk/.claude/commands",
+      "/Users/hk/blog/src/app/api/shop/digital"
     ]
   }
 }

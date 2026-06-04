@@ -101,10 +101,10 @@ function BriefingEditor({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 32, opacity: 0 }}
         transition={{ duration: 0.22 }}
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col"
+        className="w-full max-w-2xl max-h-[90dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <Card variant="elevated" className="overflow-hidden p-0 flex flex-col max-h-[90vh]">
+        <Card variant="elevated" className="overflow-hidden p-0 flex flex-col max-h-[90dvh]">
           {/* 头部 */}
           <div className="flex items-center justify-between border-b border-(--border-default) px-5 py-4 shrink-0">
             <h2 className="font-semibold text-ink">{initial?.id ? '编辑简报' : '新建简报'}</h2>

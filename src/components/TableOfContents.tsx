@@ -157,7 +157,7 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="ios-sheet-card fixed bottom-0 left-0 right-0 z-50 max-h-[82vh] overflow-hidden border-t border-border shadow-2xl"
+                className="ios-sheet-card fixed bottom-0 left-0 right-0 z-50 max-h-[82dvh] overflow-hidden border-t border-border shadow-2xl"
               >
                 <div className="flex items-center justify-between p-4 border-b border-border">
                   <h3 className="font-semibold flex items-center gap-2">
@@ -174,7 +174,7 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
                     <X className="w-5 h-5" />
                   </motion.button>
                 </div>
-                <div className="p-4 overflow-y-auto max-h-[calc(82vh-80px)]">
+                <div className="p-4 overflow-y-auto max-h-[calc(82dvh-80px)]">
                   <ul className="space-y-2">
                     {headings.map((heading) => (
                       <li

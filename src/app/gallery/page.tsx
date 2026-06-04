@@ -519,7 +519,7 @@ function EditPhotoModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="border-b border-(--border-default) p-6">
@@ -721,7 +721,7 @@ function Lightbox({
           src={photo.url}
           alt={photo.title || '照片'}
           className="max-w-full max-h-full w-auto h-auto object-contain rounded select-none"
-          style={{ maxHeight: hasInfo ? 'calc(100vh - 160px)' : 'calc(100vh - 100px)' }}
+          style={{ maxHeight: hasInfo ? 'calc(100dvh - 160px)' : 'calc(100dvh - 100px)' }}
           onClick={e => e.stopPropagation()}
           onLoad={() => setImgLoaded(true)}
           onError={() => { setImgError(true); setImgLoaded(true); }}
@@ -827,7 +827,7 @@ function AddPhotoModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="border-b border-(--border-default) p-6">

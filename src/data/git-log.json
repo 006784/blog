@@ -1,5 +1,95 @@
 [
   {
+    "hash": "70c769b",
+    "date": "2026-06-04T01:22:09+08:00",
+    "message": "feat: 首页新增「Claude 今日动态」板块",
+    "author": "zyi"
+  },
+  {
+    "hash": "d6e85c9",
+    "date": "2026-06-04T01:02:48+08:00",
+    "message": "chore: 全站体检修复（安全/SEO/健壮性/质量）",
+    "author": "zyi"
+  },
+  {
+    "hash": "701f740",
+    "date": "2026-06-04T00:59:53+08:00",
+    "message": "fix: 日记页手机端适配改善",
+    "author": "zyi"
+  },
+  {
+    "hash": "d3cc571",
+    "date": "2026-06-04T00:45:41+08:00",
+    "message": "style: 每日简报正文排版升级为日系风格",
+    "author": "zyi"
+  },
+  {
+    "hash": "c4dc087",
+    "date": "2026-06-04T00:42:36+08:00",
+    "message": "perf: 提示词页 RSC -95%，字体请求合并为单次",
+    "author": "zyi"
+  },
+  {
+    "hash": "b28c7a0",
+    "date": "2026-06-01T23:47:49+08:00",
+    "message": "style: 博客文章排版升级为日系杂志风格",
+    "author": "zyi"
+  },
+  {
+    "hash": "20b5b6f",
+    "date": "2026-06-01T09:34:42+08:00",
+    "message": "fix: 博客多处不完善问题修复",
+    "author": "zyi"
+  },
+  {
+    "hash": "5e72127",
+    "date": "2026-05-27T13:06:45+08:00",
+    "message": "fix: 修正 requireAdminSession 调用方式，解决 Vercel 构建类型错误",
+    "author": "zyi"
+  },
+  {
+    "hash": "0e2038d",
+    "date": "2026-05-27T12:45:24+08:00",
+    "message": "refine: 商店全局细节打磨",
+    "author": "zyi"
+  },
+  {
+    "hash": "0f13d9b",
+    "date": "2026-05-27T12:38:43+08:00",
+    "message": "feat: 数字资源商品动态化 + 购买后即显网盘直链",
+    "author": "zyi"
+  },
+  {
+    "hash": "7499042",
+    "date": "2026-05-27T11:46:30+08:00",
+    "message": "feat: 商品页拆分为独立子页面（ChatGPT / Claude / 海外账号 / 数字资源）",
+    "author": "zyi"
+  },
+  {
+    "hash": "9d72866",
+    "date": "2026-05-27T11:18:28+08:00",
+    "message": "feat: 删除商品页精选资料包板块及相关无用代码",
+    "author": "zyi"
+  },
+  {
+    "hash": "7d792f5",
+    "date": "2026-05-27T11:08:44+08:00",
+    "message": "feat: 按 Claude 官方定价页更新 Claude Pro/Max 卡片功能描述",
+    "author": "zyi"
+  },
+  {
+    "hash": "3843ea0",
+    "date": "2026-05-27T11:01:16+08:00",
+    "message": "feat: 按 OpenAI 官方定价页更新 ChatGPT 卡片功能描述，Pro 拆分为 5倍/20倍两档",
+    "author": "zyi"
+  },
+  {
+    "hash": "8a2c7d1",
+    "date": "2026-05-27T10:56:19+08:00",
+    "message": "fix: CI build 补充占位符 env vars，解决 Supabase 配置缺失导致的构建失败",
+    "author": "zyi"
+  },
+  {
     "hash": "6954aaf",
     "date": "2026-05-27T10:52:23+08:00",
     "message": "fix: 清除所有 ESLint warnings，lint 全绿",
@@ -508,95 +598,5 @@
     "date": "2026-03-25T13:07:47+05:30",
     "message": "feat(practice): add LeetCode-style coding practice module",
     "author": "lishiya"
-  },
-  {
-    "hash": "c478843",
-    "date": "2026-03-25T12:30:03+05:30",
-    "message": "fix(api): migrate all DB writes to supabaseAdmin to bypass RLS",
-    "author": "lishiya"
-  },
-  {
-    "hash": "e08131f",
-    "date": "2026-03-25T12:16:40+05:30",
-    "message": "fix(music): route song CRUD through API to bypass RLS",
-    "author": "lishiya"
-  },
-  {
-    "hash": "f1cad54",
-    "date": "2026-03-25T12:08:18+05:30",
-    "message": "fix(auth): use supabaseAdmin for all admin_sessions DB operations",
-    "author": "lishiya"
-  },
-  {
-    "hash": "8f97a2f",
-    "date": "2026-03-25T11:55:33+05:30",
-    "message": "feat(mobile): iOS/Android safe-area and viewport adaptation",
-    "author": "lishiya"
-  },
-  {
-    "hash": "3f234a0",
-    "date": "2026-03-25T11:23:38+05:30",
-    "message": "fix: add missing diary/themes.ts to git tracking",
-    "author": "lishiya"
-  },
-  {
-    "hash": "7cfaf8b",
-    "date": "2026-03-25T11:03:08+05:30",
-    "message": "feat(security): overhaul admin auth with JWT sessions and hardened API routes",
-    "author": "lishiya"
-  },
-  {
-    "hash": "1d9c12c",
-    "date": "2026-02-20T15:29:18+08:00",
-    "message": "feat(home): redesign glass homepage and support pinned hero cover",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "ee52b3c",
-    "date": "2026-02-15T23:03:51+08:00",
-    "message": "feat(ui): premium visual overhaul for navigation search and cards",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "3389188",
-    "date": "2026-02-15T10:43:27+08:00",
-    "message": "feat(ui): apple-style redesign v5 with diary readability lock",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "9a31814",
-    "date": "2026-02-15T10:34:59+08:00",
-    "message": "refactor(ui): polish visual quality and reduce noisy effects",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "a53c1f6",
-    "date": "2026-02-15T10:31:45+08:00",
-    "message": "feat(ui): unify navbar search and card-action motion rhythm",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "21f1e02",
-    "date": "2026-02-15T10:24:16+08:00",
-    "message": "feat(ui): refine diary/resources usability and visual consistency",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "824274e",
-    "date": "2026-02-15T10:16:24+08:00",
-    "message": "feat(devops): add daily scheduled auto-push scripts for macOS",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "a4880c0",
-    "date": "2026-02-15T10:14:31+08:00",
-    "message": "feat(ui): major apple-style interaction overhaul",
-    "author": "Lishiya"
-  },
-  {
-    "hash": "d43d495",
-    "date": "2026-02-15T03:48:21+08:00",
-    "message": "Upgrade UI effects and verify APIs",
-    "author": "Lishiya"
   }
 ]

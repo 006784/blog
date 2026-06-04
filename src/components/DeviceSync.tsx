@@ -497,7 +497,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
       {/* 冲突模态框 */}
       {showConflicts && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[80dvh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-medium text-gray-900 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-500" />
@@ -613,7 +613,7 @@ export function DeviceSync({ diaries, className = '' }: DeviceSyncProps) {
       {/* 历史记录模态框 */}
       {showHistory && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[80dvh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-medium text-gray-900 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-500" />

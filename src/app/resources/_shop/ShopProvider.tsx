@@ -630,7 +630,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
               )}
             </div>
 
-            <div className="max-h-[75vh] overflow-y-auto">
+            <div className="max-h-[75dvh] overflow-y-auto">
               {digitalFlow.result ? (
                 /* ─── Result: link revealed ─── */
                 <div className="space-y-4 p-5">

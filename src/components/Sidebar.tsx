@@ -65,7 +65,6 @@ const group1: NavItem[] = [
 const group2: NavItem[] = [
   { key: 'diary',       href: '/diary',       icon: BookOpen,      label: '日记',  kana: '記' },
   { key: 'gallery',     href: '/gallery',     icon: Camera,        label: '相册',  kana: '影' },
-  { key: 'computer',    href: '/computer',    icon: Monitor,       label: '电脑专区', kana: '屏' },
   { key: 'music',       href: '/music',       icon: Music,         label: '歌单',  kana: '音' },
   { key: 'collections', href: '/collections', icon: BookMarked,    label: '合集',  kana: '選' },
   { key: 'media',       href: '/media',       icon: Film,          label: '书影音', kana: '覧' },
@@ -73,14 +72,10 @@ const group2: NavItem[] = [
   { key: 'uses',        href: '/uses',        icon: Wrench,        label: '工具箱', kana: '具' },
   { key: 'shop',        href: '/resources',   icon: ShoppingBag,   label: '商店',  kana: '店' },
   { key: 'links',       href: '/links',       icon: LinkIcon,      label: '友链',  kana: '縁' },
-  { key: 'message',     href: '/guestbook',   icon: MessageCircle, label: '留言',  kana: '声' },
 ];
 
 const group3: NavItem[] = [
-  { key: 'practice', href: '/practice',     icon: Code2,            label: '练习',  kana: '練' },
-  { key: 'code',     href: '/code',         icon: Terminal,         label: '运行',  kana: '行' },
   { key: 'ciyuan',   href: '/tools/ciyuan', icon: BotMessageSquare, label: '词元',  kana: 'AI' },
-  { key: 'prompts',   href: '/prompts',    icon: Lightbulb,        label: '提示词',  kana: '詞' },
   { key: 'dashboard', href: '/dashboard',  icon: BarChart3,        label: '看板',    kana: '計' },
 ];
 
@@ -91,7 +86,16 @@ const group4: NavItem[] = [
   { key: 'contact', href: '/contact', icon: Mail,     label: '联系', kana: '信' },
 ];
 
-const allItems = [...group1, ...group2, ...group3, ...group4];
+// 「更多」——从桌面主导航收起，仅在移动端完整菜单中显示（页面仍可直接访问）
+const groupMore: NavItem[] = [
+  { key: 'computer', href: '/computer',     icon: Monitor,          label: '电脑专区', kana: '屏' },
+  { key: 'message',  href: '/guestbook',    icon: MessageCircle,    label: '留言',    kana: '声' },
+  { key: 'practice', href: '/practice',     icon: Code2,            label: '练习',    kana: '練' },
+  { key: 'code',     href: '/code',         icon: Terminal,         label: '运行',    kana: '行' },
+  { key: 'prompts',  href: '/prompts',      icon: Lightbulb,        label: '提示词',  kana: '詞' },
+];
+
+const allItems = [...group1, ...group2, ...group3, ...group4, ...groupMore];
 
 const groupMeta: Record<string, { title: string; items: NavItem[] }> = {
   content: { title: '内容', items: group1 },
@@ -770,7 +774,7 @@ export function Sidebar() {
                 left: 0,
                 right: 0,
                 zIndex: 50,
-                maxHeight: '82vh',
+                maxHeight: '82dvh',
                 overflowY: 'auto',
                 background: 'var(--surface-raised)',
                 borderTop: '1px solid var(--line)',

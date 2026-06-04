@@ -354,11 +354,11 @@ export function NovelReader({ novel }: { novel: Novel }) {
       </header>
 
       {/* ── Page layout ───────────────────────────────────────────────────── */}
-      <div className="flex min-h-[calc(100vh-53px)]">
+      <div className="flex min-h-[calc(100dvh-53px)]">
 
         {/* ── Desktop sidebar TOC ──────────────────────────────────────────── */}
         <aside
-          className="hidden lg:flex flex-col w-[260px] shrink-0 sticky top-[53px] h-[calc(100vh-53px)] overflow-hidden"
+          className="hidden lg:flex flex-col w-[260px] shrink-0 sticky top-[53px] h-[calc(100dvh-53px)] overflow-hidden"
           style={{ background: theme.sidebar, borderRight: `1px solid ${theme.border}` }}
         >
           {TocContent}

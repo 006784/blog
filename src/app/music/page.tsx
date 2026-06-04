@@ -708,7 +708,7 @@ export default function MusicPage() {
                 type="button"
                 onClick={() => setFilter(tab.key)}
                 className={cn(
-                  'rounded-full px-3.5 py-1 text-sm transition-all',
+                  'rounded-full px-3.5 py-2 text-sm transition-all',
                   filter === tab.key
                     ? 'bg-ink text-paper shadow-sm'
                     : 'text-ink-muted hover:bg-(--surface-overlay)'

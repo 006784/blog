@@ -477,7 +477,7 @@ export function DataExport({ diaries, className = '' }: DataExportProps) {
       {/* 预览模态框 */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[80dvh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-medium text-gray-900">导出预览 - {formats.find(f => f.type === selectedFormat)?.name}</h3>
               <button

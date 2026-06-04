@@ -409,7 +409,7 @@ function SettingsModal({
           </button>
         </div>
 
-        <div className="grid gap-0 lg:grid-cols-[1.2fr_0.9fr] max-h-[75vh] overflow-hidden">
+        <div className="grid gap-0 lg:grid-cols-[1.2fr_0.9fr] max-h-[75dvh] overflow-hidden">
           <div className="p-6 overflow-y-auto space-y-6 border-b lg:border-b-0 lg:border-r border-line">
             <section className="space-y-4">
               <div>
