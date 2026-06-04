@@ -292,10 +292,10 @@ export function ProblemFormModal({ problem, onClose, onSave }: Props) {
                         <button onClick={() => removeExample(i)} className="hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <input value={ex.input} onChange={e => updateExample(i, 'input', e.target.value)} placeholder="输入" className="px-2 py-1 text-xs font-mono border border-border rounded bg-muted outline-none focus:border-primary" />
-                        <input value={ex.output} onChange={e => updateExample(i, 'output', e.target.value)} placeholder="输出" className="px-2 py-1 text-xs font-mono border border-border rounded bg-muted outline-none focus:border-primary" />
+                        <input value={ex.input} onChange={e => updateExample(i, 'input', e.target.value)} placeholder="输入" className="px-2 py-1.5 text-sm font-mono border border-border rounded bg-muted outline-none focus:border-primary" />
+                        <input value={ex.output} onChange={e => updateExample(i, 'output', e.target.value)} placeholder="输出" className="px-2 py-1.5 text-sm font-mono border border-border rounded bg-muted outline-none focus:border-primary" />
                       </div>
-                      <input value={ex.explanation || ''} onChange={e => updateExample(i, 'explanation', e.target.value)} placeholder="解释（可选）" className="w-full px-2 py-1 text-xs border border-border rounded bg-muted outline-none focus:border-primary" />
+                      <input value={ex.explanation || ''} onChange={e => updateExample(i, 'explanation', e.target.value)} placeholder="解释（可选）" className="w-full px-2 py-1.5 text-sm border border-border rounded bg-muted outline-none focus:border-primary" />
                     </div>
                   ))}
                 </div>

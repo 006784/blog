@@ -108,7 +108,7 @@ export function SubscribeForm({ variant = 'card' }: SubscribeFormProps) {
             placeholder="输入邮箱订阅..."
             required
             disabled={loading || success}
-            className="editorial-inline-input w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:border-primary text-sm"
+            className="editorial-inline-input w-full pl-10 pr-4 py-2.5 bg-secondary border border-border rounded-xl focus:outline-none focus:border-primary text-base"
           />
         </div>
         <motion.button
