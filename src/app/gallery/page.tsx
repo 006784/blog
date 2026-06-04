@@ -522,7 +522,7 @@ function EditPhotoModal({
         className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="border-b border-(--border-default) p-6">
+        <div className="border-b border-(--border-default) p-4 md:p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-primary" />
@@ -537,7 +537,7 @@ function EditPhotoModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
           {/* Preview */}
           <div className="aspect-video rounded-xl overflow-hidden bg-muted relative">
             <Image src={photo.url} alt={photo.title || ''} fill className="object-cover" sizes="(max-width: 768px) 100vw, 600px" />
@@ -599,7 +599,7 @@ function EditPhotoModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-(--border-default) p-6">
+        <div className="flex justify-end gap-3 border-t border-(--border-default) p-4 md:p-6">
           <Button
             type="button"
             onClick={onClose}
@@ -830,7 +830,7 @@ function AddPhotoModal({
         className="w-full max-w-lg bg-card rounded-3xl shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="border-b border-(--border-default) p-6">
+        <div className="border-b border-(--border-default) p-4 md:p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -845,7 +845,7 @@ function AddPhotoModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
           {/* 图片上传 */}
           <div>
             <label className="block text-sm font-medium mb-2">选择图片 *</label>
@@ -916,7 +916,7 @@ function AddPhotoModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-(--border-default) p-6">
+        <div className="flex justify-end gap-3 border-t border-(--border-default) p-4 md:p-6">
           <Button
             type="button"
             onClick={onClose}

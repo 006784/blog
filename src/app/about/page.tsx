@@ -225,8 +225,8 @@ export default function AboutPage() {
               className="relative overflow-hidden border-(--border-strong)"
             >
               <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(135deg,var(--color-primary-100),transparent)] opacity-80" />
-              <div className="relative grid gap-6 sm:grid-cols-[220px_1fr] sm:items-center">
-                <div className="mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-[calc(var(--radius-2xl)+4px)] border border-(--border-strong) bg-(--surface-overlay) shadow-(--shadow-lg)">
+              <div className="relative grid gap-6 sm:grid-cols-[160px_1fr] sm:items-center">
+                <div className="mx-auto aspect-square w-full max-w-40 sm:max-w-50 overflow-hidden rounded-[calc(var(--radius-2xl)+4px)] border border-(--border-strong) bg-(--surface-overlay) shadow-(--shadow-lg)">
                   {profile.avatar ? (
                     <Image
                       src={profile.avatar}

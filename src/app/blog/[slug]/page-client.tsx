@@ -284,7 +284,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen px-6 py-24">
+      <div className="min-h-screen px-4 py-12 md:px-6 md:py-24">
         <div className="mx-auto max-w-4xl">
           <Card variant="elevated" padding="lg" className="space-y-6 rounded-2xl">
             <div className="flex items-center gap-3">
@@ -303,7 +303,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
   if (loadError) {
     return (
-      <div className="min-h-screen px-6 py-24">
+      <div className="min-h-screen px-4 py-12 md:px-6 md:py-24">
         <div className="mx-auto max-w-3xl">
           <StatePanel
             tone="error"
@@ -323,7 +323,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
 
   if (!post) {
     return (
-      <div className="min-h-screen px-6 py-24">
+      <div className="min-h-screen px-4 py-12 md:px-6 md:py-24">
         <div className="mx-auto max-w-3xl">
           <StatePanel
             tone="empty"
