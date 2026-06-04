@@ -3978,6 +3978,7 @@ textarea:focus {
 
 .frost-hero-grid {
   min-height: calc(60vh - 88px);
+  min-height: calc(60dvh - 88px);
   align-items: center;
 }
 
