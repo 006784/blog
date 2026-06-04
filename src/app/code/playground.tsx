@@ -713,7 +713,7 @@ export function CodePlayground() {
   ]);
 
   return (
-    <div className="flex flex-col h-screen bg-[#1e1e1e] text-gray-100 overflow-hidden">
+    <div className="flex flex-col h-dvh bg-[#1e1e1e] text-gray-100 overflow-hidden">
       {/* ── Top bar ── */}
       <div className="flex items-center gap-2 px-4 py-2 bg-[#252526] border-b border-[#3d3d3d] flex-shrink-0">
         {/* Logo / back */}

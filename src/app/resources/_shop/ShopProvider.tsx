@@ -1304,7 +1304,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
       {/* Delivery assurance strip */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-line bg-(--surface-panel)/90 backdrop-blur-xl md:hidden">
-        <div className="flex items-center justify-center gap-6 px-4 py-2.5 text-xs text-ink-muted">
+        <div className="flex items-center justify-center gap-6 px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] text-xs text-ink-muted">
           <span className="flex items-center gap-1.5"><Shield className="h-3 w-3" />官方渠道</span>
           <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" />24h 交付</span>
           <span className="flex items-center gap-1.5"><MessageCircle className="h-3 w-3" />售后支持</span>

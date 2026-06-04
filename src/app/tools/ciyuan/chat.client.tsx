@@ -1121,7 +1121,7 @@ export function CiyuanChat() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--surface-base)">
+    <div className="flex h-dvh overflow-hidden bg-(--surface-base)">
       <AnimatePresence initial={false}>
         {sidebarOpen && (
           <motion.aside

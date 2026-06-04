@@ -135,7 +135,7 @@ export function ProblemPageClient({ slug }: Props) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-dvh">
         <div className="text-center text-muted-foreground">加载中...</div>
       </div>
     );
@@ -143,7 +143,7 @@ export function ProblemPageClient({ slug }: Props) {
 
   if (!problem) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-dvh">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">题目不存在</p>
           <Link href="/practice" className="text-(--gold) hover:underline">返回题库</Link>
@@ -159,7 +159,7 @@ export function ProblemPageClient({ slug }: Props) {
   const availableLangs = (problem.languages as string[]) || [];
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-(--paper,#faf8f5)">
+    <div className="flex flex-col h-dvh overflow-hidden bg-(--paper,#faf8f5)">
       {/* Top bar */}
       <div className="flex items-center gap-3 px-4 py-2.5 border-b border-(--line) bg-(--paper) flex-shrink-0">
         <Link href="/practice" className="p-1.5 rounded-lg hover:bg-(--paper-deep) transition-colors">

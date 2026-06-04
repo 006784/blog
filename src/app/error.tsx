@@ -19,7 +19,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen px-6 py-24">
+    <div className="min-h-screen px-4 py-12 md:px-6 md:py-24">
       <div className="mx-auto max-w-xl">
         <StatePanel
           tone="error"
