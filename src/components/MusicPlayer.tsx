@@ -228,7 +228,7 @@ export function MusicPlayer({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            className="fixed bottom-[min(15rem,30vh)] left-1/2 z-40 w-[min(720px,calc(100vw-2rem))] -translate-x-1/2"
+            className="fixed bottom-[min(15rem,30dvh)] left-1/2 z-40 w-[min(720px,calc(100vw-2rem))] -translate-x-1/2"
           >
             <div className="overflow-hidden rounded-[28px] border border-white/45 bg-[rgba(255,250,245,0.84)] shadow-[0_20px_60px_rgba(117,74,33,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(23,20,18,0.88)]">
               <div className="flex items-center justify-between border-b border-(--border-default) px-5 py-4">

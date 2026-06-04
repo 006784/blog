@@ -918,7 +918,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             </div>
 
             {/* Step content */}
-            <div className="max-h-[65vh] overflow-y-auto">
+            <div className="max-h-[65dvh] overflow-y-auto">
 
               {/* Step 1 */}
               {aiFlow.step === 1 && (

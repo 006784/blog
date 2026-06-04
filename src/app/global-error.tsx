@@ -18,7 +18,7 @@ export default function GlobalError({
     <html lang="zh-CN">
       <body style={{ margin: 0, fontFamily: "'Noto Serif SC', serif", background: '#fff7f2', color: '#2d1e17' }}>
         <div style={{
-          minHeight: '100vh',
+          minHeight: '100dvh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

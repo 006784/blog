@@ -272,7 +272,7 @@ export function EnhancedSearch() {
                 </div>
 
                 {/* 搜索结果区域 */}
-                <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="max-h-[60dvh] overflow-y-auto custom-scrollbar">
                   {query ? (
                     results.length > 0 ? (
                       <div className="p-3">

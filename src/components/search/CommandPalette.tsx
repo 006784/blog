@@ -195,7 +195,7 @@ export function CommandPalette() {
 
             {/* 面板 */}
             <motion.div
-              className="fixed inset-x-4 top-[15vh] z-[9999] mx-auto max-w-2xl"
+              className="fixed inset-x-4 top-[15dvh] z-[9999] mx-auto max-w-2xl"
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}

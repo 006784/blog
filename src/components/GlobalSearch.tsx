@@ -196,7 +196,7 @@ export function GlobalSearch() {
                 </div>
 
                 {/* 搜索结果 */}
-                <div className="max-h-[60vh] overflow-y-auto">
+                <div className="max-h-[60dvh] overflow-y-auto">
                   {results.length > 0 ? (
                     <div className="p-2">
                       {results.map((result, index) => {
