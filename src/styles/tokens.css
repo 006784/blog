@@ -15,17 +15,27 @@
   --color-teal-800: #0c3e36;
   --color-teal-900: #072921;
 
-  /* ── Accent: Warm Orange ────────────────────────────────── */
-  --color-orange-50:  #fff3ed;
-  --color-orange-100: #ffe4d0;
-  --color-orange-200: #ffc4a0;
-  --color-orange-300: #ff9f6a;
-  --color-orange-400: #f07840;
-  --color-orange-500: #e8693a;  /* main accent orange */
-  --color-orange-600: #d05428;
-  --color-orange-700: #a83e1a;
-  --color-orange-800: #7a2c10;
-  --color-orange-900: #4d1b08;
+  /* ── Accent: Rust Orange ────────────────────────────────── */
+  --color-orange-50:  #fdf2ec;
+  --color-orange-100: #f9ddd0;
+  --color-orange-200: #f2b99f;
+  --color-orange-300: #e89272;
+  --color-orange-400: #d47648;
+  --color-orange-500: #c4622d;  /* main accent rust-orange */
+  --color-orange-600: #a5501f;
+  --color-orange-700: #843e17;
+  --color-orange-800: #602c10;
+  --color-orange-900: #3d1b08;
+
+  /* ── Smoke Blue (sidebar chrome / secondary UI) ──────── */
+  --color-smoke-blue-50:  #f0f5f9;
+  --color-smoke-blue-100: #d6e8f5;
+  --color-smoke-blue-200: #add1ec;
+  --color-smoke-blue-300: #7fb5db;
+  --color-smoke-blue-400: #7b9eb9;  /* main smoke blue */
+  --color-smoke-blue-500: #5a82a0;
+  --color-smoke-blue-600: #3f6480;
+  --color-smoke-blue-700: #2a4a63;
 
   /* ── Neutral ─────────────────────────────────────────────── */
   --color-neutral-50:  #f8f8f7;
@@ -60,7 +70,7 @@
   --surface-card-shadow:    rgba(0, 0, 0, 0.10);
   --surface-card-shadow-strong: rgba(0, 0, 0, 0.18);
   --surface-button-shadow:  rgba(27, 130, 114, 0.35);
-  --surface-accent-ring:    rgba(232, 105, 58, 0.25);
+  --surface-accent-ring:    rgba(196, 98, 45, 0.25);
 
   /* ── Neumorphic shadows ─────────────────────────────────── */
   --neu-light: rgba(255, 255, 255, 0.88);
@@ -125,8 +135,11 @@
   --color-teal-500: #4ecfb0;
   --color-teal-400: #6ddfc5;
   --color-teal-600: #3ab89a;
-  --color-orange-500: #ff8040;
-  --color-orange-400: #ff9a60;
+  --color-orange-500: #e07848;
+  --color-orange-400: #f09060;
+  --color-smoke-blue-400: #9dbfd6;
+  --color-smoke-blue-500: #7ba3be;
+  --color-smoke-blue-100: #1e303d;
 
   --color-neutral-50:  #1e2220;
   --color-neutral-100: #262c2a;

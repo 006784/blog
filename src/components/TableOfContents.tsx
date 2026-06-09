@@ -100,7 +100,7 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
     <>
       {/* 桌面端侧边目录 */}
       <nav className={`hidden xl:block ${className}`}>
-        <div className="sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto pr-4">
+        <div className="sticky top-24 max-h-[calc(100dvh-120px)] overflow-y-auto pr-4">
           <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <List className="w-4 h-4" />
             目录

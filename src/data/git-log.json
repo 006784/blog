@@ -1,5 +1,95 @@
 [
   {
+    "hash": "d521738",
+    "date": "2026-06-05T01:15:27+08:00",
+    "message": "feat: 交互组件支持传参复用 + 新增 4 个交互组件",
+    "author": "zyi"
+  },
+  {
+    "hash": "9b5a52d",
+    "date": "2026-06-05T00:16:57+08:00",
+    "message": "feat: 文章支持内嵌可交互组件 + JWT 解码器",
+    "author": "zyi"
+  },
+  {
+    "hash": "887774d",
+    "date": "2026-06-04T18:13:01+08:00",
+    "message": "fix: 提升 PostInteractions + Timeline 按钮 touch target",
+    "author": "zyi"
+  },
+  {
+    "hash": "83abf5b",
+    "date": "2026-06-04T16:37:05+08:00",
+    "message": "fix: Input/Textarea 全局字号 text-sm(14px) → text-base(16px)，防止 iOS Safari 缩放",
+    "author": "zyi"
+  },
+  {
+    "hash": "63ff449",
+    "date": "2026-06-04T16:27:25+08:00",
+    "message": "fix: 补全 frost-hero-grid calc(60dvh) 缺失的 dvh 备用行",
+    "author": "zyi"
+  },
+  {
+    "hash": "bae7c9f",
+    "date": "2026-06-04T16:21:18+08:00",
+    "message": "fix: globals.css 补全 dvh 渐进增强（5处主题/组件 CSS）",
+    "author": "zyi"
+  },
+  {
+    "hash": "fe21d60",
+    "date": "2026-06-04T16:20:12+08:00",
+    "message": "fix: 收尾 vh → dvh（loading 骨架屏 + playground 内联 CSS）",
+    "author": "zyi"
+  },
+  {
+    "hash": "6253f8f",
+    "date": "2026-06-04T16:17:15+08:00",
+    "message": "fix: 剩余 vh → dvh 全量替换（搜索/播放器/错误页）",
+    "author": "zyi"
+  },
+  {
+    "hash": "a83f4c8",
+    "date": "2026-06-04T16:12:01+08:00",
+    "message": "fix: 全屏布局 h-dvh + error/404/shop 手机端修复",
+    "author": "zyi"
+  },
+  {
+    "hash": "15c7efd",
+    "date": "2026-06-04T16:05:48+08:00",
+    "message": "fix: 修复 iOS input 自动缩放问题（font-size < 16px）",
+    "author": "zyi"
+  },
+  {
+    "hash": "747a8e7",
+    "date": "2026-06-04T13:42:12+08:00",
+    "message": "fix: 手机端弹窗内边距、头像尺寸、loading 态适配",
+    "author": "zyi"
+  },
+  {
+    "hash": "801503d",
+    "date": "2026-06-04T13:25:14+08:00",
+    "message": "refactor: 侧边栏桌面 rail 内联样式抽取为 CSS 类",
+    "author": "zyi"
+  },
+  {
+    "hash": "d1c9cad",
+    "date": "2026-06-04T13:13:54+08:00",
+    "message": "feat: 侧边栏精简导航 + hover 展开交互",
+    "author": "zyi"
+  },
+  {
+    "hash": "dfed73a",
+    "date": "2026-06-04T13:10:42+08:00",
+    "message": "fix: 全站手机端 vh→dvh + touch target 改善",
+    "author": "zyi"
+  },
+  {
+    "hash": "296c52d",
+    "date": "2026-06-04T11:45:31+08:00",
+    "message": "style: 侧边栏体验优化（保留日系窄轨风格）",
+    "author": "zyi"
+  },
+  {
     "hash": "70c769b",
     "date": "2026-06-04T01:22:09+08:00",
     "message": "feat: 首页新增「Claude 今日动态」板块",
@@ -508,95 +598,5 @@
     "date": "2026-03-31T10:06:14+05:30",
     "message": "添加 CLAUDE.md 项目上下文文档",
     "author": "李诗雅"
-  },
-  {
-    "hash": "05f3f59",
-    "date": "2026-03-31T09:43:43+05:30",
-    "message": "修复文章过滤、改进相册预览、完善评论配置提示",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "138bb8b",
-    "date": "2026-03-31T05:11:01+05:30",
-    "message": "修复文章无法查看及桌面端写作界面",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "2fd388b",
-    "date": "2026-03-30T21:23:20+05:30",
-    "message": "修复bug",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "9b2b276",
-    "date": "2026-03-28T15:17:15+05:30",
-    "message": "修复",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "2391046",
-    "date": "2026-03-28T13:07:50+05:30",
-    "message": "支持管理员邮箱验证码登录并兼容多邮箱白名单",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "76b2c8b",
-    "date": "2026-03-27T13:29:10+05:30",
-    "message": "统一前后台高频页面并收口内容管理交互",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "601ea46",
-    "date": "2026-03-27T10:01:28+05:30",
-    "message": "完善个人资料与日记保存并搭建设计系统底座",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "515fc53",
-    "date": "2026-03-26T00:45:57+05:30",
-    "message": "完善站点核心功能并补齐 AI 能力",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "c92d433",
-    "date": "2026-03-25T23:23:48+05:30",
-    "message": "chore(ci): modernize github actions workflows",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "523b329",
-    "date": "2026-03-25T23:13:35+05:30",
-    "message": "fix(logger): use console transport only",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "30545c6",
-    "date": "2026-03-25T23:09:22+05:30",
-    "message": "fix(logger): disable file transports on serverless",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "b7d8ddd",
-    "date": "2026-03-25T23:02:52+05:30",
-    "message": "fix(auth): unify admin entry with login page",
-    "author": "李诗雅"
-  },
-  {
-    "hash": "f5a6d46",
-    "date": "2026-03-25T17:49:51+05:30",
-    "message": "修改了工具箱",
-    "author": "lishiya"
-  },
-  {
-    "hash": "66a9b18",
-    "date": "2026-03-25T13:57:19+05:30",
-    "message": "feat(code): add standalone code playground at /code",
-    "author": "lishiya"
-  },
-  {
-    "hash": "b718da0",
-    "date": "2026-03-25T13:07:47+05:30",
-    "message": "feat(practice): add LeetCode-style coding practice module",
-    "author": "lishiya"
   }
 ]

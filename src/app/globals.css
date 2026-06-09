@@ -132,6 +132,8 @@
   --color-gold-light: var(--gold-light);
   --color-kana-ghost: var(--kana-ghost);
   --color-accent-orange: var(--accent-orange);
+  --color-smoke-blue: var(--color-smoke-blue-400);
+  --color-smoke-blue-light: var(--color-smoke-blue-100);
   --font-sans: var(--font-sans);
 }
 
@@ -1796,6 +1798,149 @@ textarea:focus {
   border-radius: 3px;
   padding: 0 1px;
 }
+
+/* 通用：交互组件里的输入框/标签 */
+.b64__io,
+.urlp__input,
+.cron__input,
+.chenc__input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-base);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  outline: none;
+}
+.b64__io:focus,
+.urlp__input:focus,
+.cron__input:focus,
+.chenc__input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
+/* Base64 */
+.b64__modes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+.b64__mode {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-base);
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.b64__mode.is-active { background: var(--gold); border-color: var(--gold); color: var(--paper); }
+.b64__swap {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-raised);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.b64__swap:hover { color: var(--gold); border-color: var(--gold); }
+.b64__label {
+  display: block;
+  margin: 0.8rem 0 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+.b64__io { padding: 0.7rem 0.85rem; font-size: 0.82rem; line-height: 1.6; resize: vertical; }
+.b64__out {
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: var(--surface-base);
+  border: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--color-primary-700);
+  word-break: break-all;
+  min-height: 2.5rem;
+}
+.dark .b64__out { color: var(--color-primary-500); }
+.b64__out--error { color: #c0392b; }
+
+/* URL 解析器 */
+.urlp__input { margin-top: 0.8rem; padding: 0.6rem 0.8rem; font-size: 0.82rem; }
+.urlp__table { width: 100%; border-collapse: collapse; margin-top: 0.8rem; font-size: 0.82rem; }
+.urlp__table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border-default); vertical-align: top; }
+.urlp__key { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.urlp__val { font-family: var(--font-mono); color: var(--color-primary-700); word-break: break-all; }
+.dark .urlp__val { color: var(--color-primary-500); }
+.urlp__desc { color: var(--ink-muted); font-size: 0.76rem; }
+.urlp__params { margin-top: 0.8rem; padding: 0.7rem 0.85rem; border-radius: 10px; background: var(--surface-base); border: 1px solid var(--border-default); }
+.urlp__params-title { font-size: 0.74rem; font-weight: 700; color: var(--ink-muted); margin-bottom: 0.5rem; }
+.urlp__param { display: flex; gap: 0.3rem; font-family: var(--font-mono); font-size: 0.8rem; padding: 0.15rem 0; word-break: break-all; }
+.urlp__param-key { color: var(--gold); font-weight: 600; }
+.urlp__param-eq { color: var(--ink-ghost); }
+.urlp__param-val { color: var(--ink-secondary); }
+@media (max-width: 640px) {
+  .urlp__desc { display: none; }
+}
+
+/* Cron 解析器 */
+.cron__input { margin-top: 0.8rem; padding: 0.6rem 0.8rem; font-size: 0.95rem; letter-spacing: 0.1em; }
+.cron__human {
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface-base));
+  border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.cron__fields { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-top: 0.8rem; }
+@media (max-width: 640px) { .cron__fields { grid-template-columns: repeat(2, 1fr); } }
+.cron__field { border: 1px solid var(--border-default); border-radius: 8px; padding: 0.5rem; text-align: center; background: var(--surface-base); }
+.cron__field-val { display: block; font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--gold); }
+.cron__field-label { display: block; font-size: 0.72rem; color: var(--ink-muted); margin: 0.2rem 0; }
+.cron__field-desc { display: block; font-size: 0.7rem; color: var(--ink-ghost); line-height: 1.4; }
+.cron__legend { margin-top: 0.7rem; font-size: 0.72rem; color: var(--ink-ghost); line-height: 1.7; }
+.cron__legend code { font-family: var(--font-mono); color: var(--color-primary-700); background: var(--surface-overlay); padding: 0 0.25rem; border-radius: 3px; }
+.dark .cron__legend code { color: var(--color-primary-500); }
+
+/* 字符编码 */
+.chenc__input { margin-top: 0.8rem; padding: 0.7rem 0.85rem; font-size: 1rem; }
+.chenc__grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem; }
+.chenc__cell { border: 1px solid var(--border-default); border-radius: 10px; padding: 0.6rem 0.5rem; text-align: center; background: var(--surface-base); min-width: 4.5rem; }
+.chenc__char { font-size: 1.6rem; line-height: 1.2; color: var(--ink); }
+.chenc__cp { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-primary-700); margin-top: 0.2rem; }
+.dark .chenc__cp { color: var(--color-primary-500); }
+.chenc__bytes { display: flex; flex-wrap: wrap; gap: 0.2rem; justify-content: center; margin-top: 0.35rem; }
+.chenc__byte { font-family: var(--font-mono); font-size: 0.66rem; padding: 0.05rem 0.25rem; border-radius: 3px; background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--ink-secondary); }
+.chenc__bytecount { font-size: 0.66rem; color: var(--ink-ghost); margin-top: 0.3rem; }
+.chenc__legend { margin-top: 0.9rem; font-size: 0.8rem; line-height: 1.8; color: var(--ink-secondary); }
+
+/* 排序可视化 */
+.sortviz__algos { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.8rem; }
+.sortviz__algo { padding: 0.35rem 0.7rem; border-radius: 999px; border: 1px solid var(--border-default); background: var(--surface-base); color: var(--ink-muted); font-size: 0.78rem; cursor: pointer; transition: all 0.15s; }
+.sortviz__algo.is-active { background: var(--gold); border-color: var(--gold); color: var(--paper); }
+.sortviz__bars { display: flex; align-items: flex-end; gap: 0.3rem; height: 160px; margin-top: 0.9rem; padding: 0.5rem; border-radius: 10px; background: var(--surface-base); border: 1px solid var(--border-default); }
+.sortviz__bar { flex: 1; display: flex; align-items: flex-start; justify-content: center; border-radius: 4px 4px 0 0; background: color-mix(in srgb, var(--ink) 18%, transparent); transition: height 0.25s ease, background 0.2s; position: relative; min-height: 1.2rem; }
+.sortviz__bar.is-active { background: var(--gold); }
+.sortviz__bar.is-sorted { background: color-mix(in srgb, #16a34a 55%, transparent); }
+.sortviz__bar-val { font-size: 0.6rem; color: var(--ink-muted); margin-top: 0.15rem; }
+.sortviz__controls { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+.sortviz__btn { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.7rem; border-radius: 8px; border: 1px solid var(--border-default); background: var(--surface-base); color: var(--ink); font-size: 0.78rem; cursor: pointer; }
+.sortviz__btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.sortviz__btn:disabled { opacity: 0.5; cursor: default; }
+.sortviz__range { flex: 1; min-width: 6rem; accent-color: var(--gold); }
+.sortviz__progress { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-ghost); }
+.sortviz__desc { margin-top: 0.7rem; font-size: 0.8rem; line-height: 1.7; color: var(--ink-secondary); }
 
 /* 正则：贪婪 vs 懒惰对比 */
 .regex-greedy__text {
@@ -3714,13 +3859,13 @@ textarea:focus {
   transform: translateY(-1px);
 }
 .rail-btn svg {
-  opacity: 0.55;
+  opacity: 0.7;
   transition:
     opacity var(--duration-fast) var(--ease-default),
     color var(--duration-fast) var(--ease-default);
-  color: var(--ink);
+  color: var(--color-smoke-blue-400);
 }
-.rail-btn:hover svg { opacity: 1; }
+.rail-btn:hover svg { opacity: 1; color: var(--color-smoke-blue-500); }
 .rail-btn.active,
 .rail-btn.panel-open {
   background: var(--surface-raised);

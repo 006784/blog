@@ -18,6 +18,11 @@ export const INTERACTIVE_REGISTRY: Record<string, InteractiveComponent> = {
   'regex-greedy': dynamic(() => import('./RegexGreedy'), { ssr: false, loading }),
   'hash-generator': dynamic(() => import('./HashGenerator'), { ssr: false, loading }),
   'http-status': dynamic(() => import('./HttpStatus'), { ssr: false, loading }),
+  'base64': dynamic(() => import('./Base64Tool'), { ssr: false, loading }),
+  'url-parser': dynamic(() => import('./UrlParser'), { ssr: false, loading }),
+  'cron-parser': dynamic(() => import('./CronParser'), { ssr: false, loading }),
+  'char-encoding': dynamic(() => import('./CharEncoding'), { ssr: false, loading }),
+  'sort-visualizer': dynamic(() => import('./SortVisualizer'), { ssr: false, loading }),
 };
 
 export function getInteractive(key: string): InteractiveComponent | null {
