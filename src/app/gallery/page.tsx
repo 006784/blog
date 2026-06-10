@@ -824,7 +824,7 @@ function Lightbox({
           </div>
         )}
 
-        {/* Image — 用普通 img + CSS 过渡，避免 motion opacity 卡黑屏；外部任意 URL 不走 next/image */}
+        {/* Image — 绝对定位铺满容器 + object-contain，确保超高/超宽图都完整可见、不依赖 flex 高度计算 */}
         {!imgError && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -832,7 +832,7 @@ function Lightbox({
             key={photo.id}
             src={photo.url}
             alt={photo.title || '照片'}
-            className="max-w-full max-h-full w-auto h-auto object-contain rounded select-none transition-opacity duration-300"
+            className="absolute inset-0 m-auto max-w-full max-h-full w-auto h-auto object-contain rounded select-none transition-opacity duration-300"
             style={{ opacity: imgLoaded ? 1 : 0 }}
             onClick={e => e.stopPropagation()}
             onLoad={() => setImgLoaded(true)}
