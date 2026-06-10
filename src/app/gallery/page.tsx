@@ -389,12 +389,54 @@ function PhotoCard({
   square?: boolean;
 }) {
   const previewSrc = photo.thumbnail_url || photo.url;
+  // 瓦片流用真实宽高比，避免裁切竖图；没有尺寸信息时回退 4:3
+  const ratioW = photo.width && photo.width > 0 ? photo.width : 4;
+  const ratioH = photo.height && photo.height > 0 ? photo.height : 3;
+
+  const [likes, setLikes] = useState(photo.likes ?? 0);
+  const [liked, setLiked] = useState(false);
+  const [liking, setLiking] = useState(false);
+
+  // 本设备是否已点赞（localStorage 防重复）
+  useEffect(() => {
+    try {
+      const set = JSON.parse(localStorage.getItem('liked-photos') || '[]') as string[];
+      if (set.includes(photo.id)) setLiked(true);
+    } catch { /* ignore */ }
+  }, [photo.id]);
+
+  async function handleLike() {
+    if (liked || liking) return;
+    setLiking(true);
+    setLiked(true);
+    setLikes((n) => n + 1); // 乐观更新
+    try {
+      const res = await fetch(`/api/gallery/photos/${photo.id}/like/`, { method: 'POST' });
+      if (res.ok) {
+        const { likes: serverLikes } = await res.json();
+        if (typeof serverLikes === 'number') setLikes(serverLikes);
+        try {
+          const set = JSON.parse(localStorage.getItem('liked-photos') || '[]') as string[];
+          if (!set.includes(photo.id)) {
+            set.push(photo.id);
+            localStorage.setItem('liked-photos', JSON.stringify(set));
+          }
+        } catch { /* ignore */ }
+      } else {
+        setLiked(false); setLikes((n) => Math.max(0, n - 1)); // 回滚
+      }
+    } catch {
+      setLiked(false); setLikes((n) => Math.max(0, n - 1));
+    } finally {
+      setLiking(false);
+    }
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03 }}
+      transition={{ delay: Math.min(index, 12) * 0.03 }}
       className={`group relative mb-4 cursor-pointer overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) ${
         square ? 'aspect-square' : ''
       }`}
@@ -404,11 +446,11 @@ function PhotoCard({
         src={previewSrc}
         alt={photo.title || '照片'}
         fill={square}
-        width={square ? undefined : 800}
-        height={square ? undefined : 600}
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        className={`object-cover group-hover:scale-105 transition-transform duration-500 ${
-          square ? '' : 'w-full h-auto'
+        width={square ? undefined : ratioW}
+        height={square ? undefined : ratioH}
+        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+        className={`group-hover:scale-105 transition-transform duration-500 ${
+          square ? 'object-cover' : 'w-full h-auto'
         }`}
       />
       
@@ -438,10 +480,15 @@ function PhotoCard({
       {/* Actions - 只有管理员可见 */}
       <div className="absolute right-3 top-3 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
         <button
-          onClick={(e) => { e.stopPropagation(); }}
-          className="rounded-full bg-black/30 p-2 backdrop-blur-sm transition-colors hover:bg-black/50"
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleLike(); }}
+          disabled={liking}
+          className="flex items-center gap-1 rounded-full bg-black/30 px-2.5 py-2 backdrop-blur-sm transition-colors hover:bg-black/50"
+          title={liked ? '已点赞' : '点赞'}
+          aria-label="点赞"
         >
-          <Heart className="w-4 h-4 text-white" />
+          <Heart className={`w-4 h-4 transition-colors ${liked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
+          {likes > 0 && <span className="text-xs text-white tabular-nums">{likes}</span>}
         </button>
         {isAdmin && (
           <>

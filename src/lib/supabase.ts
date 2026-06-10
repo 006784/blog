@@ -150,6 +150,7 @@ export interface Photo {
   tags: string[];
   is_favorite: boolean;
   views: number;
+  likes?: number;
   created_at: string;
 }
 
