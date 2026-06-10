@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera, Image as ImageIcon, Plus, X, Heart, MapPin,
   Calendar, Folder, Trash2, ZoomIn, ChevronLeft, ChevronRight,
-  Grid3X3, LayoutGrid, Sparkles, Upload, Shield, Edit2, Save
+  Grid3X3, LayoutGrid, Sparkles, Upload, Shield, Edit2, Save,
+  Download, Loader2
 } from 'lucide-react';
 import { MultiImageUploader } from '@/components/ImageUploader';
 import { Badge } from '@/components/ui/Badge';
@@ -640,6 +641,24 @@ function Lightbox({
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // 切换照片时重置加载状态
+  useEffect(() => {
+    setImgLoaded(false);
+    setImgError(false);
+  }, [photo.id]);
+
+  // 兜底：缓存命中的图片可能在 onLoad 绑定前就完成，导致 onLoad 不触发、画面卡黑屏。
+  // 挂载/换图后检查 img.complete 主动补一次 loaded。
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete) {
+      if (img.naturalWidth > 0) setImgLoaded(true);
+      else setImgError(true);
+    }
+  }, [photo.id]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -650,6 +669,31 @@ function Lightbox({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, onPrev, onNext]);
+
+  async function handleDownload() {
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      // 跨域图片用 blob 强制下载（普通 a[download] 对跨域无效）
+      const res = await fetch(photo.url, { mode: 'cors' });
+      const blob = await res.blob();
+      const ext = (photo.url.split('.').pop() || 'jpg').split('?')[0];
+      const name = (photo.title?.trim() || 'photo').replace(/[\\/:*?"<>|]/g, '_');
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = `${name}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objUrl);
+    } catch {
+      // 退路：blob 失败（如 CORS 限制）则新标签打开，用户可右键保存
+      window.open(photo.url, '_blank', 'noopener');
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   const hasInfo = photo.title || photo.description || photo.location || photo.taken_at;
 
@@ -662,16 +706,28 @@ function Lightbox({
       onClick={onClose}
     >
       {/* Top bar */}
-      <div className="flex-none flex items-center justify-between px-4 py-3 z-10" onClick={e => e.stopPropagation()}>
-        <span className="text-white/50 text-sm select-none">
+      <div className="flex-none flex items-center justify-between gap-2 px-3 py-3 sm:px-4 z-10" onClick={e => e.stopPropagation()}>
+        <span className="min-w-0 truncate text-white/50 text-sm select-none">
           {photo.title || '照片预览'}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
+            title="下载原图"
+            aria-label="下载原图"
+          >
+            {downloading
+              ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+              : <Download className="w-4 h-4 text-white" />}
+          </button>
           {isAdmin && onEdit && (
             <button
               onClick={onEdit}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               title="编辑"
+              aria-label="编辑"
             >
               <Edit2 className="w-4 h-4 text-white" />
             </button>
@@ -679,27 +735,29 @@ function Lightbox({
           {isAdmin && onDelete && (
             <button
               onClick={onDelete}
-              className="p-2 rounded-lg bg-white/10 hover:bg-red-500/60 transition-colors"
+              className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-red-500/60 active:scale-95 transition-all"
               title="删除"
+              aria-label="删除"
             >
               <Trash2 className="w-4 h-4 text-white" />
             </button>
           )}
           <button
             onClick={onClose}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
             title="关闭 (Esc)"
+            aria-label="关闭"
           >
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
       </div>
 
-      {/* Image area */}
-      <div className="flex-1 flex items-center justify-center relative min-h-0 px-14" onClick={onClose}>
+      {/* Image area — 手机端缩小左右留白 */}
+      <div className="flex-1 flex items-center justify-center relative min-h-0 px-2 sm:px-14" onClick={onClose}>
         {/* Loading spinner */}
         {!imgLoaded && !imgError && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
           </div>
         )}
@@ -712,36 +770,42 @@ function Lightbox({
           </div>
         )}
 
-        {/* Image */}
-        <motion.img
-          key={photo.id}
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: imgLoaded ? 1 : 0, scale: imgLoaded ? 1 : 0.96 }}
-          transition={{ duration: 0.25 }}
-          src={photo.url}
-          alt={photo.title || '照片'}
-          className="max-w-full max-h-full w-auto h-auto object-contain rounded select-none"
-          style={{ maxHeight: hasInfo ? 'calc(100dvh - 160px)' : 'calc(100dvh - 100px)' }}
-          onClick={e => e.stopPropagation()}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => { setImgError(true); setImgLoaded(true); }}
-          draggable={false}
-        />
+        {/* Image — 用普通 img + CSS 过渡，避免 motion opacity 卡黑屏；外部任意 URL 不走 next/image */}
+        {!imgError && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            ref={imgRef}
+            key={photo.id}
+            src={photo.url}
+            alt={photo.title || '照片'}
+            className="max-w-full max-h-full w-auto h-auto object-contain rounded select-none transition-opacity duration-300"
+            style={{
+              maxHeight: hasInfo ? 'calc(100dvh - 180px)' : 'calc(100dvh - 96px)',
+              opacity: imgLoaded ? 1 : 0,
+            }}
+            onClick={e => e.stopPropagation()}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+            draggable={false}
+          />
+        )}
 
-        {/* Prev/Next buttons — outside image, inside px-14 padding */}
+        {/* Prev/Next buttons — 手机端更贴边、更小 */}
         <button
           onClick={(e) => { e.stopPropagation(); onPrev(); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
+          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
           title="上一张 (←)"
+          aria-label="上一张"
         >
-          <ChevronLeft className="w-6 h-6 text-white" />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); onNext(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
+          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
           title="下一张 (→)"
+          aria-label="下一张"
         >
-          <ChevronRight className="w-6 h-6 text-white" />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
       </div>
 
