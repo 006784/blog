@@ -670,6 +670,13 @@ function Lightbox({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, onPrev, onNext]);
 
+  // 打开时锁定背景滚动，避免遮罩下的相册列表还能滚动（导致“黑屏要往下拉”）
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   async function handleDownload() {
     if (downloading) return;
     setDownloading(true);
@@ -779,10 +786,7 @@ function Lightbox({
             src={photo.url}
             alt={photo.title || '照片'}
             className="max-w-full max-h-full w-auto h-auto object-contain rounded select-none transition-opacity duration-300"
-            style={{
-              maxHeight: hasInfo ? 'calc(100dvh - 180px)' : 'calc(100dvh - 96px)',
-              opacity: imgLoaded ? 1 : 0,
-            }}
+            style={{ opacity: imgLoaded ? 1 : 0 }}
             onClick={e => e.stopPropagation()}
             onLoad={() => setImgLoaded(true)}
             onError={() => setImgError(true)}
