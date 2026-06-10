@@ -756,16 +756,50 @@ function Lightbox({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col bg-black"
+      className="fixed inset-0 z-50 bg-black"
       onClick={onClose}
     >
-      {/* Top bar */}
-      <div className="flex-none flex items-center justify-between gap-2 px-3 py-3 sm:px-4 z-10" onClick={e => e.stopPropagation()}>
-        <span className="min-w-0 truncate text-white/50 text-sm select-none">
+      {/* 图片层：直接铺满整个视口，object-contain 保证任意比例完整居中、永不黑屏 */}
+      {/* Loading spinner */}
+      {!imgLoaded && !imgError && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+        </div>
+      )}
+
+      {/* Error state */}
+      {imgError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/40 pointer-events-none">
+          <ImageIcon className="w-12 h-12" />
+          <p className="text-sm">图片加载失败</p>
+        </div>
+      )}
+
+      {/* Image — 全屏绝对定位 + padding 留出顶/底栏空间 */}
+      {!imgError && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          ref={imgRef}
+          key={photo.id}
+          src={photo.url}
+          alt={photo.title || '照片'}
+          className="absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-300 px-2 sm:px-16 py-16"
+          style={{ opacity: imgLoaded ? 1 : 0 }}
+          onClick={e => e.stopPropagation()}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
+          draggable={false}
+        />
+      )}
+
+      {/* Top bar — 浮层 */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between gap-2 px-3 py-3 sm:px-4 z-10 bg-linear-to-b from-black/60 to-transparent" onClick={e => e.stopPropagation()}>
+        <span className="min-w-0 truncate text-white/60 text-sm select-none">
           {photo.title || '照片预览'}
         </span>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
+            type="button"
             onClick={handleDownload}
             disabled={downloading}
             className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all disabled:opacity-50"
@@ -778,6 +812,7 @@ function Lightbox({
           </button>
           {isAdmin && onEdit && (
             <button
+              type="button"
               onClick={onEdit}
               className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
               title="编辑"
@@ -788,6 +823,7 @@ function Lightbox({
           )}
           {isAdmin && onDelete && (
             <button
+              type="button"
               onClick={onDelete}
               className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-red-500/60 active:scale-95 transition-all"
               title="删除"
@@ -797,6 +833,7 @@ function Lightbox({
             </button>
           )}
           <button
+            type="button"
             onClick={onClose}
             className="p-2.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all"
             title="关闭 (Esc)"
@@ -807,66 +844,33 @@ function Lightbox({
         </div>
       </div>
 
-      {/* Image area — 手机端缩小左右留白 */}
-      <div className="flex-1 flex items-center justify-center relative min-h-0 px-2 sm:px-14" onClick={onClose}>
-        {/* Loading spinner */}
-        {!imgLoaded && !imgError && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-          </div>
-        )}
+      {/* Prev/Next buttons — 浮层 */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onPrev(); }}
+        className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
+        title="上一张 (←)"
+        aria-label="上一张"
+      >
+        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+      </button>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onNext(); }}
+        className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
+        title="下一张 (→)"
+        aria-label="下一张"
+      >
+        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+      </button>
 
-        {/* Error state */}
-        {imgError && (
-          <div className="flex flex-col items-center gap-3 text-white/40">
-            <ImageIcon className="w-12 h-12" />
-            <p className="text-sm">图片加载失败</p>
-          </div>
-        )}
-
-        {/* Image — 绝对定位铺满容器 + object-contain，确保超高/超宽图都完整可见、不依赖 flex 高度计算 */}
-        {!imgError && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            ref={imgRef}
-            key={photo.id}
-            src={photo.url}
-            alt={photo.title || '照片'}
-            className="absolute inset-0 m-auto max-w-full max-h-full w-auto h-auto object-contain rounded select-none transition-opacity duration-300"
-            style={{ opacity: imgLoaded ? 1 : 0 }}
-            onClick={e => e.stopPropagation()}
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setImgError(true)}
-            draggable={false}
-          />
-        )}
-
-        {/* Prev/Next buttons — 手机端更贴边、更小 */}
-        <button
-          onClick={(e) => { e.stopPropagation(); onPrev(); }}
-          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
-          title="上一张 (←)"
-          aria-label="上一张"
-        >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onNext(); }}
-          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/25 active:scale-95 transition-all"
-          title="下一张 (→)"
-          aria-label="下一张"
-        >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-        </button>
-      </div>
-
-      {/* Bottom info */}
+      {/* Bottom info — 浮层 */}
       {hasInfo && (
-        <div className="flex-none px-6 py-4 text-center z-10" onClick={e => e.stopPropagation()}>
+        <div className="absolute bottom-0 left-0 right-0 px-6 py-4 text-center z-10 bg-linear-to-t from-black/70 to-transparent" onClick={e => e.stopPropagation()}>
           {photo.title && <p className="text-white font-medium">{photo.title}</p>}
-          {photo.description && <p className="text-white/55 text-sm mt-1">{photo.description}</p>}
+          {photo.description && <p className="text-white/60 text-sm mt-1">{photo.description}</p>}
           {(photo.location || photo.taken_at) && (
-            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-white/40">
+            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-white/50">
               {photo.location && (
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3" />{photo.location}
