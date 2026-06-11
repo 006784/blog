@@ -449,6 +449,11 @@ a {
   color: var(--color-teal-900);
 }
 
+.dark ::selection {
+  background: color-mix(in srgb, var(--gold) 32%, transparent);
+  color: var(--ink);
+}
+
 /* Glass morphism - 增强版 */
 .glass {
   background: rgba(255, 255, 255, 0.72);
@@ -832,14 +837,23 @@ textarea:focus {
   margin-bottom: 0;
 }
 
-/* 图片 */
+/* 图片 — 限制最大高度，避免竖图/高分辨率截图占满整屏 */
 .article-content img,
 .prose img {
+  display: block;
   border-radius: var(--radius-lg);
-  margin: 2em 0;
+  margin: 2em auto;
   max-width: 100%;
+  max-height: 32rem;
+  width: auto;
   height: auto;
   box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.2);
+}
+
+.dark .article-content img,
+.dark .prose img {
+  border: 1px solid var(--border-default);
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
 }
 
 /* 表格 */

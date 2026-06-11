@@ -14,8 +14,8 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const toneClasses: Record<BadgeTone, Record<BadgeVariant, string>> = {
   default: {
     solid: 'border-white/35 bg-[linear-gradient(135deg,var(--color-primary-500),var(--color-primary-600))] text-(--color-primary-foreground) shadow-[0_12px_22px_-18px_var(--surface-button-shadow)]',
-    outline: 'border-(--border-default) bg-white/35 text-neutral-700',
-    soft: 'border-transparent bg-[linear-gradient(180deg,var(--surface-overlay),var(--surface-raised))] text-neutral-700 shadow-[inset_0_1px_0_var(--surface-card-highlight)]',
+    outline: 'border-(--border-default) bg-white/35 text-neutral-700 dark:bg-white/5 dark:text-neutral-300',
+    soft: 'border-transparent bg-[linear-gradient(180deg,var(--surface-overlay),var(--surface-raised))] text-neutral-700 shadow-[inset_0_1px_0_var(--surface-card-highlight)] dark:text-neutral-300',
   },
   success: {
     solid: 'border-transparent bg-(--color-success) text-white',
