@@ -7363,46 +7363,11 @@ textarea:focus {
   background: linear-gradient(90deg, var(--color-primary-500), transparent 85%);
 }
 
-/* ── Back link on blog post ── */
-.rounded-full.border.border-border\/70.bg-card\/70 {
-  border-radius: 0 !important;
-  background: transparent !important;
-  border-color: var(--line) !important;
-}
-
 /* ── Blog Post Page: article h1 typography ── */
 .site-main header h1 {
   font-family: var(--font-mincho), 'Noto Serif SC', serif !important;
   letter-spacing: 0.04em !important;
   line-height: 1.25 !important;
-}
-
-.site-main section.rounded-3xl,
-.site-main section.rounded-2xl {
-  border-radius: var(--radius-lg) !important;
-  background: var(--paper) !important;
-  border-color: var(--line) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-
-/* Post category badge */
-.site-main .rounded-full.bg-primary\/10 {
-  border-radius: 0.25rem !important;
-  background: transparent !important;
-  border: 1px solid var(--gold) !important;
-  color: var(--gold) !important;
-  font-family: var(--font-garamond), Georgia, serif;
-  font-style: italic;
-  letter-spacing: 0.1em;
-  font-size: 0.72rem;
-}
-
-/* Cover image container */
-.site-main .rounded-2xl.border.border-border\/60 {
-  border-radius: var(--radius-lg) !important;
-  border-color: var(--line) !important;
-  background: var(--paper-deep) !important;
 }
 
 /* Related post cards */
