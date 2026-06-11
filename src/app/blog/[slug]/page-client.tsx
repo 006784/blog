@@ -298,20 +298,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
         <table {...props}>{children}</table>
       </div>
     ),
-    img: ({ src, alt }) => {
-      if (!src || typeof src !== 'string') return null;
-      return (
-        <span className="block">
-          <Image
-            src={src}
-            alt={alt || '文章图片'}
-            width={1200}
-            height={675}
-            className="article-image h-auto w-full"
-          />
-        </span>
-      );
-    },
+    img: () => null,
   };
 
   if (loading) {
