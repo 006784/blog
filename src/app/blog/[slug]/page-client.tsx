@@ -437,13 +437,14 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           )}
 
           {coverImage && (
-            <div className="relative mt-8 aspect-21/9 max-h-88 w-full overflow-hidden rounded-xl border border-(--border-default) bg-secondary/50 shadow-(--shadow-sm) md:max-h-112">
+            <div className="relative mt-8 flex w-full items-center justify-center overflow-hidden rounded-xl border border-(--border-default) bg-secondary/50 shadow-(--shadow-sm)">
               <Image
                 src={coverImage}
                 alt={post.title}
-                fill
+                width={1600}
+                height={900}
                 sizes="(max-width: 1024px) 100vw, 1024px"
-                className="object-cover"
+                className="aspect-auto h-auto max-h-88 w-auto max-w-full object-contain md:max-h-112"
                 priority
               />
             </div>

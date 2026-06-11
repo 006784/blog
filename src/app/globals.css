@@ -837,7 +837,7 @@ textarea:focus {
   margin-bottom: 0;
 }
 
-/* 图片 — 限制最大高度，避免竖图/高分辨率截图占满整屏 */
+/* 图片 — 限制最大高度，避免竖图/高分辨率截图占满整屏；按真实比例缩放，不裁剪不变形 */
 .article-content img,
 .prose img {
   display: block;
@@ -847,6 +847,8 @@ textarea:focus {
   max-height: 32rem;
   width: auto;
   height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
   box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.2);
 }
 
