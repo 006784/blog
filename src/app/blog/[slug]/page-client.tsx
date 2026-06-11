@@ -437,28 +437,16 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           )}
 
           {coverImage && (
-            <div className="relative mt-8 w-full overflow-hidden rounded-xl border border-(--border-default) shadow-(--shadow-sm)">
-              {/* 模糊放大背景：填满容器，避免竖图两侧出现大片空白 */}
+            <div className="mt-8 flex w-full justify-center">
               <Image
                 src={coverImage}
-                alt=""
-                fill
-                aria-hidden
-                sizes="100vw"
-                className="scale-110 object-cover blur-2xl brightness-75 saturate-150"
+                alt={post.title}
+                width={1600}
+                height={900}
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                className="aspect-auto h-auto max-h-88 w-auto max-w-full rounded-xl border border-(--border-default) object-contain shadow-(--shadow-sm) md:max-h-112"
+                priority
               />
-              {/* 前景：完整显示原图，按真实比例缩放，不裁剪不变形 */}
-              <div className="relative flex w-full items-center justify-center py-6">
-                <Image
-                  src={coverImage}
-                  alt={post.title}
-                  width={1600}
-                  height={900}
-                  sizes="(max-width: 1024px) 100vw, 1024px"
-                  className="aspect-auto h-auto max-h-88 w-auto max-w-full object-contain drop-shadow-xl md:max-h-112"
-                  priority
-                />
-              </div>
             </div>
           )}
         </motion.header>
