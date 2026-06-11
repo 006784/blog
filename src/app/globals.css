@@ -1575,6 +1575,7 @@ textarea:focus {
 }
 
 .article-content li {
+  margin: 0;
   line-height: 1.78;
 }
 
@@ -7376,34 +7377,8 @@ textarea:focus {
   line-height: 1.25 !important;
 }
 
-/* ── Blog Post Page: refined rounded containers ── */
-.site-main header.rounded-3xl,
-.site-main header.rounded-2xl {
-  border-radius: var(--radius-xl) !important;
-  background: var(--paper) !important;
-  border-color: var(--line) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-
 .site-main section.rounded-3xl,
 .site-main section.rounded-2xl {
-  border-radius: var(--radius-lg) !important;
-  background: var(--paper) !important;
-  border-color: var(--line) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-
-.site-main .article-content {
-  border-radius: var(--radius-xl) !important;
-  background: var(--paper) !important;
-  border-color: var(--line) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-
-.site-main .mt-8.flex.flex-wrap {
   border-radius: var(--radius-lg) !important;
   background: var(--paper) !important;
   border-color: var(--line) !important;
