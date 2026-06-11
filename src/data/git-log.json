@@ -1,5 +1,17 @@
 [
   {
+    "hash": "157b201",
+    "date": "2026-06-11T16:21:57+08:00",
+    "message": "fix: add gallery lightbox image fallback",
+    "author": "zyi"
+  },
+  {
+    "hash": "61943fd",
+    "date": "2026-06-11T16:09:27+08:00",
+    "message": "style: 暗色模式改为纯黑中性调 + 网格背景",
+    "author": "zyi"
+  },
+  {
     "hash": "75b61c9",
     "date": "2026-06-11T01:42:36+08:00",
     "message": "fix: Lightbox 重构为全屏分层布局，彻底解决竖图黑屏",
@@ -586,17 +598,5 @@
     "date": "2026-05-23T12:05:07+08:00",
     "message": "feat: 文章发布自动从 Unsplash 生成封面图",
     "author": "zyi"
-  },
-  {
-    "hash": "f0a5d29",
-    "date": "2026-05-23T10:43:03+08:00",
-    "message": "全面升级 UI/UX、安全加固与新功能",
-    "author": "zyi"
-  },
-  {
-    "hash": "c1e7fa1",
-    "date": "2026-04-14T03:09:07+08:00",
-    "message": "修复 sentry-integration 兼容 @sentry/nextjs v10",
-    "author": "006784"
   }
 ]

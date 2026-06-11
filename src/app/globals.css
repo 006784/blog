@@ -101,6 +101,8 @@
   --gradient-accent-end:   var(--color-orange-400);
 
   /* 暗色下金棕色阶（供 color-primary-* 引用，统一暖色） */
+  --color-primary-300: #f3c79a;
+  --color-primary-400: #f0be9a;
   --color-primary-500: #e9a969;
   --color-primary-600: #d68f4f;
   --color-primary-700: #f0be9a;
@@ -3629,7 +3631,7 @@ textarea:focus {
 
 .dark .diary-select option {
   color: #f1f5f9;
-  background: #0c1220;
+  background: #141414;
 }
 
 .diary-env-panel {
@@ -5021,59 +5023,61 @@ textarea:focus {
 }
 
 .dark .frost-home {
-  --frost-title: #e6ebf4;
-  --frost-text: #b6becc;
-  --frost-soft: #8d97aa;
-  background:
-    radial-gradient(1200px circle at 8% -6%, #131923 0%, #0d121a 66%),
-    linear-gradient(160deg, #101622 0%, #0b1018 42%, #0f141d 100%);
+  --frost-title: #f4f4f4;
+  --frost-text: #c4c4c4;
+  --frost-soft: #a3a3a3;
+  background-color: #0d0d0d;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
 }
 
 .dark .frost-nav {
-  border-bottom-color: rgba(163, 177, 199, 0.24);
-  background: color-mix(in srgb, var(--frost-nav-bg, rgba(18, 24, 35, 0.55)) 88%, transparent);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--frost-nav-bg, rgba(20, 20, 20, 0.55)) 88%, transparent);
 }
 
 .dark .frost-link,
 .dark .frost-search-link,
 .dark .frost-outline-btn,
 .dark .frost-load-more {
-  color: #d9e2f0;
+  color: #e0e0e0;
 }
 
 .dark .frost-search-link,
 .dark .frost-outline-btn,
 .dark .frost-load-more {
-  border-color: rgba(146, 161, 184, 0.28);
-  background: rgba(18, 25, 36, 0.38);
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(26, 26, 26, 0.5);
 }
 
 .dark .frost-glass-card {
-  background: rgba(18, 25, 36, 0.42);
-  border-color: rgba(146, 161, 184, 0.24);
+  background: rgba(26, 26, 26, 0.55);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .frost-glass-card::before {
-  background: radial-gradient(520px circle at 0% 0%, rgba(255, 255, 255, 0.08), transparent 46%);
+  background: radial-gradient(520px circle at 0% 0%, rgba(255, 255, 255, 0.06), transparent 46%);
 }
 
 .dark .frost-tag {
-  background: rgba(22, 30, 44, 0.52);
-  border-color: rgba(146, 161, 184, 0.24);
+  background: rgba(32, 32, 32, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .frost-pinned-badge {
-  border-color: rgba(146, 161, 184, 0.4);
-  background: rgba(18, 25, 36, 0.64);
-  color: #a9bcda;
+  border-color: rgba(233, 169, 105, 0.4);
+  background: rgba(26, 26, 26, 0.7);
+  color: var(--gold);
 }
 
 .dark .frost-image-shell {
-  background: #111826;
+  background: #141414;
 }
 
 .dark .frost-image-placeholder {
-  background: linear-gradient(120deg, #141d2d 0%, #0f1827 50%, #141d2d 100%);
+  background: linear-gradient(120deg, #1a1a1a 0%, #141414 50%, #1a1a1a 100%);
 }
 
 /* ============================================ */
@@ -5093,6 +5097,16 @@ textarea:focus {
 .atelier-home-route .premium-global-backdrop,
 .atelier-home-route .particle-bg-canvas {
   display: none !important;
+}
+
+/* 暗色首页：强制纯黑底 + 淡网格，去除暖褐色调，贴近壁纸站风格 */
+.dark .atelier-home-route .site-main,
+[data-theme="dark"] .atelier-home-route .site-main {
+  background-color: #0d0d0d;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
 }
 
 /* 全局磁性容器 */
@@ -6315,8 +6329,7 @@ textarea:focus {
 
 .dark .journal-hero.surface-hero {
   background:
-    radial-gradient(420px circle at 90% 10%, rgba(195, 135, 98, 0.07), transparent 44%),
-    radial-gradient(360px circle at 10% 100%, rgba(116, 132, 107, 0.06), transparent 44%),
+    radial-gradient(420px circle at 90% 10%, rgba(233, 169, 105, 0.06), transparent 44%),
     linear-gradient(180deg, var(--surface-raised) 0%, var(--surface-overlay) 100%) !important;
 }
 
@@ -6326,8 +6339,8 @@ textarea:focus {
 
 .dark .journal-page {
   --journal-ink: var(--color-neutral-900);
-  --journal-soft: #a89480;
-  --journal-line: rgba(200, 175, 150, 0.1);
+  --journal-soft: #a3a3a3;
+  --journal-line: rgba(255, 255, 255, 0.1);
 }
 
 .journal-hero-grid {
@@ -6793,42 +6806,42 @@ textarea:focus {
 
 /* ── Dark Mode Overrides ── */
 .dark .atelier-home {
-  --atelier-paper: #171312;
-  --atelier-paper-strong: #211a18;
+  --atelier-paper: #1a1a1a;
+  --atelier-paper-strong: #141414;
   --atelier-ink: var(--ink);
-  --atelier-soft: #c6b8ad;
-  --atelier-line: rgba(244, 233, 223, 0.1);
+  --atelier-soft: #a3a3a3;
+  --atelier-line: rgba(255, 255, 255, 0.1);
   --atelier-accent: var(--gold);
   --atelier-accent-strong: var(--gold);
-  --atelier-accent-copper: #d1a07c;
-  --atelier-accent-sage: #97aa8a;
-  --atelier-accent-slate: #94a8bb;
-  --atelier-accent-claret: #c19488;
-  --atelier-wash-copper: rgba(168, 107, 72, 0.18);
-  --atelier-wash-sage: rgba(115, 138, 102, 0.15);
-  --atelier-wash-slate: rgba(99, 126, 154, 0.16);
-  --atelier-wash-claret: rgba(139, 97, 93, 0.14);
-  --atelier-cloud: #231c19;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(169, 110, 75, 0.2) 0%, transparent 26%),
-    radial-gradient(circle at 100% 8%, rgba(154, 108, 98, 0.14) 0%, transparent 28%),
-    radial-gradient(circle at 12% 72%, rgba(92, 112, 85, 0.13) 0%, transparent 24%),
-    linear-gradient(180deg, #141110 0%, #1a1514 38%, #1a1512 100%);
+  --atelier-accent-copper: var(--gold);
+  --atelier-accent-sage: #808080;
+  --atelier-accent-slate: #808080;
+  --atelier-accent-claret: var(--gold);
+  --atelier-wash-copper: rgba(255, 255, 255, 0.04);
+  --atelier-wash-sage: rgba(255, 255, 255, 0.04);
+  --atelier-wash-slate: rgba(255, 255, 255, 0.04);
+  --atelier-wash-claret: rgba(255, 255, 255, 0.04);
+  --atelier-cloud: #1a1a1a;
+  background-color: #0d0d0d;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
 }
 
 .dark .atelier-home::before {
   background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 18%, transparent 34%, rgba(195, 135, 98, 0.06) 58%, transparent 74%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%);
-  opacity: 0.82;
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.035) 18%, transparent 34%, rgba(255, 255, 255, 0.025) 58%, transparent 74%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 18%);
+  opacity: 0.7;
 }
 
+/* 顶部淡金光晕 — 保留氛围，去掉彩色噪点 */
 .dark .atelier-home::after {
   background:
-    radial-gradient(circle at 82% 88%, rgba(154, 108, 98, 0.16), transparent 24%),
-    radial-gradient(circle at 22% 34%, rgba(150, 103, 71, 0.16), transparent 28%);
+    radial-gradient(ellipse 60% 42% at 50% 0%, rgba(233, 169, 105, 0.06), transparent 70%);
   mix-blend-mode: screen;
-  opacity: 0.32;
+  opacity: 0.9;
 }
 
 .dark .atelier-hero-copy {
