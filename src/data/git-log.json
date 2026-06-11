@@ -1,5 +1,41 @@
 [
   {
+    "hash": "75b61c9",
+    "date": "2026-06-11T01:42:36+08:00",
+    "message": "fix: Lightbox 重构为全屏分层布局，彻底解决竖图黑屏",
+    "author": "zyi"
+  },
+  {
+    "hash": "49c87e1",
+    "date": "2026-06-11T00:54:54+08:00",
+    "message": "fix: 修复超高竖图预览黑屏",
+    "author": "zyi"
+  },
+  {
+    "hash": "e80fe5f",
+    "date": "2026-06-11T00:24:44+08:00",
+    "message": "feat: 相册瓦片流真实比例 + 照片点赞功能",
+    "author": "zyi"
+  },
+  {
+    "hash": "d275a02",
+    "date": "2026-06-11T00:01:33+08:00",
+    "message": "fix: 修复相册预览大片黑屏留白 + 图片尺寸",
+    "author": "zyi"
+  },
+  {
+    "hash": "d9885ba",
+    "date": "2026-06-10T23:39:53+08:00",
+    "message": "fix: 修复相册预览黑屏 + 加下载按钮 + 手机端优化",
+    "author": "zyi"
+  },
+  {
+    "hash": "e12a25d",
+    "date": "2026-06-09T11:59:24+08:00",
+    "message": "style: 配色微调——锈橙主调 + 烟蓝侧边栏图标 + 新增 5 个交互组件",
+    "author": "zyi"
+  },
+  {
     "hash": "d521738",
     "date": "2026-06-05T01:15:27+08:00",
     "message": "feat: 交互组件支持传参复用 + 新增 4 个交互组件",
@@ -562,41 +598,5 @@
     "date": "2026-04-14T03:09:07+08:00",
     "message": "修复 sentry-integration 兼容 @sentry/nextjs v10",
     "author": "006784"
-  },
-  {
-    "hash": "5be23b1",
-    "date": "2026-04-14T03:04:01+08:00",
-    "message": "升级 UI/UX 日系杂志风格 & 后端增强",
-    "author": "006784"
-  },
-  {
-    "hash": "eae131a",
-    "date": "2026-04-10T09:40:10+05:30",
-    "message": "优化",
-    "author": "006784"
-  },
-  {
-    "hash": "3d7f3ae",
-    "date": "2026-04-04T18:08:24+05:30",
-    "message": "修复",
-    "author": "006784"
-  },
-  {
-    "hash": "f32cfca",
-    "date": "2026-04-03T06:41:00+05:30",
-    "message": "Fix admin session persistence and protect private routes",
-    "author": "006784"
-  },
-  {
-    "hash": "046c485",
-    "date": "2026-04-03T06:19:20+05:30",
-    "message": "Harden admin auth and clean project warnings",
-    "author": "006784"
-  },
-  {
-    "hash": "3baf40b",
-    "date": "2026-03-31T10:06:14+05:30",
-    "message": "添加 CLAUDE.md 项目上下文文档",
-    "author": "李诗雅"
   }
 ]

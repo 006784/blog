@@ -686,26 +686,38 @@ function Lightbox({
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
+  const imageSources = useMemo(
+    () => Array.from(new Set([photo.url, photo.thumbnail_url].filter(Boolean))) as string[],
+    [photo.thumbnail_url, photo.url]
+  );
+  const [activeSourceIndex, setActiveSourceIndex] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const activeImageSrc = imageSources[activeSourceIndex] ?? '';
 
   // 切换照片时重置加载状态
   useEffect(() => {
+    setActiveSourceIndex(0);
     setImgLoaded(false);
     setImgError(false);
-  }, [photo.id]);
+  }, [photo.id, photo.thumbnail_url, photo.url]);
 
   // 兜底：缓存命中的图片可能在 onLoad 绑定前就完成，导致 onLoad 不触发、画面卡黑屏。
   // 挂载/换图后检查 img.complete 主动补一次 loaded。
   useEffect(() => {
+    if (!activeImageSrc) {
+      setImgError(true);
+      return;
+    }
+
     const img = imgRef.current;
     if (img && img.complete) {
       if (img.naturalWidth > 0) setImgLoaded(true);
       else setImgError(true);
     }
-  }, [photo.id]);
+  }, [activeImageSrc]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -729,9 +741,10 @@ function Lightbox({
     setDownloading(true);
     try {
       // 跨域图片用 blob 强制下载（普通 a[download] 对跨域无效）
-      const res = await fetch(photo.url, { mode: 'cors' });
+      const downloadSrc = photo.url || activeImageSrc;
+      const res = await fetch(downloadSrc, { mode: 'cors' });
       const blob = await res.blob();
-      const ext = (photo.url.split('.').pop() || 'jpg').split('?')[0];
+      const ext = (downloadSrc.split('.').pop() || 'jpg').split('?')[0];
       const name = (photo.title?.trim() || 'photo').replace(/[\\/:*?"<>|]/g, '_');
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -743,10 +756,22 @@ function Lightbox({
       URL.revokeObjectURL(objUrl);
     } catch {
       // 退路：blob 失败（如 CORS 限制）则新标签打开，用户可右键保存
-      window.open(photo.url, '_blank', 'noopener');
+      window.open(photo.url || activeImageSrc, '_blank', 'noopener');
     } finally {
       setDownloading(false);
     }
+  }
+
+  function handleImageError() {
+    const nextIndex = activeSourceIndex + 1;
+    if (imageSources[nextIndex]) {
+      setActiveSourceIndex(nextIndex);
+      setImgLoaded(false);
+      setImgError(false);
+      return;
+    }
+
+    setImgError(true);
   }
 
   const hasInfo = photo.title || photo.description || photo.location || photo.taken_at;
@@ -759,7 +784,7 @@ function Lightbox({
       className="fixed inset-0 z-50 bg-black"
       onClick={onClose}
     >
-      {/* 图片层：直接铺满整个视口，object-contain 保证任意比例完整居中、永不黑屏 */}
+      {/* 图片层：直接铺满整个视口，object-contain 保证任意比例完整居中 */}
       {/* Loading spinner */}
       {!imgLoaded && !imgError && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -769,27 +794,40 @@ function Lightbox({
 
       {/* Error state */}
       {imgError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/40 pointer-events-none">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-white/50">
           <ImageIcon className="w-12 h-12" />
-          <p className="text-sm">图片加载失败</p>
+          <p className="text-sm">图片加载失败，原图地址可能已失效或格式不被浏览器支持。</p>
+          {(photo.url || photo.thumbnail_url) && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(photo.url || photo.thumbnail_url, '_blank', 'noopener');
+              }}
+              className="mt-2 rounded-lg bg-white/10 px-3 py-2 text-sm text-white transition-colors hover:bg-white/20"
+            >
+              在新标签打开
+            </button>
+          )}
         </div>
       )}
 
-      {/* Image — 全屏绝对定位 + padding 留出顶/底栏空间 */}
-      {!imgError && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          ref={imgRef}
-          key={photo.id}
-          src={photo.url}
-          alt={photo.title || '照片'}
-          className="absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-300 px-2 sm:px-16 py-16"
-          style={{ opacity: imgLoaded ? 1 : 0 }}
-          onClick={e => e.stopPropagation()}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => setImgError(true)}
-          draggable={false}
-        />
+      {/* Image — 外层 padding 留出顶/底栏空间，避免直接给替换元素加 padding */}
+      {!imgError && activeImageSrc && (
+        <div className="absolute inset-0 px-2 py-16 sm:px-16" onClick={e => e.stopPropagation()}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            ref={imgRef}
+            key={activeImageSrc}
+            src={activeImageSrc}
+            alt={photo.title || '照片'}
+            className="h-full w-full object-contain select-none transition-opacity duration-300"
+            style={{ opacity: imgLoaded ? 1 : 0 }}
+            onLoad={() => setImgLoaded(true)}
+            onError={handleImageError}
+            draggable={false}
+          />
+        </div>
       )}
 
       {/* Top bar — 浮层 */}
