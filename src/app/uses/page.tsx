@@ -29,6 +29,8 @@ function getCategoryMeta(cat: string) {
   return CATEGORY_META[cat] ?? { label: cat, icon: '📦' };
 }
 
+const SECTION_ACCENTS = ['var(--color-orange-500)', 'var(--color-smoke-blue-400)', 'var(--color-primary-500)'];
+
 function UsesSkeleton() {
   return (
     <div className="space-y-10">
@@ -88,8 +90,10 @@ export default function UsesPage() {
   ];
 
   return (
-    <div className="min-h-screen px-6 py-16 sm:px-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="relative min-h-screen overflow-hidden px-6 py-16 sm:px-8">
+      <div className="pointer-events-none absolute right-[6%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-orange-100)_0%,transparent_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-[4%] h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative mx-auto max-w-6xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,7 +114,10 @@ export default function UsesPage() {
             </div>
             <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style={{ background: 'color-mix(in srgb, var(--color-primary-500) 15%, transparent)', color: 'var(--color-primary-500)' }}
+                >
                   <Boxes className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
@@ -150,6 +157,7 @@ export default function UsesPage() {
           <div className="space-y-10">
             {categoryOrder.map((category, ci) => {
               const meta = getCategoryMeta(category);
+              const accent = SECTION_ACCENTS[ci % SECTION_ACCENTS.length];
               return (
                 <motion.section
                   key={category}
@@ -158,7 +166,12 @@ export default function UsesPage() {
                   transition={{ delay: ci * 0.07 }}
                 >
                   <div className="mb-5 flex items-center gap-3">
-                    <span className="text-lg">{meta.icon}</span>
+                    <div
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base"
+                      style={{ background: `color-mix(in srgb, ${accent} 15%, transparent)` }}
+                    >
+                      {meta.icon}
+                    </div>
                     <div className="flex items-center gap-3">
                       <h2 className="text-lg font-semibold text-ink">
                         {meta.label}
@@ -177,7 +190,7 @@ export default function UsesPage() {
                         >
                           <div
                             className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-                            style={{ boxShadow: 'var(--neu-shadow-sm)', background: 'var(--surface-base)' }}
+                            style={{ boxShadow: 'var(--neu-shadow-sm)', background: `color-mix(in srgb, ${accent} 8%, var(--surface-base))` }}
                           >
                             {item.icon_url ? (
                               <UsesIcon

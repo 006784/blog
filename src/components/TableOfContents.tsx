@@ -100,9 +100,14 @@ export function TableOfContents({ content, className = '' }: TableOfContentsProp
     <>
       {/* 桌面端侧边目录 */}
       <nav className={`hidden xl:block ${className}`}>
-        <div className="sticky top-24 max-h-[calc(100dvh-120px)] overflow-y-auto pr-4">
-          <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-            <List className="w-4 h-4" />
+        <div className="sticky top-24 max-h-[calc(100dvh-120px)] overflow-y-auto rounded-2xl border border-(--border-default) bg-(--surface-panel) p-4 shadow-(--shadow-sm)">
+          <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <span
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+              style={{ background: 'color-mix(in srgb, var(--color-smoke-blue-400) 15%, transparent)', color: 'var(--color-smoke-blue-400)' }}
+            >
+              <List className="h-3.5 w-3.5" />
+            </span>
             目录
           </h4>
           <ul className="space-y-2 text-sm">

@@ -43,7 +43,10 @@ function GitCommitSection() {
     <div className="mt-12 space-y-6">
       {/* 分节标题 */}
       <div className="flex items-center gap-4">
-        <span className="shrink-0 flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold bg-(--surface-overlay) text-teal-500 shadow-(--neu-inset)">
+        <span
+          className="shrink-0 flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold shadow-(--neu-inset)"
+          style={{ background: 'color-mix(in srgb, var(--color-orange-500) 15%, transparent)', color: 'var(--color-orange-500)' }}
+        >
           <GitCommit className="h-3.5 w-3.5" />
           代码提交
         </span>
@@ -192,8 +195,9 @@ export default function TimelinePage() {
   const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a));
 
   return (
-    <div className="min-h-screen px-6 py-16 sm:px-8">
-      <div className="mx-auto max-w-5xl space-y-8">
+    <div className="relative min-h-screen overflow-hidden px-6 py-16 sm:px-8">
+      <div className="pointer-events-none absolute right-[8%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative mx-auto max-w-5xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -214,7 +218,10 @@ export default function TimelinePage() {
             </div>
             <Card variant="glass" padding="sm" className="w-full max-w-sm rounded-2xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-teal-500">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style={{ background: 'color-mix(in srgb, var(--color-smoke-blue-400) 15%, transparent)', color: 'var(--color-smoke-blue-400)' }}
+                >
                   <Milestone className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">

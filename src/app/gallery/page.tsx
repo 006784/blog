@@ -7,7 +7,7 @@ import {
   Camera, Image as ImageIcon, Plus, X, Heart, MapPin,
   Calendar, Folder, Trash2, ZoomIn, ChevronLeft, ChevronRight,
   Grid3X3, LayoutGrid, Sparkles, Upload, Shield, Edit2, Save,
-  Download, Loader2
+  Download, Loader2, Compass
 } from 'lucide-react';
 import { MultiImageUploader } from '@/components/ImageUploader';
 import { Badge } from '@/components/ui/Badge';
@@ -160,16 +160,46 @@ export default function GalleryPage() {
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-xl">
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Photos</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{photos.length}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in srgb, var(--color-orange-500) 15%, transparent)', color: 'var(--color-orange-500)' }}
+                  >
+                    <Camera className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Photos</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{photos.length}</p>
+                  </div>
+                </div>
               </Card>
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Albums</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{albums.length}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in srgb, var(--color-smoke-blue-400) 15%, transparent)', color: 'var(--color-smoke-blue-400)' }}
+                  >
+                    <Folder className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Albums</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{albums.length}</p>
+                  </div>
+                </div>
               </Card>
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Current View</p>
-                <p className="mt-2 text-lg font-semibold text-neutral-900">{activeAlbumName}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in srgb, var(--color-primary-500) 15%, transparent)', color: 'var(--color-primary-500)' }}
+                  >
+                    <Compass className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Current View</p>
+                    <p className="mt-1 truncate text-lg font-semibold text-neutral-900">{activeAlbumName}</p>
+                  </div>
+                </div>
               </Card>
             </div>
           </div>
@@ -437,7 +467,7 @@ function PhotoCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 12) * 0.03 }}
-      className={`group relative mb-4 cursor-pointer overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) ${
+      className={`group relative mb-4 cursor-pointer overflow-hidden rounded-2xl border border-(--border-default) bg-(--surface-panel) shadow-(--shadow-sm) transition-all duration-300 hover:-translate-y-1 hover:border-(--color-smoke-blue-300) hover:shadow-(--shadow-lg) ${
         square ? 'aspect-square' : ''
       }`}
       onClick={onClick}

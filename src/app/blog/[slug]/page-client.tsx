@@ -400,7 +400,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="rounded-2xl border border-(--border-default) bg-(--surface-panel) p-6 shadow-(--shadow-lg) backdrop-blur md:p-10"
+          className="rounded-2xl border border-(--border-default) border-t-4 border-t-(--color-orange-500) bg-(--surface-panel) p-6 shadow-(--shadow-lg) backdrop-blur md:p-10"
         >
           <Badge className="mb-4 px-3 py-1">
             {categoryLabel(post.category)}

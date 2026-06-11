@@ -23,8 +23,10 @@ export default function CollectionsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen px-6 py-16 sm:px-8">
-      <div className="mx-auto max-w-5xl">
+    <div className="relative min-h-screen overflow-hidden px-6 py-16 sm:px-8">
+      <div className="pointer-events-none absolute right-[6%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-orange-100)_0%,transparent_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-[4%] h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -49,7 +51,10 @@ export default function CollectionsPage() {
               className="w-full max-w-sm rounded-2xl"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-overlay) text-(--color-primary-600)">
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style={{ background: 'color-mix(in srgb, var(--color-primary-500) 15%, transparent)', color: 'var(--color-primary-500)' }}
+                >
                   <Layers3 className="h-5 w-5" />
                 </div>
                 <div className="space-y-1">
@@ -94,7 +99,14 @@ export default function CollectionsPage() {
                     padding="sm"
                     className="flex h-full flex-col overflow-hidden rounded-2xl transition duration-(--duration-normal) hover:-translate-y-1 hover:shadow-(--shadow-xl)"
                   >
-                    <div className="relative h-40 overflow-hidden rounded-[calc(var(--radius-2xl)-8px)] bg-[linear-gradient(135deg,var(--surface-overlay),var(--surface-raised))]">
+                    <div
+                      className="relative h-40 overflow-hidden rounded-[calc(var(--radius-2xl)-8px)]"
+                      style={
+                        col.cover_image
+                          ? undefined
+                          : { background: `linear-gradient(135deg, color-mix(in srgb, ${col.color || 'var(--color-primary-500)'} 20%, var(--surface-overlay)), var(--surface-raised))` }
+                      }
+                    >
                       {col.cover_image ? (
                         <Image
                           src={col.cover_image}

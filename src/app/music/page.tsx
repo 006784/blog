@@ -674,20 +674,31 @@ export default function MusicPage() {
   ];
 
   return (
-    <div className="min-h-screen px-4 pb-32 pt-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl space-y-6">
+    <div className="relative min-h-screen overflow-hidden px-4 pb-32 pt-12 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute right-[6%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-orange-100)_0%,transparent_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-[4%] h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+
+      <div className="relative mx-auto max-w-3xl space-y-6">
 
         {/* 页头 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-end justify-between gap-4">
-            <div>
-              <h1 className="font-mincho text-3xl font-semibold tracking-tight text-ink">歌单</h1>
-              <p className="mt-1 text-sm text-ink-muted">
-                最近反复播放的那些歌
-                {!loading && songs.length > 0 && (
-                  <span className="ml-2 text-ink-ghost">· {songs.length} 首</span>
-                )}
-              </p>
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                style={{ background: 'color-mix(in srgb, var(--color-orange-500) 15%, transparent)', color: 'var(--color-orange-500)' }}
+              >
+                <Disc3 className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="font-mincho text-3xl font-semibold tracking-tight text-ink">歌单</h1>
+                <p className="mt-1 text-sm text-ink-muted">
+                  最近反复播放的那些歌
+                  {!loading && songs.length > 0 && (
+                    <span className="ml-2 text-ink-ghost">· {songs.length} 首</span>
+                  )}
+                </p>
+              </div>
             </div>
             {isAdmin && (
               <button

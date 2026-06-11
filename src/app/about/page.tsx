@@ -58,21 +58,25 @@ const interests = [
     icon: Code2,
     label: '编程',
     description: '喜欢把复杂问题拆开，再做成顺手好用的产品。',
+    color: 'var(--color-orange-500)',
   },
   {
     icon: Palette,
     label: '设计',
     description: '关注排版、节奏和细节，希望页面既清晰也耐看。',
+    color: 'var(--color-smoke-blue-400)',
   },
   {
     icon: Coffee,
     label: '咖啡',
     description: '一杯热咖啡，通常是一个想法开始落地的信号。',
+    color: 'var(--color-primary-500)',
   },
   {
     icon: Music,
     label: '音乐',
     description: '写代码和写文章时，音乐总能把状态慢慢拉回来。',
+    color: 'var(--color-orange-500)',
   },
 ];
 
@@ -102,9 +106,9 @@ export default function AboutPage() {
   }>;
 
   const highlightStats = [
-    { label: '核心技能', value: `${skills.length}+` },
-    { label: '成长阶段', value: `${experiences.length} 段` },
-    { label: '关注方向', value: `${interests.length} 类` },
+    { label: '核心技能', value: `${skills.length}+`, icon: Code2, color: 'var(--color-orange-500)' },
+    { label: '成长阶段', value: `${experiences.length} 段`, icon: Briefcase, color: 'var(--color-smoke-blue-400)' },
+    { label: '关注方向', value: `${interests.length} 类`, icon: Heart, color: 'var(--color-primary-500)' },
   ];
 
   const profileHighlights = [
@@ -137,7 +141,7 @@ export default function AboutPage() {
     <div className="relative min-h-screen overflow-hidden px-4 pb-16 pt-12 sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[8%] top-20 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-primary-200)_0%,transparent_72%)] opacity-35 blur-3xl" />
-        <div className="absolute bottom-0 right-[10%] h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--surface-overlay)_0%,transparent_70%)] opacity-70 blur-3xl" />
+        <div className="absolute bottom-0 right-[10%] h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
       </div>
 
       <div className="relative mx-auto flex max-w-6xl flex-col gap-10">
@@ -195,10 +199,23 @@ export default function AboutPage() {
                     padding="sm"
                     className="rounded-xl bg-(--surface-base)"
                   >
-                    <p className="text-sm text-neutral-500">{item.label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-neutral-900">
-                      {item.value}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style={{
+                          background: `color-mix(in srgb, ${item.color} 15%, transparent)`,
+                          color: item.color,
+                        }}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm text-neutral-500">{item.label}</p>
+                        <p className="mt-1 text-2xl font-semibold text-neutral-900">
+                          {item.value}
+                        </p>
+                      </div>
+                    </div>
                   </Card>
                 ))}
               </div>
@@ -378,7 +395,13 @@ export default function AboutPage() {
                     padding="sm"
                     className="h-full rounded-2xl bg-(--surface-base)"
                   >
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary-100),var(--surface-overlay))] text-(--color-primary-700)">
+                    <div
+                      className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                      style={{
+                        background: `color-mix(in srgb, ${interest.color} 15%, transparent)`,
+                        color: interest.color,
+                      }}
+                    >
                       <interest.icon className="h-5 w-5" />
                     </div>
                     <p className="text-lg font-semibold text-neutral-900">

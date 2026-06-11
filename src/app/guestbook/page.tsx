@@ -187,8 +187,10 @@ export default function GuestbookPage() {
   );
 
   return (
-    <div className="min-h-screen px-4 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl space-y-8">
+    <div className="relative min-h-screen overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute right-[6%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-orange-100)_0%,transparent_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-[4%] h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative mx-auto max-w-5xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -209,12 +211,32 @@ export default function GuestbookPage() {
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-md">
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Messages</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{messages.length}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in srgb, var(--color-orange-500) 15%, transparent)', color: 'var(--color-orange-500)' }}
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Messages</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{messages.length}</p>
+                  </div>
+                </div>
               </Card>
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Pinned</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{pinnedCount}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in srgb, var(--color-primary-500) 15%, transparent)', color: 'var(--color-primary-500)' }}
+                  >
+                    <Pin className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Pinned</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{pinnedCount}</p>
+                  </div>
+                </div>
               </Card>
             </div>
           </div>

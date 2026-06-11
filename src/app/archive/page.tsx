@@ -87,6 +87,8 @@ export default function ArchivePage() {
     0
   );
 
+  const yearAccents = ['var(--color-orange-500)', 'var(--color-smoke-blue-400)', 'var(--color-primary-500)'];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -96,8 +98,10 @@ export default function ArchivePage() {
   }
 
   return (
-    <div className="min-h-screen py-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen overflow-hidden py-20">
+      <div className="pointer-events-none absolute right-[6%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-orange-100)_0%,transparent_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-[4%] h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 页面标题 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -119,7 +123,9 @@ export default function ArchivePage() {
           {/* 时间线轴 */}
           <div className="absolute left-6 top-0 bottom-0 w-px" style={{ background: 'var(--line)' }} />
 
-          {archives.map((yearData, yearIndex) => (
+          {archives.map((yearData, yearIndex) => {
+            const accent = yearAccents[yearIndex % yearAccents.length];
+            return (
             <motion.div
               key={yearData.year}
               initial={{ opacity: 0, x: -20 }}
@@ -132,7 +138,10 @@ export default function ArchivePage() {
                 onClick={() => toggleYear(yearData.year)}
                 className="flex items-center gap-4 mb-4 group"
               >
-                <div className="relative z-10 w-12 h-12 flex items-center justify-center font-bold border border-(--line)" style={{ background: 'var(--paper-deep)', color: 'var(--gold)' }}>
+                <div
+                  className="relative z-10 w-12 h-12 flex items-center justify-center rounded-xl font-bold border border-(--line)"
+                  style={{ background: `color-mix(in srgb, ${accent} 15%, transparent)`, color: accent }}
+                >
                   {expandedYears.includes(yearData.year) ? (
                     <ChevronDown className="w-6 h-6" />
                   ) : (
@@ -140,8 +149,10 @@ export default function ArchivePage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold group-hover:text-(--gold) transition-colors">
-                    {yearData.year}
+                  <h2 className="text-2xl font-bold transition-colors" style={{ color: 'var(--ink)' }}>
+                    <span className="group-hover:opacity-80 transition-opacity" style={{ color: accent }}>
+                      {yearData.year}
+                    </span>
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {yearData.months.reduce((acc, m) => acc + m.posts.length, 0)} 篇文章
@@ -159,7 +170,7 @@ export default function ArchivePage() {
                 >
                   {yearData.months.map((monthData) => (
                     <div key={monthData.month} className="mb-6">
-                      <h3 className="text-lg font-semibold mb-3 text-(--gold)" style={{ fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.1em' }}>
+                      <h3 className="text-lg font-semibold mb-3" style={{ color: accent, fontFamily: 'var(--font-garamond)', fontStyle: 'italic', letterSpacing: '0.1em' }}>
                         {monthNames[monthData.month - 1]}
                       </h3>
                       <div className="space-y-3">
@@ -208,7 +219,8 @@ export default function ArchivePage() {
                 </motion.div>
               )}
             </motion.div>
-          ))}
+            );
+          })}
 
           {archives.length === 0 && (
             <div className="text-center py-20">

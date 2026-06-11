@@ -217,7 +217,7 @@ function BlogPageContent() {
 
       <div className="journal-shell">
         <section className="journal-hero surface-hero relative overflow-hidden p-6 md:p-10">
-          <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(195,135,98,0.18)_0%,rgba(195,135,98,0)_68%)]" />
+          <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(196,98,45,0.18)_0%,rgba(196,98,45,0)_68%)]" />
           <div className="pointer-events-none absolute -bottom-10 left-0 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(116,132,107,0.13)_0%,rgba(116,132,107,0)_72%)]" />
 
           <div className="journal-hero-grid">

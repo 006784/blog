@@ -622,8 +622,10 @@ export default function LinksPage() {
   );
 
   return (
-    <div className="min-h-screen px-6 py-16 sm:px-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="relative min-h-screen overflow-hidden px-6 py-16 sm:px-8">
+      <div className="pointer-events-none absolute right-[6%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-orange-100)_0%,transparent_70%)] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-[4%] h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative mx-auto max-w-6xl space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -644,12 +646,29 @@ export default function LinksPage() {
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-md">
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">All Links</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{links.length}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: 'color-mix(in srgb, var(--color-smoke-blue-400) 15%, transparent)', color: 'var(--color-smoke-blue-400)' }}
+                  >
+                    <Globe className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">All Links</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{links.length}</p>
+                  </div>
+                </div>
               </Card>
               <Card variant="glass" padding="sm" className="rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Featured</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{featured.length}</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-(--surface-overlay)">
+                    <Star className="h-5 w-5 fill-(--color-warning) text-(--color-warning)" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Featured</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900">{featured.length}</p>
+                  </div>
+                </div>
               </Card>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { BarChart3, Calendar, Clock, Lock, PenLine, Search } from 'lucide-react';
 import { Diary } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
 import { DiaryTheme, applyThemeVars } from '@/lib/diary/themes';
@@ -27,6 +28,13 @@ const VIEW_LABELS: Record<View, string> = {
   editor: '写作',
   report: '报告',
   search: '搜索',
+};
+const VIEW_ICONS: Record<View, typeof Calendar> = {
+  calendar: Calendar,
+  timeline: Clock,
+  editor: PenLine,
+  report: BarChart3,
+  search: Search,
 };
 
 function getNextDate(date: string): string {
@@ -208,6 +216,12 @@ export default function DiaryPage() {
         style={{ background: 'var(--d-bg)', fontFamily: 'var(--d-font-title)' }}
       >
         <div className="text-center p-8">
+          <div
+            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border"
+            style={{ borderColor: 'var(--d-border)', color: 'var(--d-accent)' }}
+          >
+            <Lock className="h-5 w-5" />
+          </div>
           <p className="text-2xl mb-2" style={{ color: 'var(--d-ink)' }}>日记本</p>
           <p className="text-sm mb-6" style={{ color: 'var(--d-ink-3)', letterSpacing: '.1em' }}>私密内容，请先登录</p>
           <button
@@ -253,21 +267,25 @@ export default function DiaryPage() {
 
           {/* View tabs — desktop only（手机端用底部导航）*/}
           <div className="hidden md:flex h-full">
-            {(Object.keys(VIEW_LABELS) as View[]).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className="px-4 h-full text-xs relative transition-colors"
-                style={{
-                  color: view === v ? 'var(--d-ink)' : 'var(--d-ink-3)',
-                  fontFamily: 'var(--d-font-title)',
-                  letterSpacing: '.15em',
-                  borderBottom: view === v ? '1px solid var(--d-accent)' : '1px solid transparent',
-                }}
-              >
-                {VIEW_LABELS[v]}
-              </button>
-            ))}
+            {(Object.keys(VIEW_LABELS) as View[]).map((v) => {
+              const Icon = VIEW_ICONS[v];
+              return (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className="flex h-full items-center gap-1.5 px-4 text-xs relative transition-colors"
+                  style={{
+                    color: view === v ? 'var(--d-ink)' : 'var(--d-ink-3)',
+                    fontFamily: 'var(--d-font-title)',
+                    letterSpacing: '.15em',
+                    borderBottom: view === v ? '1px solid var(--d-accent)' : '1px solid transparent',
+                  }}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {VIEW_LABELS[v]}
+                </button>
+              );
+            })}
           </div>
 
           {/* Mobile: current view label */}
@@ -467,21 +485,25 @@ export default function DiaryPage() {
           className="md:hidden diary-bottom-nav fixed bottom-0 left-0 right-0 border-t flex"
           style={{ borderColor: 'var(--d-border)', background: 'var(--d-bg)', height: 52, zIndex: 40 }}
         >
-          {(Object.keys(VIEW_LABELS) as View[]).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className="diary-nav-tab flex-1 flex flex-col items-center justify-center gap-0.5 relative"
-              style={{ color: view === v ? 'var(--d-ink)' : 'var(--d-ink-3)' }}
-            >
-              {view === v && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6" style={{ height: 1, background: 'var(--d-accent)' }} />
-              )}
-              <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: 'var(--d-font-title)' }}>
-                {VIEW_LABELS[v]}
-              </span>
-            </button>
-          ))}
+          {(Object.keys(VIEW_LABELS) as View[]).map((v) => {
+            const Icon = VIEW_ICONS[v];
+            return (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className="diary-nav-tab flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+                style={{ color: view === v ? 'var(--d-ink)' : 'var(--d-ink-3)' }}
+              >
+                {view === v && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6" style={{ height: 1, background: 'var(--d-accent)' }} />
+                )}
+                <Icon className="h-3.5 w-3.5" />
+                <span className="text-[9px] tracking-widest uppercase" style={{ fontFamily: 'var(--d-font-title)' }}>
+                  {VIEW_LABELS[v]}
+                </span>
+              </button>
+            );
+          })}
         </nav>
       </DiaryShell>
 
@@ -508,19 +530,25 @@ function DiarySearchView({ diaries, onOpen }: { diaries: Diary[]; onOpen: (d: Di
     <div className="p-6" style={{ fontFamily: 'var(--d-font-body)' }}>
       {/* Search input */}
       <div className="flex items-center gap-3 mb-6">
-        <input
-          type="search"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="搜索日记标题或内容…"
-          autoFocus
-          className="flex-1 rounded-xl border px-4 py-2.5 text-sm outline-none transition-all focus:ring-2"
-          style={{
-            background: 'var(--d-bg)',
-            borderColor: 'var(--d-border)',
-            color: 'var(--d-ink)',
-          }}
-        />
+        <div className="relative flex-1">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
+            style={{ color: 'var(--d-ink-3)' }}
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="搜索日记标题或内容…"
+            autoFocus
+            className="w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:ring-2"
+            style={{
+              background: 'var(--d-bg)',
+              borderColor: 'var(--d-border)',
+              color: 'var(--d-ink)',
+            }}
+          />
+        </div>
         <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as SearchOptions['sortBy'])}
@@ -536,7 +564,10 @@ function DiarySearchView({ diaries, onOpen }: { diaries: Diary[]; onOpen: (d: Di
 
       {/* Results */}
       {query && results.length === 0 ? (
-        <p className="text-sm py-8 text-center" style={{ color: 'var(--d-ink-3)' }}>未找到匹配的日记</p>
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Search className="h-8 w-8" style={{ color: 'var(--d-ink-3)' }} />
+          <p className="text-sm" style={{ color: 'var(--d-ink-3)' }}>未找到匹配的日记</p>
+        </div>
       ) : (
         <div className="space-y-2">
           {(query ? results : []).map(r => {
@@ -560,7 +591,10 @@ function DiarySearchView({ diaries, onOpen }: { diaries: Diary[]; onOpen: (d: Di
             );
           })}
           {!query && (
-            <p className="text-sm py-8 text-center" style={{ color: 'var(--d-ink-3)' }}>输入关键词开始搜索</p>
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <Search className="h-8 w-8" style={{ color: 'var(--d-ink-3)' }} />
+              <p className="text-sm" style={{ color: 'var(--d-ink-3)' }}>输入关键词开始搜索</p>
+            </div>
           )}
         </div>
       )}

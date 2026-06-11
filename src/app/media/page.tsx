@@ -218,19 +218,37 @@ export default function MediaPage() {
             </div>
             <div className="grid w-full grid-cols-3 gap-2 sm:gap-3 lg:max-w-xl">
               <Card variant="glass" padding="sm" className="rounded-xl sm:rounded-2xl">
+                <div
+                  className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg"
+                  style={{ background: 'color-mix(in srgb, var(--color-orange-500) 15%, transparent)', color: 'var(--color-orange-500)' }}
+                >
+                  <Library className="h-4 w-4" />
+                </div>
                 <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">总记录</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">{items.length}</p>
+                <p className="mt-1 text-2xl font-semibold text-neutral-900">{items.length}</p>
               </Card>
               <Card variant="glass" padding="sm" className="rounded-xl sm:rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">已完成</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">
-                  {items.filter((item) => item.status === 'done').length}
+                <div
+                  className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg"
+                  style={{ background: 'color-mix(in srgb, var(--color-smoke-blue-400) 15%, transparent)', color: 'var(--color-smoke-blue-400)' }}
+                >
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">正在进行</p>
+                <p className="mt-1 text-2xl font-semibold text-neutral-900">
+                  {items.filter((item) => item.status === 'doing').length}
                 </p>
               </Card>
               <Card variant="glass" padding="sm" className="rounded-xl sm:rounded-2xl">
-                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">正在进行</p>
-                <p className="mt-2 text-2xl font-semibold text-neutral-900">
-                  {items.filter((item) => item.status === 'doing').length}
+                <div
+                  className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg"
+                  style={{ background: 'color-mix(in srgb, var(--color-primary-500) 15%, transparent)', color: 'var(--color-primary-500)' }}
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">已完成</p>
+                <p className="mt-1 text-2xl font-semibold text-neutral-900">
+                  {items.filter((item) => item.status === 'done').length}
                 </p>
               </Card>
             </div>

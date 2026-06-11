@@ -25,6 +25,17 @@
   --accent-orange: var(--color-orange-500);
   --accent-orange-light: var(--color-orange-200);
 
+  /* 浅色下 primary 色阶 = teal（与暗色 .dark 中的 color-primary-* 暖金色阶语义对应，供三色轮换图标徽章等使用） */
+  --color-primary-100: var(--color-teal-100);
+  --color-primary-200: var(--color-teal-200);
+  --color-primary-300: var(--color-teal-300);
+  --color-primary-400: var(--color-teal-400);
+  --color-primary-500: var(--color-teal-500);
+  --color-primary-600: var(--color-teal-600);
+  --color-primary-700: var(--color-teal-700);
+  --color-primary-800: var(--color-teal-800);
+  --color-primary-900: var(--color-teal-900);
+
   /* 字体 — 现代无衬线 */
   --font-sans:     'Plus Jakarta Sans', 'Inter', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --font-display:  'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
@@ -5143,13 +5154,13 @@ textarea:focus {
   --atelier-accent: var(--gold);
   --atelier-accent-strong: var(--gold);
   --atelier-accent-soft: var(--gold-light);
-  --atelier-accent-copper: #b8784c;
+  --atelier-accent-copper: var(--color-orange-500);
   --atelier-accent-sage: #74846b;
-  --atelier-accent-slate: #71879b;
+  --atelier-accent-slate: var(--color-smoke-blue-400);
   --atelier-accent-claret: #97685e;
-  --atelier-wash-copper: rgba(195, 135, 98, 0.18);
+  --atelier-wash-copper: color-mix(in srgb, var(--color-orange-500) 18%, transparent);
   --atelier-wash-sage: rgba(120, 144, 112, 0.16);
-  --atelier-wash-slate: rgba(111, 134, 154, 0.15);
+  --atelier-wash-slate: color-mix(in srgb, var(--color-smoke-blue-400) 15%, transparent);
   --atelier-wash-claret: rgba(154, 108, 98, 0.12);
   --atelier-cloud: #fffaf6;
   position: relative;
@@ -6017,7 +6028,7 @@ textarea:focus {
 .atelier-feed-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 32px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
-  border-color: rgba(27,130,114,0.35);
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 35%, transparent);
 }
 
 .atelier-feed-card.is-emphasized {
@@ -6140,9 +6151,9 @@ textarea:focus {
 }
 
 .atelier-feed-card .atelier-pill {
-  border-color: rgba(27,130,114,0.2);
-  background: rgba(27,130,114,0.08);
-  color: var(--color-teal-500);
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 20%, transparent);
+  background: color-mix(in srgb, var(--atelier-card-accent) 8%, transparent);
+  color: var(--atelier-card-accent);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
 }
@@ -6338,7 +6349,7 @@ textarea:focus {
 .journal-hero.surface-hero {
   border-radius: 2rem !important;
   background:
-    radial-gradient(420px circle at 90% 10%, rgba(195, 135, 98, 0.14), transparent 44%),
+    radial-gradient(420px circle at 90% 10%, rgba(196, 98, 45, 0.14), transparent 44%),
     radial-gradient(360px circle at 10% 100%, rgba(116, 132, 107, 0.12), transparent 44%),
     linear-gradient(180deg, rgba(255, 251, 244, 0.94) 0%, rgba(255, 246, 235, 0.82) 100%) !important;
 }
@@ -6829,13 +6840,13 @@ textarea:focus {
   --atelier-line: rgba(255, 255, 255, 0.1);
   --atelier-accent: var(--gold);
   --atelier-accent-strong: var(--gold);
-  --atelier-accent-copper: var(--gold);
+  --atelier-accent-copper: var(--color-orange-500);
   --atelier-accent-sage: #808080;
-  --atelier-accent-slate: #808080;
+  --atelier-accent-slate: var(--color-smoke-blue-400);
   --atelier-accent-claret: var(--gold);
-  --atelier-wash-copper: rgba(255, 255, 255, 0.04);
+  --atelier-wash-copper: color-mix(in srgb, var(--color-orange-500) 10%, transparent);
   --atelier-wash-sage: rgba(255, 255, 255, 0.04);
-  --atelier-wash-slate: rgba(255, 255, 255, 0.04);
+  --atelier-wash-slate: color-mix(in srgb, var(--color-smoke-blue-400) 10%, transparent);
   --atelier-wash-claret: rgba(255, 255, 255, 0.04);
   --atelier-cloud: #1a1a1a;
   background-color: #0d0d0d;
@@ -7325,6 +7336,30 @@ textarea:focus {
   border: 1px solid var(--border-default) !important;
   box-shadow: var(--neu-shadow-sm) !important;
   padding: 0.875rem 1rem !important;
+}
+
+/* ── Blog 列表页：三个统计 tile 用品牌三色做顶部强调条 ── */
+.journal-hero-stats .metric-tile {
+  position: relative;
+  overflow: hidden;
+}
+
+.journal-hero-stats .metric-tile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-orange-500), transparent 85%);
+}
+
+.journal-hero-stats .metric-tile:nth-child(2)::before {
+  background: linear-gradient(90deg, var(--color-smoke-blue-400), transparent 85%);
+}
+
+.journal-hero-stats .metric-tile:nth-child(3)::before {
+  background: linear-gradient(90deg, var(--color-primary-500), transparent 85%);
 }
 
 /* ── Back link on blog post ── */

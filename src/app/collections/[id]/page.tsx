@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Layers3 } from 'lucide-react';
 import { getCollectionById, getPostsByCollection, type Collection, type Post, formatDate } from '@/lib/supabase';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
@@ -69,8 +69,9 @@ export default function CollectionDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen px-6 py-16">
-      <div className="mx-auto max-w-3xl">
+    <div className="relative min-h-screen overflow-hidden px-6 py-16">
+      <div className="pointer-events-none absolute right-[8%] top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--color-smoke-blue-100)_0%,transparent_70%)] opacity-50 blur-3xl" />
+      <div className="relative mx-auto max-w-3xl">
         {/* 面包屑 */}
         <div className="mb-8">
           <Breadcrumb
@@ -97,7 +98,7 @@ export default function CollectionDetailPage({ params }: Props) {
           animate={{ opacity: 1, y: 0 }}
           className="mb-10"
         >
-          {collection.cover_image && (
+          {collection.cover_image ? (
             <div className="relative h-48 rounded-2xl overflow-hidden mb-6 bg-(--surface-overlay)">
               <Image
                 src={collection.cover_image}
@@ -107,13 +108,32 @@ export default function CollectionDetailPage({ params }: Props) {
               />
               <div className="absolute inset-0 bg-linear-to-t from-(--surface-base)/80 to-transparent" />
             </div>
+          ) : (
+            <div
+              className="relative mb-6 flex h-32 items-center justify-center overflow-hidden rounded-2xl text-6xl font-semibold opacity-20"
+              style={{
+                background: `linear-gradient(135deg, color-mix(in srgb, ${collection.color || 'var(--color-primary-500)'} 20%, var(--surface-overlay)), var(--surface-raised))`,
+                color: collection.color || 'var(--color-primary-500)',
+              }}
+            >
+              {collection.name.charAt(0)}
+            </div>
           )}
 
           <h1 className="text-3xl font-semibold tracking-tight text-ink">{collection.name}</h1>
           {collection.description && (
             <p className="mt-2 text-ink-secondary">{collection.description}</p>
           )}
-          <p className="mt-2 text-sm text-ink-muted">{collection.post_count} 篇文章</p>
+          <div
+            className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm"
+            style={{
+              background: `color-mix(in srgb, ${collection.color || 'var(--color-primary-500)'} 15%, transparent)`,
+              color: collection.color || 'var(--color-primary-500)',
+            }}
+          >
+            <Layers3 className="h-3.5 w-3.5" />
+            {collection.post_count} 篇文章
+          </div>
         </motion.div>
 
         {/* 文章列表 */}
