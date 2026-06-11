@@ -76,29 +76,34 @@
   --ink-ghost:     var(--color-neutral-400);
   --line:          var(--border-default);
   --line-light:    var(--surface-overlay);
-  --gold:          var(--color-teal-500);
-  --gold-light:    var(--color-teal-300);
+  --gold:          #e9a969;
+  --gold-light:    #f3c79a;
   --accent-orange: var(--color-orange-500);
 
   --background: var(--surface-base);
   --foreground: var(--color-neutral-900);
   --card: var(--surface-raised);
   --card-foreground: var(--color-neutral-900);
-  --primary: var(--color-teal-500);
-  --primary-foreground: #0c3e36;
+  --primary: #e9a969;
+  --primary-foreground: #1a1208;
   --secondary: var(--surface-raised);
   --secondary-foreground: var(--color-neutral-700);
   --muted: var(--color-neutral-400);
   --muted-foreground: var(--color-neutral-500);
-  --accent: var(--color-orange-500);
-  --accent-foreground: #ffffff;
+  --accent: #e9a969;
+  --accent-foreground: #1a1208;
   --border: var(--border-default);
-  --ring: var(--color-teal-500);
+  --ring: #e9a969;
 
-  --gradient-start: var(--color-teal-500);
-  --gradient-end:   var(--color-teal-400);
+  --gradient-start: #e9a969;
+  --gradient-end:   #f3c79a;
   --gradient-accent-start: var(--color-orange-500);
   --gradient-accent-end:   var(--color-orange-400);
+
+  /* 暗色下金棕色阶（供 color-primary-* 引用，统一暖色） */
+  --color-primary-500: #e9a969;
+  --color-primary-600: #d68f4f;
+  --color-primary-700: #f0be9a;
 }
 
 @theme inline {
@@ -223,20 +228,22 @@ body::after {
     radial-gradient(ellipse 45% 35% at 100% 0%,  color-mix(in srgb, var(--color-orange-200) 15%, transparent), transparent);
 }
 
-/* 深色模式 */
+/* 深色模式：纯黑底 + 淡网格纹理（参考壁纸站风格） */
 .dark body::before,
 [data-theme="dark"] body::before {
   background-image:
-    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+  /* 中心略亮、四周渐隐，网格更精致不刺眼 */
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, black 40%, transparent 100%);
 }
 
 .dark body::after,
 [data-theme="dark"] body::after {
   background:
-    radial-gradient(ellipse 55% 40% at 0% 0%,   color-mix(in srgb, var(--color-teal-800) 25%, transparent), transparent),
-    radial-gradient(ellipse 45% 35% at 100% 0%,  color-mix(in srgb, var(--color-orange-900) 20%, transparent), transparent);
+    radial-gradient(ellipse 60% 45% at 50% 0%, rgba(233,169,105,0.05), transparent 70%);
 }
 
 .studio-grid {

@@ -132,55 +132,63 @@
 /* ── Dark mode ──────────────────────────────────────────────── */
 .dark,
 [data-theme="dark"] {
-  --color-teal-500: #4ecfb0;
-  --color-teal-400: #6ddfc5;
-  --color-teal-600: #3ab89a;
+  /* 暗色下把 teal 强调色重映射为暖金，统一全站点缀色（去青绿） */
+  --color-teal-200: #3a2c1c;
+  --color-teal-300: #f3c79a;
+  --color-teal-400: #f0be9a;
+  --color-teal-500: #e9a969;
+  --color-teal-600: #d68f4f;
+  --color-teal-700: #b86443;
+  --color-teal-800: #2a1f14;
+  --color-teal-900: #1a1208;
   --color-orange-500: #e07848;
   --color-orange-400: #f09060;
   --color-smoke-blue-400: #9dbfd6;
   --color-smoke-blue-500: #7ba3be;
   --color-smoke-blue-100: #1e303d;
 
-  --color-neutral-50:  #1e2220;
-  --color-neutral-100: #262c2a;
-  --color-neutral-200: #323836;
-  --color-neutral-300: #48504e;
-  --color-neutral-400: #687070;
-  --color-neutral-500: #8a9490;
-  --color-neutral-600: #aab4b0;
-  --color-neutral-700: #ccd4d0;
-  --color-neutral-800: #e0e8e4;
-  --color-neutral-900: #f0f5f2;
+  /* 纯黑中性灰阶（去除偏绿色调，贴近高级暗色） */
+  --color-neutral-50:  #141414;
+  --color-neutral-100: #1c1c1c;
+  --color-neutral-200: #262626;
+  --color-neutral-300: #3a3a3a;
+  --color-neutral-400: #5c5c5c;
+  --color-neutral-500: #808080;
+  --color-neutral-600: #a3a3a3;
+  --color-neutral-700: #c4c4c4;
+  --color-neutral-800: #e0e0e0;
+  --color-neutral-900: #f4f4f4;
 
-  --surface-base:    #1e2422;
-  --surface-raised:  #262e2a;
-  --surface-overlay: #1a201e;
-  --surface-sunken:  #161c1a;
-  --surface-panel:   rgba(30, 38, 34, 0.94);
-  --surface-glass:   rgba(38, 46, 42, 0.78);
+  /* 近黑背景，逐级抬升 */
+  --surface-base:    #0d0d0d;
+  --surface-raised:  #1a1a1a;
+  --surface-overlay: #141414;
+  --surface-sunken:  #080808;
+  --surface-panel:   rgba(20, 20, 20, 0.94);
+  --surface-glass:   rgba(26, 26, 26, 0.80);
 
-  --surface-card-start:     rgba(38, 46, 42, 0.96);
-  --surface-card-end:       rgba(28, 36, 32, 0.92);
-  --surface-card-highlight: rgba(255, 255, 255, 0.05);
-  --surface-card-shadow:    rgba(0, 0, 0, 0.35);
-  --surface-card-shadow-strong: rgba(0, 0, 0, 0.50);
-  --surface-button-shadow:  rgba(78, 207, 176, 0.22);
-  --surface-accent-ring:    rgba(255, 128, 64, 0.20);
+  --surface-card-start:     rgba(26, 26, 26, 0.96);
+  --surface-card-end:       rgba(18, 18, 18, 0.92);
+  --surface-card-highlight: rgba(255, 255, 255, 0.06);
+  --surface-card-shadow:    rgba(0, 0, 0, 0.45);
+  --surface-card-shadow-strong: rgba(0, 0, 0, 0.65);
+  --surface-button-shadow:  rgba(233, 154, 105, 0.20);
+  --surface-accent-ring:    rgba(233, 154, 105, 0.22);
 
-  --neu-light: rgba(255, 255, 255, 0.04);
-  --neu-dark:  rgba(0, 0, 0, 0.35);
+  --neu-light: rgba(255, 255, 255, 0.03);
+  --neu-dark:  rgba(0, 0, 0, 0.50);
   --neu-shadow: 6px 6px 14px var(--neu-dark), -6px -6px 14px var(--neu-light);
   --neu-shadow-sm: 3px 3px 8px var(--neu-dark), -3px -3px 8px var(--neu-light);
   --neu-inset: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
 
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong:  rgba(255, 255, 255, 0.22);
-  --border-teal:    rgba(78, 207, 176, 0.22);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.20);
+  --border-teal:    rgba(233, 154, 105, 0.22);
 
-  --shadow-xs: 2px 2px 6px rgba(0,0,0,0.35);
-  --shadow-sm: 4px 4px 10px rgba(0,0,0,0.38);
-  --shadow-md: 8px 8px 18px rgba(0,0,0,0.40);
-  --shadow-lg: 12px 12px 28px rgba(0,0,0,0.42);
-  --shadow-xl: 18px 18px 40px rgba(0,0,0,0.45);
-  --shadow-2xl: 24px 24px 56px rgba(0,0,0,0.50);
+  --shadow-xs: 2px 2px 6px rgba(0,0,0,0.45);
+  --shadow-sm: 4px 4px 10px rgba(0,0,0,0.48);
+  --shadow-md: 8px 8px 18px rgba(0,0,0,0.52);
+  --shadow-lg: 12px 12px 28px rgba(0,0,0,0.55);
+  --shadow-xl: 18px 18px 40px rgba(0,0,0,0.58);
+  --shadow-2xl: 24px 24px 56px rgba(0,0,0,0.65);
 }
