@@ -36,15 +36,15 @@
   --color-primary-800: var(--color-teal-800);
   --color-primary-900: var(--color-teal-900);
 
-  /* 字体 — 现代无衬线 */
-  --font-sans:     'Plus Jakarta Sans', 'Inter', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  --font-display:  'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
-  --font-inter:    'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  /* 字体 — 现代无衬线（中文用 Noto Sans SC，替代系统默认黑体） */
+  --font-sans:     'Plus Jakarta Sans', 'Noto Sans SC', 'Inter', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-display:  'Plus Jakarta Sans', 'Noto Sans SC', 'Inter', -apple-system, sans-serif;
+  --font-inter:    'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
   --font-mono:     'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, monospace;
   /* 保留旧字体变量指向新字体，避免组件报错 */
-  --font-mincho:   'Plus Jakarta Sans', 'Inter', sans-serif;
-  --font-jp-serif: 'Plus Jakarta Sans', 'Inter', sans-serif;
-  --font-garamond: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-mincho:   'Plus Jakarta Sans', 'Noto Sans SC', 'Inter', sans-serif;
+  --font-jp-serif: 'Plus Jakarta Sans', 'Noto Sans SC', 'Inter', sans-serif;
+  --font-garamond: 'Plus Jakarta Sans', 'Noto Sans SC', 'Inter', sans-serif;
   /* ================================================ */
 
   --background: var(--surface-base);
