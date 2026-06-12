@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { BarChart3, Calendar, Clock, Lock, PenLine, Search } from 'lucide-react';
 import { Diary } from '@/lib/supabase';
 import { useAdmin } from '@/components/AdminProvider';
@@ -11,9 +12,14 @@ import { DiaryEditor } from '@/components/diary/DiaryEditor';
 import { CalendarView } from '@/components/diary/CalendarView';
 import { TimelineView } from '@/components/diary/TimelineView';
 import { MoodReport } from '@/components/diary/MoodReport';
-import { ExportModal } from '@/components/diary/ExportModal';
 import { extractDiaryEditorState, getDiaryLocationLabel } from '@/lib/diary-editor';
 import { DiarySearchService, type SearchOptions } from '@/lib/diary/search-service';
+
+// jszip 体积较大，仅在打开导出弹窗时才加载
+const ExportModal = dynamic(
+  () => import('@/components/diary/ExportModal').then((m) => m.ExportModal),
+  { ssr: false }
+);
 
 // ── Helpers ────────────────────────────────────────────────────
 function getSavedTheme(): DiaryTheme {

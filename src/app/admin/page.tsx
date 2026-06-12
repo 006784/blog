@@ -10,7 +10,7 @@ import {
   Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck,
   Link2, MessageSquare, Music2, Mail, Check, Star, Pin, ExternalLink, Upload, Send, ClipboardList
 } from 'lucide-react';
-import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
+import dynamic from 'next/dynamic';
 import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -31,6 +31,12 @@ import {
 } from '@/lib/supabase';
 
 const PAGE_SIZE = 20;
+
+// recharts 体积较大，仅在打开"统计"标签时才加载
+const AnalyticsDashboard = dynamic(
+  () => import('@/components/analytics/AnalyticsDashboard').then((m) => m.AnalyticsDashboard),
+  { ssr: false, loading: () => <div className="h-64 rounded-2xl bg-secondary animate-pulse" /> }
+);
 
 type TabType = 'overview' | 'posts' | 'photos' | 'diary' | 'albums' | 'analytics' | 'practice' | 'security' | 'links' | 'guestbook' | 'music' | 'subscribers';
 
@@ -59,18 +65,20 @@ export default function AdminPage() {
   async function loadAllData() {
     try {
       setLoading(true);
-      const [postsData, photosData, diariesData, albumsData] = await Promise.all([
+      const [postsResult, photosResult, diariesResult, albumsResult] = await Promise.allSettled([
         getAllPosts(),
         getAllPhotos(),
         getDiaries(false),
         getAlbums()
       ]);
-      setPosts(postsData);
-      setPhotos(photosData);
-      setDiaries(diariesData);
-      setAlbums(albumsData);
-    } catch (error) {
-      console.error('加载数据失败:', error);
+      if (postsResult.status === 'fulfilled') setPosts(postsResult.value);
+      else console.error('加载文章失败:', postsResult.reason);
+      if (photosResult.status === 'fulfilled') setPhotos(photosResult.value);
+      else console.error('加载照片失败:', photosResult.reason);
+      if (diariesResult.status === 'fulfilled') setDiaries(diariesResult.value);
+      else console.error('加载日记失败:', diariesResult.reason);
+      if (albumsResult.status === 'fulfilled') setAlbums(albumsResult.value);
+      else console.error('加载相册失败:', albumsResult.reason);
     } finally {
       setLoading(false);
     }

@@ -11,14 +11,15 @@ Sentry.init({
   integrations: [Sentry.replayIntegration()],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+  // 个人博客流量小，全量采样无意义，且每次导航都会触发上报请求，降低到 10%
+  tracesSampleRate: 0.1,
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
   // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
+  // 关闭常规会话录屏（持续运行的 MutationObserver 有运行时开销），
+  // 仅在报错时通过 replaysOnErrorSampleRate 触发回放
+  replaysSessionSampleRate: 0,
 
   // Define how likely Replay events are sampled when an error occurs.
   replaysOnErrorSampleRate: 1.0,

@@ -135,8 +135,22 @@ export function ParticleBackground() {
 
     const animate = () => {
       drawParticles(ctx, canvas.width, canvas.height);
-      if (!reducedMotionRef.current) {
+      if (!reducedMotionRef.current && !document.hidden) {
         animationRef.current = requestAnimationFrame(animate);
+      } else {
+        animationRef.current = null;
+      }
+    };
+
+    // 标签页切到后台时停止动画循环，避免后台持续占用 CPU
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+          animationRef.current = null;
+        }
+      } else if (!reducedMotionRef.current && animationRef.current === null) {
+        animate();
       }
     };
 
@@ -144,6 +158,7 @@ export function ParticleBackground() {
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', handleMouseMove);
     mediaQuery.addEventListener('change', handleReducedMotion);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     if (reducedMotionRef.current) {
       drawParticles(ctx, canvas.width, canvas.height);
@@ -155,6 +170,7 @@ export function ParticleBackground() {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
       mediaQuery.removeEventListener('change', handleReducedMotion);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }

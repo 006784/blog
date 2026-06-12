@@ -21,7 +21,10 @@ export async function GET() {
       throw error;
     }
 
-    return ok(normalizeProfile(data?.value ?? defaultProfile));
+    const response = ok(normalizeProfile(data?.value ?? defaultProfile));
+    // 公开数据，所有访客每次进入页面都会请求 —— 允许 CDN 边缘缓存，减少重复查库
+    response.headers.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=300');
+    return response;
   } catch (error) {
     logger.error('读取个人资料失败:', error);
     return err('读取个人资料失败');
