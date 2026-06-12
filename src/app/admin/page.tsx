@@ -8,7 +8,8 @@ import {
   Eye, EyeOff, TrendingUp, LogOut, Lock,
   ArrowLeft, BarChart2, Film, Clock, Wrench, BookMarked, Sparkles, Code2,
   Fingerprint, MonitorSmartphone, KeyRound, ShieldCheck,
-  Link2, MessageSquare, Music2, Mail, Check, Star, Pin, ExternalLink, Upload, Send, ClipboardList
+  Link2, MessageSquare, Music2, Mail, Check, Star, Pin, ExternalLink, Upload, Send, ClipboardList,
+  ShieldAlert, AlertTriangle, Ban, Users
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { PracticeAdminTab } from '@/components/practice/admin/PracticeAdminTab';
@@ -1330,6 +1331,186 @@ function SubscribersTab() {
   );
 }
 
+// ── Security Monitor Section ─────────────────────────────────────────────────
+
+interface SecurityEventRow {
+  id: string;
+  event_type: string;
+  severity: string;
+  ip_address: string;
+  path: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+interface SecuritySummary {
+  byType: Record<string, number>;
+  topIPs: { ip: string; count: number }[];
+  topPaths: { path: string; count: number }[];
+  todayFlagged: number;
+  weekFlagged: number;
+  today404: number;
+  week404: number;
+}
+
+interface BannedIPInfo {
+  ip: string;
+  bannedUntil: number;
+}
+
+interface TrendDay {
+  date: string;
+  pv: number;
+  uv: number;
+}
+
+const SECURITY_EVENT_LABELS: Record<string, string> = {
+  scanner_probe: '扫描器探测',
+  sqli_xss_pattern: 'SQL注入/XSS尝试',
+  malicious_ua: '恶意工具UA',
+  unknown_404: '未知404',
+  login_failure: '登录失败',
+  ip_banned: 'IP封禁',
+};
+
+const SECURITY_SEVERITY_TONE: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
+  critical: 'error',
+  high: 'error',
+  medium: 'warning',
+  low: 'info',
+};
+
+function SecurityMonitorSection() {
+  const [events, setEvents] = useState<SecurityEventRow[]>([]);
+  const [summary, setSummary] = useState<SecuritySummary | null>(null);
+  const [bannedIPs, setBannedIPs] = useState<BannedIPInfo[]>([]);
+  const [visitorTrend, setVisitorTrend] = useState<TrendDay[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/admin/security-events?days=7', { credentials: 'include' }).then(r => r.json()),
+      fetch('/api/stats?type=trend&days=7', { credentials: 'include' }).then(r => r.json()),
+    ]).then(([secRes, trendRes]) => {
+      if (secRes?.data) {
+        setEvents(secRes.data.flaggedEvents ?? []);
+        setSummary(secRes.data.summary ?? null);
+        setBannedIPs(secRes.data.bannedIPs ?? []);
+      }
+      if (trendRes?.data) setVisitorTrend(trendRes.data);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const cardCls = 'rounded-2xl border border-(--border-default) bg-(--surface-panel) p-5 shadow-(--shadow-xs)';
+  const rowCls = 'flex items-start justify-between gap-4 rounded-xl border border-(--border-default) bg-(--surface-base) p-3.5';
+  const statCls = 'rounded-xl border border-(--border-default) bg-(--surface-base) p-3';
+
+  const todayVisitors = visitorTrend.at(-1)?.uv ?? 0;
+  const weekVisitors = visitorTrend.reduce((sum, d) => sum + d.uv, 0);
+
+  return (
+    <div className={cardCls}>
+      <h3 className="mb-4 flex items-center gap-2 font-semibold">
+        <ShieldAlert className="h-5 w-5 text-primary" />
+        访问与威胁监控
+      </h3>
+
+      {loading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />加载中…</div>
+      ) : (
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className={statCls}>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Users className="h-3.5 w-3.5" />今日访客</div>
+              <div className="mt-1 text-xl font-semibold">{todayVisitors}</div>
+            </div>
+            <div className={statCls}>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Users className="h-3.5 w-3.5" />7日访客</div>
+              <div className="mt-1 text-xl font-semibold">{weekVisitors}</div>
+            </div>
+            <div className={statCls}>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><AlertTriangle className="h-3.5 w-3.5" />今日可疑请求</div>
+              <div className="mt-1 text-xl font-semibold">{summary?.todayFlagged ?? 0}</div>
+            </div>
+            <div className={statCls}>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Ban className="h-3.5 w-3.5" />当前封禁 IP</div>
+              <div className="mt-1 text-xl font-semibold">{bannedIPs.length}</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="mb-2 text-sm font-medium text-muted-foreground">
+              最近可疑请求{events.length > 0 && `（近 7 天 ${summary?.weekFlagged ?? events.length}）`}
+            </h4>
+            {events.length === 0 ? (
+              <p className="py-2 text-sm text-muted-foreground">近 7 天未发现扫描器探测或异常请求</p>
+            ) : (
+              <div className="space-y-2">
+                {events.slice(0, 8).map(e => (
+                  <div key={e.id} className={rowCls}>
+                    <div className="min-w-0">
+                      <div className="mb-1 flex items-center gap-2">
+                        <Badge variant="soft" tone={SECURITY_SEVERITY_TONE[e.severity] ?? 'default'}>
+                          {SECURITY_EVENT_LABELS[e.event_type] ?? e.event_type}
+                        </Badge>
+                        <span className="truncate font-mono text-xs text-muted-foreground">{e.path || '—'}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {e.ip_address} · {new Date(e.created_at).toLocaleString('zh-CN')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {(summary?.topIPs?.length ?? 0) > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <h4 className="mb-2 text-sm font-medium text-muted-foreground">高频可疑 IP</h4>
+                <div className="space-y-1.5">
+                  {summary!.topIPs.map(item => (
+                    <div key={item.ip} className="flex items-center justify-between text-sm">
+                      <span className="font-mono text-xs">{item.ip}</span>
+                      <span className="text-muted-foreground">{item.count} 次</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="mb-2 text-sm font-medium text-muted-foreground">高频探测路径</h4>
+                <div className="space-y-1.5">
+                  {summary!.topPaths.map(item => (
+                    <div key={item.path} className="flex items-center justify-between text-sm">
+                      <span className="truncate font-mono text-xs">{item.path}</span>
+                      <span className="text-muted-foreground">{item.count} 次</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {bannedIPs.length > 0 && (
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-muted-foreground">当前封禁 IP</h4>
+              <div className="space-y-1.5">
+                {bannedIPs.map(b => (
+                  <div key={b.ip} className="flex items-center justify-between text-sm">
+                    <span className="font-mono text-xs">{b.ip}</span>
+                    <span className="text-muted-foreground">解封于 {new Date(b.bannedUntil).toLocaleString('zh-CN')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Security Tab ───────────────────────────────────────────────────────────────
 
 interface SessionInfo {
@@ -1411,6 +1592,9 @@ function SecurityTab() {
 
   return (
     <div className="space-y-6">
+      {/* 访问与威胁监控 */}
+      <SecurityMonitorSection />
+
       {/* Sessions */}
       <div className={cardCls}>
         <div className="mb-4 flex items-center justify-between">

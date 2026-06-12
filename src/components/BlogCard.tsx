@@ -76,11 +76,80 @@ function getCategoryStyle(category: string) {
   );
 }
 
+// 技术分类下按标签细分领域，让博客列表的强调色有节奏感，避免全部撞成同一种颜色
+type SubtopicKey = 'ai-tools' | 'ai-coding' | 'cs-basics' | 'productivity';
+
+const subtopicKeywords: Record<Exclude<SubtopicKey, 'ai-tools'>, string[]> = {
+  'ai-coding': [
+    'Claude Code', 'Cursor', 'MCP', 'Copilot', 'GitHub Copilot', 'AI Agent', 'LangGraph',
+    'CrewAI', 'Codex', 'Ollama', 'n8n', 'DeepSeek', 'API', '本地部署', 'Next.js', 'Vercel',
+    '建站', '博客搭建', '开发工具', '开发效率', '开发教程', '开发者指南', 'Hooks', 'MAI-Code',
+    'Docker', '自托管',
+  ],
+  'cs-basics': [
+    'JWT', '正则表达式', 'regex', '哈希', '密码学', 'HTTP', '计算机网络', '网络基础', 'TCP/IP',
+    'OSI模型', '网络分层', 'Java', 'JDK', 'JVM', '编程入门', '身份认证', '状态码', '封装与解封装',
+    '互联网发展史',
+  ],
+  productivity: [
+    '虚拟卡', '支付', '省钱攻略', 'AI赚钱', '变现', 'AI效率', '工作效率', '谷歌商店', 'Google Play',
+    'VPN', 'Roogoo', '币安', '海外服务',
+  ],
+};
+
+const subtopicOrder: Exclude<SubtopicKey, 'ai-tools'>[] = ['ai-coding', 'cs-basics', 'productivity'];
+
+const subtopicStyle: Record<SubtopicKey, { label: string; accent: string; accentSoft: string; accentDeep: string; chip: string }> = {
+  'ai-tools': {
+    label: 'AI 工具',
+    accent: '#3c78d8',
+    accentSoft: 'rgba(60, 120, 216, 0.14)',
+    accentDeep: '#1f4ea7',
+    chip: 'rgba(60, 120, 216, 0.16)',
+  },
+  'ai-coding': {
+    label: 'AI 编程',
+    accent: '#df7b4c',
+    accentSoft: 'rgba(223, 123, 76, 0.16)',
+    accentDeep: '#a8512b',
+    chip: 'rgba(223, 123, 76, 0.18)',
+  },
+  'cs-basics': {
+    label: '计算机基础',
+    accent: '#45a58d',
+    accentSoft: 'rgba(69, 165, 141, 0.16)',
+    accentDeep: '#2d7b67',
+    chip: 'rgba(69, 165, 141, 0.18)',
+  },
+  productivity: {
+    label: '效率与变现',
+    accent: '#ae5e39',
+    accentSoft: 'rgba(174, 94, 57, 0.15)',
+    accentDeep: '#7f4125',
+    chip: 'rgba(174, 94, 57, 0.18)',
+  },
+};
+
+function getSubtopicStyle(tags: string[] = []) {
+  for (const key of subtopicOrder) {
+    if (tags.some((tag) => subtopicKeywords[key].includes(tag))) {
+      return subtopicStyle[key];
+    }
+  }
+  return subtopicStyle['ai-tools'];
+}
+
 export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify }: BlogCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
   const { isAdmin } = useAdmin();
-  const palette = getCategoryStyle(post.category);
+  const palette =
+    !post.isDemo && post.category === 'tech'
+      ? getSubtopicStyle(post.tags)
+      : getCategoryStyle(post.category);
+  const visibleTags = post.tags.slice(0, featured ? 4 : 3);
+  const hiddenTagCount = Math.max(post.tags.length - visibleTags.length, 0);
+  const issueNumber = String(index + 1).padStart(2, '0');
 
   const frameStyle = {
     '--blog-card-accent': palette.accent,
@@ -158,11 +227,15 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
         </motion.div>
       )}
 
-      <Link href={`/blog/${post.slug}`} className="ground-news-card-link relative z-10 block h-full">
+      <Link
+        href={`/blog/${post.slug}`}
+        className="ground-news-card-link relative z-10 block h-full"
+        aria-label={`阅读文章：${post.title}`}
+      >
         <div className="ground-news-card-shell">
           <div className="ground-news-card-topline">
             <span className="ground-news-card-kicker">
-              {featured ? 'Feature story' : 'Archive story'}
+              No. {issueNumber} · {featured ? 'Feature story' : 'Archive story'}
             </span>
             <div className="ground-news-card-topline-right">
               {post.isDemo && (
@@ -208,7 +281,7 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
 
             {post.tags.length > 0 && (
               <div className="ground-news-card-tags">
-                {post.tags.slice(0, featured ? 4 : 3).map((tag) => (
+                {visibleTags.map((tag) => (
                   <Badge
                     key={tag}
                     variant="soft"
@@ -218,6 +291,9 @@ export function BlogCard({ post, index = 0, featured = false, onDelete, onNotify
                     {tag}
                   </Badge>
                 ))}
+                {hiddenTagCount > 0 && (
+                  <span className="ground-news-card-tag-more">+{hiddenTagCount}</span>
+                )}
               </div>
             )}
           </div>

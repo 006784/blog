@@ -7,6 +7,7 @@
  */
 import { RateLimiterMemory, type RateLimiterRes } from 'rate-limiter-flexible';
 import { logger } from './logger';
+import { logSecurityEvent } from './security-monitor';
 
 // ─── 速率限制器实例 ────────────────────────────────────────────────────────────
 
@@ -49,6 +50,14 @@ export function banIP(ip: string): void {
   bannedIPs.set(ip, Date.now() + BAN_DURATION_MS);
 }
 
+/** 当前仍在封禁期内的 IP 列表，供管理后台展示 */
+export function getBannedIPs(): { ip: string; bannedUntil: number }[] {
+  const now = Date.now();
+  return Array.from(bannedIPs.entries())
+    .filter(([, until]) => until > now)
+    .map(([ip, bannedUntil]) => ({ ip, bannedUntil }));
+}
+
 // ─── 主检查函数 ───────────────────────────────────────────────────────────────
 
 export type RateLimitResult =
@@ -83,6 +92,12 @@ export async function recordLoginFailure(ip: string): Promise<void> {
     // 超过 10 次 → 封禁
     banIP(ip);
     logger.warn('IP 封禁（登录失败 10 次）', { ip, module: 'auth' });
+    void logSecurityEvent({
+      eventType: 'ip_banned',
+      severity: 'critical',
+      ip,
+      detail: { reason: 'login_failure_threshold' },
+    });
     await sendBanAlert(ip);
   }
 }

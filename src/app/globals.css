@@ -7621,16 +7621,32 @@ textarea:focus {
 }
 
 .ground-news-card {
-  border: 2px solid var(--blog-card-accent);
+  border: 1px solid color-mix(in srgb, var(--blog-card-accent) 28%, rgba(82, 60, 40, 0.16));
   background:
-    radial-gradient(circle at top right, var(--blog-card-accent-soft), transparent 34%),
+    radial-gradient(circle at top right, var(--blog-card-accent-soft), transparent 32%),
+    linear-gradient(135deg, color-mix(in srgb, var(--blog-card-accent-soft) 52%, transparent), transparent 42%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(251, 247, 241, 0.96) 100%);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.72) inset,
     0 24px 46px -34px rgba(53, 34, 18, 0.28);
+  isolation: isolate;
   transition:
+    border-color 0.32s var(--ease-default, cubic-bezier(0.25, 0.1, 0.25, 1)),
     transform 0.32s var(--ease-default, cubic-bezier(0.25, 0.1, 0.25, 1)),
     box-shadow 0.32s var(--ease-default, cubic-bezier(0.25, 0.1, 0.25, 1));
+}
+
+.ground-news-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--blog-card-accent), transparent 72%) top left / 100% 3px no-repeat,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 34%);
+  opacity: 0.72;
+  transition: opacity 0.32s var(--ease-default);
 }
 
 .dark .ground-news-card {
@@ -7649,6 +7665,12 @@ textarea:focus {
 .ground-news-card-link {
   text-decoration: none;
   color: inherit;
+}
+
+.ground-news-card-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--blog-card-accent) 30%, transparent);
+  outline-offset: 5px;
+  border-radius: 1.7rem;
 }
 
 .ground-news-card-shell {
@@ -7685,9 +7707,9 @@ textarea:focus {
   gap: 0.35rem;
   border-radius: 999px;
   padding: 0.18rem 0.58rem;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -7727,6 +7749,7 @@ textarea:focus {
   aspect-ratio: 4 / 3;
   border: 1px solid color-mix(in srgb, var(--blog-card-accent) 24%, white);
   background: rgba(39, 29, 22, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .ground-news-card-media.is-featured {
@@ -7776,6 +7799,10 @@ textarea:focus {
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .ground-news-card-title.is-featured {
@@ -7823,7 +7850,8 @@ textarea:focus {
   gap: 0.45rem;
 }
 
-.ground-news-card-tag {
+.ground-news-card-tag,
+.ground-news-card-tag-more {
   display: inline-flex;
   align-items: center;
   gap: 0.32rem;
@@ -7831,9 +7859,20 @@ textarea:focus {
   border: 1px solid color-mix(in srgb, var(--blog-card-accent) 20%, white);
   background: color-mix(in srgb, var(--blog-card-chip) 60%, white);
   color: #4a3826;
+  min-height: 1.85rem;
 }
 
-.dark .ground-news-card-tag {
+.ground-news-card-tag-more {
+  justify-content: center;
+  min-width: 2.25rem;
+  padding-inline: 0.62rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--blog-card-accent-deep);
+}
+
+.dark .ground-news-card-tag,
+.dark .ground-news-card-tag-more {
   border-color: color-mix(in srgb, var(--blog-card-accent) 22%, transparent);
   background: color-mix(in srgb, var(--blog-card-chip) 28%, transparent);
   color: color-mix(in srgb, var(--blog-card-accent) 80%, white);
@@ -7856,6 +7895,7 @@ textarea:focus {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .ground-news-card-footer-cell.is-primary {
@@ -7922,9 +7962,14 @@ textarea:focus {
 
 .ground-news-card:hover {
   transform: translateY(-5px);
+  border-color: color-mix(in srgb, var(--blog-card-accent) 52%, rgba(82, 60, 40, 0.18));
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--blog-card-accent) 18%, white) inset,
     0 36px 64px -34px rgba(53, 34, 18, 0.38);
+}
+
+.ground-news-card:hover::before {
+  opacity: 1;
 }
 
 .dark .ground-news-card:hover {
@@ -7952,6 +7997,23 @@ textarea:focus {
 
   .ground-news-card-title.is-featured {
     font-size: 1.68rem;
+  }
+
+  .ground-news-card-shell {
+    padding: 0.72rem;
+  }
+
+  .ground-news-card-topline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ground-news-card-topline-right {
+    justify-content: flex-start;
+  }
+
+  .ground-news-card-footer {
+    grid-template-columns: 1fr;
   }
 }
 
