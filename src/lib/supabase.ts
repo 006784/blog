@@ -356,7 +356,7 @@ export async function deletePost(id: string) {
 }
 
 export async function incrementPostViews(id: string) {
-  await supabase.rpc('increment_post_views', { post_id: id });
+  await supabase.rpc('increment_post_views', { p_post_id: id });
 }
 
 export async function likePost(id: string) {

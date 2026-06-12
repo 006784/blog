@@ -708,15 +708,18 @@ CREATE POLICY "post_stats_write"  ON post_stats FOR ALL WITH CHECK (true);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_post_stats_post_id ON post_stats (post_id);
 CREATE INDEX IF NOT EXISTS idx_post_stats_views          ON post_stats (view_count DESC);
 
--- RPC：自增文章浏览数
-CREATE OR REPLACE FUNCTION increment_post_views(post_id uuid)
-RETURNS void LANGUAGE plpgsql AS $$
+-- RPC：自增文章浏览数（SECURITY DEFINER：匿名访客以 anon 角色调用，
+-- 需要绕过 posts_write 的 authenticated 限制来更新 posts.views）
+CREATE OR REPLACE FUNCTION increment_post_views(p_post_id uuid)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   INSERT INTO post_stats (post_id, view_count)
-    VALUES (post_id, 1)
+    VALUES (p_post_id, 1)
     ON CONFLICT (post_id) DO UPDATE
       SET view_count = post_stats.view_count + 1,
           updated_at = now();
+
+  UPDATE posts SET views = views + 1 WHERE id = p_post_id;
 END;
 $$;
 
