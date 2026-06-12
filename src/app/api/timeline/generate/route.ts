@@ -7,22 +7,28 @@ import { requireAdminSession } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
-const SYSTEM_PROMPT = `你是一个帮助整理人生时间线的助手。
-用户会描述他们的经历，你需要将其结构化为时间线事件列表。
+const SYSTEM_PROMPT = `你是一个帮助整理AI发展史时间线的助手。
+用户会描述一段AI技术/产业的发展历程，你需要将其结构化为时间线事件列表。
 
 每个事件必须是合法 JSON，格式：
 {
   "title": "事件标题（简洁，10字以内）",
   "description": "事件描述（可选，不超过100字）",
   "date": "YYYY-MM-DD（只有年份则用YYYY-01-01，只有年月则用YYYY-MM-01）",
-  "category": "work|education|life|achievement|travel 之一",
+  "category": "breakthrough|product|industry|tracking 之一",
   "icon": "一个相关的 emoji",
   "is_milestone": true|false（重要节点设为true）
 }
 
+分类说明：
+- breakthrough：技术突破（论文、算法、模型架构等）
+- product：模型/产品发布
+- industry：行业事件（融资、政策、市场动态等）
+- tracking：AI日报追踪（仅用于持续更新的动态节点，一般不要生成）
+
 规则：
 - 只输出 JSON 数组，不要任何额外文字或 Markdown 代码块
-- category 必须严格是 work/education/life/achievement/travel 之一
+- category 必须严格是 breakthrough/product/industry/tracking 之一
 - date 必须是合法日期字符串
 - 按时间从早到晚排序
 - 如果无法从描述中提取具体日期，合理推断
@@ -82,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证和清理每个事件
-    const VALID_CATEGORIES = new Set(['work', 'education', 'life', 'achievement', 'travel']);
+    const VALID_CATEGORIES = new Set(['breakthrough', 'product', 'industry', 'tracking']);
     const cleaned = events
       .filter((e): e is Record<string, unknown> => typeof e === 'object' && e !== null)
       .map((e) => ({
@@ -91,7 +97,7 @@ export async function POST(request: NextRequest) {
         date: String(e.date ?? '').match(/^\d{4}-\d{2}-\d{2}$/)
           ? String(e.date)
           : String(e.date ?? '2020-01-01').replace(/^(\d{4})$/, '$1-01-01'),
-        category: VALID_CATEGORIES.has(String(e.category)) ? String(e.category) : 'life',
+        category: VALID_CATEGORIES.has(String(e.category)) ? String(e.category) : 'product',
         icon: String(e.icon ?? '').slice(0, 4) || undefined,
         is_milestone: Boolean(e.is_milestone),
       }))

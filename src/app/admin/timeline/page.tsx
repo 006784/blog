@@ -25,18 +25,17 @@ import { Textarea } from '@/components/ui/Textarea';
 import { TimelineEvent } from '@/lib/supabase';
 
 const CATEGORY_OPTIONS = [
-  { value: 'work', label: '工作', color: 'bg-blue-400' },
-  { value: 'education', label: '学习', color: 'bg-emerald-400' },
-  { value: 'life', label: '生活', color: 'bg-amber-400' },
-  { value: 'achievement', label: '成就', color: 'bg-purple-400' },
-  { value: 'travel', label: '旅行', color: 'bg-rose-400' },
+  { value: 'breakthrough', label: '技术突破', color: 'bg-blue-400' },
+  { value: 'product', label: '模型发布', color: 'bg-emerald-400' },
+  { value: 'industry', label: '行业事件', color: 'bg-amber-400' },
+  { value: 'tracking', label: 'AI日报', color: 'bg-rose-400' },
 ];
 
 const EMPTY: Partial<TimelineEvent> = {
   title: '',
   description: '',
   date: '',
-  category: 'life',
+  category: 'product',
   icon: '',
   link: '',
   is_milestone: false,

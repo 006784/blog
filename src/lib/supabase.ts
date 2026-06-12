@@ -613,7 +613,7 @@ export interface TimelineEvent {
   title: string;
   description?: string;
   date: string;
-  category: 'work' | 'education' | 'life' | 'achievement' | 'travel';
+  category: 'breakthrough' | 'product' | 'industry' | 'tracking';
   icon?: string;
   image?: string;
   link?: string;
@@ -623,6 +623,16 @@ export interface TimelineEvent {
   updated_at: string;
 }
 
+export interface TimelineEventLog {
+  id: string;
+  timeline_event_id: string;
+  date: string;
+  title: string;
+  content: string;
+  link?: string;
+  created_at: string;
+}
+
 export async function getTimelineEvents() {
   const { data, error } = await supabase
     .from('timeline_events')
@@ -630,6 +640,16 @@ export async function getTimelineEvents() {
     .order('date', { ascending: false });
   if (error) { console.error('获取时间线失败:', error); return []; }
   return data as TimelineEvent[];
+}
+
+export async function getTimelineEventLogs(timelineEventId: string) {
+  const { data, error } = await supabase
+    .from('timeline_event_logs')
+    .select('*')
+    .eq('timeline_event_id', timelineEventId)
+    .order('date', { ascending: false });
+  if (error) { console.error('获取时间线日志失败:', error); return []; }
+  return data as TimelineEventLog[];
 }
 
 export async function createTimelineEvent(event: Partial<TimelineEvent>) {
