@@ -31,6 +31,121 @@ const CATEGORY_LABEL: Record<string, string> = {
   tracking: 'AI日报',
 };
 
+// ── 日志按月/周分组 ────────────────────────────────────────
+
+interface LogTimeGroup {
+  key: string;
+  label: string;
+  logs: TimelineEventLog[];
+  weeks: LogTimeGroup[] | null;
+}
+
+/** 把逐日日志按「年月 → 周」分组，单月超过7条才拆分到周一级。 */
+function groupLogsByTime(logs: TimelineEventLog[]): LogTimeGroup[] {
+  const byMonth = new Map<string, TimelineEventLog[]>();
+  for (const log of logs) {
+    const ym = log.date.slice(0, 7);
+    const list = byMonth.get(ym);
+    if (list) list.push(log);
+    else byMonth.set(ym, [log]);
+  }
+
+  return Array.from(byMonth.entries())
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([ym, monthLogs]) => {
+      const sorted = [...monthLogs].sort((a, b) => b.date.localeCompare(a.date));
+      const [year, month] = ym.split('-');
+
+      let weeks: LogTimeGroup[] | null = null;
+      if (sorted.length > 7) {
+        const byWeek = new Map<number, TimelineEventLog[]>();
+        for (const log of sorted) {
+          const day = Number(log.date.slice(8, 10));
+          const weekNo = Math.ceil(day / 7);
+          const list = byWeek.get(weekNo);
+          if (list) list.push(log);
+          else byWeek.set(weekNo, [log]);
+        }
+        weeks = Array.from(byWeek.entries())
+          .sort((a, b) => b[0] - a[0])
+          .map(([weekNo, weekLogs]) => ({
+            key: `${ym}-w${weekNo}`,
+            label: `第${weekNo}周`,
+            logs: weekLogs,
+            weeks: null,
+          }));
+      }
+
+      return {
+        key: ym,
+        label: `${year}年${Number(month)}月`,
+        logs: sorted,
+        weeks,
+      };
+    });
+}
+
+// ── 日志卡片 ──────────────────────────────────────────────
+
+function LogCard({ log }: { log: TimelineEventLog }) {
+  return (
+    <div className="rounded-xl p-3" style={{ background: 'var(--surface-base)' }}>
+      <div className="flex items-start justify-between gap-2">
+        <h4 className="text-sm font-medium text-ink">{log.title}</h4>
+        <span className="shrink-0 text-xs text-ink-muted">
+          {log.date.slice(5).replace('-', '/')}
+        </span>
+      </div>
+      <p className="mt-1 text-sm leading-6 text-ink-secondary">{log.content}</p>
+      {log.link ? (
+        <a
+          href={log.link}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-flex text-xs font-medium text-teal-600 transition hover:underline"
+        >
+          了解更多 →
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
+/** 月/周分组的可折叠小节点标题 */
+function LogGroupHeader({
+  label,
+  count,
+  open,
+  level,
+  color,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  open: boolean;
+  level: 'month' | 'week';
+  color: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-(--surface-base)"
+    >
+      <span
+        className={level === 'month' ? 'h-1.5 w-1.5 rounded-full' : 'h-1 w-1 rounded-full'}
+        style={{ background: level === 'month' ? color : 'var(--ink-ghost)' }}
+      />
+      <span className={level === 'month' ? 'text-xs font-semibold text-ink-secondary' : 'text-[11px] font-medium text-ink-muted'}>
+        {label}
+      </span>
+      <span className="text-[10px] text-ink-muted">{count} 条</span>
+      <ChevronDown className={`ml-auto h-3 w-3 text-ink-muted transition-transform ${open ? 'rotate-180' : ''}`} />
+    </button>
+  );
+}
+
 // ── 骨架 ──────────────────────────────────────────────────
 
 function TimelineSkeleton() {
@@ -59,6 +174,7 @@ export default function TimelinePage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [logsByEvent, setLogsByEvent] = useState<Record<string, TimelineEventLog[] | 'loading' | 'error'>>({});
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   const loadTimeline = useCallback(async () => {
     setLoading(true);
@@ -99,6 +215,12 @@ export default function TimelinePage() {
     } catch {
       setLogsByEvent((prev) => ({ ...prev, [id]: 'error' }));
     }
+  };
+
+  // 月/周分组默认展开最新一组，其余折叠；点击后记录用户的显式状态
+  const isGroupOpen = (key: string, defaultOpen: boolean) => expandedGroups[key] ?? defaultOpen;
+  const toggleGroup = (key: string, defaultOpen: boolean) => {
+    setExpandedGroups((prev) => ({ ...prev, [key]: !(prev[key] ?? defaultOpen) }));
   };
 
   const categories = ['all', ...Array.from(new Set(events.map((e) => e.category)))];
@@ -340,33 +462,55 @@ export default function TimelinePage() {
                         ) : null}
 
                         {isExpanded && (
-                          <div className="mt-4 space-y-3 border-t border-(--border-default) pt-4">
+                          <div className="mt-4 space-y-2 border-t border-(--border-default) pt-4">
                             {logs === 'loading' ? (
                               <p className="text-xs text-ink-muted">加载中...</p>
                             ) : logs === 'error' ? (
                               <p className="text-xs text-ink-muted">加载失败，请重试</p>
                             ) : logs && logs.length > 0 ? (
-                              logs.map((log) => (
-                                <div key={log.id} className="rounded-xl p-3" style={{ background: 'var(--surface-base)' }}>
-                                  <div className="flex items-start justify-between gap-2">
-                                    <h4 className="text-sm font-medium text-ink">{log.title}</h4>
-                                    <span className="shrink-0 text-xs text-ink-muted">
-                                      {log.date.slice(5).replace('-', '/')}
-                                    </span>
+                              groupLogsByTime(logs).map((month, mi) => {
+                                const monthOpen = isGroupOpen(month.key, mi === 0);
+                                return (
+                                  <div key={month.key} className="space-y-2">
+                                    <LogGroupHeader
+                                      label={month.label}
+                                      count={month.logs.length}
+                                      open={monthOpen}
+                                      level="month"
+                                      color={color}
+                                      onClick={() => toggleGroup(month.key, mi === 0)}
+                                    />
+                                    {monthOpen && (
+                                      <div className="space-y-2 border-l border-(--border-default) pl-3">
+                                        {month.weeks
+                                          ? month.weeks.map((week, wi) => {
+                                              const weekOpen = isGroupOpen(week.key, wi === 0);
+                                              return (
+                                                <div key={week.key} className="space-y-2">
+                                                  <LogGroupHeader
+                                                    label={week.label}
+                                                    count={week.logs.length}
+                                                    open={weekOpen}
+                                                    level="week"
+                                                    color={color}
+                                                    onClick={() => toggleGroup(week.key, wi === 0)}
+                                                  />
+                                                  {weekOpen && (
+                                                    <div className="space-y-2 border-l border-(--border-default) pl-3">
+                                                      {week.logs.map((log) => (
+                                                        <LogCard key={log.id} log={log} />
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              );
+                                            })
+                                          : month.logs.map((log) => <LogCard key={log.id} log={log} />)}
+                                      </div>
+                                    )}
                                   </div>
-                                  <p className="mt-1 text-sm leading-6 text-ink-secondary">{log.content}</p>
-                                  {log.link ? (
-                                    <a
-                                      href={log.link}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="mt-2 inline-flex text-xs font-medium text-teal-600 transition hover:underline"
-                                    >
-                                      了解更多 →
-                                    </a>
-                                  ) : null}
-                                </div>
-                              ))
+                                );
+                              })
                             ) : (
                               <p className="text-xs text-ink-muted">暂无逐日动态记录</p>
                             )}
