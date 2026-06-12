@@ -1,5 +1,95 @@
 [
   {
+    "hash": "7d2d2a6",
+    "date": "2026-06-12T18:06:39+08:00",
+    "message": "feat: 时间线展开面板按月/周分组展示逐日动态日志",
+    "author": "zyi"
+  },
+  {
+    "hash": "db97ef4",
+    "date": "2026-06-12T16:59:00+08:00",
+    "message": "feat: /timeline 改造为 AI 发展史时间线",
+    "author": "zyi"
+  },
+  {
+    "hash": "3a356d5",
+    "date": "2026-06-12T12:12:52+08:00",
+    "message": "fix: 修复文章阅读量自增 RPC 函数的参数名歧义与权限问题",
+    "author": "zyi"
+  },
+  {
+    "hash": "75c043d",
+    "date": "2026-06-12T11:47:25+08:00",
+    "message": "fix: 文章归档页查询字段错误，导致归档列表始终为空",
+    "author": "zyi"
+  },
+  {
+    "hash": "9c7a09f",
+    "date": "2026-06-12T07:41:14+08:00",
+    "message": "fix: 清理过时的 .site-main 扁平化/死代码规则，修复 /computer 推荐区阴影丢失",
+    "author": "zyi"
+  },
+  {
+    "hash": "055acdb",
+    "date": "2026-06-12T00:40:42+08:00",
+    "message": "style: 中文正文/标题改用 Noto Sans SC，替代系统默认黑体",
+    "author": "zyi"
+  },
+  {
+    "hash": "c7d17a1",
+    "date": "2026-06-12T00:29:23+08:00",
+    "message": "fix: 文章详情页恢复卡片质感 + 修复列表项间距翻倍",
+    "author": "zyi"
+  },
+  {
+    "hash": "50627c7",
+    "date": "2026-06-12T00:06:17+08:00",
+    "message": "revert: 恢复文章正文图片渲染",
+    "author": "zyi"
+  },
+  {
+    "hash": "2c04df1",
+    "date": "2026-06-12T00:02:17+08:00",
+    "message": "fix: 文章正文不再渲染图片，仅保留封面图",
+    "author": "zyi"
+  },
+  {
+    "hash": "d0a8b0e",
+    "date": "2026-06-11T23:59:41+08:00",
+    "message": "fix: 封面图去掉模糊背景大卡片，改为图片自带边框居中显示",
+    "author": "zyi"
+  },
+  {
+    "hash": "530a6b7",
+    "date": "2026-06-11T23:55:13+08:00",
+    "message": "fix: 文章封面图加模糊背景铺满，避免竖图大片留白",
+    "author": "zyi"
+  },
+  {
+    "hash": "e565b5d",
+    "date": "2026-06-11T23:36:06+08:00",
+    "message": "style: 全站页面质感提升 + 修复 primary 色阶 800/900 缺失导致文字不可见",
+    "author": "zyi"
+  },
+  {
+    "hash": "994681b",
+    "date": "2026-06-11T19:54:31+08:00",
+    "message": "fix: 文章封面图改为不裁剪缩放 + 正文图片按真实比例显示",
+    "author": "zyi"
+  },
+  {
+    "hash": "8fe6947",
+    "date": "2026-06-11T19:16:53+08:00",
+    "message": "fix: 文章封面图/正文图片限高 + 修复输入框暗色下文字不可见",
+    "author": "zyi"
+  },
+  {
+    "hash": "973a912",
+    "date": "2026-06-11T18:38:01+08:00",
+    "message": "style: 暗色全站纯黑中性化——去除首页绿/褐、博客navy、日记暖褐",
+    "author": "zyi"
+  },
+  {
     "hash": "157b201",
     "date": "2026-06-11T16:21:57+08:00",
     "message": "fix: add gallery lightbox image fallback",
@@ -507,96 +597,6 @@
     "hash": "cca21d3",
     "date": "2026-05-23T21:35:24+08:00",
     "message": "style: 圆角 & 颜色打磨——博客卡片、文章页、指标块精细化",
-    "author": "zyi"
-  },
-  {
-    "hash": "95ef856",
-    "date": "2026-05-23T21:02:06+08:00",
-    "message": "style: 全局 UI/UX 精细化打磨",
-    "author": "zyi"
-  },
-  {
-    "hash": "16a3406",
-    "date": "2026-05-23T17:53:08+08:00",
-    "message": "style: 时间线/工具箱/电脑页面视觉优化",
-    "author": "zyi"
-  },
-  {
-    "hash": "a6ab43b",
-    "date": "2026-05-23T17:45:15+08:00",
-    "message": "chore: Tailwind v4 语法迁移 + 全站样式统一清理",
-    "author": "zyi"
-  },
-  {
-    "hash": "27f7aab",
-    "date": "2026-05-23T17:37:42+08:00",
-    "message": "fix: Song platform 类型不含 youtube，改为 other",
-    "author": "zyi"
-  },
-  {
-    "hash": "c9dd7a1",
-    "date": "2026-05-23T17:32:27+08:00",
-    "message": "feat: 多语言支持 (zh/en/ko/ja) + 语言切换器",
-    "author": "zyi"
-  },
-  {
-    "hash": "8d04692",
-    "date": "2026-05-23T17:28:42+08:00",
-    "message": "feat: 每日简报功能（首页预览 + 完整归档页 + 管理编辑）",
-    "author": "zyi"
-  },
-  {
-    "hash": "753f27d",
-    "date": "2026-05-23T17:23:19+08:00",
-    "message": "feat: 歌单页重设计 + Apple Music 自动提取元数据",
-    "author": "zyi"
-  },
-  {
-    "hash": "6d573b1",
-    "date": "2026-05-23T17:16:36+08:00",
-    "message": "fix: 修正卡片深色模式文字不可见 + 加强边框与阴影对比度",
-    "author": "zyi"
-  },
-  {
-    "hash": "35cf20f",
-    "date": "2026-05-23T17:11:02+08:00",
-    "message": "fix: 写作页视觉空白、AdminFloatButton 全局化、文章移动端优化",
-    "author": "zyi"
-  },
-  {
-    "hash": "8967261",
-    "date": "2026-05-23T16:34:35+08:00",
-    "message": "feat(code): improve playground workflow",
-    "author": "zyi"
-  },
-  {
-    "hash": "a8a72ce",
-    "date": "2026-05-23T15:43:48+08:00",
-    "message": "fix: 优化文章页移动端阅读体验",
-    "author": "zyi"
-  },
-  {
-    "hash": "efe9868",
-    "date": "2026-05-23T12:55:15+08:00",
-    "message": "feat: 文章封面优先从相册随机取图，无图时回退 Unsplash",
-    "author": "zyi"
-  },
-  {
-    "hash": "d24f0f9",
-    "date": "2026-05-23T12:52:54+08:00",
-    "message": "chore: 配置现代浏览器目标，消除 CSS color-mix() 兼容性警告",
-    "author": "zyi"
-  },
-  {
-    "hash": "5a40b77",
-    "date": "2026-05-23T12:49:06+08:00",
-    "message": "style: 格子纸背景 + 首页文章卡片重设计",
-    "author": "zyi"
-  },
-  {
-    "hash": "a984c93",
-    "date": "2026-05-23T12:05:07+08:00",
-    "message": "feat: 文章发布自动从 Unsplash 生成封面图",
     "author": "zyi"
   }
 ]

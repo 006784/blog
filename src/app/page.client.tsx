@@ -853,11 +853,22 @@ export default function HomePageClient({
           </div>
         </section>
 
-        {/* ── 每日简报预览 ── */}
-        <TodayBriefingSection />
+        <section className="atelier-dashboard-strip">
+          <div className="atelier-shell">
+            <div className="atelier-section-head is-compact">
+              <div>
+                <p className="atelier-section-kicker">TODAY&ensp;·&ensp;NOTES</p>
+                <h2>今日备忘</h2>
+              </div>
+              <p>把每日简报和 AI 协作动态收进同一张工作台，首页读起来更像一本正在更新的杂志。</p>
+            </div>
 
-        {/* ── Claude 每日动态 ── */}
-        <ClaudeStatusSection />
+            <div className="atelier-dashboard-grid">
+              <TodayBriefingSection />
+              <ClaudeStatusSection />
+            </div>
+          </div>
+        </section>
 
         <section className="atelier-subscribe-section">
           <div className="atelier-shell">
@@ -932,32 +943,22 @@ function TodayBriefingSection() {
   }, []);
 
   return (
-    <section className="atelier-shell pt-12 pb-4">
+    <section className="atelier-daily-card">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="rounded-2xl overflow-hidden shadow-(--neu-shadow-sm) border border-(--border-default) border-l-4 border-l-orange-500"
-        style={{
-          background: 'color-mix(in srgb, var(--surface-raised) 91%, var(--color-orange-500) 9%)',
-        }}
+        className="atelier-daily-panel is-briefing"
       >
-        {/* 编辑头部：橙色左边框条 + 标签 + 时钟 */}
-        <div
-          className="flex items-center justify-between gap-4 px-5 sm:px-6 py-3 border-b border-(--border-default)"
-          style={{
-            background: 'color-mix(in srgb, var(--surface-raised) 82%, var(--color-orange-500) 18%)',
-          }}
-        >
+        <div className="atelier-daily-head">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+            <CalendarDays className="h-3.5 w-3.5 shrink-0" />
             <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-medium">Daily Briefing</span>
           </div>
           <LiveClock />
         </div>
 
-        {/* 简报内容 */}
-        <div className="px-5 sm:px-6 pt-5 pb-4">
+        <div className="atelier-daily-body">
           {briefing === undefined ? (
             <div className="space-y-3 py-1">
               <div className="h-5 rounded bg-(--surface-overlay) animate-pulse w-2/3" />
@@ -998,11 +999,10 @@ function TodayBriefingSection() {
           )}
         </div>
 
-        {/* 底部操作 */}
-        <div className="flex items-center justify-end px-5 sm:px-6 pb-4">
+        <div className="atelier-daily-footer">
           <Link
             href="/briefing"
-            className="flex items-center gap-1 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors"
+            className="atelier-daily-link"
           >
             查看全部简报 <ArrowRight className="h-3 w-3" />
           </Link>
@@ -1034,21 +1034,16 @@ function ClaudeStatusSection() {
   }
 
   return (
-    <section className="atelier-shell pb-4">
+    <section className="atelier-daily-card">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="rounded-2xl overflow-hidden shadow-(--neu-shadow-sm) border border-(--border-default) border-l-4 border-l-violet-500"
-        style={{ background: 'color-mix(in srgb, var(--surface-raised) 91%, #8b5cf6 9%)' }}
+        className="atelier-daily-panel is-claude"
       >
-        {/* 头部 */}
-        <div
-          className="flex items-center justify-between gap-4 px-5 sm:px-6 py-3 border-b border-(--border-default)"
-          style={{ background: 'color-mix(in srgb, var(--surface-raised) 82%, #8b5cf6 18%)' }}
-        >
+        <div className="atelier-daily-head">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+            <Sparkles className="h-3.5 w-3.5 shrink-0" />
             <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-medium">Claude · 今日动态</span>
           </div>
           {status && (
@@ -1056,8 +1051,7 @@ function ClaudeStatusSection() {
           )}
         </div>
 
-        {/* 内容 */}
-        <div className="px-5 sm:px-6 pt-5 pb-5">
+        <div className="atelier-daily-body">
           {status === undefined ? (
             <div className="space-y-3 py-1">
               <div className="h-4 rounded bg-(--surface-overlay) animate-pulse w-1/2" />
@@ -1068,7 +1062,7 @@ function ClaudeStatusSection() {
             <>
               {/* 心情 */}
               <div className="flex items-start gap-2">
-                <Heart className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
+                <Heart className="h-4 w-4 shrink-0 mt-0.5" />
                 <p className="text-sm text-ink leading-7">
                   <span className="text-ink-muted">今天的心情：</span>{status.mood}
                 </p>
@@ -1081,7 +1075,7 @@ function ClaudeStatusSection() {
                   <ul className="space-y-1.5">
                     {status.tasks.map((t, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-ink-secondary leading-6">
-                        <CheckCircle2 className="h-4 w-4 text-violet-500/80 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
                         <span>{t}</span>
                       </li>
                     ))}
@@ -1092,8 +1086,7 @@ function ClaudeStatusSection() {
               {/* 对主人的看法 */}
               {status.thoughts && (
                 <blockquote
-                  className="mt-4 rounded-r-lg border-l-2 border-violet-400 pl-3 py-1 text-sm leading-7 text-ink-secondary"
-                  style={{ background: 'color-mix(in srgb, var(--surface-raised) 60%, #8b5cf6 6%)' }}
+                  className="atelier-daily-quote"
                 >
                   {status.thoughts}
                 </blockquote>

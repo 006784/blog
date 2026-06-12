@@ -3151,6 +3151,10 @@ textarea:focus {
 .route-transition-layer {
   will-change: opacity, transform, filter;
   backface-visibility: hidden;
+  /* will-change/transform/filter 会让本层成为 position:fixed 子元素的新容纳块；
+     若不给最小高度，无内容时会塌缩为 0，导致 /write 等 fixed inset-0 全屏层高度归零 */
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .ios-hover-surface {
@@ -5172,8 +5176,29 @@ textarea:focus {
   isolation: isolate;
 }
 
-.atelier-home::before,
-.atelier-home::after { display: none; }
+.atelier-home::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--atelier-line) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in srgb, var(--atelier-line) 28%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 72%);
+  opacity: 0.42;
+}
+
+.atelier-home::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--paper) 92%, white 8%) 0%, color-mix(in srgb, var(--paper-warm) 94%, white 6%) 48%, var(--paper) 100%);
+}
 
 /* Orbs removed — magazine is flat */
 .atelier-noise,
@@ -5181,14 +5206,6 @@ textarea:focus {
 .atelier-orb-one,
 .atelier-orb-two,
 .atelier-orb-three { display: none; }
-
-/* ── Atelier Shell ── */
-.atelier-shell {
-  position: relative;
-  width: min(100%, 1280px);
-  margin: 0 auto;
-  padding-inline: clamp(1.5rem, 4vw, 3.75rem);
-}
 
 /* ── Magazine Navbar ── */
 .atelier-nav {
@@ -5202,6 +5219,7 @@ textarea:focus {
   backdrop-filter: blur(var(--atelier-nav-blur, 12px)) saturate(110%);
   -webkit-backdrop-filter: blur(var(--atelier-nav-blur, 12px)) saturate(110%);
   transition: background 0.3s ease;
+  box-shadow: 0 16px 36px -34px var(--surface-card-shadow);
 }
 
 .atelier-scroll-progress {
@@ -5235,6 +5253,11 @@ textarea:focus {
   gap: 0.6rem;
   color: var(--ink);
   text-decoration: none;
+  transition: transform 0.28s ease;
+}
+
+.atelier-brand:hover {
+  transform: translateY(-1px);
 }
 
 .atelier-brand-mark {
@@ -5347,6 +5370,7 @@ textarea:focus {
 .atelier-icon-button:hover {
   transform: translateY(-1px);
   border-color: var(--border-strong);
+  box-shadow: 0 18px 30px -26px var(--surface-card-shadow-strong), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .atelier-ghost-button {
@@ -5385,6 +5409,17 @@ textarea:focus {
   transform: translateY(-1px);
   color: #1f1714;
   box-shadow: 0 28px 48px -28px color-mix(in srgb, var(--atelier-accent-copper) 62%, transparent);
+}
+
+.atelier-primary-button:focus-visible,
+.atelier-secondary-button:focus-visible,
+.atelier-ghost-button:focus-visible,
+.atelier-icon-button:focus-visible,
+.atelier-topic-chip:focus-visible,
+.atelier-note-link:focus-visible,
+.atelier-daily-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--atelier-accent-copper) 28%, transparent);
+  outline-offset: 3px;
 }
 
 .atelier-secondary-button {
@@ -5649,6 +5684,10 @@ textarea:focus {
 
 .atelier-feature-card:hover {
   outline-color: var(--gold);
+}
+
+.atelier-feature-card:hover .atelier-image {
+  transform: scale(1.035);
 }
 
 .atelier-feature-media {
@@ -6017,19 +6056,45 @@ textarea:focus {
 
 .atelier-feed-card {
   --atelier-card-accent: var(--color-teal-500);
-  background: color-mix(in srgb, var(--surface-panel) 96%, white 4%);
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 94%, white 6%) 0%, color-mix(in srgb, var(--surface-raised) 90%, var(--atelier-wash-slate)) 100%);
   padding: 0;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+  border: 1px solid color-mix(in srgb, var(--atelier-card-accent) 14%, var(--atelier-line));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 22px 42px -34px var(--surface-card-shadow-strong);
   border-radius: 1.25rem;
   overflow: hidden;
-  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+}
+
+.atelier-feed-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--atelier-card-accent) 10%, transparent), transparent 38%);
+  opacity: 0;
+  transition: opacity 0.28s ease;
 }
 
 .atelier-feed-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
-  border-color: color-mix(in srgb, var(--atelier-card-accent) 35%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.74),
+    0 28px 52px -34px var(--surface-card-shadow-strong);
+  border-color: color-mix(in srgb, var(--atelier-card-accent) 32%, var(--atelier-line));
+}
+
+.atelier-feed-card:hover::after {
+  opacity: 1;
+}
+
+.atelier-feed-card:hover .atelier-image {
+  transform: scale(1.035);
 }
 
 .atelier-feed-card.is-emphasized {
@@ -6070,7 +6135,7 @@ textarea:focus {
 .atelier-image {
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.7s ease;
   border-radius: 0 !important;
 }
 
@@ -6106,10 +6171,10 @@ textarea:focus {
 }
 
 .atelier-feed-body h3 {
-  font-family: var(--font-sans), sans-serif;
-  font-size: 1rem;
+  font-family: var(--font-mincho), 'Noto Serif SC', serif;
+  font-size: 1.08rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.03em;
   line-height: 1.45;
   color: var(--ink);
 }
@@ -6174,6 +6239,118 @@ textarea:focus {
   display: flex;
   justify-content: center;
   margin-top: 2.5rem;
+}
+
+/* ── Daily Dashboard ── */
+.atelier-dashboard-strip {
+  padding: clamp(2.75rem, 5vw, 4.75rem) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--atelier-line) 84%, var(--atelier-accent-slate) 16%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--atelier-paper) 92%, var(--atelier-wash-slate)) 0%, color-mix(in srgb, var(--atelier-paper) 90%, var(--atelier-wash-copper)) 100%);
+}
+
+.atelier-section-head.is-compact {
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.atelier-section-head.is-compact > p {
+  padding-top: 0;
+}
+
+.atelier-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.atelier-daily-card,
+.atelier-daily-card > div {
+  min-width: 0;
+  height: 100%;
+}
+
+.atelier-daily-panel {
+  --daily-accent: var(--atelier-accent-copper);
+  --daily-wash: var(--atelier-wash-copper);
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1.55rem;
+  border: 1px solid color-mix(in srgb, var(--daily-accent) 18%, var(--atelier-line));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 94%, white 6%) 0%, color-mix(in srgb, var(--surface-raised) 84%, var(--daily-wash)) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.66),
+    0 24px 46px -36px var(--surface-card-shadow-strong);
+}
+
+.atelier-daily-panel.is-claude {
+  --daily-accent: var(--atelier-accent-slate);
+  --daily-wash: var(--atelier-wash-slate);
+}
+
+.atelier-daily-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--daily-accent) 14%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 76%, var(--daily-wash));
+  color: color-mix(in srgb, var(--daily-accent) 78%, var(--ink));
+}
+
+.atelier-daily-body {
+  flex: 1;
+  padding: 1.25rem 1.2rem;
+}
+
+.atelier-daily-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1.2rem 1.2rem;
+}
+
+.atelier-daily-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-garamond), serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--daily-accent) 82%, var(--ink));
+  text-decoration: none;
+  transition: color 0.24s ease, transform 0.24s ease;
+}
+
+.atelier-daily-link:hover {
+  transform: translateX(2px);
+  color: var(--ink);
+}
+
+.atelier-daily-panel .text-orange-500,
+.atelier-daily-panel .text-violet-500,
+.atelier-daily-panel .text-violet-500\/80 {
+  color: color-mix(in srgb, var(--daily-accent) 82%, var(--ink)) !important;
+}
+
+.atelier-daily-panel .border-orange-400\/40 {
+  border-color: color-mix(in srgb, var(--daily-accent) 34%, var(--atelier-line)) !important;
+}
+
+.atelier-daily-quote {
+  margin-top: 1rem;
+  border-left: 2px solid color-mix(in srgb, var(--daily-accent) 58%, transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+  background: color-mix(in srgb, var(--surface-raised) 70%, var(--daily-wash));
+  padding: 0.55rem 0.85rem;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+  line-height: 1.8;
 }
 
 /* ── Subscribe Card ── */
@@ -6662,6 +6839,7 @@ textarea:focus {
   .journal-hero-grid,
   .journal-layout,
   .journal-spotlight-grid,
+  .atelier-dashboard-grid,
   .atelier-subscribe-card {
     grid-template-columns: 1fr;
   }
@@ -6824,6 +7002,15 @@ textarea:focus {
   .atelier-section-head > p {
     padding-top: 0;
   }
+
+  .atelier-section-head.is-compact {
+    align-items: flex-start;
+  }
+
+  .atelier-daily-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6851,25 +7038,21 @@ textarea:focus {
   --atelier-wash-claret: rgba(255, 255, 255, 0.04);
   --atelier-cloud: #1a1a1a;
   background-color: #0d0d0d;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 52px 52px;
 }
 
 .dark .atelier-home::before {
   background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.035) 18%, transparent 34%, rgba(255, 255, 255, 0.025) 58%, transparent 74%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 18%);
-  opacity: 0.7;
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.88), transparent 76%);
+  opacity: 1;
 }
 
-/* 顶部淡金光晕 — 保留氛围，去掉彩色噪点 */
 .dark .atelier-home::after {
   background:
-    radial-gradient(ellipse 60% 42% at 50% 0%, rgba(233, 169, 105, 0.06), transparent 70%);
-  mix-blend-mode: screen;
-  opacity: 0.9;
+    radial-gradient(ellipse 60% 42% at 50% 0%, rgba(233, 169, 105, 0.06), transparent 70%),
+    #0d0d0d;
 }
 
 .dark .atelier-hero-copy {
@@ -6880,7 +7063,8 @@ textarea:focus {
 .dark .atelier-category-panel,
 .dark .atelier-story-link,
 .dark .atelier-note-card,
-.dark .atelier-feed-card {
+.dark .atelier-feed-card,
+.dark .atelier-daily-panel {
   background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, rgba(255, 255, 255, 0.02)) 0%, color-mix(in srgb, var(--surface-overlay) 84%, var(--atelier-card-wash, var(--atelier-wash-copper))) 100%) !important;
   border-color: color-mix(in srgb, var(--atelier-card-accent, var(--atelier-accent-copper)) 18%, var(--atelier-line)) !important;
   box-shadow: 0 28px 52px -38px var(--surface-card-shadow-strong) !important;
@@ -6891,6 +7075,19 @@ textarea:focus {
 .dark .atelier-note-card:hover,
 .dark .atelier-feed-card:hover {
   background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 90%, rgba(255, 255, 255, 0.04)) 0%, color-mix(in srgb, var(--surface-overlay) 88%, var(--atelier-card-wash, var(--atelier-wash-copper))) 100%) !important;
+}
+
+.dark .atelier-dashboard-strip {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 86%, var(--atelier-wash-slate)) 0%, color-mix(in srgb, var(--surface-overlay) 92%, var(--atelier-wash-copper)) 100%);
+}
+
+.dark .atelier-daily-head {
+  background: color-mix(in srgb, var(--surface-panel) 74%, var(--daily-wash));
+}
+
+.dark .atelier-daily-quote {
+  background: color-mix(in srgb, var(--surface-overlay) 78%, var(--daily-wash));
 }
 
 .dark .atelier-subscribe-card {
@@ -8624,10 +8821,6 @@ textarea:focus {
   color: var(--color-primary-700);
   font-size: 0.88em;
   font-family: var(--font-mono);
-}
-
-.dark .article-inline-code {
-  color: var(--color-primary-500);
 }
 
 /* 管理员浮动按钮 */
