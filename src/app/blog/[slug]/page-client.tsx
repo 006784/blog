@@ -30,6 +30,7 @@ import {
   type PublicCatalogPost,
 } from '@/lib/sample-posts';
 import { getPublicPostBySlug, getPublishedPosts, incrementPostViews } from '@/lib/supabase';
+import { normalizeMarkdownBold } from '@/lib/auto-format';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -467,7 +468,7 @@ export default function BlogPostPageClient({ slug }: BlogPostPageClientProps) {
           <Card variant="elevated" padding="sm" className="article-content rounded-2xl sm:p-6 xl:p-10">
             <AISummary postId={post.id} />
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-              {post.content || ''}
+              {normalizeMarkdownBold(post.content || '')}
             </ReactMarkdown>
           </Card>
 
