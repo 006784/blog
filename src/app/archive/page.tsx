@@ -113,6 +113,11 @@ export default function ArchivePage() {
             <span>文章归档</span>
           </div>
           <h1 className="text-4xl font-bold mb-4">时光机</h1>
+          <p className="about-id-strip justify-center mb-2" aria-hidden="true">
+            <span>ARCHIVE.LOG</span>
+            <span>{totalPosts} ENTRIES</span>
+            <span>SORT BY TIME</span>
+          </p>
           <p className="text-muted-foreground">
             共 {totalPosts} 篇文章，记录点滴思考
           </p>

@@ -212,6 +212,11 @@ export default function MediaPage() {
               <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 书影音
               </h1>
+              <p className="about-id-strip" aria-hidden="true">
+                <span>FORMAT · BOOK / FILM / MUSIC</span>
+                <span>{items.length} RECORDS</span>
+                <span>VER. 1.0.0</span>
+              </p>
               <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 把近期读过、看过、听过的内容整理成持续更新的观影与阅读清单。
               </p>

@@ -320,6 +320,25 @@ export default function AboutPage() {
                 </div>
               </div>
             </Card>
+
+            <div className="relative isolate overflow-hidden rounded-xl border border-(--border-strong) shadow-(--shadow-lg)">
+              <div className="relative aspect-[860/1000] w-full">
+                <Image
+                  src="/about-halftone.png"
+                  alt="网点风格人像插画"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p
+                className="about-id-strip absolute bottom-3 left-4"
+                style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
+                aria-hidden="true"
+              >
+                <span>PORTRAIT.001</span>
+                <span>HALFTONE / DUOTONE</span>
+              </p>
+            </div>
           </div>
         </motion.section>
 

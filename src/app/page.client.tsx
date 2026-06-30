@@ -873,6 +873,8 @@ export default function HomePageClient({
               <TodayBriefingSection />
               <ClaudeStatusSection />
             </div>
+
+            <BuildLogCard />
           </div>
         </section>
 
@@ -934,6 +936,65 @@ function LiveClock() {
         {time}
       </span>
       <span className="text-xs text-ink-ghost">{date}</span>
+    </div>
+  );
+}
+
+const BUILD_LOG_COMMITS = [
+  { hash: 'a1b2c3d', msg: 'feat: init core' },
+  { hash: 'd4e5f6a', msg: 'feat: graph engine' },
+  { hash: 'f7a8b9c', msg: 'feat: content model' },
+];
+
+function BuildLogCard() {
+  const [progress, setProgress] = useState(12);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setProgress((p) => (p >= 100 ? 8 : p + 3 + Math.floor(Math.random() * 7)));
+    }, 1400);
+    return () => clearInterval(id);
+  }, []);
+
+  const clampedProgress = Math.min(progress, 100);
+
+  return (
+    <div className="atelier-buildlog" aria-hidden="true">
+      <div className="atelier-buildlog-timeline">
+        <p className="atelier-buildlog-branch">⊖ main —</p>
+        <ul>
+          {BUILD_LOG_COMMITS.map((commit) => (
+            <li key={commit.hash}>
+              <span className="atelier-buildlog-dot" />
+              <span className="atelier-buildlog-hash">{commit.hash}</span>
+              <span className="atelier-buildlog-msg">{commit.msg}</span>
+            </li>
+          ))}
+          <li className="is-head">
+            <span className="atelier-buildlog-dot is-active" />
+            <span className="atelier-buildlog-hash">HEAD —</span>
+            <span className="atelier-buildlog-msg">build: in public</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="atelier-buildlog-terminal">
+        <div className="atelier-buildlog-bar">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="atelier-buildlog-body">
+          <p className="atelier-buildlog-cmd">$ lumen build --in-public</p>
+          <div className="atelier-buildlog-progress-row">
+            <span>v1.0 · building...</span>
+            <div className="atelier-buildlog-progress-track">
+              <div className="atelier-buildlog-progress-fill" style={{ width: `${clampedProgress}%` }} />
+            </div>
+            <span>{clampedProgress}%</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

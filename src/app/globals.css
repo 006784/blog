@@ -6368,6 +6368,139 @@ textarea:focus {
   align-items: stretch;
 }
 
+.atelier-buildlog {
+  display: grid;
+  grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 1.55rem;
+  border: 1px solid color-mix(in srgb, var(--atelier-accent-copper) 16%, var(--atelier-line));
+  background: color-mix(in srgb, var(--surface-panel) 92%, var(--atelier-wash-copper));
+}
+
+.atelier-buildlog-branch {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-ghost);
+  margin-bottom: 0.85rem;
+}
+
+.atelier-buildlog-timeline ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0.45rem;
+  border-left: 1px solid var(--line-light);
+}
+
+.atelier-buildlog-timeline li {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.4rem 0 0.4rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.atelier-buildlog-dot {
+  position: absolute;
+  left: -0.345rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-panel);
+  border: 1.5px solid var(--ink-ghost);
+}
+
+.atelier-buildlog-dot.is-active {
+  border-color: var(--color-orange-500);
+  background: var(--color-orange-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-orange-500) 22%, transparent);
+}
+
+.atelier-buildlog-hash {
+  color: var(--ink-ghost);
+}
+
+.atelier-buildlog-msg {
+  color: var(--ink-secondary);
+}
+
+.atelier-buildlog-timeline li.is-head .atelier-buildlog-hash,
+.atelier-buildlog-timeline li.is-head .atelier-buildlog-msg {
+  color: var(--color-orange-500);
+  font-weight: 600;
+}
+
+.atelier-buildlog-terminal {
+  border-radius: 1.1rem;
+  overflow: hidden;
+  border: 1px solid var(--line-light);
+  background: color-mix(in srgb, var(--surface-base) 96%, white 4%);
+}
+
+.atelier-buildlog-bar {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--line-light);
+}
+
+.atelier-buildlog-bar span {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--ink-ghost);
+  opacity: 0.55;
+}
+
+.atelier-buildlog-bar span:first-child {
+  opacity: 0.85;
+}
+
+.atelier-buildlog-body {
+  padding: 1.1rem 1.25rem 1.35rem;
+  font-family: var(--font-mono);
+}
+
+.atelier-buildlog-cmd {
+  font-size: 0.92rem;
+  color: var(--ink);
+  margin: 0 0 1.5rem;
+}
+
+.atelier-buildlog-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.7rem;
+  color: var(--color-orange-500);
+}
+
+.atelier-buildlog-progress-track {
+  flex: 1;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--line-light);
+  overflow: hidden;
+}
+
+.atelier-buildlog-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-orange-500);
+  transition: width 0.6s ease;
+}
+
+@media (max-width: 760px) {
+  .atelier-buildlog {
+    grid-template-columns: 1fr;
+  }
+}
+
 .atelier-daily-card,
 .atelier-daily-card > div {
   min-width: 0;
