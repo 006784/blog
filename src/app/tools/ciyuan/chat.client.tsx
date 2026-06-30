@@ -22,6 +22,13 @@ import {
   PlugZap,
   Pencil,
   FileDown,
+  Search,
+  Pin,
+  PinOff,
+  Paperclip,
+  UserCog,
+  Hash,
+  FileText,
 } from 'lucide-react';
 import type {
   CiyuanAuthMode,
@@ -37,10 +44,20 @@ import {
   getDefaultModelId,
 } from '@/lib/ciyuan-providers';
 
+interface Attachment {
+  id: string;
+  name: string;
+  mime: string;
+  kind: 'image' | 'text';
+  dataUrl?: string;
+  textContent?: string;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
+  attachments?: Attachment[];
   streaming?: boolean;
 }
 
@@ -53,11 +70,72 @@ interface Conversation {
   providerColor?: string;
   messages: Message[];
   createdAt: number;
+  pinned?: boolean;
+  systemPrompt?: string;
+  presetId?: string;
+}
+
+interface RolePreset {
+  id: string;
+  name: string;
+  prompt: string;
 }
 
 const KEYS_STORAGE = 'ciyuan_api_keys';
 const CONVS_STORAGE = 'ciyuan_conversations';
 const CUSTOM_PROVIDERS_STORAGE = 'ciyuan_custom_providers_v2';
+const PRESETS_STORAGE = 'ciyuan_role_presets';
+
+const DEFAULT_PRESETS: RolePreset[] = [
+  { id: 'preset-default', name: '默认助手', prompt: '' },
+  { id: 'preset-writer', name: '写作助手', prompt: '你是一名专业中文写作助手，行文简洁克制，逻辑清晰，避免空洞的套话和明显的 AI 腔调。' },
+  { id: 'preset-coder', name: '编程助手', prompt: '你是一名资深工程师，回答精炼准确，优先给出可运行的代码和关键解释，不做无关的展开。' },
+  { id: 'preset-translator', name: '翻译助手', prompt: '你是一名专业翻译，准确传达原文含义，符合目标语言的表达习惯，不做额外解释。' },
+];
+
+function loadPresets(): RolePreset[] {
+  try {
+    const raw = localStorage.getItem(PRESETS_STORAGE);
+    if (!raw) return DEFAULT_PRESETS;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_PRESETS;
+  } catch {
+    return DEFAULT_PRESETS;
+  }
+}
+
+function savePresets(presets: RolePreset[]) {
+  localStorage.setItem(PRESETS_STORAGE, JSON.stringify(presets));
+}
+
+// 粗略估算 token 数：中日韩文字按约 0.6 token/字符，其余按约 4 字符/token
+function estimateTokens(text: string): number {
+  if (!text) return 0;
+  const cjkMatches = text.match(/[一-鿿぀-ヿ가-힯]/g);
+  const cjkCount = cjkMatches ? cjkMatches.length : 0;
+  const otherCount = text.length - cjkCount;
+  return Math.ceil(cjkCount * 0.6 + otherCount / 4);
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function readFileAsText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+const TEXT_FILE_PATTERN = /\.(txt|md|markdown|json|csv|log|yml|yaml|ts|tsx|js|jsx|py|java|go|rs|c|cpp|h|css|html|xml|sql)$/i;
 
 function loadKeys(): Record<string, string> {
   try {
@@ -220,6 +298,46 @@ function MsgContent({ content }: { content: string }) {
     >
       {stripEmoji(content)}
     </ReactMarkdown>
+  );
+}
+
+function AttachmentChips({
+  attachments,
+  onRemove,
+}: {
+  attachments: Attachment[];
+  onRemove?: (id: string) => void;
+}) {
+  if (attachments.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2 mb-2">
+      {attachments.map((attachment) => (
+        <div
+          key={attachment.id}
+          className="group relative flex items-center gap-1.5 rounded-lg border border-line bg-paper-deep/60 overflow-hidden"
+        >
+          {attachment.kind === 'image' && attachment.dataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={attachment.dataUrl} alt={attachment.name} className="w-12 h-12 object-cover" />
+          ) : (
+            <span className="flex items-center gap-1.5 px-2.5 py-2 text-xs">
+              <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="max-w-32 truncate">{attachment.name}</span>
+            </span>
+          )}
+          {onRemove && (
+            <button
+              type="button"
+              onClick={() => onRemove(attachment.id)}
+              className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              title="移除"
+            >
+              <X className="w-2.5 h-2.5" />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -823,6 +941,248 @@ function ProviderSelector({
   );
 }
 
+function RolePresetsModal({
+  presets,
+  onSave,
+  onClose,
+}: {
+  presets: RolePreset[];
+  onSave: (presets: RolePreset[]) => void;
+  onClose: () => void;
+}) {
+  const [draft, setDraft] = useState<RolePreset[]>(presets);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [prompt, setPrompt] = useState('');
+
+  const startNew = () => {
+    setEditingId('new');
+    setName('');
+    setPrompt('');
+  };
+
+  const startEdit = (preset: RolePreset) => {
+    setEditingId(preset.id);
+    setName(preset.name);
+    setPrompt(preset.prompt);
+  };
+
+  const saveDraftItem = () => {
+    if (!name.trim()) return;
+    if (editingId === 'new') {
+      setDraft((prev) => [...prev, { id: newId(), name: name.trim(), prompt: prompt.trim() }]);
+    } else if (editingId) {
+      setDraft((prev) => prev.map((item) => (item.id === editingId ? { ...item, name: name.trim(), prompt: prompt.trim() } : item)));
+    }
+    setEditingId(null);
+  };
+
+  const removeItem = (id: string) => {
+    setDraft((prev) => prev.filter((item) => item.id !== id));
+    if (editingId === id) setEditingId(null);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 10 }}
+        className="relative z-10 w-full max-w-lg rounded-2xl border border-line bg-paper shadow-2xl overflow-hidden"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line">
+          <div className="flex items-center gap-2">
+            <UserCog className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+            <p className="font-semibold">角色 / 系统提示词</p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-paper-deep transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-3 max-h-[60dvh] overflow-y-auto">
+          {draft.map((preset) => (
+            <div key={preset.id} className="rounded-xl border border-line p-3">
+              {editingId === preset.id ? (
+                <div className="space-y-2">
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="角色名称"
+                    className="w-full px-3 py-1.5 rounded-lg border border-line bg-transparent text-sm focus:border-gold outline-none"
+                  />
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="系统提示词内容"
+                    rows={3}
+                    className="w-full px-3 py-1.5 rounded-lg border border-line bg-transparent text-sm focus:border-gold outline-none resize-none"
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={saveDraftItem} className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--gold)', color: '#fff' }}>
+                      保存
+                    </button>
+                    <button onClick={() => setEditingId(null)} className="px-3 py-1.5 rounded-lg text-xs border border-line">
+                      取消
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{preset.name}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{preset.prompt || '（无系统提示词）'}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => startEdit(preset)} className="p-1.5 rounded-lg hover:bg-paper-deep transition-colors" title="编辑">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => removeItem(preset.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors" title="删除">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {editingId === 'new' ? (
+            <div className="rounded-xl border border-line p-3 space-y-2">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="角色名称"
+                className="w-full px-3 py-1.5 rounded-lg border border-line bg-transparent text-sm focus:border-gold outline-none"
+              />
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="系统提示词内容"
+                rows={3}
+                className="w-full px-3 py-1.5 rounded-lg border border-line bg-transparent text-sm focus:border-gold outline-none resize-none"
+              />
+              <div className="flex gap-2">
+                <button onClick={saveDraftItem} className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--gold)', color: '#fff' }}>
+                  添加
+                </button>
+                <button onClick={() => setEditingId(null)} className="px-3 py-1.5 rounded-lg text-xs border border-line">
+                  取消
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={startNew}
+              className="w-full px-3 py-2 rounded-lg border border-dashed border-line text-xs text-muted-foreground hover:border-gold transition-colors"
+            >
+              + 新增角色
+            </button>
+          )}
+        </div>
+
+        <div className="px-6 py-4 border-t border-line flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm hover:bg-paper-deep transition-colors">
+            关闭
+          </button>
+          <button
+            onClick={() => {
+              onSave(draft);
+              onClose();
+            }}
+            className="px-4 py-2 rounded-lg text-sm font-medium"
+            style={{ background: 'var(--gold)', color: '#fff' }}
+          >
+            保存
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function RolePresetSelector({
+  presets,
+  activePresetId,
+  onSelect,
+  onManage,
+}: {
+  presets: RolePreset[];
+  activePresetId: string | null;
+  onSelect: (preset: RolePreset) => void;
+  onManage: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const activePreset = presets.find((preset) => preset.id === activePresetId);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((current) => !current)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-line hover:border-gold transition-colors text-sm"
+        title="角色 / 系统提示词"
+      >
+        <UserCog className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="font-medium max-w-28 truncate">{activePreset?.name ?? '默认助手'}</span>
+        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.12 }}
+            className="absolute top-full mt-2 left-0 z-50 w-64 rounded-xl border border-line bg-paper shadow-2xl overflow-hidden"
+          >
+            <div className="p-2 space-y-0.5 max-h-72 overflow-y-auto">
+              {presets.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => {
+                    onSelect(preset);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    preset.id === activePresetId ? 'bg-paper-deep font-medium' : 'hover:bg-paper-deep text-muted-foreground'
+                  }`}
+                >
+                  <span className="flex-1 text-left truncate">{preset.name}</span>
+                  {preset.id === activePresetId && <Check className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />}
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-line p-2">
+              <button
+                onClick={() => {
+                  onManage();
+                  setOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-paper-deep transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                管理角色
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function CiyuanChat() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [customProviders, setCustomProviders] = useState<CiyuanProviderConfig[]>([]);
@@ -834,9 +1194,16 @@ export function CiyuanChat() {
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamingTitle, setRenamingTitle] = useState('');
+  const [presets, setPresets] = useState<RolePreset[]>(DEFAULT_PRESETS);
+  const [showRoleManager, setShowRoleManager] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const providersMap = useMemo(() => buildCiyuanProviderMap(customProviders), [customProviders]);
@@ -847,9 +1214,26 @@ export function CiyuanChat() {
   const activeProvider = providersMap[provider] ?? providers[0] ?? null;
   const activeConv = conversations.find((conversation) => conversation.id === activeId) ?? null;
 
+  const visibleConversations = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const filtered = query
+      ? conversations.filter((conversation) => conversation.title.toLowerCase().includes(query))
+      : conversations;
+    return [...filtered].sort((a, b) => {
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+      return b.createdAt - a.createdAt;
+    });
+  }, [conversations, searchQuery]);
+
+  const conversationTokenTotal = useMemo(() => {
+    if (!activeConv) return 0;
+    return activeConv.messages.reduce((sum, message) => sum + estimateTokens(message.content), 0);
+  }, [activeConv]);
+
   useEffect(() => {
     const loadedProviders = loadCustomProviders();
     setCustomProviders(loadedProviders);
+    setPresets(loadPresets());
 
     const loadedConversations = loadConvs();
     setConversations(loadedConversations);
@@ -918,7 +1302,9 @@ export function CiyuanChat() {
     providerColor: activeProvider?.color,
     messages: [],
     createdAt: Date.now(),
-  }), [activeProvider?.color, activeProvider?.label, model, provider]);
+    systemPrompt: activeConv?.systemPrompt,
+    presetId: activeConv?.presetId,
+  }), [activeConv?.presetId, activeConv?.systemPrompt, activeProvider?.color, activeProvider?.label, model, provider]);
 
   const newChat = useCallback(() => {
     const conversationId = newId();
@@ -956,8 +1342,59 @@ export function CiyuanChat() {
     }
   }, [activeId, conversations, persistConversations]);
 
+  const togglePin = useCallback((conversationId: string) => {
+    updateConversation(conversationId, (conversation) => ({ ...conversation, pinned: !conversation.pinned }));
+  }, [updateConversation]);
+
+  const startRename = (conversation: Conversation) => {
+    setRenamingId(conversation.id);
+    setRenamingTitle(conversation.title);
+  };
+
+  const commitRename = useCallback(() => {
+    if (renamingId && renamingTitle.trim()) {
+      updateConversation(renamingId, (conversation) => ({ ...conversation, title: renamingTitle.trim() }));
+    }
+    setRenamingId(null);
+    setRenamingTitle('');
+  }, [renamingId, renamingTitle, updateConversation]);
+
+  const handleSelectPreset = useCallback((preset: RolePreset) => {
+    if (activeId) {
+      updateConversation(activeId, (conversation) => ({
+        ...conversation,
+        presetId: preset.id,
+        systemPrompt: preset.prompt,
+      }));
+    }
+  }, [activeId, updateConversation]);
+
+  const handleSavePresets = (next: RolePreset[]) => {
+    setPresets(next);
+    savePresets(next);
+  };
+
+  const handleFilesSelected = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const newAttachments: Attachment[] = [];
+    for (const file of Array.from(files)) {
+      if (file.type.startsWith('image/')) {
+        const dataUrl = await readFileAsDataUrl(file);
+        newAttachments.push({ id: newId(), name: file.name, mime: file.type, kind: 'image', dataUrl });
+      } else if (TEXT_FILE_PATTERN.test(file.name) || file.type.startsWith('text/')) {
+        const textContent = await readFileAsText(file);
+        newAttachments.push({ id: newId(), name: file.name, mime: file.type || 'text/plain', kind: 'text', textContent });
+      }
+    }
+    setPendingAttachments((prev) => [...prev, ...newAttachments]);
+  }, []);
+
+  const removePendingAttachment = (id: string) => {
+    setPendingAttachments((prev) => prev.filter((attachment) => attachment.id !== id));
+  };
+
   const send = useCallback(async () => {
-    if (!input.trim() || streaming || !activeProvider) return;
+    if ((!input.trim() && pendingAttachments.length === 0) || streaming || !activeProvider) return;
 
     const keys = loadKeys();
     const apiKey = keys[activeProvider.id] || '';
@@ -966,8 +1403,15 @@ export function CiyuanChat() {
       return;
     }
 
-    const userMessage: Message = { id: newId(), role: 'user', content: input.trim() };
+    const userMessage: Message = {
+      id: newId(),
+      role: 'user',
+      content: input.trim(),
+      attachments: pendingAttachments.length > 0 ? pendingAttachments : undefined,
+    };
+    const attachmentsForRequest = pendingAttachments;
     setInput('');
+    setPendingAttachments([]);
     // 发送时立即滚到底部
     setTimeout(() => {
       if (scrollAreaRef.current) scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
@@ -1008,6 +1452,8 @@ export function CiyuanChat() {
       const existingConversation = conversations.find((conversation) => conversation.id === conversationId);
       const history = existingConversation?.messages ?? [];
 
+      const systemPrompt = (existingConversation?.systemPrompt || activeConv?.systemPrompt || '').trim();
+
       const response = await fetch('/api/tools/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1017,11 +1463,13 @@ export function CiyuanChat() {
           model,
           apiKey,
           messages: [
+            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
             ...history.filter((message) => !message.streaming).map((message) => ({
               role: message.role,
               content: message.content,
+              attachments: message.attachments,
             })),
-            { role: 'user', content: userMessage.content },
+            { role: 'user', content: userMessage.content, attachments: attachmentsForRequest },
           ],
         }),
         signal: abortRef.current.signal,
@@ -1085,11 +1533,13 @@ export function CiyuanChat() {
     }
   }, [
     activeId,
+    activeConv?.systemPrompt,
     activeProvider,
     conversations,
     createConversationSnapshot,
     input,
     model,
+    pendingAttachments,
     persistConversations,
     provider,
     streaming,
@@ -1161,15 +1611,32 @@ export function CiyuanChat() {
               </p>
             </div>
 
+            <div className="px-4 pt-3 pb-1">
+              <div className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5">
+                <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="搜索对话…"
+                  className="min-w-0 flex-1 bg-transparent outline-none text-xs"
+                />
+                {searchQuery && (
+                  <button type="button" onClick={() => setSearchQuery('')} title="清除">
+                    <X className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="flex-1 overflow-y-auto py-2 space-y-0.5 px-2">
-              {conversations.length === 0 ? (
+              {visibleConversations.length === 0 ? (
                 <div className="text-center py-8 text-xs text-muted-foreground">
                   <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                  <p>还没有对话</p>
-                  <p>点击 + 开始</p>
+                  <p>{searchQuery ? '没有匹配的对话' : '还没有对话'}</p>
+                  {!searchQuery && <p>点击 + 开始</p>}
                 </div>
               ) : (
-                conversations.map((conversation) => {
+                visibleConversations.map((conversation) => {
                   const conversationProvider = providersMap[conversation.provider];
                   const dotProvider = conversationProvider || {
                     id: conversation.provider,
@@ -1194,7 +1661,47 @@ export function CiyuanChat() {
                       }}
                     >
                       <ProviderDot provider={dotProvider} size={6} />
-                      <span className="flex-1 text-xs truncate">{conversation.title}</span>
+                      {renamingId === conversation.id ? (
+                        <input
+                          autoFocus
+                          value={renamingTitle}
+                          onChange={(event) => setRenamingTitle(event.target.value)}
+                          onClick={(event) => event.stopPropagation()}
+                          onBlur={commitRename}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') commitRename();
+                            if (event.key === 'Escape') {
+                              setRenamingId(null);
+                              setRenamingTitle('');
+                            }
+                          }}
+                          className="flex-1 min-w-0 bg-transparent outline-none text-xs border-b border-gold"
+                        />
+                      ) : (
+                        <span
+                          className="flex-1 text-xs truncate"
+                          onDoubleClick={(event) => {
+                            event.stopPropagation();
+                            startRename(conversation);
+                          }}
+                          title="双击重命名"
+                        >
+                          {conversation.title}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          togglePin(conversation.id);
+                        }}
+                        className={`p-0.5 rounded transition-all ${
+                          conversation.pinned ? 'opacity-100 text-gold' : 'opacity-0 group-hover:opacity-100 hover:text-gold'
+                        }`}
+                        title={conversation.pinned ? '取消置顶' : '置顶'}
+                      >
+                        {conversation.pinned ? <Pin className="w-3 h-3" /> : <PinOff className="w-3 h-3" />}
+                      </button>
                       <button
                         type="button"
                         onClick={(event) => {
@@ -1249,6 +1756,23 @@ export function CiyuanChat() {
               ))}
             </datalist>
           </div>
+
+          <RolePresetSelector
+            presets={presets}
+            activePresetId={activeConv?.presetId ?? null}
+            onSelect={handleSelectPreset}
+            onManage={() => setShowRoleManager(true)}
+          />
+
+          {activeConv && activeConv.messages.length > 0 && (
+            <span
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-muted-foreground border border-line"
+              title="对话内容估算 token 数（粗略估算，仅供参考）"
+            >
+              <Hash className="w-3 h-3" />
+              约 {conversationTokenTotal} tokens
+            </span>
+          )}
 
           <div className="ml-auto flex items-center gap-2">
             {activeConv && activeConv.messages.length > 0 && (
@@ -1340,10 +1864,16 @@ export function CiyuanChat() {
                     className="flex justify-end"
                   >
                     <div className="group max-w-[80%] flex flex-col items-end space-y-1">
-                      <div className="rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed bg-ink text-paper">
-                        <p className="whitespace-pre-wrap">{message.content}</p>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity px-1">
+                      {message.attachments && message.attachments.length > 0 && (
+                        <AttachmentChips attachments={message.attachments} />
+                      )}
+                      {message.content && (
+                        <div className="rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed bg-ink text-paper">
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity px-1">
+                        <span className="text-[10px] text-muted-foreground">~{estimateTokens(message.content)} tokens</span>
                         <button
                           type="button"
                           onClick={() => copyMessage(message.id, message.content)}
@@ -1381,7 +1911,8 @@ export function CiyuanChat() {
                         )}
                       </div>
                       {!message.streaming && (
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] text-muted-foreground">~{estimateTokens(message.content)} tokens</span>
                           <button
                             type="button"
                             onClick={() => copyMessage(message.id, message.content)}
@@ -1407,7 +1938,23 @@ export function CiyuanChat() {
 
         <div className="border-t border-line px-4 py-4">
           <div className="max-w-3xl mx-auto">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.txt,.md,.markdown,.json,.csv,.log,.yml,.yaml,.ts,.tsx,.js,.jsx,.py,.java,.go,.rs,.c,.cpp,.h,.css,.html,.xml,.sql"
+              className="hidden"
+              onChange={(event) => {
+                handleFilesSelected(event.target.files);
+                event.target.value = '';
+              }}
+            />
             <div className="rounded-2xl border border-line bg-(--surface-raised) shadow-(--neu-shadow-sm) overflow-hidden focus-within:border-gold transition-all">
+              {pendingAttachments.length > 0 && (
+                <div className="px-4 pt-3">
+                  <AttachmentChips attachments={pendingAttachments} onRemove={removePendingAttachment} />
+                </div>
+              )}
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -1420,6 +1967,14 @@ export function CiyuanChat() {
               />
               <div className="flex items-center justify-between px-3 pb-2.5 pt-0.5">
                 <span className="text-xs text-muted-foreground flex items-center gap-1.5 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-1 rounded-lg hover:bg-paper-deep transition-colors text-muted-foreground shrink-0"
+                    title="添加图片或文件"
+                  >
+                    <Paperclip className="w-3.5 h-3.5" />
+                  </button>
                   <ProviderDot provider={activeProvider} size={6} />
                   <span className="truncate opacity-70">{activeProvider?.label ?? '—'}</span>
                   {model && <span className="opacity-40 shrink-0">·</span>}
@@ -1440,8 +1995,10 @@ export function CiyuanChat() {
                     <button
                       type="button"
                       onClick={send}
-                      disabled={!input.trim() || !model.trim()}
-                      className={`p-2 rounded-xl transition-colors disabled:opacity-30 ${input.trim() && model.trim() ? 'bg-gold text-white' : ''}`}
+                      disabled={(!input.trim() && pendingAttachments.length === 0) || !model.trim()}
+                      className={`p-2 rounded-xl transition-colors disabled:opacity-30 ${
+                        (input.trim() || pendingAttachments.length > 0) && model.trim() ? 'bg-gold text-white' : ''
+                      }`}
                       title="发送 (Enter)"
                     >
                       <Send className="w-4 h-4" />
@@ -1460,6 +2017,13 @@ export function CiyuanChat() {
             customProviders={customProviders}
             onSave={handleSettingsSave}
             onClose={() => setShowSettings(false)}
+          />
+        )}
+        {showRoleManager && (
+          <RolePresetsModal
+            presets={presets}
+            onSave={handleSavePresets}
+            onClose={() => setShowRoleManager(false)}
           />
         )}
       </AnimatePresence>

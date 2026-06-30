@@ -3,9 +3,18 @@ import type { CiyuanProviderConfig } from '@/lib/ciyuan-providers';
 
 export const dynamic = 'force-dynamic';
 
+interface MessageAttachment {
+  name: string;
+  mime: string;
+  kind: 'image' | 'text';
+  dataUrl?: string;
+  textContent?: string;
+}
+
 interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  attachments?: MessageAttachment[];
 }
 
 interface ChatRequestBody {
@@ -17,6 +26,30 @@ interface ChatRequestBody {
 }
 
 const encoder = new TextEncoder();
+
+function extractBase64(dataUrl: string) {
+  const commaIndex = dataUrl.indexOf(',');
+  return commaIndex >= 0 ? dataUrl.slice(commaIndex + 1) : dataUrl;
+}
+
+function textWithAttachments(message: Message) {
+  let text = message.content || '';
+  const textAttachments = (message.attachments || []).filter((attachment) => attachment.kind === 'text');
+  for (const attachment of textAttachments) {
+    text += `\n\n[文件: ${attachment.name}]\n\`\`\`\n${attachment.textContent || ''}\n\`\`\``;
+  }
+  return text;
+}
+
+function imageAttachments(message: Message) {
+  return (message.attachments || []).filter(
+    (attachment) => attachment.kind === 'image' && attachment.dataUrl
+  );
+}
+
+function hasImageAttachments(messages: Message[]) {
+  return messages.some((message) => imageAttachments(message).length > 0);
+}
 
 function sseChunk(text: string, done = false) {
   return `data: ${JSON.stringify({ text, done })}\n\n`;
@@ -89,8 +122,30 @@ async function streamOpenAICompatible(
   messages: Message[],
   controller: ReadableStreamDefaultController,
 ) {
+  const useMultimodal = hasImageAttachments(messages);
+  const outgoingMessages = messages.map((message) => {
+    const text = textWithAttachments(message);
+    if (!useMultimodal || message.role === 'system') {
+      return { role: message.role, content: text };
+    }
+    const images = imageAttachments(message);
+    if (images.length === 0) {
+      return { role: message.role, content: text };
+    }
+    return {
+      role: message.role,
+      content: [
+        { type: 'text', text },
+        ...images.map((image) => ({
+          type: 'image_url',
+          image_url: { url: image.dataUrl },
+        })),
+      ],
+    };
+  });
+
   const body: Record<string, unknown> = {
-    messages,
+    messages: outgoingMessages,
     stream: true,
   };
 
@@ -151,6 +206,28 @@ async function streamAnthropic(
   const system = messages.find((message) => message.role === 'system')?.content;
   const filtered = messages.filter((message) => message.role !== 'system');
 
+  const outgoingMessages = filtered.map((message) => {
+    const text = textWithAttachments(message);
+    const images = imageAttachments(message);
+    if (images.length === 0) {
+      return { role: message.role, content: text };
+    }
+    return {
+      role: message.role,
+      content: [
+        { type: 'text', text },
+        ...images.map((image) => ({
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: image.mime || 'image/png',
+            data: extractBase64(image.dataUrl || ''),
+          },
+        })),
+      ],
+    };
+  });
+
   const response = await fetch(buildRequestUrl(provider, model, apiKey), {
     method: 'POST',
     headers: buildHeaders(provider, apiKey),
@@ -158,7 +235,7 @@ async function streamAnthropic(
       model,
       max_tokens: 8192,
       ...(system ? { system } : {}),
-      messages: filtered,
+      messages: outgoingMessages,
       stream: true,
     }),
   });
@@ -213,10 +290,22 @@ async function streamGemini(
     method: 'POST',
     headers: buildHeaders(provider, apiKey),
     body: JSON.stringify({
-      contents: filtered.map((message) => ({
-        role: message.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: message.content }],
-      })),
+      contents: filtered.map((message) => {
+        const text = textWithAttachments(message);
+        const images = imageAttachments(message);
+        return {
+          role: message.role === 'assistant' ? 'model' : 'user',
+          parts: [
+            { text },
+            ...images.map((image) => ({
+              inline_data: {
+                mime_type: image.mime || 'image/png',
+                data: extractBase64(image.dataUrl || ''),
+              },
+            })),
+          ],
+        };
+      }),
       ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
     }),
   });
