@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Boxes, ExternalLink, RefreshCw, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -30,6 +30,43 @@ function getCategoryMeta(cat: string) {
 }
 
 const SECTION_ACCENTS = ['var(--color-orange-500)', 'var(--color-smoke-blue-400)', 'var(--color-primary-500)'];
+
+function ToolboxTerminal({ count, categoryCount }: { count: number; categoryCount: number }) {
+  const lines = useMemo(
+    () => [
+      '$ uses --list --format=spec',
+      `> scanning workspace ... ${count} entries found`,
+      `> categories: ${categoryCount} groups indexed`,
+      '> sync ok · last updated just now',
+    ],
+    [count, categoryCount]
+  );
+  const [visible, setVisible] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible((v) => (v < lines.length ? v + 1 : v));
+    }, 450);
+    return () => clearInterval(id);
+  }, [lines.length]);
+
+  return (
+    <div className="uses-terminal" aria-hidden="true">
+      <div className="uses-terminal-bar">
+        <span className="uses-terminal-dot" style={{ background: '#e9897a' }} />
+        <span className="uses-terminal-dot" style={{ background: '#e9c27a' }} />
+        <span className="uses-terminal-dot" style={{ background: '#8fc28a' }} />
+        <span className="uses-terminal-title">uses.sh</span>
+      </div>
+      <div className="uses-terminal-body">
+        {lines.slice(0, visible).map((line, i) => (
+          <p key={i}>{line}</p>
+        ))}
+        <span className="uses-terminal-cursor">_</span>
+      </div>
+    </div>
+  );
+}
 
 function UsesSkeleton() {
   return (
@@ -127,6 +164,8 @@ export default function UsesPage() {
               </div>
             </Card>
           </div>
+
+          <ToolboxTerminal count={items.length} categoryCount={categoryOrder.length} />
         </motion.div>
 
         {loading ? (

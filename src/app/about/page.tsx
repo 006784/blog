@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
+  Bot,
   Briefcase,
   Code2,
   Coffee,
@@ -15,41 +16,40 @@ import {
   Mail,
   MapPin,
   Music,
+  Network,
   Palette,
   Twitter,
+  Zap,
 } from 'lucide-react';
 import { useProfile } from '@/components/ProfileProvider';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
-const skills = [
-  { name: 'React', level: 95, summary: '复杂交互、状态管理与组件抽象' },
-  { name: 'TypeScript', level: 90, summary: '类型建模、接口设计与重构安全性' },
-  { name: 'Next.js', level: 88, summary: '内容站点、全栈接口与渲染策略' },
-  { name: 'Node.js', level: 85, summary: 'API 设计、数据处理与服务整合' },
-  { name: 'Tailwind CSS', level: 92, summary: '设计系统落地与视觉统一' },
-  { name: 'Python', level: 75, summary: '脚本自动化与数据工具辅助' },
-];
-
-const experiences = [
+const focusAreas = [
   {
-    title: '高级前端工程师',
-    company: 'Tech Company',
-    period: '2022 - 至今',
-    description: '负责核心产品的前端架构设计和开发，带领团队完成多个重要项目。',
+    icon: Bot,
+    label: 'AI 编程工具',
+    description: 'Claude Code、Cursor、MCP 等 AI 辅助开发工具的实测体验与效率对比。',
+    color: 'var(--color-primary-500)',
   },
   {
-    title: '前端工程师',
-    company: 'Startup Inc',
-    period: '2020 - 2022',
-    description: '从零开始构建公司的主要产品，优化性能提升了 40% 的加载速度。',
+    icon: Code2,
+    label: 'Web 全栈开发',
+    description: 'Next.js、TypeScript 与个人项目从搭建到上线的踩坑记录。',
+    color: 'var(--color-orange-500)',
   },
   {
-    title: '初级开发者',
-    company: 'Agency Co',
-    period: '2018 - 2020',
-    description: '参与多个客户项目的开发，学习和成长。',
+    icon: Network,
+    label: '计算机基础',
+    description: '网络协议、密码学这些"用得到但说不清"的底层知识梳理。',
+    color: 'var(--color-teal-500)',
+  },
+  {
+    icon: Zap,
+    label: '效率与工具',
+    description: '把繁琐的事交给脚本和自动化，省下时间写点别的。',
+    color: 'var(--color-smoke-blue-400)',
   },
 ];
 
@@ -106,9 +106,8 @@ export default function AboutPage() {
   }>;
 
   const highlightStats = [
-    { label: '核心技能', value: `${skills.length}+`, icon: Code2, color: 'var(--color-orange-500)' },
-    { label: '成长阶段', value: `${experiences.length} 段`, icon: Briefcase, color: 'var(--color-smoke-blue-400)' },
-    { label: '关注方向', value: `${interests.length} 类`, icon: Heart, color: 'var(--color-primary-500)' },
+    { label: '技术方向', value: `${focusAreas.length} 个`, icon: Code2, color: 'var(--color-orange-500)' },
+    { label: '生活兴趣', value: `${interests.length} 类`, icon: Heart, color: 'var(--color-primary-500)' },
   ];
 
   const profileHighlights = [
@@ -165,6 +164,13 @@ export default function AboutPage() {
               </Badge>
             </div>
 
+            <p className="about-id-strip" aria-hidden="true">
+              <span>ID // {(profile.nickname || 'LUMEN').toUpperCase()}</span>
+              <span>{profile.occupation || 'BUILDER'}</span>
+              {profile.location && <span>LOC. {profile.location}</span>}
+              <span>STATUS · Available</span>
+            </p>
+
             <div className="space-y-5">
               <div className="space-y-3">
                 <h1 className="text-4xl font-semibold tracking-[-0.03em] text-neutral-900 sm:text-5xl">
@@ -191,7 +197,7 @@ export default function AboutPage() {
                 </p>
               </Card>
 
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {highlightStats.map((item) => (
                   <Card
                     key={item.label}
@@ -319,52 +325,46 @@ export default function AboutPage() {
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <Card variant="default" padding="lg">
-            <div className="mb-6 flex items-center justify-between gap-4">
-              <div>
-                <Badge variant="soft" className="mb-3 px-3 py-1.5">
-                  Core Skills
-                </Badge>
-                <h2 className="text-3xl font-semibold text-neutral-900">
-                  技能专长
-                </h2>
-                <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
-                  主要聚焦现代 Web 技术栈，也持续把设计系统、体验细节和工程质量一起往前推。
-                </p>
-              </div>
-            </div>
+            <Badge variant="soft" className="mb-3 px-3 py-1.5">
+              Focus
+            </Badge>
+            <h2 className="text-3xl font-semibold text-neutral-900">
+              关注领域
+            </h2>
+            <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
+              博客里大部分内容都围绕这几个方向展开，边写边学，记录过程比给出结论更重要。
+            </p>
 
-            <div className="grid gap-4">
-              {skills.map((skill, index) => (
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {focusAreas.map((area, index) => (
                 <motion.div
-                  key={skill.name}
+                  key={area.label}
                   initial={{ opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{ delay: index * 0.06 }}
-                  className="rounded-xl border border-(--border-default) bg-(--surface-base) p-4"
                 >
-                  <div className="mb-3 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-base font-semibold text-neutral-900">
-                        {skill.name}
-                      </p>
-                      <p className="mt-1 text-sm text-neutral-600">
-                        {skill.summary}
-                      </p>
+                  <Card
+                    variant="bordered"
+                    padding="sm"
+                    className="h-full rounded-2xl bg-(--surface-base)"
+                  >
+                    <div
+                      className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+                      style={{
+                        background: `color-mix(in srgb, ${area.color} 15%, transparent)`,
+                        color: area.color,
+                      }}
+                    >
+                      <area.icon className="h-5 w-5" />
                     </div>
-                    <Badge variant="outline" className="shrink-0 px-3 py-1.5">
-                      {skill.level}%
-                    </Badge>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-(--surface-overlay)">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${skill.level}%` }}
-                      viewport={{ once: true, amount: 0.5 }}
-                      transition={{ duration: 0.8, delay: index * 0.06 }}
-                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-primary-500),var(--color-primary-700))]"
-                    />
-                  </div>
+                    <p className="text-lg font-semibold text-neutral-900">
+                      {area.label}
+                    </p>
+                    <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
+                      {area.description}
+                    </p>
+                  </Card>
                 </motion.div>
               ))}
             </div>
@@ -418,64 +418,6 @@ export default function AboutPage() {
         </section>
 
         <section>
-          <Card variant="default" padding="lg">
-            <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <Badge variant="soft" className="mb-3 px-3 py-1.5">
-                  Timeline
-                </Badge>
-                <h2 className="text-3xl font-semibold text-neutral-900">
-                  工作经历
-                </h2>
-                <p className="mt-2 text-sm leading-(--leading-relaxed) text-neutral-600">
-                  从执行项目，到搭建系统，再到开始关注产品气质和整体体验。
-                </p>
-              </div>
-              <Badge variant="outline" className="px-3 py-1.5">
-                持续成长中
-              </Badge>
-            </div>
-
-            <div className="grid gap-4">
-              {experiences.map((experience, index) => (
-                <motion.div
-                  key={experience.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.35 }}
-                  transition={{ delay: index * 0.08 }}
-                >
-                  <Card
-                    variant="bordered"
-                    padding="md"
-                    className="relative overflow-hidden rounded-2xl bg-[linear-gradient(180deg,var(--surface-base),var(--surface-panel))]"
-                  >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="space-y-2">
-                        <Badge variant="soft" className="px-3 py-1.5">
-                          {experience.period}
-                        </Badge>
-                        <div>
-                          <h3 className="text-xl font-semibold text-neutral-900">
-                            {experience.title}
-                          </h3>
-                          <p className="mt-1 text-sm font-medium text-(--color-primary-700)">
-                            {experience.company}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="max-w-2xl text-sm leading-(--leading-relaxed) text-neutral-600">
-                        {experience.description}
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </Card>
-        </section>
-
-        <section>
           <Card
             variant="glass"
             padding="lg"
@@ -487,10 +429,10 @@ export default function AboutPage() {
                   Connect
                 </Badge>
                 <h2 className="text-3xl font-semibold text-neutral-900">
-                  让我们一起创造精彩
+                  一起交流，一起记录
                 </h2>
                 <p className="mt-3 text-sm leading-(--leading-relaxed) text-neutral-600">
-                  如果你想聊项目合作、站点设计、内容系统，或者只是想打个招呼，都欢迎来联系我。
+                  如果你也在关注 AI 编程、Web 开发，或者只是想打个招呼，都欢迎来聊聊。
                 </p>
               </div>
 
@@ -503,7 +445,7 @@ export default function AboutPage() {
                   variant="secondary"
                   onClick={() => window.location.assign('/timeline')}
                 >
-                  看成长时间线
+                  看 AI 时间线
                 </Button>
               </div>
             </div>

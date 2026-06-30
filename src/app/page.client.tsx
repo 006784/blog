@@ -680,6 +680,12 @@ export default function HomePageClient({
                 className="atelier-hero-copy"
               >
                 <p className="atelier-kicker">独立写作空间&ensp;·&ensp;ESSAY</p>
+                <p className="atelier-spec-strip" aria-hidden="true">
+                  <span>VOL. {String(activePosts.length).padStart(3, '0')}</span>
+                  <span>EST. 2023</span>
+                  <span>N 31°14&apos; E 121°29&apos;</span>
+                  <span>{siteConfig.name.toUpperCase()} / LUMEN</span>
+                </p>
                 <h1>{heroQuote.text}</h1>
                 <p className="atelier-quote-author">—— {heroQuote.author}</p>
                 <p className="atelier-intro">

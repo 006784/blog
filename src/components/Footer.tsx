@@ -67,6 +67,11 @@ export function Footer() {
           <div className="editorial-footer-intro">
             <p className="editorial-footer-kicker">Slow Publishing Studio</p>
             <h3 className="text-xl font-semibold tracking-tight">Lumen</h3>
+            <p className="about-id-strip mt-1" aria-hidden="true">
+              <span>EST. 2023</span>
+              <span>BUILD {new Date().getFullYear()}</span>
+              <span>NEXT.JS / SUPABASE</span>
+            </p>
             <p className="text-soft mt-3 max-w-sm text-sm leading-7">
               一个持续更新的内容站，记录技术实践、设计思考和长期写作。
             </p>
@@ -107,7 +112,14 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="text-soft mt-10 flex flex-col gap-2 border-t border-border/60 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="footer-marquee mt-10 border-t border-border/60 pt-5">
+          <div className="footer-marquee-track">
+            <span>慢写作&ensp;·&ensp;长期主义&ensp;·&ensp;持续更新&ensp;·&ensp;技术实践&ensp;·&ensp;生活札记&ensp;·&ensp;</span>
+            <span aria-hidden="true">慢写作&ensp;·&ensp;长期主义&ensp;·&ensp;持续更新&ensp;·&ensp;技术实践&ensp;·&ensp;生活札记&ensp;·&ensp;</span>
+          </div>
+        </div>
+
+        <div className="text-soft mt-6 flex flex-col gap-2 border-t border-border/60 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Lumen。All rights reserved.</p>
           <p>Built with Next.js and Tailwind CSS</p>
         </div>

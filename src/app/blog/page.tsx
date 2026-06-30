@@ -152,6 +152,14 @@ function BlogPageContent() {
     }));
   }, [posts]);
 
+  const activeCategoryName = categories.find((item) => item.id === selectedCategory)?.name || '全部';
+  const activeCollectionName =
+    collections.find((item) => item.id === selectedCollection)?.name || '全部专题';
+  const hasActiveFilters = searchQuery.trim().length > 0 || selectedCategory !== 'all' || Boolean(selectedCollection);
+  const topCategory = categories
+    .filter((item) => item.id !== 'all')
+    .sort((a, b) => b.count - a.count)[0];
+
   const filteredPosts = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase();
 
@@ -230,6 +238,18 @@ function BlogPageContent() {
               <p className="text-soft mt-4 max-w-2xl text-base md:text-lg">
                 把技术实践、设计观察和长期写作收进同一座内容展厅里。你可以像翻杂志一样浏览，也可以按专题、关键词和分类进入。
               </p>
+
+              <div className="journal-hero-quicklinks" aria-label="档案快捷入口">
+                <a href="#journal-results" className="journal-quicklink">
+                  最新文章
+                </a>
+                <a href="#journal-filters" className="journal-quicklink">
+                  筛选目录
+                </a>
+                <Link href="/archive" className="journal-quicklink">
+                  时间归档
+                </Link>
+              </div>
             </div>
 
             <div className="journal-hero-actions">
@@ -254,16 +274,32 @@ function BlogPageContent() {
                   <p className="text-soft text-xs">活跃分类</p>
                 </div>
               </div>
+
+              <div className="journal-hero-note">
+                <span>当前主线</span>
+                <strong>{topCategory ? topCategory.name : '慢阅读'}</strong>
+              </div>
             </div>
           </div>
         </section>
 
         <div className="journal-layout">
           <aside className="journal-sidebar">
-            <section className="journal-filter-panel surface-card">
+            <section id="journal-filters" className="journal-filter-panel surface-card">
               <div>
                 <p className="journal-panel-kicker">Filters</p>
                 <h2 className="journal-panel-title">精准定位你想读的那一篇</h2>
+              </div>
+
+              <div className="journal-filter-summary">
+                <div>
+                  <span>分类</span>
+                  <strong>{activeCategoryName}</strong>
+                </div>
+                <div>
+                  <span>专题</span>
+                  <strong>{activeCollectionName}</strong>
+                </div>
               </div>
 
               <div className="relative">
@@ -351,11 +387,25 @@ function BlogPageContent() {
                 <p className="text-soft text-sm leading-7">
                   如果你是第一次来，建议先看本页第一篇精选文章，再根据标签和专题继续往下读，体验会更连贯。
                 </p>
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('all');
+                      setSelectedCollection(null);
+                    }}
+                    className="journal-reset-button"
+                  >
+                    清空全部筛选
+                  </Button>
+                )}
               </div>
             </section>
           </aside>
 
-          <section className="journal-results">
+          <section id="journal-results" className="journal-results">
             {loading ? (
               <div className="space-y-4">
                 {/* 精选文章骨架 */}
@@ -386,9 +436,30 @@ function BlogPageContent() {
             ) : (
               <>
                 <div className="journal-results-head">
-                  <Badge variant="outline" className="rounded-full px-3 py-1.5 text-sm">
-                    共找到 <span className="font-medium text-foreground">{filteredPosts.length}</span> 篇文章
-                  </Badge>
+                  <div>
+                    <p className="journal-panel-kicker">Results</p>
+                    <h2 className="journal-results-title">筛选结果</h2>
+                  </div>
+
+                  <div className="journal-results-tools">
+                    <Badge variant="outline" className="rounded-full px-3 py-1.5 text-sm">
+                      共找到 <span className="font-medium text-foreground">{filteredPosts.length}</span> 篇文章
+                    </Badge>
+
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSelectedCategory('all');
+                          setSelectedCollection(null);
+                        }}
+                      >
+                        重置
+                      </Button>
+                    )}
+                  </div>
 
                   {notifyingSlug && (
                     <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
@@ -445,8 +516,15 @@ function BlogPageContent() {
         </div>
 
         <section className="journal-newsletter">
-          <div className="journal-newsletter-shell">
-            <SubscribeForm />
+          <div className="journal-newsletter-shell surface-card">
+            <div className="journal-newsletter-copy">
+              <p className="journal-panel-kicker">Newsletter</p>
+              <h2>把新文章订进邮箱</h2>
+              <p>只在有值得收藏的文章、专题或工具更新时提醒你。</p>
+            </div>
+            <div className="journal-newsletter-form">
+              <SubscribeForm />
+            </div>
           </div>
         </section>
       </div>

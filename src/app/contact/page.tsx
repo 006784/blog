@@ -12,11 +12,11 @@ import {
   Mail,
   MapPin,
   MessageCircle,
-  Phone,
   Send,
   Twitter,
 } from 'lucide-react';
 import { AnimatedSection } from '@/components/Animations';
+import { useProfile } from '@/components/ProfileProvider';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -24,38 +24,8 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { createContactMessage } from '@/lib/supabase';
 
-const contactInfo = [
-  {
-    icon: Mail,
-    label: '邮箱',
-    value: 'zyi408480@gmail.com',
-    href: 'mailto:zyi408480@gmail.com',
-    color: 'var(--color-orange-500)',
-  },
-  {
-    icon: MapPin,
-    label: '地点',
-    value: '上海，中国',
-    href: '#',
-    color: 'var(--color-smoke-blue-400)',
-  },
-  {
-    icon: Phone,
-    label: '电话',
-    value: '+86 123 4567 8900',
-    href: 'tel:+8612345678900',
-    color: 'var(--color-primary-500)',
-  },
-];
-
-const socialLinks = [
-  { name: 'GitHub', href: 'https://github.com', icon: Github, color: 'hover:bg-(--ink) hover:text-(--paper)' },
-  { name: 'Twitter', href: 'https://twitter.com', icon: Twitter, color: 'hover:bg-(--ink) hover:text-(--paper)' },
-  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin, color: 'hover:bg-(--ink) hover:text-(--paper)' },
-  { name: 'WeChat', href: '#', icon: MessageCircle, color: 'hover:bg-(--gold) hover:text-(--paper)' },
-];
-
 export default function ContactPage() {
+  const { profile } = useProfile();
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -65,6 +35,45 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const contactInfo = [
+    profile.email
+      ? {
+          icon: Mail,
+          label: '邮箱',
+          value: profile.email,
+          href: `mailto:${profile.email}`,
+          color: 'var(--color-orange-500)',
+        }
+      : null,
+    profile.location
+      ? {
+          icon: MapPin,
+          label: '地点',
+          value: profile.location,
+          href: '#',
+          color: 'var(--color-smoke-blue-400)',
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    icon: typeof Mail;
+    label: string;
+    value: string;
+    href: string;
+    color: string;
+  }>;
+
+  const socialLinks = [
+    profile.github
+      ? { name: 'GitHub', href: profile.github, icon: Github }
+      : null,
+    profile.twitter
+      ? { name: 'Twitter', href: profile.twitter, icon: Twitter }
+      : null,
+    profile.linkedin
+      ? { name: 'LinkedIn', href: profile.linkedin, icon: Linkedin }
+      : null,
+  ].filter(Boolean) as Array<{ name: string; href: string; icon: typeof Github }>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,30 +208,36 @@ export default function ContactPage() {
                   <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Social</p>
                   <h2 className="text-2xl font-semibold text-neutral-900">社交媒体</h2>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {socialLinks.map((social, index) => (
-                    <motion.a
-                      key={social.name}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.08 }}
-                      whileHover={{ y: -2 }}
-                      className="block"
-                    >
-                      <Card
-                        variant="glass"
-                        padding="sm"
-                        className="flex h-14 w-14 items-center justify-center rounded-full p-0 transition hover:border-(--color-primary-300) hover:text-(--color-primary-600)"
+                {socialLinks.length > 0 ? (
+                  <div className="flex flex-wrap gap-3">
+                    {socialLinks.map((social, index) => (
+                      <motion.a
+                        key={social.name}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.08 }}
+                        whileHover={{ y: -2 }}
+                        className="block"
                       >
-                        <social.icon className="h-5 w-5" />
-                      </Card>
-                    </motion.a>
-                  ))}
-                </div>
+                        <Card
+                          variant="glass"
+                          padding="sm"
+                          className="flex h-14 w-14 items-center justify-center rounded-full p-0 transition hover:border-(--color-primary-300) hover:text-(--color-primary-600)"
+                        >
+                          <social.icon className="h-5 w-5" />
+                        </Card>
+                      </motion.a>
+                    ))}
+                  </div>
+                ) : (
+                  <Badge variant="outline" className="px-3 py-1.5">
+                    社交链接稍后补充
+                  </Badge>
+                )}
               </div>
             </AnimatedSection>
 
@@ -351,24 +366,6 @@ export default function ContactPage() {
             </AnimatedSection>
           </div>
         </section>
-
-        <AnimatedSection delay={0.15}>
-          <Card variant="glass" className="relative min-h-[320px] overflow-hidden rounded-2xl">
-            <div className="absolute inset-0 bg-[radial-gradient(circle,var(--border-default)_1px,transparent_1px)] [background-size:24px_24px]" />
-            <div className="absolute inset-0 bg-linear-to-br from-(--surface-overlay)/80 via-transparent to-(--surface-raised)/80" />
-            <div className="relative flex h-full min-h-[320px] items-center justify-center">
-              <div className="text-center">
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-(--color-primary-500)/12 text-(--color-primary-600)">
-                  <MapPin className="h-8 w-8" />
-                </div>
-                <h3 className="text-2xl font-semibold text-neutral-900">上海，中国</h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-600">
-                  期待在某个项目、某次交流，或者生活的交叉点与你相遇。
-                </p>
-              </div>
-            </div>
-          </Card>
-        </AnimatedSection>
       </div>
     </div>
   );

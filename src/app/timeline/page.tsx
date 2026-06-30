@@ -255,6 +255,11 @@ export default function TimelinePage() {
               <h1 className="text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
                 AI 发展时间线
               </h1>
+              <p className="about-id-strip" aria-hidden="true">
+                <span>SPEC.001</span>
+                <span>RANGE 1956 — {years[0] || '2026'}</span>
+                <span>{events.length} EVENTS LOGGED</span>
+              </p>
               <p className="text-sm leading-7 text-ink-secondary sm:text-base">
                 从达特茅斯会议到大模型时代，按时间梳理人工智能发展的关键里程碑。点开「AI日报」节点，查看每天更新的行业动态详细记录。
               </p>

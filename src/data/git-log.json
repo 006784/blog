@@ -1,5 +1,35 @@
 [
   {
+    "hash": "4752a07",
+    "date": "2026-06-30T18:40:44+08:00",
+    "message": "feat: 词元 AI 支持图片/文件输入、对话搜索置顶重命名、角色预设、token 估算",
+    "author": "zyi"
+  },
+  {
+    "hash": "2bf09e9",
+    "date": "2026-06-29T13:18:24+08:00",
+    "message": "fix: 修复博客文章中 AI 写作导致的 ** 加粗符号渲染失败",
+    "author": "zyi"
+  },
+  {
+    "hash": "3c2a1d9",
+    "date": "2026-06-13T06:51:44+08:00",
+    "message": "fix: 后台数据加载容错 + 博客卡片配色细分 + 新增安全监控",
+    "author": "zyi"
+  },
+  {
+    "hash": "a265b2d",
+    "date": "2026-06-12T21:54:43+08:00",
+    "message": "feat: 首页\"今日简报\"与\"Claude动态\"合并为今日备忘看板",
+    "author": "zyi"
+  },
+  {
+    "hash": "01754cc",
+    "date": "2026-06-12T21:54:31+08:00",
+    "message": "perf: 降低 Sentry 客户端开销，重型组件改为按需懒加载",
+    "author": "zyi"
+  },
+  {
     "hash": "7d2d2a6",
     "date": "2026-06-12T18:06:39+08:00",
     "message": "feat: 时间线展开面板按月/周分组展示逐日动态日志",
@@ -567,36 +597,6 @@
     "hash": "a728361",
     "date": "2026-05-24T11:58:53+08:00",
     "message": "feat: 链接预览卡放宽识别条件",
-    "author": "zyi"
-  },
-  {
-    "hash": "66613d0",
-    "date": "2026-05-24T11:53:22+08:00",
-    "message": "feat: 链接预览卡（Link Preview Card）",
-    "author": "zyi"
-  },
-  {
-    "hash": "0cf3f8a",
-    "date": "2026-05-24T11:48:41+08:00",
-    "message": "fix: Apple Music 元数据改用 iTunes Lookup API",
-    "author": "zyi"
-  },
-  {
-    "hash": "cbecc2f",
-    "date": "2026-05-24T11:43:00+08:00",
-    "message": "feat: AI 文章摘要（DeepSeek）",
-    "author": "zyi"
-  },
-  {
-    "hash": "26246f3",
-    "date": "2026-05-24T11:37:18+08:00",
-    "message": "style: 代码块复制按钮重构 + 全站格子背景统一",
-    "author": "zyi"
-  },
-  {
-    "hash": "cca21d3",
-    "date": "2026-05-23T21:35:24+08:00",
-    "message": "style: 圆角 & 颜色打磨——博客卡片、文章页、指标块精细化",
     "author": "zyi"
   }
 ]

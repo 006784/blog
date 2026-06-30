@@ -640,6 +640,11 @@ export default function LinksPage() {
               <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 友情链接
               </h1>
+              <p className="about-id-strip" aria-hidden="true">
+                <span>SIGNAL STATION</span>
+                <span>LIVE / SOON</span>
+                <span>{links.length} NODES</span>
+              </p>
               <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 一些喜欢逛、值得收藏，也愿意经常回访的朋友和他们的角落。
               </p>
