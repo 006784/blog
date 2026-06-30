@@ -154,6 +154,11 @@ export default function GalleryPage() {
               <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl">
                 相册
               </h1>
+              <p className="about-id-strip" aria-hidden="true">
+                <span>SHOOT.LOG</span>
+                <span>{photos.length} FRAMES</span>
+                <span>{activeAlbumName.toUpperCase()}</span>
+              </p>
               <p className="text-sm leading-7 text-neutral-600 sm:text-base">
                 用镜头保存生活切片。这里展示最近拍下来的画面、地点和当时的心情。
               </p>
